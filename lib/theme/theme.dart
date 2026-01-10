@@ -24,14 +24,12 @@ final ThemeData lightTheme = ThemeData(
     primaryContainer: primaryColor.withOpacity(0.7),
     secondary: Colors.white, // اللون الثانوي
     secondaryContainer: Colors.blueAccent,
-    surface: Colors.white, // الخلفيات العادية مثل الـ cards
-    background: Colors.white, // لون الخلفية
+    surface: Colors.white, // لون الخلفية
     error: Colors.red, // لون الأخطاء
     onPrimary: Colors
         .white, // اللون المستخدم مع الـ primary (النصوص على الخلفية الأساسية)
     onSecondary: Colors.grey[200]!, // اللون المستخدم مع الـ secondary
-    onSurface: Colors.black, // اللون المستخدم مع الخلفيات السطحية
-    onBackground: Color(0xfff8f7f4), // اللون المستخدم مع خلفية الصفحة
+    onSurface: Colors.black, // اللون المستخدم مع خلفية الصفحة
     onError: Colors.white, // اللون المستخدم مع الأخطاء
     brightness: Brightness.light, // تحديد إذا كان الوضع ليلي أو نهاري
   ),
@@ -65,8 +63,6 @@ final ThemeData darkTheme = ThemeData(
       38,
     ), // لون السطح مثل الحوارات أو الأوراق
     onSurface: Colors.white,
-    background: Colors.grey[900]!,
-    onBackground: Colors.grey[800]!,
     error: Colors.redAccent,
     onError: Colors.white,
   ),

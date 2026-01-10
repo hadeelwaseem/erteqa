@@ -1,7 +1,3 @@
-import 'package:dartz/dartz.dart';
-import 'package:sooq_merchant/core/errors/failures.dart';
-import 'package:sooq_merchant/features/auth/data/models/index_address_years/index_address_years.dart';
-
 abstract class AuthRepo {
   // Future<Either<Failure, Map<String, dynamic>>> signInWithDeviceToken({
   //   required String deviceToken,

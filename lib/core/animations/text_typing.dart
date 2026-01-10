@@ -21,8 +21,10 @@ class TypingTextState extends State<TypingText>
       duration: const Duration(milliseconds: 3000),
       vsync: this,
     );
-    animation = StepTween(begin: 0, end: widget.text.length)
-        .animate(CurvedAnimation(parent: controller, curve: Curves.easeIn));
+    animation = StepTween(
+      begin: 0,
+      end: widget.text.length,
+    ).animate(CurvedAnimation(parent: controller, curve: Curves.easeIn));
     controller.forward();
   }
 
@@ -31,9 +33,12 @@ class TypingTextState extends State<TypingText>
     return AnimatedBuilder(
       animation: animation,
       builder: (BuildContext context, Widget? child) {
-        String text = widget.text.substring(0, animation.value);
-        return Text('Welcome to ScholarSphere',
-            textAlign: TextAlign.center, style: const TextStyle(fontSize: 40));
+        //String text = widget.text.substring(0, animation.value);
+        return Text(
+          'Welcome to ScholarSphere',
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 40),
+        );
       },
     );
   }

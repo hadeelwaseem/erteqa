@@ -1,6 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sooq_merchant/features/auth/presentation/views/onboarding_view.dart';
 import 'package:sooq_merchant/features/dashboard/dashboard_screen.dart';
 import '../../features/customization/data/models/store_layout_model.dart';
 import '../../features/customization/presentation/cubits/customization_cubit.dart';

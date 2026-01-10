@@ -1,23 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 // import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
-import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:sooq_merchant/core/utils/constants.dart';
 import 'package:sooq_merchant/core/cubits/shared_preferences_cubit/shared_preferences_cubit.dart';
-import 'package:sooq_merchant/core/utils/app_router.dart';
 import 'package:sooq_merchant/core/utils/service_locator.dart';
-import 'package:sooq_merchant/features/auth/presentation/manager/auth_cubit/auth_cubit.dart';
-import 'package:sooq_merchant/features/auth/presentation/manager/create_user_cubit/create_user_cubit.dart';
-import 'package:sooq_merchant/features/auth/presentation/manager/index_address_year_cubit/index_address_year_cubit.dart';
-import 'package:sooq_merchant/features/auth/presentation/manager/verify_user_cubit/verify_user_cubit.dart';
 // import 'package:sooq_merchant/features/auth/presentation/views/widgets/auth_widgets/avatar_selector.dart';
 // import 'package:sooq_merchant/features/auth/presentation/views/widgets/auth_widgets/sign_button.dart';
-
-import 'auth_widgets/address_picker.dart';
-import 'auth_widgets/email_text_field.dart';
 
 class AuthBody extends StatefulWidget {
   // final String deviceToken;
