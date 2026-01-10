@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sooq_merchant/constants.dart';
+import 'package:sooq_merchant/core/utils/constants.dart';
 import 'package:sooq_merchant/core/cubits/shared_preferences_cubit/shared_preferences_cubit.dart';
 import 'package:sooq_merchant/core/cubits/token_cubit/token_cubit.dart';
 import 'package:sooq_merchant/core/utils/app_bloc_observer.dart';
@@ -21,7 +21,7 @@ void main() async {
   // 3. إعدادات الواجهة
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
-      statusBarColor: kAppColor, // Status bar color
+      statusBarColor: primaryColor, // Status bar color
       statusBarIconBrightness: Brightness.light, // Status bar icons' color
     ),
   );

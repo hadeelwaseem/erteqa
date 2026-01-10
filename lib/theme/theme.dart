@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:sooq_merchant/constants.dart';
+import 'package:sooq_merchant/core/utils/constants.dart';
 
 final ThemeData lightTheme = ThemeData(
   brightness: Brightness.light,
-  primaryColor: kAppColor,
+  primaryColor: primaryColor,
   scaffoldBackgroundColor: Colors.white,
   appBarTheme: AppBarTheme(
-    backgroundColor: kAppColor,
+    backgroundColor: primaryColor,
     iconTheme: const IconThemeData(color: Colors.white),
   ),
   textTheme: const TextTheme(
@@ -15,13 +15,13 @@ final ThemeData lightTheme = ThemeData(
     bodySmall: TextStyle(color: Colors.white),
   ),
   buttonTheme: const ButtonThemeData(buttonColor: Color(0xffebe6e0)),
-  iconTheme: IconThemeData(color: kAppColor),
+  iconTheme: IconThemeData(color: primaryColor),
 
   // Adding ColorScheme
   colorScheme: ColorScheme(
     onPrimaryContainer: Color(0xffebe6e0),
-    primary: kAppColor, // اللون الأساسي
-    primaryContainer: kAppColor.withOpacity(0.7),
+    primary: primaryColor, // اللون الأساسي
+    primaryContainer: primaryColor.withOpacity(0.7),
     secondary: Colors.white, // اللون الثانوي
     secondaryContainer: Colors.blueAccent,
     surface: Colors.white, // الخلفيات العادية مثل الـ cards
@@ -39,7 +39,7 @@ final ThemeData lightTheme = ThemeData(
 
 final ThemeData darkTheme = ThemeData(
   brightness: Brightness.dark,
-  primaryColor: kAppColor,
+  primaryColor: primaryColor,
   // Colors.white,
   scaffoldBackgroundColor: Color.fromARGB(255, 31, 31, 31),
   appBarTheme: AppBarTheme(
@@ -56,7 +56,7 @@ final ThemeData darkTheme = ThemeData(
     onPrimaryContainer: Colors.black,
     primary: Colors.black45,
     onPrimary: Colors.white,
-    secondary: kAppColor,
+    secondary: primaryColor,
     onSecondary: Colors.grey[800]!, //استخدم لل navigatton
     surface: Color.fromARGB(
       255,
