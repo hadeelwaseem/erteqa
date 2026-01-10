@@ -1,0 +1,50 @@
+---
+name: sooqrules
+description: This is a new rule
+---
+
+# Overview
+PROJECT IDENTITY
+- This project is a Flutter-based dynamic mobile app generator.
+- It is NOT a traditional Flutter application.
+
+CORE MODEL
+- Applications, screens, components, and themes are defined as data.
+- Flutter is used only as a runtime rendering platform.
+- UI structure must never be hardcoded in Dart.
+
+ARCHITECTURAL LAYERS
+- Config Layer:
+  - Pure declarative data
+  - No logic, no Flutter, no rendering
+  - Single source of truth for app definition
+
+- Engine Layer:
+  - Interprets configuration into UI
+  - Resolves templates and component mappings
+  - Owns rendering orchestration
+  - Contains no business logic
+
+- Core Layer:
+  - Stateless, reusable UI primitives
+  - Configuration-agnostic
+  - No JSON parsing or template logic
+
+- Features Layer:
+  - Isolated business domains
+  - Independent from the Engine
+  - Must not affect UI generation logic
+
+STRICT CONSTRAINTS
+- Do NOT hardcode screens, flows, or layouts.
+- Do NOT embed business or domain logic in widgets or renderers.
+- Do NOT couple UI decisions to Flutter-specific constructs.
+- Do NOT treat this system as a template-based app.
+
+DESIGN INTENT
+- Any visual or structural change must be achievable via configuration.
+- Code changes are allowed only for engine capabilities or shared primitives.
+
+VIOLATIONS
+- Any solution that mixes UI rendering with business logic is invalid.
+- Any per-merchant branching or duplicated UI code is rejected.
