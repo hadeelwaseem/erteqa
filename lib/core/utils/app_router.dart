@@ -18,14 +18,12 @@ abstract class AppRouter {
   static const kOnBoardingView = '/onBoardingView';
   static const kHomeView = '/homeView';
 
-  static GoRouter setupRouter(
-    String? token,
-    // String? deviceToken,
-    String? gradeId,
-  ) {
+  static GoRouter setupRouter(String? token) {
     return GoRouter(
       routes: [
         if (token == null)
+          //navigate to Auth/onBoarding Screen (He is not signingIn)
+          //The Bellow code is example os how we will continue
           GoRoute(
             path: '/',
             builder: (context, state) => MultiBlocProvider(
@@ -54,6 +52,9 @@ abstract class AppRouter {
               child: OnBoaringView(),
             ),
           ),
+
+        //else: the user is SiginedIn and should be navigated to Home screen
+        //The Bellow code is example os how we will continue
 
         // if (token != null)
         //   GoRoute(

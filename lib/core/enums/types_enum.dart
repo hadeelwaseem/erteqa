@@ -1,4 +1,4 @@
-enum Types {
-  subject,
-  lesson,
-}
+// enum Types {
+//   subject,
+//   lesson,
+// }

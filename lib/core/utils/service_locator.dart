@@ -2,7 +2,6 @@ import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 // import 'package:sooq_merchant/core/cubits/device_token_cubit.dart/device_token_cubit.dart';
 // import 'package:sooq_merchant/core/cubits/directory_cubit/directory_cubit.dart';
-import 'package:sooq_merchant/core/cubits/hydrated_cubit_instance.dart';
 import 'package:sooq_merchant/core/cubits/shared_preferences_cubit/shared_preferences_cubit.dart';
 import 'package:sooq_merchant/core/cubits/token_cubit/token_cubit.dart';
 import 'package:sooq_merchant/core/utils/api_service.dart';

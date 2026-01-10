@@ -38,7 +38,7 @@ void main() async {
   ]);
 
   // 6. إعداد الـ Router بعد التأكد من وجود التوكن
-  final router = AppRouter.setupRouter(tokenCubit.state, null);
+  final router = AppRouter.setupRouter(tokenCubit.state);
 
   // 7. إعداد مراقب الـ Bloc
   Bloc.observer = AppBlocObserver();

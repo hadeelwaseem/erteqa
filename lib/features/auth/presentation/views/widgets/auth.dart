@@ -8,7 +8,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:sooq_merchant/constants.dart';
 import 'package:sooq_merchant/core/cubits/shared_preferences_cubit/shared_preferences_cubit.dart';
 import 'package:sooq_merchant/core/utils/app_router.dart';
-import 'package:sooq_merchant/core/utils/functions/custom_toast.dart';
 import 'package:sooq_merchant/core/utils/service_locator.dart';
 import 'package:sooq_merchant/core/widgets/custom_loading.dart';
 import 'package:sooq_merchant/features/auth/presentation/manager/auth_cubit/auth_cubit.dart';

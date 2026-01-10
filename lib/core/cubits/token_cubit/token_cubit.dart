@@ -13,14 +13,12 @@ class TokenCubit extends Cubit<String?> {
 
   Future<void> storeToken(String token) async {
     const storage = FlutterSecureStorage();
-    // Read value
     await storage.write(key: 'token', value: token);
     emit(token);
   }
 
   Future<void> deleteSavedToken() async {
     const storage = FlutterSecureStorage();
-    // Read value
     await storage.delete(key: 'token');
     emit(null);
   }
