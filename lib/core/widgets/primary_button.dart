@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+//first Step of How the Components should be and the level of abstraction
 class PrimaryButton extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;

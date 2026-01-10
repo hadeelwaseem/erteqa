@@ -1,3 +1,4 @@
+//TODO: commented to know how we will make the theme config dynamic
 // import 'package:flutter/material.dart';
 // import 'package:sooq_merchant/core/utils/size_config.dart';
 

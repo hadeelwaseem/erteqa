@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:sooq_merchant/core/animations/text_typing.dart';
-import 'package:sooq_merchant/core/utils/assets.dart';
 
 class WelcomeBody extends StatelessWidget {
   final VoidCallback onButtonPressed;
@@ -12,16 +11,16 @@ class WelcomeBody extends StatelessWidget {
     return ListView(
       physics: const BouncingScrollPhysics(),
       children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 150.0),
-          child: Center(
-            child: CircleAvatar(
-              backgroundColor: Colors.transparent,
-              radius: MediaQuery.of(context).size.width / 5,
-              backgroundImage: const AssetImage(AssetsData.logoIcon),
-            ),
-          ),
-        ),
+        // Padding(
+        //   padding: const EdgeInsets.only(top: 150.0),
+        //   child: Center(
+        //     child: CircleAvatar(
+        //       backgroundColor: Colors.transparent,
+        //       radius: MediaQuery.of(context).size.width / 5,
+        //       backgroundImage: const AssetImage(AssetsData.logoIcon),
+        //     ),
+        //   ),
+        // ),
         const SizedBox(height: 20),
         const Padding(
           padding: EdgeInsets.all(8.0),
