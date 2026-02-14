@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:sooq_merchant/core/widgets/active_nav_item.dart';
-import 'package:sooq_merchant/features/customization/data/models/store_colors_model.dart';
-import 'package:sooq_merchant/features/dashboard/widgets/top_bar.dart';
+import 'package:sooq_merchant/config/models/app_theme_model.dart';
 
 class BottomNavBar extends StatelessWidget {
-  final StoreColorsModel colors;
+  final AppThemeModel colors;
   const BottomNavBar({super.key, required this.colors});
 
   @override
@@ -58,4 +57,30 @@ class BottomNavBar extends StatelessWidget {
       ),
     );
   }
+}
+
+class CurvedConnectorClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+    path.moveTo(0, size.height * 0.3);
+    path.quadraticBezierTo(
+      size.width * 0.5,
+      size.height * 0.5,
+      size.width,
+      size.height * 0.3,
+    );
+    path.lineTo(size.width, size.height * 0.7);
+    path.quadraticBezierTo(
+      size.width * 0.5,
+      size.height * 0.5,
+      0,
+      size.height * 0.7,
+    );
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }

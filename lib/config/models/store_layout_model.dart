@@ -1,5 +1,7 @@
 import 'package:sooq_merchant/core/enums/card_style.dart';
 
+/// Layout model (e.g. card style) parsed from configuration.
+/// No dependency on the customization feature.
 class StoreLayoutModel {
   final CardStyleType cardStyle;
 
@@ -13,3 +15,4 @@ class StoreLayoutModel {
     return const StoreLayoutModel(cardStyle: CardStyleType.rounded);
   }
 }
+

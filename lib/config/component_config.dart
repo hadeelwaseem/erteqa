@@ -1,4 +1,4 @@
-enum ComponentType { button, list, card }
+import 'package:sooq_merchant/core/enums/component_type.dart';
 
 class ComponentConfig {
   final ComponentType type;

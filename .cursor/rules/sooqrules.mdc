@@ -1,8 +1,6 @@
 ---
-name: sooqrules
-description: This is a new rule
+alwaysApply: true
 ---
-
 # Overview
 PROJECT IDENTITY
 - This project is a Flutter-based dynamic mobile app generator.

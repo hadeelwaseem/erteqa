@@ -1,0 +1,62 @@
+{
+  "appName": "SOOQ Merchant",
+  "bundleId": "com.sooq.merchant",
+  "screens": [
+    {
+      "id": "dashboard",
+      "components": [
+        {
+          "type": "topBar",
+          "properties": {
+            "storeName": "My Store",
+            "showCustomizeButton": true
+          }
+        },
+        {
+          "type": "text",
+          "properties": {
+            "text": "Hi Static",
+            "fontSize": 16,
+            "fontWeight": "bold",
+            "color": "#234563"
+
+          }
+        },
+        {
+          "type": "text",
+          "properties": {
+            "dataKey": "welcomeMessage",
+            "fontSize": 26,
+            "fontWeight": "bold"
+          }
+        },
+        {
+          "type": "statsSection",
+          "properties": {
+            "dataKey": "stats",
+            "scrollDirection": "horizontal"
+          }
+        },
+        {
+          "type": "insightsCard",
+          "properties": {
+            "dataKey": "insights"
+          }
+        },
+        {
+          "type": "insightsCard",
+          "properties": {
+            "dataKey": "insights"
+          }
+        },
+        {
+          "type": "ordersSection",
+          "properties": {
+            "dataKey": "recentOrders",
+            "maxItems": 3
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,11 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:sooq_merchant/Features/customization/presentation/screens/customization_screen.dart';
+import 'package:sooq_merchant/config/models/app_theme_model.dart';
 
 class TopBar extends StatelessWidget {
-  const TopBar({super.key});
+  final String storeName;
+  final bool showSearch;
+  final bool showCustomizeButton;
+  final AppThemeModel? colors;
+
+  const TopBar({
+    super.key,
+    this.storeName = 'My Store',
+    this.showSearch = true,
+    this.showCustomizeButton = true,
+    this.colors,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final textColor = colors?.text ?? Colors.black;
+
     return SizedBox(
       height: 44,
       child: Stack(
@@ -22,25 +35,19 @@ class TopBar extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'My Store',
-                      style: TextStyle(fontWeight: FontWeight.w600),
+                      storeName,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: textColor,
+                      ),
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const CustomizationScreen(),
-                        ),
-                      );
-                    },
-                    child: const Icon(Icons.edit, size: 18),
-                  ),
-
-                  const SizedBox(width: 12),
-                  const Icon(Icons.search, size: 18),
+                  if (showSearch) ...[
+                    const SizedBox(width: 12),
+                    Icon(Icons.search, size: 18, color: textColor),
+                  ],
                 ],
               ),
             ),
@@ -48,15 +55,18 @@ class TopBar extends StatelessWidget {
           Positioned(
             left: 42,
             child: ClipPath(
-              clipper: CurvedConnectorClipper(),
+              clipper: _CurvedConnectorClipper(),
               child: Container(width: 15, height: 44, color: Colors.white),
             ),
           ),
-
           const Positioned(left: 0, child: _CircleIcon(icon: Icons.menu)),
-          const Positioned(
+          Positioned(
             right: 0,
-            child: _CircleIcon(icon: Icons.notifications_none),
+            child: _CircleIcon(
+              icon: showCustomizeButton
+                  ? Icons.notifications_none
+                  : Icons.notifications_none,
+            ),
           ),
         ],
       ),
@@ -79,33 +89,24 @@ class _CircleIcon extends StatelessWidget {
   }
 }
 
-class CurvedConnectorClipper extends CustomClipper<Path> {
+class _CurvedConnectorClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     final path = Path();
-
-    // نبدأ من أعلى اليسار
     path.moveTo(0, size.height * 0.3);
-
-    // منحنى علوي (ينحني للداخل في الأعلى)
     path.quadraticBezierTo(
-      size.width * 0.5, // نقطة التحكم x (المنتصف)
-      size.height * 0.5, // نقطة التحكم y (للداخل - للأسفل)
-      size.width, // نقطة النهاية x
-      size.height * 0.3, // نقطة النهاية y
+      size.width * 0.5,
+      size.height * 0.5,
+      size.width,
+      size.height * 0.3,
     );
-
-    // خط للأسفل
     path.lineTo(size.width, size.height * 0.7);
-
-    // منحنى سفلي (ينحني للخارج في الأسفل)
     path.quadraticBezierTo(
-      size.width * 0.5, // نقطة التحكم x (المنتصف)
-      size.height * 0.5, // نقطة التحكم y (للخارج - للأعلى)
-      0, // نقطة النهاية x
-      size.height * 0.7, // نقطة النهاية y
+      size.width * 0.5,
+      size.height * 0.5,
+      0,
+      size.height * 0.7,
     );
-
     path.close();
     return path;
   }

@@ -7,12 +7,31 @@ class ScreenRenderer {
 
   ScreenRenderer(this.renderers);
 
-  Widget render(ScreenConfig config) {
+  Widget render(ScreenConfig config, {Map<String, dynamic>? dataContext}) {
+    final componentWidgets = <Widget>[];
+
+    for (var entry in config.components.asMap().entries) {
+      final index = entry.key;
+      final component = entry.value;
+      final renderer = renderers[component.type.name];
+
+      if (renderer == null) {
+        continue;
+      }
+
+      // Add spacing between components (except for the first one)
+      if (index > 0) {
+        componentWidgets.add(const SizedBox(height: 20));
+      }
+
+      componentWidgets.add(
+        renderer.render(component, dataContext: dataContext),
+      );
+    }
+
     return Column(
-      children: config.components.map((component) {
-        final renderer = renderers[component.type.name];
-        return renderer!.render(component);
-      }).toList(),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: componentWidgets,
     );
   }
 }

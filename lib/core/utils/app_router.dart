@@ -1,9 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sooq_merchant/core/utils/service_locator.dart';
 import 'package:sooq_merchant/features/dashboard/dashboard_screen.dart';
-import '../../features/customization/data/models/store_layout_model.dart';
-import '../../features/customization/presentation/cubits/customization_cubit.dart';
-import '../../features/customization/presentation/cubits/customization_preview_cubit.dart';
+import 'package:sooq_merchant/features/dashboard/data/repos/dashboard_repo.dart';
+import 'package:sooq_merchant/features/dashboard/presentation/manager/dashboard_cubit/dashboard_cubit.dart';
 
 abstract class AppRouter {
   static const kOnBoardingView = '/onBoardingView';
@@ -15,20 +15,12 @@ abstract class AppRouter {
       routes: [
         if (token == null)
           //navigate to Auth/onBoarding Screen (He is not signingIn)
-          //The Bellow code is example os how we will continue
           GoRoute(
             path: '/',
-            builder: (context, state) => MultiBlocProvider(
-              providers: [
-                BlocProvider(create: (_) => CustomizationCubit()),
-                BlocProvider(
-                  create: (context) => CustomizationPreviewCubit(
-                    colors: context.read<CustomizationCubit>().state,
-                    layout: StoreLayoutModel.defaultLayout(),
-                  ),
-                ),
-              ],
-              child: DashboardScreen(),
+            builder: (context, state) => BlocProvider(
+              create: (context) =>
+                  DashboardCubit(getIt<DashboardRepo>()),
+              child: const DashboardScreen(),
             ),
           ),
 
