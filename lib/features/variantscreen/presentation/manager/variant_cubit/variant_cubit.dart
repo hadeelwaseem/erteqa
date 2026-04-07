@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../../config/genericConfig/screen_config.dart';
+import '../../../../../config/screen_config.dart';
 import '../../../data/repos/variant_repository.dart';
 
 part 'variant_state.dart';

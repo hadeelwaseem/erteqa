@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 
-import '../../../../config/genericConfig/component_config.dart';
-import '../../../../config/genericConfig/screen_config.dart';
+import '../../../../config/component_config.dart';
+import '../../../../config/screen_config.dart';
 import '../../../../core/enums/generic_component_type.dart';
 
 abstract class VariantRepository {
@@ -15,7 +15,9 @@ class AssetVariantRepository implements VariantRepository {
 
   @override
   Future<ScreenConfig> loadVariant(String variantId) async {
-    final jsonString = await rootBundle.loadString('$_configPath/$variantId.json');
+    final jsonString = await rootBundle.loadString(
+      '$_configPath/$variantId.json',
+    );
     final json = jsonDecode(jsonString) as Map<String, dynamic>;
     return _parseScreenConfig(json);
   }

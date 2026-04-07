@@ -1,8 +1,9 @@
-import 'package:sooq_merchant/config/component_config.dart';
+import 'component_config.dart';
 
+/// Configuration for a screen with a single tree root.
 class ScreenConfig {
   final String id;
-  final List<ComponentConfig> components;
+  final ComponentConfig root;
 
-  const ScreenConfig({required this.id, required this.components});
+  const ScreenConfig({required this.id, required this.root});
 }

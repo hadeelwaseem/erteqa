@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../config/genericConfig/component_config.dart';
-import 'component_renderer.dart';
+import '../../../config/component_config.dart';
+import '../../component_renderer/component_renderer.dart';
 import '../parsers/property_parsers.dart';
 
 class ButtonRenderer implements ComponentRenderer {

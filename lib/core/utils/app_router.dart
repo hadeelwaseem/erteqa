@@ -1,9 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sooq_merchant/core/utils/service_locator.dart';
-import 'package:sooq_merchant/features/dashboard/dashboard_screen.dart';
-import 'package:sooq_merchant/features/dashboard/data/repos/dashboard_repo.dart';
-import 'package:sooq_merchant/features/dashboard/presentation/manager/dashboard_cubit/dashboard_cubit.dart';
 import 'package:sooq_merchant/features/homescreen/presentation/views/home_screen.dart';
 import 'package:sooq_merchant/features/variantscreen/data/repos/variant_repository.dart';
 import 'package:sooq_merchant/features/variantscreen/presentation/views/variant_screen.dart';

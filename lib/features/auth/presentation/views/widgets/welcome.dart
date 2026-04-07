@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:sooq_merchant/core/animations/text_typing.dart';
 
 class WelcomeBody extends StatelessWidget {
   final VoidCallback onButtonPressed;
