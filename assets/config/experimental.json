@@ -1,0 +1,264 @@
+{
+  "id": "experimental",
+  "root": {
+    "type": "scaffold",
+    "backgroundColor": "#1A1A2E",
+    "child": {
+      "type": "column",
+      "mainAxisAlignment": "spaceEvenly",
+      "crossAxisAlignment": "stretch",
+      "children": [
+        {
+          "type": "container",
+          "padding": 32,
+          "margin": 20,
+          "color": "#16213E",
+          "borderRadius": 20,
+          "child": {
+            "type": "column",
+            "mainAxisAlignment": "start",
+            "crossAxisAlignment": "center",
+            "children": [
+              {
+                "type": "text",
+                "value": "Experimental Dashboard",
+                "fontSize": 32,
+                "fontWeight": "bold",
+                "color": "#E94560",
+                "textAlign": "center"
+              },
+              {
+                "type": "text",
+                "value": "Dark mode layout with rich structure",
+                "fontSize": 16,
+                "color": "#B0BEC5",
+                "textAlign": "center"
+              },
+              {
+                "type": "button",
+                "label": "Primary CTA",
+                "backgroundColor": "#E94560",
+                "borderRadius": 12,
+                "alignment": "center"
+              }
+            ]
+          }
+        },
+        {
+          "type": "column",
+          "mainAxisAlignment": "start",
+          "crossAxisAlignment": "stretch",
+          "children": [
+            {
+              "type": "row",
+              "mainAxisAlignment": "spaceEvenly",
+              "crossAxisAlignment": "stretch",
+              "children": [
+                {
+                  "type": "card",
+                  "elevation": 4,
+                  "borderRadius": 16,
+                  "color": "#0F3460",
+                  "child": {
+                    "type": "container",
+                    "padding": 20,
+                    "margin": 12,
+                    "child": {
+                      "type": "row",
+                      "mainAxisAlignment": "spaceBetween",
+                      "crossAxisAlignment": "center",
+                      "children": [
+                        {
+                          "type": "column",
+                          "mainAxisAlignment": "start",
+                          "crossAxisAlignment": "start",
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "Metric A",
+                              "fontSize": 12,
+                              "color": "#B0BEC5"
+                            },
+                            {
+                              "type": "text",
+                              "value": "1.2K",
+                              "fontSize": 22,
+                              "fontWeight": "bold",
+                              "color": "#FFFFFF"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "type": "card",
+                  "elevation": 4,
+                  "borderRadius": 16,
+                  "color": "#0F3460",
+                  "child": {
+                    "type": "container",
+                    "padding": 20,
+                    "margin": 12,
+                    "child": {
+                      "type": "row",
+                      "mainAxisAlignment": "spaceBetween",
+                      "crossAxisAlignment": "center",
+                      "children": [
+                        {
+                          "type": "column",
+                          "mainAxisAlignment": "start",
+                          "crossAxisAlignment": "start",
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "Metric B",
+                              "fontSize": 12,
+                              "color": "#B0BEC5"
+                            },
+                            {
+                              "type": "text",
+                              "value": "98%",
+                              "fontSize": 22,
+                              "fontWeight": "bold",
+                              "color": "#E94560"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "type": "row",
+              "mainAxisAlignment": "spaceEvenly",
+              "crossAxisAlignment": "stretch",
+              "children": [
+                {
+                  "type": "card",
+                  "elevation": 4,
+                  "borderRadius": 16,
+                  "color": "#0F3460",
+                  "child": {
+                    "type": "container",
+                    "padding": 20,
+                    "margin": 12,
+                    "child": {
+                      "type": "row",
+                      "mainAxisAlignment": "spaceBetween",
+                      "crossAxisAlignment": "center",
+                      "children": [
+                        {
+                          "type": "column",
+                          "mainAxisAlignment": "start",
+                          "crossAxisAlignment": "start",
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "Metric C",
+                              "fontSize": 12,
+                              "color": "#B0BEC5"
+                            },
+                            {
+                              "type": "text",
+                              "value": "$4.2K",
+                              "fontSize": 22,
+                              "fontWeight": "bold",
+                              "color": "#4CAF50"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "type": "card",
+                  "elevation": 4,
+                  "borderRadius": 16,
+                  "color": "#0F3460",
+                  "child": {
+                    "type": "container",
+                    "padding": 20,
+                    "margin": 12,
+                    "child": {
+                      "type": "row",
+                      "mainAxisAlignment": "spaceBetween",
+                      "crossAxisAlignment": "center",
+                      "children": [
+                        {
+                          "type": "column",
+                          "mainAxisAlignment": "start",
+                          "crossAxisAlignment": "start",
+                          "children": [
+                            {
+                              "type": "text",
+                              "value": "Metric D",
+                              "fontSize": 12,
+                              "color": "#B0BEC5"
+                            },
+                            {
+                              "type": "text",
+                              "value": "256",
+                              "fontSize": 22,
+                              "fontWeight": "bold",
+                              "color": "#FF9800"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "container",
+          "padding": 24,
+          "margin": 20,
+          "color": "#16213E",
+          "borderRadius": 20,
+          "child": {
+            "type": "column",
+            "mainAxisAlignment": "start",
+            "crossAxisAlignment": "stretch",
+            "children": [
+              {
+                "type": "text",
+                "value": "Need help?",
+                "fontSize": 18,
+                "fontWeight": "bold",
+                "color": "#FFFFFF",
+                "textAlign": "center"
+              },
+              {
+                "type": "row",
+                "mainAxisAlignment": "spaceEvenly",
+                "crossAxisAlignment": "center",
+                "children": [
+                  {
+                    "type": "button",
+                    "label": "Support",
+                    "backgroundColor": "#E94560",
+                    "borderRadius": 12
+                  },
+                  {
+                    "type": "button",
+                    "label": "Docs",
+                    "backgroundColor": "#0F3460",
+                    "borderRadius": 12
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

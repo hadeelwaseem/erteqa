@@ -75,6 +75,9 @@ flutter:
   assets:
     - assets/translations/
     - assets/config/dashboard.json
+    - assets/config/classic.json
+    - assets/config/modern.json
+    - assets/config/experimental.json
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

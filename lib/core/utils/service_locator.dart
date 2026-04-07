@@ -16,6 +16,7 @@ import 'package:sooq_merchant/features/auth/data/repos/auth_repo_impl.dart';
 import 'package:sooq_merchant/features/dashboard/data/dashboard_data_provider.dart';
 import 'package:sooq_merchant/features/dashboard/data/repos/dashboard_repo.dart';
 import 'package:sooq_merchant/features/dashboard/data/repos/dashboard_repo_impl.dart';
+import 'package:sooq_merchant/features/variantscreen/data/repos/variant_repository.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -44,6 +45,11 @@ void setupServiceLocator() {
   // Dashboard Repo
   getIt.registerLazySingleton<DashboardRepo>(
     () => DashboardRepoImpl(getIt<DashboardDataProvider>()),
+  );
+
+  // Variant Repository (MVP V2 tree-based UI)
+  getIt.registerLazySingleton<VariantRepository>(
+    () => AssetVariantRepository(),
   );
 
   // Component Renderers
