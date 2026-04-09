@@ -1,4 +1,6 @@
 {
+  "id": "dashboard",
+  "pageName": "Dashboard",
   "appName": "SOOQ Merchant",
   "bundleId": "com.sooq.merchant",
   "screens": [

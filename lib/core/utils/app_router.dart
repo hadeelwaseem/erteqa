@@ -1,4 +1,3 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sooq_merchant/core/utils/service_locator.dart';
 import 'package:sooq_merchant/features/homescreen/presentation/views/home_screen.dart';
@@ -10,6 +9,19 @@ abstract class AppRouter {
   static const kHomeView = '/homeView';
   static const kDashboardView = '/dashboardView';
   static const kMvp2View = '/mvp2';
+  
+  /// Dynamic screen route: `/variant/:id` where `:id` is the pageId.
+  /// 
+  /// Routing is explicitly pageId-driven:
+  /// - PageId (e.g., 'classic', 'dashboard', 'modern') is extracted from the URL
+  /// - Router passes it directly to VariantScreen
+  /// - VariantScreen loads the ScreenConfig via VariantRepository
+  /// - No additional resolver/factory layers; routing is deterministic
+  /// 
+  /// Bootstrap strategy (deterministic initial page):
+  /// - On app startup, the initial pageId is resolved via ConfigService or a hardcoded default
+  /// - App navigates to `/variant/:startupPageId`
+  /// - This ensures a predictable entry point
   static const kVariantView = '/variant/:id';
 
   static GoRouter setupRouter(String? token) {
@@ -35,12 +47,15 @@ abstract class AppRouter {
           path: kMvp2View,
           builder: (context, state) => const HomeScreen(),
         ),
+        // Dynamic screen route: loads screen config by pageId (deterministically).
+        // Route resolution: /variant/:pageId -> VariantScreen(pageId) -> VariantCubit.loadVariant(pageId) -> ScreenConfig
+        // Fallback: if pageId not found in path parameters, defaults to 'classic' (bootstrap default).
         GoRoute(
           path: '/variant/:id',
           builder: (context, state) {
-            final id = state.pathParameters['id'] ?? 'classic';
+            final pageId = state.pathParameters['id'] ?? 'classic';
             return VariantScreen(
-              variantId: id,
+              variantId: pageId,
               variantRepository: getIt<VariantRepository>(),
             );
           },

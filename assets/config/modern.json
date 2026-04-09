@@ -1,5 +1,6 @@
 {
   "id": "modern",
+  "pageName": "Product Dashboard",
   "root": {
     "type": "scaffold",
     "backgroundColor": "#F2F4F7",

@@ -1,0 +1,21 @@
+{
+
+    "pages":[
+  {
+    "pageId": "home",
+    "pageName": "Home Page",
+    "isMain": true,
+    "content": [
+      {},{}
+    ],
+    "navigation":[{},{}]
+  },
+  {
+    "pageId": "themes",
+    "pageName": "Theme Gallery",
+    "content": [
+      
+    ]
+  }
+]
+}

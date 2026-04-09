@@ -1,5 +1,6 @@
 {
   "id": "experimental",
+  "pageName": "Experimental Dashboard",
   "root": {
     "type": "scaffold",
     "backgroundColor": "#1A1A2E",

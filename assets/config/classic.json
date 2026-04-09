@@ -1,5 +1,6 @@
 {
   "id": "classic",
+  "pageName": "Classic Dashboard",
   "root": {
     "type": "scaffold",
     "backgroundColor": "#FFFFFF",
