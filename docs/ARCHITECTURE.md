@@ -28,18 +28,19 @@ Input Layer (JSON Configs)
     ↓
     
 Parse Layer (AssetVariantRepository)
-    ├─ Load JSON from assets
-    ├─ Parse into ScreenConfig
-    ├─ Validate against ComponentSchemas
-    └─ Emit warnings on invalid properties
+  ├─ Load JSON from assets
+  ├─ Parse simple or builder JSON
+  ├─ Normalize props/style into ComponentConfig
+  ├─ Validate against ComponentSchemas
+  └─ Emit warnings on invalid properties
     
     ↓
     
-Registry Layer (ComponentRegistry)
-    ├─ String-based lookup (not enum-based)
-    ├─ Runtime registration of custom renderers
-    ├─ Default registry with 9 built-in types
-    └─ Support for renderer overrides
+Renderer Map (ScreenRenderer)
+  ├─ Enum-based lookup (GenericComponentType → Renderer)
+  ├─ Default map with 14 built-in renderers
+  ├─ Optional injection for overrides
+  └─ Unsupported type fallback
     
     ↓
     
@@ -96,29 +97,24 @@ Output Layer (Flutter Widgets)
 
 ---
 
-### Decision 2: Registry Pattern (String-Based)
+### Decision 2: Renderer Map (Enum-Based)
 
-**What**: Component lookup uses string names, not enums
+**What**: Component lookup uses enum keys in ScreenRenderer
 
 **Why**:
-- ✅ Decouples rendering from UI type definitions
-- ✅ Enables plugin-style component loading
-- ✅ Dynamic registration at runtime possible
-- ✅ Optional enum entries (doesn't force enum synchronization)
+- ✅ Clear mapping between JSON type strings and renderers
+- ✅ Easier validation with known component set
+- ✅ Simple default wiring for production
 
 **Example**:
 ```dart
-// Old: Enum-based
-GenericComponentType.text → Fixed set at compile time
-
-// New: Registry-based
-ComponentRegistry.get('text') → Can be customized at runtime
+final renderer = ScreenRenderer.withPrimitives();
 ```
 
-**Alternative Rejected**:
-- Enum-only: Less flexible for future component markets/plugins
+**Alternative Deferred**:
+- String registry (ComponentRegistry) exists but is not the active path
 
-**Code Location**: `lib/engine/registry/component_registry.dart`
+**Code Location**: `lib/engine/screen_renderer/screen_renderer.dart`
 
 ---
 

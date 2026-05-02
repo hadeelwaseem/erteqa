@@ -108,9 +108,9 @@ The **Dynamic UI Rendering Engine** converts JSON configuration files into Flutt
 
 ```
 JSON Config (assets/config/*.json)
-    ↓ Parse & Validate
+    ↓ Parse & Validate (VariantRepository)
 ComponentConfig Tree
-    ↓ Registry Lookup
+    ↓ ScreenRenderer (enum-based renderer map)
 Renderer Strategy
     ↓ Recursive Build
 Widget Tree
@@ -118,21 +118,26 @@ Widget Tree
 UI on Screen
 ```
 
+The parser supports two JSON formats:
+- Simple screen format: `{ id, pageName, root }`
+- Builder format: `{ schemaVersion, app, theme, navigation, pages }`
+
 ### Key Files
 
 **Implementation** (What to modify):
-- `lib/engine/registry/component_registry.dart` - Register components
-- `lib/engine/validation/component_schemas.dart` - Define schemas
-- `lib/engine/tree/renderers/*.dart` - Create renderers
-- `lib/engine/tree/parsers/property_parsers.dart` - Parse properties
+- `lib/features/variantscreen/data/repos/variant_repository.dart` - JSON parsing and builder normalization
+- `lib/engine/screen_renderer/screen_renderer.dart` - Recursive renderer orchestration
+- `lib/engine/tree/renderers/*.dart` - Per-component renderers
+- `lib/engine/tree/parsers/property_parsers.dart` - Property parsing helpers
+- `lib/engine/validation/component_schemas.dart` - Schema definitions
 
 **Configuration** (What to run):
-- `assets/config/*.json` - Your UI definitions
+- `assets/config/*.json` - UI definitions (simple or builder format)
 
 **Data Models** (What you use):
-- `lib/config/component_config.dart` - Component structure
-- `lib/config/screen_config.dart` - Screen structure
-- `lib/core/enums/generic_component_type.dart` - Component types
+- `lib/config/component_config.dart` - Component tree structure
+- `lib/config/screen_config.dart` - Screen envelope
+- `lib/core/enums/generic_component_type.dart` - Supported component types
 
 ---
 
@@ -140,9 +145,9 @@ UI on Screen
 
 | Phase | Status | Features | Docs |
 |-------|--------|----------|------|
-| **Phase 1** | ✅ Complete | Spacer, Image components | QUICK_START, GUIDE |
-| **Phase 2** | ✅ Complete | Registry, Schema, DI | ARCHITECTURE, GUIDE |
-| **Phase 3** | ⏳ Planning | Events, State binding | TBD |
+| **Phase 1** | ✅ Complete | Tree renderer + core primitives | QUICK_START, GUIDE |
+| **Phase 2** | ✅ Complete | Builder JSON parsing + schemas | ARCHITECTURE, GUIDE |
+| **Phase 3** | ⏳ Planning | Actions, data binding, domain nodes | TBD |
 
 ---
 

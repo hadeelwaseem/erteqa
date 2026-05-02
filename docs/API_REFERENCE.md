@@ -4,7 +4,7 @@ Quick lookup guide for the most commonly used classes and methods.
 
 ---
 
-## ComponentRegistry API
+## ComponentRegistry API (Optional)
 
 Static registry for runtime component type lookup and registration.
 
@@ -145,7 +145,7 @@ final renderer = ScreenRenderer({
 factory ScreenRenderer.withPrimitives()
 ```
 
-Create renderer with all default (9) renderers pre-wired.
+Create renderer with all default renderers pre-wired.
 
 **Example**:
 ```dart
@@ -157,13 +157,14 @@ final renderer = ScreenRenderer.withPrimitives();
 ### Rendering
 
 ```dart
-Widget render(ScreenConfig config, {Map<String, dynamic>? dataContext})
+Widget render(ScreenConfig config, {BuildContext? context, Map<String, dynamic>? dataContext})
 ```
 
 Render a screen configuration into a widget tree.
 
 **Parameters**:
 - `config` (ScreenConfig): Screen configuration
+- `context` (BuildContext?): Optional context for tap navigation
 - `dataContext` (Map?): Optional context data (for phase 3 state binding)
 
 **Returns**: Widget tree
@@ -175,6 +176,7 @@ final widget = renderer.render(screenConfig);
 // With data context (Phase 3)
 final widget = renderer.render(
   screenConfig,
+  context: context,
   dataContext: {'tokenCubit': tokenCubit},
 );
 ```

@@ -9,11 +9,9 @@ Get up and running in 5 minutes.
 The rendering engine converts JSON configs into Flutter widgets:
 
 ```
-JSON (assets/config/config.json)
+JSON (assets/config/*.json)
   ↓
-Parser (extract & validate)
-  ↓ 
-ComponentRegistry (lookup renderer)
+VariantRepository (parse + validate)
   ↓
 ScreenRenderer (build widget tree)
   ↓
@@ -26,12 +24,52 @@ Flutter UI
 
 | Task | Code |
 |------|------|
-| **Initialize** | `ComponentRegistry.init()` in main() |
 | **Render screen** | `ScreenRenderer.withPrimitives().render(config)` |
 | **Add component type** | See "Add New Component" below |
 | **Test renderer** | See "Test Renderer" below |
-| **Look up renderer** | `ComponentRegistry.get('typeName')` |
-| **List all types** | `ComponentRegistry.getAll().keys` |
+
+---
+
+## JSON Formats (Supported)
+
+### 1) Simple Screen JSON
+
+```json
+{
+  "id": "classic",
+  "pageName": "Classic",
+  "root": {
+    "type": "scaffold",
+    "backgroundColor": "#FFFFFF",
+    "child": {
+      "type": "column",
+      "children": []
+    }
+  }
+}
+```
+
+### 2) Builder JSON (Mobile)
+
+```json
+{
+  "schemaVersion": "1.0",
+  "app": { "name": "App", "bundleId": "com.example.app" },
+  "theme": { "mode": "light", "colors": { "primary": "#2563eb" } },
+  "navigation": { "type": "tabs", "initialRoute": "/" },
+  "pages": [
+    {
+      "id": "home",
+      "route": "/",
+      "title": "Home",
+      "background": "#FFFFFF",
+      "body": [
+        { "id": "title", "type": "text", "props": { "value": "Hello" } }
+      ]
+    }
+  ]
+}
+```
 
 ---
 
@@ -97,12 +135,12 @@ enum GenericComponentType {
 
 ### Step 4: Register
 
-**File**: `lib/engine/registry/component_registry.dart`
+**File**: `lib/engine/screen_renderer/screen_renderer.dart`
 
-Add to `_createDefaultRegistry()`:
+Add to `_createDefaultRenderers()`:
 
 ```dart
-'myCustom': MyCustomRenderer(),
+GenericComponentType.myCustom: MyCustomRenderer(),
 ```
 
 ### Step 5: Use in JSON

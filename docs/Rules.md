@@ -1,3 +1,7 @@
+Status Note:
+- This document defines the target schema and runtime rules.
+- The current engine implements a subset. See docs/PRODUCTION_PROGRESS.md for status.
+
 - 1. Global Architecture Rules
 - [Critical] The mobile architecture must use a hybrid schema: high-level functional sections plus a small layout primitive set.
 - [Critical] The allowed core layout primitive set is container, column, row, stack, spacer, and scroll.

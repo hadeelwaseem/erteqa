@@ -12,7 +12,7 @@ It focuses on system boundaries, runtime flow, and structural decisions rather t
 The project uses a hybrid architecture:
 - Feature-oriented Flutter app structure inspired by Clean Architecture (`features`, `core`)
 - Cubit/BLoC for state management
-- A JSON-driven UI rendering engine (`engine`) for runtime-configured screens (MVP V2)
+- A JSON-driven UI rendering engine (`engine`) for runtime-configured screens (production)
 
 ### Key design principles observed
 - Separation of concerns between cross-cutting infrastructure (`core`), feature modules (`features`), and rendering engine (`engine`)
@@ -43,14 +43,14 @@ The project uses a hybrid architecture:
 - `lib/features/auth/`: partial/transitional module with significant commented behavior
 
 ### Dynamic rendering engine
-- `lib/engine/screen_renderer/`: orchestrates screen tree rendering
+- `lib/engine/screen_renderer/`: orchestrates screen tree rendering (enum-based map)
 - `lib/engine/component_renderer/`: renderer interface contract
-- `lib/engine/tree/renderers/`: per-component rendering strategies (scaffold, column, row, container, text, button, card)
+- `lib/engine/tree/renderers/`: per-component rendering strategies
 - `lib/engine/tree/parsers/`: JSON property conversion to Flutter types
 
 ### Config and assets
 - `lib/config/`: in-memory config contracts (`ScreenConfig`, `ComponentConfig`, theme/layout models)
-- `assets/config/*.json`: runtime UI variants (`classic`, `modern`, `experimental`, `dashboard`)
+- `assets/config/*.json`: runtime UI variants (simple or builder format)
 
 ### Reusable/shared components
 - Reusable rendering primitives in `engine/tree/renderers`
@@ -141,6 +141,7 @@ Flutter Widget Tree
 
 ### API/data source interactions
 - Variant UI uses local asset JSON files as source
+- Builder JSON (schemaVersion/app/theme/navigation/pages) is supported
 - API service exists for remote calls and is wired into auth repository implementation
 
 ## 5. Key Design Patterns

@@ -40,15 +40,15 @@ The rendering engine consists of five layer:
 └────────────────────┬────────────────────────────────────┘
                      │
 ┌────────────────────▼────────────────────────────────────┐
-│  ComponentRegistry (String-based Lookup)                │
-│  - "text" → TextRenderer                                │
-│  - "image" → ImageRenderer                              │
-│  - "myCustom" → CustomRenderer (Runtime Register)       │
+│  ScreenRenderer (Enum-based Lookup)                     │
+│  - text → TextRenderer                                   │
+│  - image → ImageRenderer                                 │
+│  - myCustom → CustomRenderer (injected)                  │
 └────────────────────┬────────────────────────────────────┘
                      │
 ┌────────────────────▼────────────────────────────────────┐
 │  ScreenRenderer (Recursive Widget Builder)              │
-│  - Looks up renderer from ComponentRegistry             │
+│  - Looks up renderer from enum map                       │
 │  - Calls render() method with ComponentConfig           │
 │  - Rebuilds widget tree on state changes                │
 └────────────────────┬────────────────────────────────────┘
@@ -65,7 +65,7 @@ The rendering engine consists of five layer:
 |---------|-------|---------|
 | **Strategy** | ComponentRenderer interface | Each component type implements render() |
 | **Factory** | ScreenRenderer.withPrimitives() | Creates default renderer registry |
-| **Registry** | ComponentRegistry | String-based renderer lookup |
+| **Registry** | ScreenRenderer | Enum-based renderer lookup |
 | **Dependency Injection** | ScreenRenderer constructor | Custom renderers can be injected |
 | **Visitor** | _buildComponent recursion | Traverses and transforms tree |
 
@@ -172,15 +172,15 @@ class IconButtonRenderer implements ComponentRenderer {
 }
 ```
 
-### Step 3: Register with ComponentRegistry
+### Step 3: Register with ScreenRenderer
 
-**File**: `lib/engine/registry/component_registry.dart`
+**File**: `lib/engine/screen_renderer/screen_renderer.dart`
 
 ```dart
-static Map<String, ComponentRenderer> _createDefaultRegistry() {
+static Map<GenericComponentType, ComponentRenderer> _createDefaultRenderers() {
   return {
     // ... existing entries
-    'iconButton': IconButtonRenderer(),  // Add this line
+    GenericComponentType.iconButton: IconButtonRenderer(),
   };
 }
 ```
