@@ -24,9 +24,10 @@ class ButtonRenderer implements ComponentRenderer {
     final alignment = PropertyParsers.parseAlignment(
       config.properties['alignment'] as String?,
     );
+    final onTap = config.properties['onTap'] as VoidCallback?;
 
     final button = ElevatedButton(
-      onPressed: () {},
+      onPressed: onTap ?? () {},
       style: ElevatedButton.styleFrom(
         backgroundColor: backgroundColor,
         padding:

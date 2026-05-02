@@ -1,10 +1,12 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../config/component_config.dart';
 import '../../../../config/screen_config.dart';
 import '../../../../core/enums/generic_component_type.dart';
+import '../../../../engine/validation/component_schemas.dart';
 
 /// Abstract repository for loading dynamic screen configurations.
 ///
@@ -22,7 +24,7 @@ abstract class VariantRepository {
   ///
   /// **Throws**: Exception if config cannot be found or parsed.
   /// Error is caught by [VariantCubit] and emitted as [VariantFailure].
-  Future<ScreenConfig> loadVariant(String variantId);
+  Future<ScreenConfig> loadVariant(String variantId, {String? pageRoute});
 }
 
 /// Loads screen configs from JSON asset files.
@@ -53,11 +55,17 @@ class AssetVariantRepository implements VariantRepository {
   static const _configPath = 'assets/config';
 
   @override
-  Future<ScreenConfig> loadVariant(String variantId) async {
+  Future<ScreenConfig> loadVariant(
+    String variantId, {
+    String? pageRoute,
+  }) async {
     final jsonString = await rootBundle.loadString(
       '$_configPath/$variantId.json',
     );
     final json = jsonDecode(jsonString) as Map<String, dynamic>;
+    if (json['pages'] is List) {
+      return _parseBuilderScreenConfig(json, variantId, pageRoute: pageRoute);
+    }
     return _parseScreenConfig(json);
   }
 
@@ -80,6 +88,144 @@ class AssetVariantRepository implements VariantRepository {
     );
   }
 
+  ScreenConfig _parseBuilderScreenConfig(
+    Map<String, dynamic> json,
+    String variantId, {
+    String? pageRoute,
+  }) {
+    final pages = (json['pages'] as List)
+        .whereType<Map<String, dynamic>>()
+        .toList(growable: false);
+    if (pages.isEmpty) {
+      throw ArgumentError('Builder config has no pages.');
+    }
+
+    final initialRoute =
+        (json['navigation'] as Map<String, dynamic>?)?['initialRoute']
+            as String?;
+    final routeToLoad = pageRoute ?? initialRoute;
+    final selectedPage = pages.firstWhere(
+      (page) => page['route'] == routeToLoad || page['id'] == routeToLoad,
+      orElse: () => pages.first,
+    );
+
+    final body =
+        (selectedPage['body'] as List?)
+            ?.whereType<Map<String, dynamic>>()
+            .map(_parseBuilderComponentConfig)
+            .toList() ??
+        <ComponentConfig>[];
+    final appBar = selectedPage['appBar'] is Map<String, dynamic>
+        ? _parseBuilderComponentConfig(
+            selectedPage['appBar'] as Map<String, dynamic>,
+          )
+        : null;
+    final children = <ComponentConfig>[if (appBar != null) appBar, ...body];
+
+    final root = ComponentConfig(
+      type: GenericComponentType.scaffold,
+      properties: {
+        if (selectedPage['background'] is String)
+          'backgroundColor': selectedPage['background'],
+      },
+      child: ComponentConfig(
+        type: GenericComponentType.column,
+        properties: const {'crossAxisAlignment': 'stretch'},
+        children: children,
+      ),
+    );
+
+    final pageId = selectedPage['id'] as String? ?? variantId;
+    final pageName =
+        selectedPage['title'] as String? ??
+        (json['app'] as Map<String, dynamic>?)?['name'] as String? ??
+        pageId;
+
+    return ScreenConfig(pageId: variantId, pageName: pageName, root: root);
+  }
+
+  ComponentConfig _parseBuilderComponentConfig(Map<String, dynamic> json) {
+    final rawType = json['type'] as String? ?? 'unsupported';
+    final type = _componentTypeFromString(rawType, strict: false);
+    final properties = _normalizeBuilderProperties(json, rawType);
+
+    ComponentConfig? child;
+    if (json['child'] is Map<String, dynamic>) {
+      child = _parseBuilderComponentConfig(
+        json['child'] as Map<String, dynamic>,
+      );
+    }
+
+    List<ComponentConfig>? children;
+    if (json['children'] is List) {
+      children = (json['children'] as List)
+          .whereType<Map<String, dynamic>>()
+          .map(_parseBuilderComponentConfig)
+          .toList();
+    }
+
+    return ComponentConfig(
+      type: type,
+      properties: properties,
+      child: child,
+      children: children,
+    );
+  }
+
+  Map<String, dynamic> _normalizeBuilderProperties(
+    Map<String, dynamic> json,
+    String rawType,
+  ) {
+    final properties = <String, dynamic>{'id': json['id'], 'rawType': rawType}
+      ..removeWhere((_, value) => value == null);
+
+    final props = json['props'];
+    if (props is Map<String, dynamic>) {
+      properties.addAll(props);
+    }
+
+    final style = json['style'];
+    if (style is Map<String, dynamic>) {
+      if (style.containsKey('padding')) {
+        properties['padding'] = style['padding'];
+      }
+      if (style.containsKey('margin')) properties['margin'] = style['margin'];
+      if (style.containsKey('borderRadius')) {
+        properties['borderRadius'] = style['borderRadius'];
+      }
+      if (style['background'] is String) {
+        properties['color'] = style['background'];
+      }
+      if (style['color'] is String) {
+        properties['color'] = style['color'];
+      }
+      if (style.containsKey('width')) properties['width'] = style['width'];
+      if (style.containsKey('height')) properties['height'] = style['height'];
+    }
+
+    if (json['data'] is Map<String, dynamic>) {
+      properties['data'] = json['data'];
+    }
+    if (json['tap'] is Map<String, dynamic>) {
+      properties['tap'] = json['tap'];
+    }
+
+    if (properties['crossAxis'] != null) {
+      properties['crossAxisAlignment'] = properties['crossAxis'];
+    }
+    if (properties['mainAxis'] != null) {
+      properties['mainAxisAlignment'] = properties['mainAxis'];
+    }
+    if (properties['align'] != null) {
+      properties['textAlign'] = properties['align'];
+    }
+    if (rawType == 'spacer' && properties['size'] != null) {
+      properties['height'] = properties['size'];
+    }
+
+    return properties;
+  }
+
   /// Recursively parses component JSON into [ComponentConfig] tree.
   ///
   /// **Fields extracted**:
@@ -91,16 +237,25 @@ class AssetVariantRepository implements VariantRepository {
   /// **Recursion**: Child and children are recursively parsed into [ComponentConfig] trees.
   ComponentConfig _parseComponentConfig(Map<String, dynamic> json) {
     final typeString = json['type'] as String;
-    final type = GenericComponentType.values.firstWhere(
-      (e) => e.name == typeString,
-      orElse: () => throw ArgumentError('Unknown component type: $typeString'),
-    );
+    final type = _componentTypeFromString(typeString);
 
     final properties = <String, dynamic>{};
     for (final entry in json.entries) {
       final key = entry.key;
       if (key != 'type' && key != 'child' && key != 'children') {
         properties[key] = entry.value;
+      }
+    }
+
+    // Validate properties against schema (if schema exists)
+    final schema = ComponentSchemas.getSchema(typeString);
+    if (schema != null) {
+      try {
+        schema.validate(properties);
+      } catch (e) {
+        // Log warning but don't fail - lenient parsing
+        // In production, consider strict mode: throw;
+        debugPrint('[ComponentConfig] Schema validation warning: $e');
       }
     }
 
@@ -123,5 +278,16 @@ class AssetVariantRepository implements VariantRepository {
       child: child,
       children: children,
     );
+  }
+
+  GenericComponentType _componentTypeFromString(
+    String typeString, {
+    bool strict = true,
+  }) {
+    for (final type in GenericComponentType.values) {
+      if (type.name == typeString) return type;
+    }
+    if (!strict) return GenericComponentType.unsupported;
+    throw ArgumentError('Unknown component type: $typeString');
   }
 }

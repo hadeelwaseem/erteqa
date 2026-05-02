@@ -10,37 +10,45 @@ import 'package:sooq_merchant/core/utils/app_bloc_observer.dart';
 import 'package:sooq_merchant/core/utils/app_router.dart';
 import 'package:sooq_merchant/core/utils/service_locator.dart';
 import 'package:sooq_merchant/core/utils/size_config.dart';
+import 'package:sooq_merchant/engine/app_config_loader.dart';
+
+/// The JSON file that drives the app.
+/// Change this to switch to a different config at any time.
+const _kActiveConfig = 'mobile_component_flow_demo';
 
 void main() async {
-  // 1. تهيئة الـ Bindings
+  // 1. Initialize Flutter bindings
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 2. إعداد Service Locator
+  // 2. Setup Dependency Injection
   setupServiceLocator();
 
-  // 3. إعدادات الواجهة
+  // 3. System UI
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
-      statusBarColor: primaryColor, // Status bar color
-      statusBarIconBrightness: Brightness.light, // Status bar icons' color
+      statusBarColor: primaryColor,
+      statusBarIconBrightness: Brightness.light,
     ),
   );
 
   final tokenCubit = getIt<TokenCubit>();
   final sharedPreferencesCubit = getIt<SharedPreferencesCubit>();
 
-  await Future.wait([
-    sharedPreferencesCubit.setup(),
-    //  sharedPreferencesCubit.deleteAll(),
-    //  tokenCubit.deleteSavedToken(),
-    tokenCubit.fetchSavedToken(),
-    EasyLocalization.ensureInitialized(),
-  ]);
+  // 4. Startup init — void-returning calls run before the parallel wait
+  await sharedPreferencesCubit.setup();
+  await tokenCubit.fetchSavedToken();
+  await EasyLocalization.ensureInitialized();
 
-  // 6. إعداد الـ Router بعد التأكد من وجود التوكن
-  final router = AppRouter.setupRouter(tokenCubit.state);
+  // Load mobile app config (async, non-void — may return null on failure)
+  final mobileConfig = await AppConfigLoader.load(_kActiveConfig);
 
-  // 7. إعداد مراقب الـ Bloc
+  // 5. Build router from config (tab shell) or fallback
+  final router = AppRouter.setupRouter(
+    tokenCubit.state,
+    mobileConfig: mobileConfig,
+  );
+
+  // 6. Bloc observer
   Bloc.observer = AppBlocObserver();
 
   runApp(
@@ -62,6 +70,7 @@ class SOOQApp extends StatelessWidget {
   final GoRouter router;
   final TokenCubit tokenCubit;
   final SharedPreferencesCubit sharedPreferencesCubit;
+
   const SOOQApp({
     super.key,
     required this.router,
@@ -83,7 +92,7 @@ class SOOQApp extends StatelessWidget {
             theme: ThemeData(
               useMaterial3: false,
               fontFamily: 'inter',
-              scaffoldBackgroundColor: const Color(0xfff4f6fa),
+              scaffoldBackgroundColor: const Color(0xFFF4F6FA),
             ),
             localizationsDelegates: context.localizationDelegates,
             supportedLocales: context.supportedLocales,

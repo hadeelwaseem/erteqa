@@ -7,4 +7,11 @@ enum GenericComponentType {
   text,
   button,
   card,
+  spacer,
+  image,
+  appBar,
+  divider,
+  icon,
+  richtext,
+  unsupported,
 }

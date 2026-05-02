@@ -140,4 +140,58 @@ class PropertyParsers {
         return null;
     }
   }
+
+  /// Converts a dynamic value to double.
+  ///
+  /// Handles: null, num types, and strings that parse to numbers.
+  /// Returns null if conversion fails.
+  static double? parseDouble(dynamic v) {
+    if (v == null) return null;
+    if (v is num) return v.toDouble();
+    if (v is String) {
+      try {
+        return double.parse(v);
+      } catch (_) {
+        return null;
+      }
+    }
+    return null;
+  }
+
+  /// Parses image fit enum string to a value for Image.fit.
+  ///
+  /// Valid values: 'fill', 'contain', 'cover', 'fitWidth', 'fitHeight', 'scaleDown'
+  /// Returns the validated string, defaulting to 'cover'.
+  ///
+  /// The returned string should be mapped to BoxFit enum in the renderer.
+  static String parseImageFitString(String? v) {
+    if (v == null) return 'cover';
+    switch (v) {
+      case 'fill':
+      case 'contain':
+      case 'cover':
+      case 'fitWidth':
+      case 'fitHeight':
+      case 'scaleDown':
+        return v;
+      default:
+        return 'cover';
+    }
+  }
+
+  /// Parses image source type from string.
+  ///
+  /// Valid values: 'network', 'asset', 'file'
+  /// Default: 'network'
+  static String parseImageSource(String? v) {
+    switch (v) {
+      case 'asset':
+        return 'asset';
+      case 'file':
+        return 'file';
+      case 'network':
+      default:
+        return 'network';
+    }
+  }
 }

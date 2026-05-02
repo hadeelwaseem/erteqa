@@ -19,10 +19,14 @@ class RowRenderer implements ComponentRenderer {
       config.properties['crossAxisAlignment'] as String?,
     );
     final children = config.children ?? [];
-    final childWidgets = children.map((c) => buildChild(c)).toList();
+    final gap = PropertyParsers.parseDouble(config.properties['gap']) ?? 0;
+    final childWidgets = _withGap(
+      children.map((c) => buildChild(c)).toList(),
+      gap,
+    );
 
     final row = Row(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: mainAxisAlignment,
       crossAxisAlignment: crossAxisAlignment,
       children: childWidgets,
@@ -32,5 +36,15 @@ class RowRenderer implements ComponentRenderer {
     // (e.g. Column child). Prevents "BoxConstraints forces an infinite height"
     // when crossAxisAlignment is stretch.
     return IntrinsicHeight(child: row);
+  }
+
+  List<Widget> _withGap(List<Widget> children, double gap) {
+    if (gap <= 0 || children.length < 2) return children;
+    return [
+      for (var i = 0; i < children.length; i++) ...[
+        if (i > 0) SizedBox(width: gap),
+        children[i],
+      ],
+    ];
   }
 }

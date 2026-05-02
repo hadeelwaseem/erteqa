@@ -19,7 +19,11 @@ class ColumnRenderer implements ComponentRenderer {
       config.properties['crossAxisAlignment'] as String?,
     );
     final children = config.children ?? [];
-    final childWidgets = children.map((c) => buildChild(c)).toList();
+    final gap = PropertyParsers.parseDouble(config.properties['gap']) ?? 0;
+    final childWidgets = _withGap(
+      children.map((c) => buildChild(c)).toList(),
+      gap,
+    );
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -27,5 +31,15 @@ class ColumnRenderer implements ComponentRenderer {
       crossAxisAlignment: crossAxisAlignment,
       children: childWidgets,
     );
+  }
+
+  List<Widget> _withGap(List<Widget> children, double gap) {
+    if (gap <= 0 || children.length < 2) return children;
+    return [
+      for (var i = 0; i < children.length; i++) ...[
+        if (i > 0) SizedBox(height: gap),
+        children[i],
+      ],
+    ];
   }
 }

@@ -10,65 +10,68 @@ import 'package:sooq_merchant/features/variantscreen/presentation/manager/varian
 /// **Responsibility**: Render a single dynamic screen (page) from a ScreenConfig.
 ///
 /// **How it works**:
-/// 1. Receives a [variantId] (pageId) from the router (e.g., `/variant/:id`)
+/// 1. Receives a [variantId] (JSON file name) and an optional [pageRoute]
 /// 2. Creates a [VariantCubit] to load the screen config
 /// 3. Renders UI based on Cubit state:
 ///    - Loading: Shows progress indicator
 ///    - Success: Renders component tree via [ScreenRenderer]
 ///    - Failure: Shows error message
 ///
-/// **Pattern**: One instance per route navigation. Each pageId gets its own Cubit and loading flow.
+/// **Key**: Uses `ValueKey(pageRoute ?? variantId)` on the BlocProvider so
+/// that go_router rebuilds and re-fetches when navigating to a different page
+/// within the same JSON file (variantId unchanged, pageRoute changed).
 ///
-/// **Not for nesting**: This is a route-level screen host. For nested content, use component tree.
+/// **No outer Scaffold**: The Scaffold is provided by [TabShellWidget] via
+/// ShellRoute. Adding another Scaffold here would cause nesting issues.
 class VariantScreen extends StatelessWidget {
   const VariantScreen({
     super.key,
     required this.variantId,
     required this.variantRepository,
+    this.pageRoute,
   });
 
-  /// The page ID to load (e.g., 'classic', 'dashboard', 'modern').
-  /// Maps to JSON config file: `assets/config/{variantId}.json`
+  /// The JSON file identifier (e.g., 'mobile_component_flow_demo').
   final String variantId;
 
   /// Repository for loading screen configs from assets.
   final VariantRepository variantRepository;
 
+  /// The route of the page within the JSON file (e.g., '/', '/products').
+  final String? pageRoute;
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => VariantCubit(variantRepository, variantId),
-      child: SafeArea(
-        child: Scaffold(
-          // appBar: AppBar(
-          //   title: Text('Variant: $variantId'),
-          // ),
-          body: BlocBuilder<VariantCubit, VariantState>(
-            builder: (context, state) {
-              // Render based on Cubit state
-              return switch (state) {
-                // Loading: Show spinner
-                VariantInitial() || VariantLoading() => const Center(
-                  child: CircularProgressIndicator(),
+      key: ValueKey('$variantId:${pageRoute ?? ""}'),
+      create: (context) =>
+          VariantCubit(variantRepository, variantId, pageRoute: pageRoute),
+      child: BlocBuilder<VariantCubit, VariantState>(
+        builder: (context, state) {
+          return switch (state) {
+            // Loading: Show spinner
+            VariantInitial() || VariantLoading() => const Center(
+              child: CircularProgressIndicator(),
+            ),
+            // Success: Render the component tree
+            VariantSuccess(:final config) =>
+              ScreenRenderer.withPrimitives().render(
+                config,
+                context: context,
+              ),
+            // Failure: Show error message
+            VariantFailure(:final message) => Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.red),
                 ),
-                // Success: Render the component tree
-                VariantSuccess(:final config) =>
-                  ScreenRenderer.withPrimitives().render(config),
-                // Failure: Show error message
-                VariantFailure(:final message) => Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Text(
-                      message,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                  ),
-                ),
-              };
-            },
-          ),
-        ),
+              ),
+            ),
+          };
+        },
       ),
     );
   }

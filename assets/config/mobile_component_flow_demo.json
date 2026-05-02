@@ -1,0 +1,833 @@
+{
+  "schemaVersion": "1.0",
+  "app": {
+    "name": "SOOQ Merchant Flow Demo",
+    "bundleId": "com.sooq.merchant.flow.demo"
+  },
+  "theme": {
+    "mode": "light",
+    "colors": {
+      "primary": "#1D4ED8",
+      "surface": "#F8FAFC",
+      "background": "#FFFFFF",
+      "text": "#0F172A",
+      "muted": "#64748B",
+      "success": "#16A34A",
+      "warning": "#D97706",
+      "error": "#DC2626"
+    }
+  },
+  "navigation": {
+    "type": "tabs",
+    "initialRoute": "/",
+    "tabs": [
+      {
+        "id": "tab-home",
+        "label": "Home",
+        "icon": "home",
+        "route": "/"
+      },
+      {
+        "id": "tab-products",
+        "label": "Products",
+        "icon": "grid_view",
+        "route": "/products"
+      },
+      {
+        "id": "tab-checkout",
+        "label": "Checkout",
+        "icon": "shopping_cart",
+        "route": "/checkout"
+      }
+    ]
+  },
+  "pages": [
+    {
+      "id": "home-screen",
+      "route": "/",
+      "title": "Home",
+      "background": "#F8FAFC",
+      "scroll": "vertical",
+      "appBar": {
+        "id": "home-appbar",
+        "type": "appBar",
+        "props": {
+          "title": "SOOQ Merchant"
+        },
+        "style": {
+          "background": "#FFFFFF"
+        }
+      },
+      "body": [
+        {
+          "id": "hero-card",
+          "type": "container",
+          "props": {},
+          "style": {
+            "margin": {
+              "left": 16,
+              "right": 16,
+              "top": 16,
+              "bottom": 12
+            },
+            "padding": 16,
+            "background": "#1D4ED8",
+            "borderRadius": 14
+          },
+          "child": {
+            "id": "hero-content",
+            "type": "column",
+            "props": {
+              "crossAxis": "start",
+              "gap": 10
+            },
+            "children": [
+              {
+                "id": "hero-title",
+                "type": "text",
+                "props": {
+                  "value": "Grow your catalog sales",
+                  "fontSize": 22,
+                  "fontWeight": "bold",
+                  "color": "#FFFFFF"
+                }
+              },
+              {
+                "id": "hero-subtitle",
+                "type": "text",
+                "props": {
+                  "value": "Manage products, view details, and complete checkout in one flow.",
+                  "fontSize": 14,
+                  "color": "#DBEAFE"
+                }
+              },
+              {
+                "id": "hero-cta",
+                "type": "button",
+                "props": {
+                  "label": "Browse Products",
+                  "backgroundColor": "#FFFFFF",
+                  "padding": {
+                    "left": 18,
+                    "right": 18,
+                    "top": 12,
+                    "bottom": 12
+                  },
+                  "borderRadius": 10
+                },
+                "tap": {
+                  "type": "navigate",
+                  "route": "/products"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "quick-stats",
+          "type": "row",
+          "props": {
+            "mainAxisAlignment": "spaceBetween",
+            "crossAxis": "stretch"
+          },
+          "style": {
+            "margin": {
+              "left": 16,
+              "right": 16,
+              "bottom": 12
+            }
+          },
+          "children": [
+            {
+              "id": "stat-card-1",
+              "type": "card",
+              "props": {
+                "elevation": 1,
+                "borderRadius": 12,
+                "color": "#FFFFFF"
+              },
+              "child": {
+                "id": "stat-card-1-content",
+                "type": "container",
+                "props": {
+                  "padding": 12,
+                  "width": 110
+                },
+                "child": {
+                  "id": "stat-card-1-column",
+                  "type": "column",
+                  "props": {
+                    "crossAxis": "start",
+                    "gap": 4
+                  },
+                  "children": [
+                    {
+                      "id": "stat-1-label",
+                      "type": "text",
+                      "props": {
+                        "value": "Orders",
+                        "fontSize": 12,
+                        "color": "#64748B"
+                      }
+                    },
+                    {
+                      "id": "stat-1-value",
+                      "type": "text",
+                      "props": {
+                        "value": "128",
+                        "fontSize": 18,
+                        "fontWeight": "bold",
+                        "color": "#0F172A"
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "id": "stat-card-2",
+              "type": "card",
+              "props": {
+                "elevation": 1,
+                "borderRadius": 12,
+                "color": "#FFFFFF"
+              },
+              "child": {
+                "id": "stat-card-2-content",
+                "type": "container",
+                "props": {
+                  "padding": 12,
+                  "width": 110
+                },
+                "child": {
+                  "id": "stat-card-2-column",
+                  "type": "column",
+                  "props": {
+                    "crossAxis": "start",
+                    "gap": 4
+                  },
+                  "children": [
+                    {
+                      "id": "stat-2-label",
+                      "type": "text",
+                      "props": {
+                        "value": "Revenue",
+                        "fontSize": 12,
+                        "color": "#64748B"
+                      }
+                    },
+                    {
+                      "id": "stat-2-value",
+                      "type": "text",
+                      "props": {
+                        "value": "$14.2K",
+                        "fontSize": 18,
+                        "fontWeight": "bold",
+                        "color": "#0F172A"
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "id": "stat-card-3",
+              "type": "card",
+              "props": {
+                "elevation": 1,
+                "borderRadius": 12,
+                "color": "#FFFFFF"
+              },
+              "child": {
+                "id": "stat-card-3-content",
+                "type": "container",
+                "props": {
+                  "padding": 12,
+                  "width": 110
+                },
+                "child": {
+                  "id": "stat-card-3-column",
+                  "type": "column",
+                  "props": {
+                    "crossAxis": "start",
+                    "gap": 4
+                  },
+                  "children": [
+                    {
+                      "id": "stat-3-label",
+                      "type": "text",
+                      "props": {
+                        "value": "Visitors",
+                        "fontSize": 12,
+                        "color": "#64748B"
+                      }
+                    },
+                    {
+                      "id": "stat-3-value",
+                      "type": "text",
+                      "props": {
+                        "value": "3.1K",
+                        "fontSize": 18,
+                        "fontWeight": "bold",
+                        "color": "#0F172A"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "home-footer-note",
+          "type": "container",
+          "props": {},
+          "style": {
+            "margin": {
+              "left": 16,
+              "right": 16,
+              "bottom": 20
+            },
+            "padding": 12,
+            "background": "#FFFFFF",
+            "borderRadius": 10
+          },
+          "child": {
+            "id": "home-footer-rich",
+            "type": "richtext",
+            "props": {
+              "value": "<p><b>Demo Flow:</b> Home -> Products -> Product Details -> Checkout</p>"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "products-screen",
+      "route": "/products",
+      "title": "Products",
+      "background": "#F8FAFC",
+      "scroll": "vertical",
+      "appBar": {
+        "id": "products-appbar",
+        "type": "appBar",
+        "props": {
+          "title": "Products"
+        }
+      },
+      "body": [
+        {
+          "id": "products-intro",
+          "type": "container",
+          "props": {},
+          "style": {
+            "margin": {
+              "left": 16,
+              "right": 16,
+              "top": 16,
+              "bottom": 12
+            },
+            "padding": 14,
+            "background": "#FFFFFF",
+            "borderRadius": 12
+          },
+          "child": {
+            "id": "products-intro-text",
+            "type": "text",
+            "props": {
+              "value": "Choose a featured product to open details.",
+              "fontSize": 14,
+              "color": "#334155"
+            }
+          }
+        },
+        {
+          "id": "product-item-1",
+          "type": "container",
+          "props": {},
+          "style": {
+            "margin": {
+              "left": 16,
+              "right": 16,
+              "bottom": 12
+            },
+            "padding": 12,
+            "background": "#FFFFFF",
+            "borderRadius": 12
+          },
+          "tap": {
+            "type": "navigate",
+            "route": "/product/1"
+          },
+          "child": {
+            "id": "product-item-1-row",
+            "type": "row",
+            "props": {
+              "crossAxis": "center",
+              "gap": 12
+            },
+            "children": [
+              {
+                "id": "product-item-1-image",
+                "type": "image",
+                "props": {
+                  "source": "network",
+                  "url": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&q=80",
+                  "width": 88,
+                  "height": 88,
+                  "fit": "cover"
+                }
+              },
+              {
+                "id": "product-item-1-meta",
+                "type": "column",
+                "props": {
+                  "crossAxis": "start",
+                  "gap": 4
+                },
+                "children": [
+                  {
+                    "id": "product-item-1-title",
+                    "type": "text",
+                    "props": {
+                      "value": "Performance Sneakers",
+                      "fontSize": 16,
+                      "fontWeight": "bold",
+                      "color": "#0F172A"
+                    }
+                  },
+                  {
+                    "id": "product-item-1-sub",
+                    "type": "text",
+                    "props": {
+                      "value": "In stock: 42 units",
+                      "fontSize": 13,
+                      "color": "#64748B"
+                    }
+                  },
+                  {
+                    "id": "product-item-1-price",
+                    "type": "text",
+                    "props": {
+                      "value": "$129.00",
+                      "fontSize": 14,
+                      "fontWeight": "bold",
+                      "color": "#1D4ED8"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "product-item-2",
+          "type": "container",
+          "props": {},
+          "style": {
+            "margin": {
+              "left": 16,
+              "right": 16,
+              "bottom": 12
+            },
+            "padding": 12,
+            "background": "#FFFFFF",
+            "borderRadius": 12
+          },
+          "tap": {
+            "type": "navigate",
+            "route": "/product/1"
+          },
+          "child": {
+            "id": "product-item-2-row",
+            "type": "row",
+            "props": {
+              "crossAxis": "center",
+              "gap": 12
+            },
+            "children": [
+              {
+                "id": "product-item-2-image",
+                "type": "image",
+                "props": {
+                  "source": "network",
+                  "url": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80",
+                  "width": 88,
+                  "height": 88,
+                  "fit": "cover"
+                }
+              },
+              {
+                "id": "product-item-2-meta",
+                "type": "column",
+                "props": {
+                  "crossAxis": "start",
+                  "gap": 4
+                },
+                "children": [
+                  {
+                    "id": "product-item-2-title",
+                    "type": "text",
+                    "props": {
+                      "value": "Minimal T-Shirt",
+                      "fontSize": 16,
+                      "fontWeight": "bold",
+                      "color": "#0F172A"
+                    }
+                  },
+                  {
+                    "id": "product-item-2-sub",
+                    "type": "text",
+                    "props": {
+                      "value": "In stock: 75 units",
+                      "fontSize": 13,
+                      "color": "#64748B"
+                    }
+                  },
+                  {
+                    "id": "product-item-2-price",
+                    "type": "text",
+                    "props": {
+                      "value": "$39.00",
+                      "fontSize": 14,
+                      "fontWeight": "bold",
+                      "color": "#1D4ED8"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "products-cta-row",
+          "type": "row",
+          "props": {
+            "mainAxisAlignment": "spaceBetween",
+            "crossAxis": "center"
+          },
+          "style": {
+            "margin": {
+              "left": 16,
+              "right": 16,
+              "bottom": 20
+            }
+          },
+          "children": [
+            {
+              "id": "products-back-home",
+              "type": "button",
+              "props": {
+                "label": "Back Home",
+                "backgroundColor": "#334155",
+                "borderRadius": 10
+              },
+              "tap": {
+                "type": "navigate",
+                "route": "/"
+              }
+            },
+            {
+              "id": "products-go-checkout",
+              "type": "button",
+              "props": {
+                "label": "Go Checkout",
+                "backgroundColor": "#1D4ED8",
+                "borderRadius": 10
+              },
+              "tap": {
+                "type": "navigate",
+                "route": "/checkout"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "product-details-screen",
+      "route": "/product/1",
+      "title": "Product Details",
+      "background": "#F8FAFC",
+      "scroll": "vertical",
+      "appBar": {
+        "id": "details-appbar",
+        "type": "appBar",
+        "props": {
+          "title": "Product Details"
+        }
+      },
+      "body": [
+        {
+          "id": "details-image",
+          "type": "container",
+          "props": {},
+          "style": {
+            "margin": {
+              "left": 16,
+              "right": 16,
+              "top": 16,
+              "bottom": 12
+            },
+            "background": "#FFFFFF",
+            "padding": 12,
+            "borderRadius": 12
+          },
+          "child": {
+            "id": "details-image-node",
+            "type": "image",
+            "props": {
+              "source": "network",
+              "url": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200&q=80",
+              "fit": "cover",
+              "aspectRatio": 1.45
+            }
+          }
+        },
+        {
+          "id": "details-content-card",
+          "type": "container",
+          "props": {},
+          "style": {
+            "margin": {
+              "left": 16,
+              "right": 16,
+              "bottom": 12
+            },
+            "padding": 16,
+            "background": "#FFFFFF",
+            "borderRadius": 12
+          },
+          "child": {
+            "id": "details-content-col",
+            "type": "column",
+            "props": {
+              "crossAxis": "start",
+              "gap": 8
+            },
+            "children": [
+              {
+                "id": "details-title",
+                "type": "text",
+                "props": {
+                  "value": "Performance Sneakers",
+                  "fontSize": 22,
+                  "fontWeight": "bold",
+                  "color": "#0F172A"
+                }
+              },
+              {
+                "id": "details-price",
+                "type": "text",
+                "props": {
+                  "value": "$129.00",
+                  "fontSize": 18,
+                  "fontWeight": "bold",
+                  "color": "#1D4ED8"
+                }
+              },
+              {
+                "id": "details-divider",
+                "type": "divider",
+                "props": {
+                  "thickness": 1,
+                  "color": "#E2E8F0"
+                }
+              },
+              {
+                "id": "details-description",
+                "type": "text",
+                "props": {
+                  "value": "Lightweight design with breathable fabric, ideal for daily activity and long shifts.",
+                  "fontSize": 14,
+                  "color": "#475569"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "details-actions",
+          "type": "row",
+          "props": {
+            "mainAxisAlignment": "spaceBetween",
+            "crossAxis": "center"
+          },
+          "style": {
+            "margin": {
+              "left": 16,
+              "right": 16,
+              "bottom": 20
+            }
+          },
+          "children": [
+            {
+              "id": "details-back-products",
+              "type": "button",
+              "props": {
+                "label": "Back to Products",
+                "backgroundColor": "#334155",
+                "borderRadius": 10
+              },
+              "tap": {
+                "type": "navigate",
+                "route": "/products"
+              }
+            },
+            {
+              "id": "details-proceed-checkout",
+              "type": "button",
+              "props": {
+                "label": "Proceed to Checkout",
+                "backgroundColor": "#16A34A",
+                "borderRadius": 10
+              },
+              "tap": {
+                "type": "navigate",
+                "route": "/checkout"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "checkout-screen",
+      "route": "/checkout",
+      "title": "Checkout",
+      "background": "#F8FAFC",
+      "scroll": "vertical",
+      "appBar": {
+        "id": "checkout-appbar",
+        "type": "appBar",
+        "props": {
+          "title": "Checkout"
+        }
+      },
+      "body": [
+        {
+          "id": "checkout-summary",
+          "type": "container",
+          "props": {},
+          "style": {
+            "margin": {
+              "left": 16,
+              "right": 16,
+              "top": 16,
+              "bottom": 12
+            },
+            "padding": 16,
+            "background": "#FFFFFF",
+            "borderRadius": 12
+          },
+          "child": {
+            "id": "checkout-summary-col",
+            "type": "column",
+            "props": {
+              "crossAxis": "start",
+              "gap": 8
+            },
+            "children": [
+              {
+                "id": "checkout-title",
+                "type": "text",
+                "props": {
+                  "value": "Order Summary",
+                  "fontSize": 20,
+                  "fontWeight": "bold",
+                  "color": "#0F172A"
+                }
+              },
+              {
+                "id": "checkout-item",
+                "type": "text",
+                "props": {
+                  "value": "Performance Sneakers x1",
+                  "fontSize": 14,
+                  "color": "#334155"
+                }
+              },
+              {
+                "id": "checkout-total",
+                "type": "text",
+                "props": {
+                  "value": "Total: $129.00",
+                  "fontSize": 16,
+                  "fontWeight": "bold",
+                  "color": "#1D4ED8"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "checkout-note",
+          "type": "container",
+          "props": {},
+          "style": {
+            "margin": {
+              "left": 16,
+              "right": 16,
+              "bottom": 12
+            },
+            "padding": 14,
+            "background": "#ECFDF5",
+            "borderRadius": 12
+          },
+          "child": {
+            "id": "checkout-note-text",
+            "type": "text",
+            "props": {
+              "value": "This is a UI flow demo. Payment is not connected.",
+              "fontSize": 13,
+              "color": "#065F46"
+            }
+          }
+        },
+        {
+          "id": "checkout-actions",
+          "type": "row",
+          "props": {
+            "mainAxisAlignment": "spaceBetween",
+            "crossAxis": "center"
+          },
+          "style": {
+            "margin": {
+              "left": 16,
+              "right": 16,
+              "bottom": 20
+            }
+          },
+          "children": [
+            {
+              "id": "checkout-back-products",
+              "type": "button",
+              "props": {
+                "label": "Continue Shopping",
+                "backgroundColor": "#334155",
+                "borderRadius": 10
+              },
+              "tap": {
+                "type": "navigate",
+                "route": "/products"
+              }
+            },
+            {
+              "id": "checkout-finish",
+              "type": "button",
+              "props": {
+                "label": "Finish Demo",
+                "backgroundColor": "#16A34A",
+                "borderRadius": 10
+              },
+              "tap": {
+                "type": "navigate",
+                "route": "/"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

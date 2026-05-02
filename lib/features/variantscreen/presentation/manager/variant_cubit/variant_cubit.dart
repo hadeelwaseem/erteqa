@@ -44,12 +44,15 @@ class VariantCubit extends Cubit<VariantState> {
   ///
   /// **Initialization**: Automatically calls [loadVariant] on construction.
   /// This ensures screen loading begins immediately without an explicit call.
-  VariantCubit(this._repo, this._variantId) : super(VariantInitial()) {
+  VariantCubit(this._repo, this._variantId, {String? pageRoute})
+    : _pageRoute = pageRoute,
+      super(VariantInitial()) {
     loadVariant();
   }
 
   final VariantRepository _repo;
   final String _variantId;
+  final String? _pageRoute;
 
   /// Loads the screen config for the variant (pageId).
   ///
@@ -64,7 +67,7 @@ class VariantCubit extends Cubit<VariantState> {
   Future<void> loadVariant() async {
     emit(VariantLoading());
     try {
-      final config = await _repo.loadVariant(_variantId);
+      final config = await _repo.loadVariant(_variantId, pageRoute: _pageRoute);
       emit(VariantSuccess(config));
     } catch (e) {
       emit(VariantFailure(e.toString()));

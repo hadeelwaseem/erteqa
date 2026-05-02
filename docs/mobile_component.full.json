@@ -1,0 +1,1689 @@
+{
+  "schemaVersion": "1.0",
+  "app": {
+    "name": "Puck Mobile Catalog",
+    "bundleId": "com.puck.mobile.catalog"
+  },
+  "theme": {
+    "mode": "light",
+    "colors": {
+      "primary": "#2563eb",
+      "surface": "#f8fafc",
+      "background": "#ffffff",
+      "text": "#0f172a",
+      "muted": "#64748b",
+      "success": "#16a34a",
+      "warning": "#d97706",
+      "error": "#dc2626"
+    },
+    "typography": {
+      "fontFamily": "system",
+      "scale": {
+        "xs": 12,
+        "sm": 14,
+        "md": 16,
+        "lg": 18,
+        "xl": 20,
+        "xxl": 24,
+        "display": 32
+      },
+      "weights": {
+        "normal": 400,
+        "medium": 500,
+        "bold": 700
+      },
+      "lineHeight": {
+        "tight": 1.25,
+        "normal": 1.5,
+        "relaxed": 1.75
+      }
+    },
+    "radius": {
+      "none": 0,
+      "sm": 4,
+      "md": 8,
+      "lg": 12,
+      "xl": 16,
+      "full": 9999
+    },
+    "spacing": {
+      "xs": 4,
+      "sm": 8,
+      "md": 16,
+      "lg": 24,
+      "xl": 32
+    },
+    "buttons": {
+      "sm": {
+        "height": 32,
+        "padX": 12,
+        "fontSize": 14,
+        "radius": 8
+      },
+      "md": {
+        "height": 44,
+        "padX": 16,
+        "fontSize": 16,
+        "radius": 10
+      },
+      "lg": {
+        "height": 52,
+        "padX": 24,
+        "fontSize": 16,
+        "radius": 12
+      }
+    }
+  },
+  "navigation": {
+    "type": "tabs",
+    "initialRoute": "/",
+    "tabs": [
+      {
+        "id": "tab-1",
+        "label": "Config 1",
+        "icon": "home",
+        "route": "/"
+      },
+      {
+        "id": "tab-2",
+        "label": "Config 2",
+        "icon": "list",
+        "route": "/config/2"
+      },
+      {
+        "id": "tab-3",
+        "label": "Config 3",
+        "icon": "grid_view",
+        "route": "/config/3"
+      },
+      {
+        "id": "tab-4",
+        "label": "Config 4",
+        "icon": "settings",
+        "route": "/config/4"
+      }
+    ]
+  },
+  "pages": [
+    {
+      "id": "cfg-1-apps-demo-config-index-tsx",
+      "route": "/",
+      "title": "apps/demo/config/index.tsx",
+      "background": "#ffffff",
+      "scroll": "vertical",
+      "appBar": {
+        "id": "cfg-1-apps-demo-config-index-tsx-appbar",
+        "type": "appBar",
+        "props": {
+          "title": "apps/demo/config/index.tsx"
+        }
+      },
+      "body": [
+        {
+          "id": "cfg-1-apps-demo-config-index-tsx-heading",
+          "type": "text",
+          "props": {
+            "value": "Config: apps/demo/config/index.tsx",
+            "variant": "heading",
+            "level": 2,
+            "align": "left"
+          },
+          "style": {
+            "padding": {
+              "top": 16,
+              "left": 16,
+              "right": 16,
+              "bottom": 8
+            }
+          }
+        },
+        {
+          "id": "cfg-1-apps-demo-config-index-tsx-components",
+          "type": "column",
+          "props": {
+            "gap": 12,
+            "crossAxis": "start"
+          },
+          "style": {
+            "padding": {
+              "left": 16,
+              "right": 16,
+              "bottom": 24
+            }
+          },
+          "children": [
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-1",
+              "type": "appBar",
+              "props": {
+                "title": "Site Header"
+              }
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-2",
+              "type": "column",
+              "props": {
+                "gap": 8,
+                "crossAxis": "start"
+              },
+              "children": [
+                {
+                  "id": "cfg-1-apps-demo-config-index-tsx-node-2-title",
+                  "type": "text",
+                  "props": {
+                    "value": "Site Drawer Shell",
+                    "variant": "heading",
+                    "level": 4
+                  }
+                }
+              ]
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-3",
+              "type": "container",
+              "props": {},
+              "style": {
+                "padding": 16,
+                "background": "#f8fafc",
+                "borderRadius": 10
+              },
+              "child": {
+                "id": "cfg-1-apps-demo-config-index-tsx-node-3-text",
+                "type": "text",
+                "props": {
+                  "value": "Site Footer",
+                  "variant": "body"
+                }
+              }
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-4",
+              "type": "column",
+              "props": {
+                "gap": 12,
+                "crossAxis": "start"
+              },
+              "children": [
+                {
+                  "id": "cfg-1-apps-demo-config-index-tsx-node-4-text",
+                  "type": "text",
+                  "props": {
+                    "value": "Section",
+                    "variant": "heading",
+                    "level": 3
+                  }
+                }
+              ]
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-5",
+              "type": "column",
+              "props": {
+                "gap": 8,
+                "crossAxis": "start"
+              },
+              "children": [
+                {
+                  "id": "cfg-1-apps-demo-config-index-tsx-node-5-text",
+                  "type": "text",
+                  "props": {
+                    "value": "Group",
+                    "variant": "body"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-6",
+              "type": "productList",
+              "props": {
+                "layout": "grid",
+                "columns": 2,
+                "cardVariant": "vertical",
+                "gap": 12
+              },
+              "data": {
+                "source": "collection",
+                "id": "default-collection",
+                "limit": 6
+              }
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-7",
+              "type": "productCard",
+              "props": {
+                "variant": "default"
+              },
+              "data": {
+                "source": "product",
+                "id": "sample-product"
+              }
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-8",
+              "type": "categoryList",
+              "props": {
+                "layout": "chips"
+              },
+              "data": {
+                "source": "category",
+                "limit": 10
+              }
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-9",
+              "type": "cartSummary",
+              "props": {
+                "showCheckoutButton": true
+              }
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-10",
+              "type": "checkoutForm",
+              "props": {}
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-11",
+              "type": "searchBar",
+              "props": {
+                "placeholder": "Search products",
+                "route": "/search"
+              }
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-12",
+              "type": "image",
+              "props": {
+                "source": "network",
+                "url": "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&q=80",
+                "fit": "cover",
+                "aspectRatio": 1.5
+              }
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-13",
+              "type": "text",
+              "props": {
+                "value": "Product Info",
+                "variant": "body"
+              }
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-14",
+              "type": "container",
+              "props": {},
+              "style": {
+                "padding": 12,
+                "background": "#f8fafc",
+                "borderRadius": 8,
+                "border": {
+                  "width": 1,
+                  "color": "#e5e7eb"
+                }
+              },
+              "child": {
+                "id": "cfg-1-apps-demo-config-index-tsx-node-14-label",
+                "type": "text",
+                "props": {
+                  "value": "OrderHistory",
+                  "variant": "caption"
+                }
+              }
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-15",
+              "type": "container",
+              "props": {},
+              "style": {
+                "padding": 12,
+                "background": "#f8fafc",
+                "borderRadius": 8,
+                "border": {
+                  "width": 1,
+                  "color": "#e5e7eb"
+                }
+              },
+              "child": {
+                "id": "cfg-1-apps-demo-config-index-tsx-node-15-label",
+                "type": "text",
+                "props": {
+                  "value": "Wishlist",
+                  "variant": "caption"
+                }
+              }
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-16",
+              "type": "statsRow",
+              "props": {
+                "items": [
+                  {
+                    "label": "Rating",
+                    "value": "4.9"
+                  },
+                  {
+                    "label": "Reviews",
+                    "value": "1200+"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-17",
+              "type": "checkoutForm",
+              "props": {}
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-18",
+              "type": "text",
+              "props": {
+                "value": "Content Heading",
+                "variant": "heading",
+                "level": 2
+              }
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-19",
+              "type": "text",
+              "props": {
+                "value": "Content Paragraph",
+                "variant": "body"
+              }
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-20",
+              "type": "container",
+              "props": {},
+              "child": {
+                "id": "cfg-1-apps-demo-config-index-tsx-node-20-rich",
+                "type": "richtext",
+                "props": {
+                  "value": "<p>Accordion content</p>"
+                }
+              }
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-21",
+              "type": "image",
+              "props": {
+                "source": "network",
+                "url": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1200&q=80",
+                "fit": "cover",
+                "aspectRatio": 1.78
+              }
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-22",
+              "type": "button",
+              "props": {
+                "label": "Action",
+                "variant": "primary",
+                "size": "md"
+              },
+              "tap": {
+                "type": "navigate",
+                "route": "/"
+              }
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-23",
+              "type": "divider",
+              "props": {
+                "thickness": 1,
+                "color": "#e5e7eb"
+              }
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-24",
+              "type": "spacer",
+              "props": {
+                "size": 16
+              }
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-25",
+              "type": "imageGallery",
+              "props": {
+                "layout": "grid",
+                "images": [
+                  {
+                    "url": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&q=80"
+                  },
+                  {
+                    "url": "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=800&q=80"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-26",
+              "type": "videoPlayer",
+              "props": {
+                "url": "https://cdn.example.com/video.mp4",
+                "autoplay": false,
+                "controls": true
+              }
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-27",
+              "type": "icon",
+              "props": {
+                "name": "info",
+                "size": 20,
+                "color": "#0f172a"
+              }
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-28",
+              "type": "richtext",
+              "props": {
+                "value": "<p>Content HTML</p>"
+              }
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-29",
+              "type": "column",
+              "props": {
+                "gap": 8,
+                "crossAxis": "start"
+              },
+              "children": [
+                {
+                  "id": "cfg-1-apps-demo-config-index-tsx-node-29-title",
+                  "type": "text",
+                  "props": {
+                    "value": "Sidebar",
+                    "variant": "heading",
+                    "level": 4
+                  }
+                }
+              ]
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-30",
+              "type": "column",
+              "props": {
+                "gap": 8,
+                "crossAxis": "start"
+              },
+              "children": [
+                {
+                  "id": "cfg-1-apps-demo-config-index-tsx-node-30-link-1",
+                  "type": "button",
+                  "props": {
+                    "label": "Menu Link",
+                    "variant": "ghost",
+                    "size": "sm"
+                  },
+                  "tap": {
+                    "type": "navigate",
+                    "route": "/"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-31",
+              "type": "column",
+              "props": {
+                "gap": 8,
+                "crossAxis": "start"
+              },
+              "children": [
+                {
+                  "id": "cfg-1-apps-demo-config-index-tsx-node-31-title",
+                  "type": "text",
+                  "props": {
+                    "value": "Side Drawer",
+                    "variant": "heading",
+                    "level": 4
+                  }
+                }
+              ]
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-32",
+              "type": "button",
+              "props": {
+                "label": "Button",
+                "variant": "primary",
+                "size": "md"
+              },
+              "tap": {
+                "type": "navigate",
+                "route": "/"
+              }
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-33",
+              "type": "container",
+              "props": {},
+              "style": {
+                "padding": 16,
+                "borderRadius": 12,
+                "shadow": "sm"
+              },
+              "child": {
+                "id": "cfg-1-apps-demo-config-index-tsx-node-33-text",
+                "type": "text",
+                "props": {
+                  "value": "Card",
+                  "variant": "body"
+                }
+              }
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-34",
+              "type": "column",
+              "props": {
+                "gap": 8,
+                "crossAxis": "start"
+              },
+              "children": [
+                {
+                  "id": "cfg-1-apps-demo-config-index-tsx-node-34-text",
+                  "type": "text",
+                  "props": {
+                    "value": "Grid",
+                    "variant": "body"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-35",
+              "type": "hero",
+              "props": {
+                "title": "Hero Title",
+                "subtitle": "Hero subtitle",
+                "image": {
+                  "url": "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&q=80",
+                  "fit": "cover",
+                  "aspectRatio": 1.5
+                },
+                "align": "left",
+                "ctas": [
+                  {
+                    "label": "Explore",
+                    "variant": "primary",
+                    "tap": {
+                      "type": "navigate",
+                      "route": "/"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-36",
+              "type": "text",
+              "props": {
+                "value": "Heading",
+                "variant": "heading",
+                "level": 2
+              }
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-37",
+              "type": "column",
+              "props": {
+                "gap": 8,
+                "crossAxis": "start"
+              },
+              "children": [
+                {
+                  "id": "cfg-1-apps-demo-config-index-tsx-node-37-text",
+                  "type": "text",
+                  "props": {
+                    "value": "Flex",
+                    "variant": "body"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-38",
+              "type": "logosRow",
+              "props": {
+                "items": [
+                  {
+                    "url": "https://logo.clearbit.com/vogue.com",
+                    "alt": "Vogue"
+                  },
+                  {
+                    "url": "https://logo.clearbit.com/wired.com",
+                    "alt": "Wired"
+                  }
+                ],
+                "scrollable": true
+              }
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-39",
+              "type": "statsRow",
+              "props": {
+                "items": [
+                  {
+                    "label": "Users",
+                    "value": "10k+"
+                  },
+                  {
+                    "label": "Orders",
+                    "value": "1k+"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-40",
+              "type": "container",
+              "props": {},
+              "style": {
+                "padding": 12,
+                "background": "#f8fafc",
+                "borderRadius": 8,
+                "border": {
+                  "width": 1,
+                  "color": "#e5e7eb"
+                }
+              },
+              "child": {
+                "id": "cfg-1-apps-demo-config-index-tsx-node-40-label",
+                "type": "text",
+                "props": {
+                  "value": "Template",
+                  "variant": "caption"
+                }
+              }
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-41",
+              "type": "text",
+              "props": {
+                "value": "Text",
+                "variant": "body"
+              }
+            },
+            {
+              "id": "cfg-1-apps-demo-config-index-tsx-node-42",
+              "type": "richtext",
+              "props": {
+                "value": "<p>Rich text</p>"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cfg-2-apps-demo-config-server-tsx",
+      "route": "/config/2",
+      "title": "apps/demo/config/server.tsx",
+      "background": "#ffffff",
+      "scroll": "vertical",
+      "appBar": {
+        "id": "cfg-2-apps-demo-config-server-tsx-appbar",
+        "type": "appBar",
+        "props": {
+          "title": "apps/demo/config/server.tsx"
+        }
+      },
+      "body": [
+        {
+          "id": "cfg-2-apps-demo-config-server-tsx-heading",
+          "type": "text",
+          "props": {
+            "value": "Config: apps/demo/config/server.tsx",
+            "variant": "heading",
+            "level": 2,
+            "align": "left"
+          },
+          "style": {
+            "padding": {
+              "top": 16,
+              "left": 16,
+              "right": 16,
+              "bottom": 8
+            }
+          }
+        },
+        {
+          "id": "cfg-2-apps-demo-config-server-tsx-components",
+          "type": "column",
+          "props": {
+            "gap": 12,
+            "crossAxis": "start"
+          },
+          "style": {
+            "padding": {
+              "left": 16,
+              "right": 16,
+              "bottom": 24
+            }
+          },
+          "children": [
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-1",
+              "type": "appBar",
+              "props": {
+                "title": "Site Header"
+              }
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-2",
+              "type": "column",
+              "props": {
+                "gap": 8,
+                "crossAxis": "start"
+              },
+              "children": [
+                {
+                  "id": "cfg-2-apps-demo-config-server-tsx-node-2-title",
+                  "type": "text",
+                  "props": {
+                    "value": "Site Drawer Shell",
+                    "variant": "heading",
+                    "level": 4
+                  }
+                }
+              ]
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-3",
+              "type": "container",
+              "props": {},
+              "style": {
+                "padding": 16,
+                "background": "#f8fafc",
+                "borderRadius": 10
+              },
+              "child": {
+                "id": "cfg-2-apps-demo-config-server-tsx-node-3-text",
+                "type": "text",
+                "props": {
+                  "value": "Site Footer",
+                  "variant": "body"
+                }
+              }
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-4",
+              "type": "column",
+              "props": {
+                "gap": 12,
+                "crossAxis": "start"
+              },
+              "children": [
+                {
+                  "id": "cfg-2-apps-demo-config-server-tsx-node-4-text",
+                  "type": "text",
+                  "props": {
+                    "value": "Section",
+                    "variant": "heading",
+                    "level": 3
+                  }
+                }
+              ]
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-5",
+              "type": "column",
+              "props": {
+                "gap": 8,
+                "crossAxis": "start"
+              },
+              "children": [
+                {
+                  "id": "cfg-2-apps-demo-config-server-tsx-node-5-text",
+                  "type": "text",
+                  "props": {
+                    "value": "Group",
+                    "variant": "body"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-6",
+              "type": "button",
+              "props": {
+                "label": "Button",
+                "variant": "primary",
+                "size": "md"
+              },
+              "tap": {
+                "type": "navigate",
+                "route": "/"
+              }
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-7",
+              "type": "container",
+              "props": {},
+              "style": {
+                "padding": 16,
+                "borderRadius": 12,
+                "shadow": "sm"
+              },
+              "child": {
+                "id": "cfg-2-apps-demo-config-server-tsx-node-7-text",
+                "type": "text",
+                "props": {
+                  "value": "Card",
+                  "variant": "body"
+                }
+              }
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-8",
+              "type": "column",
+              "props": {
+                "gap": 8,
+                "crossAxis": "start"
+              },
+              "children": [
+                {
+                  "id": "cfg-2-apps-demo-config-server-tsx-node-8-text",
+                  "type": "text",
+                  "props": {
+                    "value": "Grid",
+                    "variant": "body"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-9",
+              "type": "hero",
+              "props": {
+                "title": "Hero Title",
+                "subtitle": "Hero subtitle",
+                "image": {
+                  "url": "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&q=80",
+                  "fit": "cover",
+                  "aspectRatio": 1.5
+                },
+                "align": "left",
+                "ctas": [
+                  {
+                    "label": "Explore",
+                    "variant": "primary",
+                    "tap": {
+                      "type": "navigate",
+                      "route": "/"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-10",
+              "type": "text",
+              "props": {
+                "value": "Heading",
+                "variant": "heading",
+                "level": 2
+              }
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-11",
+              "type": "column",
+              "props": {
+                "gap": 8,
+                "crossAxis": "start"
+              },
+              "children": [
+                {
+                  "id": "cfg-2-apps-demo-config-server-tsx-node-11-text",
+                  "type": "text",
+                  "props": {
+                    "value": "Flex",
+                    "variant": "body"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-12",
+              "type": "logosRow",
+              "props": {
+                "items": [
+                  {
+                    "url": "https://logo.clearbit.com/vogue.com",
+                    "alt": "Vogue"
+                  },
+                  {
+                    "url": "https://logo.clearbit.com/wired.com",
+                    "alt": "Wired"
+                  }
+                ],
+                "scrollable": true
+              }
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-13",
+              "type": "statsRow",
+              "props": {
+                "items": [
+                  {
+                    "label": "Users",
+                    "value": "10k+"
+                  },
+                  {
+                    "label": "Orders",
+                    "value": "1k+"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-14",
+              "type": "container",
+              "props": {},
+              "style": {
+                "padding": 12,
+                "background": "#f8fafc",
+                "borderRadius": 8,
+                "border": {
+                  "width": 1,
+                  "color": "#e5e7eb"
+                }
+              },
+              "child": {
+                "id": "cfg-2-apps-demo-config-server-tsx-node-14-label",
+                "type": "text",
+                "props": {
+                  "value": "Template",
+                  "variant": "caption"
+                }
+              }
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-15",
+              "type": "text",
+              "props": {
+                "value": "Text",
+                "variant": "body"
+              }
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-16",
+              "type": "spacer",
+              "props": {
+                "size": 16
+              }
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-17",
+              "type": "richtext",
+              "props": {
+                "value": "<p>Rich text</p>"
+              }
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-18",
+              "type": "productCard",
+              "props": {
+                "variant": "default"
+              },
+              "data": {
+                "source": "product",
+                "id": "sample-product"
+              }
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-19",
+              "type": "productList",
+              "props": {
+                "layout": "grid",
+                "columns": 2,
+                "cardVariant": "vertical",
+                "gap": 12
+              },
+              "data": {
+                "source": "collection",
+                "id": "default-collection",
+                "limit": 6
+              }
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-20",
+              "type": "cartSummary",
+              "props": {
+                "showCheckoutButton": true
+              }
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-21",
+              "type": "checkoutForm",
+              "props": {}
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-22",
+              "type": "searchBar",
+              "props": {
+                "placeholder": "Search products",
+                "route": "/search"
+              }
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-23",
+              "type": "categoryList",
+              "props": {
+                "layout": "chips"
+              },
+              "data": {
+                "source": "category",
+                "limit": 10
+              }
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-24",
+              "type": "image",
+              "props": {
+                "source": "network",
+                "url": "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&q=80",
+                "fit": "cover",
+                "aspectRatio": 1.5
+              }
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-25",
+              "type": "text",
+              "props": {
+                "value": "Product Info",
+                "variant": "body"
+              }
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-26",
+              "type": "text",
+              "props": {
+                "value": "Content Heading",
+                "variant": "heading",
+                "level": 2
+              }
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-27",
+              "type": "text",
+              "props": {
+                "value": "Content Paragraph",
+                "variant": "body"
+              }
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-28",
+              "type": "container",
+              "props": {},
+              "child": {
+                "id": "cfg-2-apps-demo-config-server-tsx-node-28-rich",
+                "type": "richtext",
+                "props": {
+                  "value": "<p>Accordion content</p>"
+                }
+              }
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-29",
+              "type": "image",
+              "props": {
+                "source": "network",
+                "url": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1200&q=80",
+                "fit": "cover",
+                "aspectRatio": 1.78
+              }
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-30",
+              "type": "button",
+              "props": {
+                "label": "Action",
+                "variant": "primary",
+                "size": "md"
+              },
+              "tap": {
+                "type": "navigate",
+                "route": "/"
+              }
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-31",
+              "type": "divider",
+              "props": {
+                "thickness": 1,
+                "color": "#e5e7eb"
+              }
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-32",
+              "type": "imageGallery",
+              "props": {
+                "layout": "grid",
+                "images": [
+                  {
+                    "url": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&q=80"
+                  },
+                  {
+                    "url": "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=800&q=80"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-33",
+              "type": "videoPlayer",
+              "props": {
+                "url": "https://cdn.example.com/video.mp4",
+                "autoplay": false,
+                "controls": true
+              }
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-34",
+              "type": "icon",
+              "props": {
+                "name": "info",
+                "size": 20,
+                "color": "#0f172a"
+              }
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-35",
+              "type": "richtext",
+              "props": {
+                "value": "<p>Content HTML</p>"
+              }
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-36",
+              "type": "container",
+              "props": {},
+              "style": {
+                "padding": 12,
+                "background": "#f8fafc",
+                "borderRadius": 8,
+                "border": {
+                  "width": 1,
+                  "color": "#e5e7eb"
+                }
+              },
+              "child": {
+                "id": "cfg-2-apps-demo-config-server-tsx-node-36-label",
+                "type": "text",
+                "props": {
+                  "value": "OrderHistory",
+                  "variant": "caption"
+                }
+              }
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-37",
+              "type": "container",
+              "props": {},
+              "style": {
+                "padding": 12,
+                "background": "#f8fafc",
+                "borderRadius": 8,
+                "border": {
+                  "width": 1,
+                  "color": "#e5e7eb"
+                }
+              },
+              "child": {
+                "id": "cfg-2-apps-demo-config-server-tsx-node-37-label",
+                "type": "text",
+                "props": {
+                  "value": "Wishlist",
+                  "variant": "caption"
+                }
+              }
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-38",
+              "type": "statsRow",
+              "props": {
+                "items": [
+                  {
+                    "label": "Rating",
+                    "value": "4.9"
+                  },
+                  {
+                    "label": "Reviews",
+                    "value": "1200+"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-39",
+              "type": "checkoutForm",
+              "props": {}
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-40",
+              "type": "column",
+              "props": {
+                "gap": 8,
+                "crossAxis": "start"
+              },
+              "children": [
+                {
+                  "id": "cfg-2-apps-demo-config-server-tsx-node-40-title",
+                  "type": "text",
+                  "props": {
+                    "value": "Sidebar",
+                    "variant": "heading",
+                    "level": 4
+                  }
+                }
+              ]
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-41",
+              "type": "column",
+              "props": {
+                "gap": 8,
+                "crossAxis": "start"
+              },
+              "children": [
+                {
+                  "id": "cfg-2-apps-demo-config-server-tsx-node-41-link-1",
+                  "type": "button",
+                  "props": {
+                    "label": "Menu Link",
+                    "variant": "ghost",
+                    "size": "sm"
+                  },
+                  "tap": {
+                    "type": "navigate",
+                    "route": "/"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "cfg-2-apps-demo-config-server-tsx-node-42",
+              "type": "column",
+              "props": {
+                "gap": 8,
+                "crossAxis": "start"
+              },
+              "children": [
+                {
+                  "id": "cfg-2-apps-demo-config-server-tsx-node-42-title",
+                  "type": "text",
+                  "props": {
+                    "value": "Side Drawer",
+                    "variant": "heading",
+                    "level": 4
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cfg-3-recipes-next-ai-puck-config-tsx",
+      "route": "/config/3",
+      "title": "recipes/next-ai/puck.config.tsx",
+      "background": "#ffffff",
+      "scroll": "vertical",
+      "appBar": {
+        "id": "cfg-3-recipes-next-ai-puck-config-tsx-appbar",
+        "type": "appBar",
+        "props": {
+          "title": "recipes/next-ai/puck.config.tsx"
+        }
+      },
+      "body": [
+        {
+          "id": "cfg-3-recipes-next-ai-puck-config-tsx-heading",
+          "type": "text",
+          "props": {
+            "value": "Config: recipes/next-ai/puck.config.tsx",
+            "variant": "heading",
+            "level": 2,
+            "align": "left"
+          },
+          "style": {
+            "padding": {
+              "top": 16,
+              "left": 16,
+              "right": 16,
+              "bottom": 8
+            }
+          }
+        },
+        {
+          "id": "cfg-3-recipes-next-ai-puck-config-tsx-components",
+          "type": "column",
+          "props": {
+            "gap": 12,
+            "crossAxis": "start"
+          },
+          "style": {
+            "padding": {
+              "left": 16,
+              "right": 16,
+              "bottom": 24
+            }
+          },
+          "children": [
+            {
+              "id": "cfg-3-recipes-next-ai-puck-config-tsx-node-1",
+              "type": "text",
+              "props": {
+                "value": "Heading Block",
+                "variant": "heading",
+                "level": 2
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cfg-4-recipes-next-puck-config-tsx",
+      "route": "/config/4",
+      "title": "recipes/next/puck.config.tsx",
+      "background": "#ffffff",
+      "scroll": "vertical",
+      "appBar": {
+        "id": "cfg-4-recipes-next-puck-config-tsx-appbar",
+        "type": "appBar",
+        "props": {
+          "title": "recipes/next/puck.config.tsx"
+        }
+      },
+      "body": [
+        {
+          "id": "cfg-4-recipes-next-puck-config-tsx-heading",
+          "type": "text",
+          "props": {
+            "value": "Config: recipes/next/puck.config.tsx",
+            "variant": "heading",
+            "level": 2,
+            "align": "left"
+          },
+          "style": {
+            "padding": {
+              "top": 16,
+              "left": 16,
+              "right": 16,
+              "bottom": 8
+            }
+          }
+        },
+        {
+          "id": "cfg-4-recipes-next-puck-config-tsx-components",
+          "type": "column",
+          "props": {
+            "gap": 12,
+            "crossAxis": "start"
+          },
+          "style": {
+            "padding": {
+              "left": 16,
+              "right": 16,
+              "bottom": 24
+            }
+          },
+          "children": [
+            {
+              "id": "cfg-4-recipes-next-puck-config-tsx-node-1",
+              "type": "text",
+              "props": {
+                "value": "Heading Block",
+                "variant": "heading",
+                "level": 2
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cfg-5-recipes-react-router-ai-puck-config-tsx",
+      "route": "/config/5",
+      "title": "recipes/react-router-ai/puck.config.tsx",
+      "background": "#ffffff",
+      "scroll": "vertical",
+      "appBar": {
+        "id": "cfg-5-recipes-react-router-ai-puck-config-tsx-appbar",
+        "type": "appBar",
+        "props": {
+          "title": "recipes/react-router-ai/puck.config.tsx"
+        }
+      },
+      "body": [
+        {
+          "id": "cfg-5-recipes-react-router-ai-puck-config-tsx-heading",
+          "type": "text",
+          "props": {
+            "value": "Config: recipes/react-router-ai/puck.config.tsx",
+            "variant": "heading",
+            "level": 2,
+            "align": "left"
+          },
+          "style": {
+            "padding": {
+              "top": 16,
+              "left": 16,
+              "right": 16,
+              "bottom": 8
+            }
+          }
+        },
+        {
+          "id": "cfg-5-recipes-react-router-ai-puck-config-tsx-components",
+          "type": "column",
+          "props": {
+            "gap": 12,
+            "crossAxis": "start"
+          },
+          "style": {
+            "padding": {
+              "left": 16,
+              "right": 16,
+              "bottom": 24
+            }
+          },
+          "children": [
+            {
+              "id": "cfg-5-recipes-react-router-ai-puck-config-tsx-node-1",
+              "type": "text",
+              "props": {
+                "value": "Heading Block",
+                "variant": "heading",
+                "level": 2
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cfg-6-recipes-react-router-puck-config-tsx",
+      "route": "/config/6",
+      "title": "recipes/react-router/puck.config.tsx",
+      "background": "#ffffff",
+      "scroll": "vertical",
+      "appBar": {
+        "id": "cfg-6-recipes-react-router-puck-config-tsx-appbar",
+        "type": "appBar",
+        "props": {
+          "title": "recipes/react-router/puck.config.tsx"
+        }
+      },
+      "body": [
+        {
+          "id": "cfg-6-recipes-react-router-puck-config-tsx-heading",
+          "type": "text",
+          "props": {
+            "value": "Config: recipes/react-router/puck.config.tsx",
+            "variant": "heading",
+            "level": 2,
+            "align": "left"
+          },
+          "style": {
+            "padding": {
+              "top": 16,
+              "left": 16,
+              "right": 16,
+              "bottom": 8
+            }
+          }
+        },
+        {
+          "id": "cfg-6-recipes-react-router-puck-config-tsx-components",
+          "type": "column",
+          "props": {
+            "gap": 12,
+            "crossAxis": "start"
+          },
+          "style": {
+            "padding": {
+              "left": 16,
+              "right": 16,
+              "bottom": 24
+            }
+          },
+          "children": [
+            {
+              "id": "cfg-6-recipes-react-router-puck-config-tsx-node-1",
+              "type": "text",
+              "props": {
+                "value": "Heading Block",
+                "variant": "heading",
+                "level": 2
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cfg-7-recipes-remix-ai-app-puck-config-tsx",
+      "route": "/config/7",
+      "title": "recipes/remix-ai/app/puck.config.tsx",
+      "background": "#ffffff",
+      "scroll": "vertical",
+      "appBar": {
+        "id": "cfg-7-recipes-remix-ai-app-puck-config-tsx-appbar",
+        "type": "appBar",
+        "props": {
+          "title": "recipes/remix-ai/app/puck.config.tsx"
+        }
+      },
+      "body": [
+        {
+          "id": "cfg-7-recipes-remix-ai-app-puck-config-tsx-heading",
+          "type": "text",
+          "props": {
+            "value": "Config: recipes/remix-ai/app/puck.config.tsx",
+            "variant": "heading",
+            "level": 2,
+            "align": "left"
+          },
+          "style": {
+            "padding": {
+              "top": 16,
+              "left": 16,
+              "right": 16,
+              "bottom": 8
+            }
+          }
+        },
+        {
+          "id": "cfg-7-recipes-remix-ai-app-puck-config-tsx-components",
+          "type": "column",
+          "props": {
+            "gap": 12,
+            "crossAxis": "start"
+          },
+          "style": {
+            "padding": {
+              "left": 16,
+              "right": 16,
+              "bottom": 24
+            }
+          },
+          "children": [
+            {
+              "id": "cfg-7-recipes-remix-ai-app-puck-config-tsx-node-1",
+              "type": "text",
+              "props": {
+                "value": "Heading Block",
+                "variant": "heading",
+                "level": 2
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cfg-8-recipes-remix-app-puck-config-tsx",
+      "route": "/config/8",
+      "title": "recipes/remix/app/puck.config.tsx",
+      "background": "#ffffff",
+      "scroll": "vertical",
+      "appBar": {
+        "id": "cfg-8-recipes-remix-app-puck-config-tsx-appbar",
+        "type": "appBar",
+        "props": {
+          "title": "recipes/remix/app/puck.config.tsx"
+        }
+      },
+      "body": [
+        {
+          "id": "cfg-8-recipes-remix-app-puck-config-tsx-heading",
+          "type": "text",
+          "props": {
+            "value": "Config: recipes/remix/app/puck.config.tsx",
+            "variant": "heading",
+            "level": 2,
+            "align": "left"
+          },
+          "style": {
+            "padding": {
+              "top": 16,
+              "left": 16,
+              "right": 16,
+              "bottom": 8
+            }
+          }
+        },
+        {
+          "id": "cfg-8-recipes-remix-app-puck-config-tsx-components",
+          "type": "column",
+          "props": {
+            "gap": 12,
+            "crossAxis": "start"
+          },
+          "style": {
+            "padding": {
+              "left": 16,
+              "right": 16,
+              "bottom": 24
+            }
+          },
+          "children": [
+            {
+              "id": "cfg-8-recipes-remix-app-puck-config-tsx-node-1",
+              "type": "text",
+              "props": {
+                "value": "Heading Block",
+                "variant": "heading",
+                "level": 2
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
