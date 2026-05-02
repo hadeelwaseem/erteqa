@@ -16,9 +16,12 @@ import '../tree/renderers/divider_renderer.dart';
 import '../tree/renderers/icon_renderer.dart';
 import '../tree/renderers/row_renderer.dart';
 import '../tree/renderers/scaffold_renderer.dart';
+import '../tree/renderers/single_child_scroll_view_renderer.dart';
 import '../tree/renderers/text_renderer.dart';
 import '../tree/renderers/spacer_renderer.dart';
 import '../tree/renderers/image_renderer.dart';
+import '../tree/renderers/list_view_renderer.dart';
+import '../tree/renderers/grid_view_renderer.dart';
 import '../tree/renderers/rich_text_renderer.dart';
 import '../tree/renderers/unsupported_component_renderer.dart';
 
@@ -60,9 +63,13 @@ class ScreenRenderer {
   _createDefaultRenderers() {
     return {
       GenericComponentType.scaffold: ScaffoldRenderer(),
+      GenericComponentType.singleChildScrollView:
+          SingleChildScrollViewRenderer(),
       GenericComponentType.column: ColumnRenderer(),
       GenericComponentType.row: RowRenderer(),
       GenericComponentType.container: ContainerRenderer(),
+      GenericComponentType.listView: ListViewRenderer(),
+      GenericComponentType.gridView: GridViewRenderer(),
       GenericComponentType.text: TextRenderer(),
       GenericComponentType.button: ButtonRenderer(),
       GenericComponentType.card: CardRenderer(),
@@ -114,6 +121,10 @@ class ScreenRenderer {
       );
     }
     final onTap = _resolveTapAction(config, context, variantId);
+    final mergedContext = _mergeContext(
+      dataContext,
+      config.dataContextOverride,
+    );
     final renderConfig = onTap == null
         ? config
         : ComponentConfig(
@@ -121,17 +132,24 @@ class ScreenRenderer {
             properties: {...config.properties, 'onTap': onTap},
             child: config.child,
             children: config.children,
+            itemBuilder: config.itemBuilder,
+            axis: config.axis,
+            scrollDirection: config.scrollDirection,
+            crossAxisCount: config.crossAxisCount,
+            mainAxisSpacing: config.mainAxisSpacing,
+            crossAxisSpacing: config.crossAxisSpacing,
+            dataContextOverride: config.dataContextOverride,
           );
     final widget = renderer.render(
       renderConfig,
       buildChild: (c) => _buildComponent(
         c,
-        dataContext: _withPath(dataContext, path),
+        dataContext: _withPath(mergedContext, path),
         context: context,
         variantId: variantId,
         path: _childPath(path, config, c),
       ),
-      dataContext: _withPath(dataContext, path),
+      dataContext: _withPath(mergedContext, path),
     );
     if (onTap == null || config.type == GenericComponentType.button) {
       return widget;
@@ -174,6 +192,20 @@ class ScreenRenderer {
         ? <String, dynamic>{}
         : Map<String, dynamic>.from(dataContext);
     next[_pathKey] = path;
+    return next;
+  }
+
+  Map<String, dynamic> _mergeContext(
+    Map<String, dynamic>? base,
+    Map<String, dynamic>? override,
+  ) {
+    if (override == null || override.isEmpty) {
+      return base ?? <String, dynamic>{};
+    }
+    final next = base == null
+        ? <String, dynamic>{}
+        : Map<String, dynamic>.from(base);
+    next.addAll(override);
     return next;
   }
 

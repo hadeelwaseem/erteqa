@@ -1,9 +1,12 @@
 /// Primitive component types for the tree-based UI engine (MVP V2).
 enum GenericComponentType {
   scaffold,
+  singleChildScrollView,
   column,
   row,
   container,
+  listView,
+  gridView,
   text,
   button,
   card,

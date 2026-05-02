@@ -52,6 +52,14 @@ class ComponentSchemas {
     propertyTypes: {'backgroundColor': 'string (hex)'},
   );
 
+  /// Schema: SingleChildScrollView - scrollable wrapper with a single child.
+  static const singleChildScrollView = ComponentSchema(
+    type: 'singleChildScrollView',
+    requiredProperties: {},
+    optionalProperties: {'axis', 'child'},
+    propertyTypes: {'axis': 'string (vertical|horizontal)'},
+  );
+
   /// Schema: Column - vertical layout with multiple children.
   static const column = ComponentSchema(
     type: 'column',
@@ -90,6 +98,44 @@ class ComponentSchemas {
     },
   );
 
+  /// Schema: ListView - dynamic list with builder definition.
+  static const listView = ComponentSchema(
+    type: 'listView',
+    requiredProperties: {},
+    optionalProperties: {
+      'scrollDirection',
+      'itemBuilder',
+      'items',
+      'enableInnerScroll',
+    },
+    propertyTypes: {
+      'scrollDirection': 'string (vertical|horizontal)',
+      'itemBuilder': 'object (type=repeat, source=string|array, item=object)',
+    },
+  );
+
+  /// Schema: GridView - static or dynamic grid with spacing and builder support.
+  static const gridView = ComponentSchema(
+    type: 'gridView',
+    requiredProperties: {},
+    optionalProperties: {
+      'crossAxisCount',
+      'mainAxisSpacing',
+      'crossAxisSpacing',
+      'scrollDirection',
+      'itemBuilder',
+      'children',
+      'enableInnerScroll',
+    },
+    propertyTypes: {
+      'crossAxisCount': 'number (integer)',
+      'mainAxisSpacing': 'number',
+      'crossAxisSpacing': 'number',
+      'scrollDirection': 'string (vertical|horizontal)',
+      'itemBuilder': 'object (type=repeat, source=string|array, item=object)',
+    },
+  );
+
   /// Schema: Text - leaf widget displaying static or dynamic text.
   static const text = ComponentSchema(
     type: 'text',
@@ -121,6 +167,7 @@ class ComponentSchemas {
     optionalProperties: {
       'label',
       'backgroundColor',
+      'textColor',
       'borderRadius',
       'padding',
       'alignment',
@@ -129,6 +176,7 @@ class ComponentSchemas {
     propertyTypes: {
       'label': 'string',
       'backgroundColor': 'string (hex)',
+      'textColor': 'string (hex)',
       'borderRadius': 'number',
       'padding': 'number | object',
     },
@@ -223,10 +271,16 @@ class ComponentSchemas {
         return container;
       case 'scaffold':
         return scaffold;
+      case 'singleChildScrollView':
+        return singleChildScrollView;
       case 'column':
         return column;
       case 'row':
         return row;
+      case 'listView':
+        return listView;
+      case 'gridView':
+        return gridView;
       case 'text':
         return text;
       case 'button':
@@ -257,8 +311,11 @@ class ComponentSchemas {
     return {
       'container': container,
       'scaffold': scaffold,
+      'singleChildScrollView': singleChildScrollView,
       'column': column,
       'row': row,
+      'listView': listView,
+      'gridView': gridView,
       'text': text,
       'button': button,
       'card': card,

@@ -230,6 +230,83 @@ test('IconButtonRenderer renders button with icon', () {
 
 ---
 
+## Layout Components (Incremental)
+
+The engine now supports `singleChildScrollView`, `listView`, and `gridView` as
+declarative layout primitives. These are incremental additions that do not
+change existing renderers or the Scaffold renderer behavior.
+
+### singleChildScrollView
+
+```json
+{
+  "type": "singleChildScrollView",
+  "axis": "vertical",
+  "child": {
+    "type": "column",
+    "children": []
+  }
+}
+```
+
+### listView (builder only)
+
+```json
+{
+  "type": "listView",
+  "scrollDirection": "vertical",
+  "enableInnerScroll": false,
+  "itemBuilder": {
+    "type": "repeat",
+    "source": "props.items",
+    "item": { "type": "text", "value": "Item" }
+  }
+}
+```
+
+### gridView (builder or static)
+
+```json
+{
+  "type": "gridView",
+  "crossAxisCount": 3,
+  "mainAxisSpacing": 24,
+  "crossAxisSpacing": 24,
+  "enableInnerScroll": false,
+  "itemBuilder": {
+    "type": "repeat",
+    "source": "dataContext.products",
+    "item": { "type": "card", "child": { "type": "text", "value": "Item" } }
+  }
+}
+```
+
+### Data Resolution (listView/gridView only)
+
+For `listView` and `gridView`, item data is resolved in this order:
+
+1. `dataContext.*`
+2. `props.*`
+3. Static arrays (`items` or `itemBuilder.source` as a list)
+4. Empty fallback
+
+Empty collections render a simple fallback message: "No items available".
+
+### Inner Scrolling
+
+By default, list and grid components are non-scrollable so the parent scroll
+container owns scrolling. Set `enableInnerScroll` to true if the component
+should scroll independently.
+
+### Scroll Ownership (Incremental)
+
+`ScaffoldRenderer` currently wraps page content in a `SingleChildScrollView`.
+Because of this, full scroll ownership enforcement is not enabled yet. The
+engine only performs localized checks in the new scroll renderers and does not
+block nested scrolling globally.
+
+---
+
 ## Creating Custom Renderers
 
 ### Basic Renderer Template

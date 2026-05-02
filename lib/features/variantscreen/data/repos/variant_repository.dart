@@ -224,11 +224,22 @@ class AssetVariantRepository implements VariantRepository {
       }).toList();
     }
 
+    final itemBuilder = _parseItemBuilder(
+      json['itemBuilder'],
+      path: '$path.itemBuilder',
+    );
+
     return ComponentConfig(
       type: type,
       properties: properties,
       child: child,
       children: children,
+      itemBuilder: itemBuilder,
+      axis: properties['axis'] as String?,
+      scrollDirection: properties['scrollDirection'] as String?,
+      crossAxisCount: _parseInt(properties['crossAxisCount']),
+      mainAxisSpacing: _parseDouble(properties['mainAxisSpacing']),
+      crossAxisSpacing: _parseDouble(properties['crossAxisSpacing']),
     );
   }
 
@@ -351,12 +362,67 @@ class AssetVariantRepository implements VariantRepository {
           .toList();
     }
 
+    final itemBuilder = _parseItemBuilder(
+      json['itemBuilder'],
+      path: '$path.itemBuilder',
+    );
+
     return ComponentConfig(
       type: type,
       properties: properties,
       child: child,
       children: children,
+      itemBuilder: itemBuilder,
+      axis: properties['axis'] as String?,
+      scrollDirection: properties['scrollDirection'] as String?,
+      crossAxisCount: _parseInt(properties['crossAxisCount']),
+      mainAxisSpacing: _parseDouble(properties['mainAxisSpacing']),
+      crossAxisSpacing: _parseDouble(properties['crossAxisSpacing']),
     );
+  }
+
+  ItemBuilderConfig? _parseItemBuilder(dynamic raw, {required String path}) {
+    if (raw == null) return null;
+    if (raw is! Map<String, dynamic>) {
+      throw ArgumentError('itemBuilder must be an Object at $path');
+    }
+    final type = raw['type'] as String?;
+    if (type != null && type != 'repeat') {
+      throw ArgumentError('Unsupported itemBuilder type "$type" at $path');
+    }
+
+    final source = raw['source'];
+    final staticItems = source is List ? source : null;
+    final sourcePath = source is String ? source : null;
+
+    ComponentConfig? item;
+    final itemJson =
+        raw['item'] ?? raw['child'] ?? raw['component'] ?? raw['template'];
+    if (itemJson != null) {
+      if (itemJson is! Map<String, dynamic>) {
+        throw ArgumentError('itemBuilder.item must be an Object at $path');
+      }
+      item = _parseComponentConfig(itemJson, path: '$path.item');
+    }
+
+    return ItemBuilderConfig(
+      source: sourcePath,
+      staticItems: staticItems,
+      item: item,
+    );
+  }
+
+  int? _parseInt(dynamic v) {
+    if (v is int) return v;
+    if (v is num) return v.toInt();
+    if (v is String) return int.tryParse(v);
+    return null;
+  }
+
+  double? _parseDouble(dynamic v) {
+    if (v is num) return v.toDouble();
+    if (v is String) return double.tryParse(v);
+    return null;
   }
 
   GenericComponentType _componentTypeFromString(

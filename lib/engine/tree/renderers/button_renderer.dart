@@ -15,6 +15,9 @@ class ButtonRenderer implements ComponentRenderer {
     final backgroundColor = PropertyParsers.parseColor(
       config.properties['backgroundColor'] as String?,
     );
+    final textColor = PropertyParsers.parseColor(
+      config.properties['textColor'] as String?,
+    );
     final borderRadius = PropertyParsers.parseBorderRadius(
       config.properties['borderRadius'],
     );
@@ -36,7 +39,10 @@ class ButtonRenderer implements ComponentRenderer {
           borderRadius: borderRadius ?? BorderRadius.circular(8),
         ),
       ),
-      child: Text(label),
+      child: Text(
+        label,
+        style: textColor != null ? TextStyle(color: textColor) : null,
+      ),
     );
 
     if (alignment != null) {
