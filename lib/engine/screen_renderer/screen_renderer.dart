@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
@@ -107,11 +108,10 @@ class ScreenRenderer {
     final renderer = _renderers[config.type];
     if (renderer == null) {
       final id = config.properties['id'] as String? ?? '?';
-      AppLogger.debug(
-        '[ScreenRenderer] ⚠️ No renderer found for type: ${config.type} '
-        '(id="$id"). Did you forget to register it?',
+      throw StateError(
+        'No renderer found for type: ${config.type.name} '
+        '(id="$id") at $path',
       );
-      return const SizedBox.shrink();
     }
     final onTap = _resolveTapAction(config, context, variantId);
     final renderConfig = onTap == null
@@ -167,6 +167,9 @@ class ScreenRenderer {
     Map<String, dynamic>? dataContext,
     String path,
   ) {
+    if (!kDebugMode) {
+      return dataContext ?? <String, dynamic>{};
+    }
     final next = dataContext == null
         ? <String, dynamic>{}
         : Map<String, dynamic>.from(dataContext);

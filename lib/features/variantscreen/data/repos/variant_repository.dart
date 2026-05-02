@@ -116,12 +116,13 @@ class AssetVariantRepository implements VariantRepository {
       (page) => page['route'] == routeToLoad || page['id'] == routeToLoad,
       orElse: () => pages.first,
     );
+    final selectedPageIndex = pages.indexOf(selectedPage);
 
     final body = <ComponentConfig>[];
     final rawBody = selectedPage['body'] as List?;
     if (selectedPage.containsKey('body') && rawBody == null) {
       throw ArgumentError(
-        'children must be a List at pages[${pages.indexOf(selectedPage)}].body',
+        'children must be a List at pages[$selectedPageIndex].body',
       );
     }
     if (rawBody != null) {
@@ -129,17 +130,17 @@ class AssetVariantRepository implements VariantRepository {
         final entry = rawBody[i];
         if (entry is! Map<String, dynamic>) {
           throw ArgumentError(
-            'children must contain objects at pages[${pages.indexOf(selectedPage)}].body[$i]',
+            'children must contain objects at pages[$selectedPageIndex].body[$i]',
           );
         }
         _validateComponentJson(
           entry,
-          path: 'pages[${pages.indexOf(selectedPage)}].body[$i]',
+          path: 'pages[$selectedPageIndex].body[$i]',
         );
         body.add(
           _parseBuilderComponentConfig(
             entry,
-            path: 'pages[${pages.indexOf(selectedPage)}].body[$i]',
+            path: 'pages[$selectedPageIndex].body[$i]',
           ),
         );
       }
@@ -147,7 +148,7 @@ class AssetVariantRepository implements VariantRepository {
     if (selectedPage.containsKey('appBar') &&
         selectedPage['appBar'] is! Map<String, dynamic>) {
       throw ArgumentError(
-        'child must be an Object at pages[${pages.indexOf(selectedPage)}].appBar',
+        'child must be an Object at pages[$selectedPageIndex].appBar',
       );
     }
     final appBar = selectedPage['appBar'] is Map<String, dynamic>
@@ -155,11 +156,11 @@ class AssetVariantRepository implements VariantRepository {
             final appBarJson = selectedPage['appBar'] as Map<String, dynamic>;
             _validateComponentJson(
               appBarJson,
-              path: 'pages[${pages.indexOf(selectedPage)}].appBar',
+              path: 'pages[$selectedPageIndex].appBar',
             );
             return _parseBuilderComponentConfig(
               appBarJson,
-              path: 'pages[${pages.indexOf(selectedPage)}].appBar',
+              path: 'pages[$selectedPageIndex].appBar',
             );
           }()
         : null;
