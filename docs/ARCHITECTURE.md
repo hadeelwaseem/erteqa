@@ -31,7 +31,8 @@ Parse Layer (AssetVariantRepository)
   ├─ Load JSON from assets
   ├─ Parse simple or builder JSON
   ├─ Normalize props/style into ComponentConfig
-  ├─ Validate against ComponentSchemas
+  ├─ Validate structure + types against GenericComponentType.values
+  ├─ Validate against ComponentSchemas (property-level)
   └─ Emit warnings on invalid properties
     
     ↓
@@ -105,6 +106,7 @@ Output Layer (Flutter Widgets)
 - ✅ Clear mapping between JSON type strings and renderers
 - ✅ Easier validation with known component set
 - ✅ Simple default wiring for production
+- ✅ Single authoritative component taxonomy via `GenericComponentType`
 
 **Example**:
 ```dart
@@ -120,13 +122,14 @@ final renderer = ScreenRenderer.withPrimitives();
 
 ### Decision 3: Lenient Validation by Default
 
-**What**: Schema violations warn but don't fail parsing
+**What**: Schema violations warn but don't fail parsing; structural/type validation is strict
 
 **Why**:
 - ✅ Better developer experience during iteration
 - ✅ Graceful degradation if config has typos
 - ✅ Can be switched to strict mode later
 - ✅ Allows phased rollout of new properties
+ - ✅ Structural/type errors fail fast with explicit path errors
 
 **Example**:
 ```dart

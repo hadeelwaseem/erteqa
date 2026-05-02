@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/enums/generic_component_type.dart';
 import '../../config/component_config.dart';
 import '../../config/screen_config.dart';
+import '../../core/utils/app_logger.dart';
 import '../tree/renderers/button_renderer.dart';
 import '../tree/renderers/card_renderer.dart';
 import '../tree/renderers/column_renderer.dart';
@@ -26,6 +27,7 @@ import '../tree/renderers/unsupported_component_renderer.dart';
 /// allowing custom renderers to be injected without modifying this class.
 class ScreenRenderer {
   final Map<GenericComponentType, ComponentRenderer> _renderers;
+  static const _pathKey = '_enginePath';
 
   /// Creates a [ScreenRenderer] with a custom renderer registry.
   ///
@@ -84,6 +86,7 @@ class ScreenRenderer {
       dataContext: dataContext,
       context: context,
       variantId: config.pageId,
+      path: 'root',
     );
   }
 
@@ -96,11 +99,15 @@ class ScreenRenderer {
     Map<String, dynamic>? dataContext,
     BuildContext? context,
     required String variantId,
+    required String path,
   }) {
+    AppLogger.debug(
+      '[ScreenRenderer] render node type=${config.type.name} path=$path',
+    );
     final renderer = _renderers[config.type];
     if (renderer == null) {
       final id = config.properties['id'] as String? ?? '?';
-      debugPrint(
+      AppLogger.debug(
         '[ScreenRenderer] ⚠️ No renderer found for type: ${config.type} '
         '(id="$id"). Did you forget to register it?',
       );
@@ -119,11 +126,12 @@ class ScreenRenderer {
       renderConfig,
       buildChild: (c) => _buildComponent(
         c,
-        dataContext: dataContext,
+        dataContext: _withPath(dataContext, path),
         context: context,
         variantId: variantId,
+        path: _childPath(path, config, c),
       ),
-      dataContext: dataContext,
+      dataContext: _withPath(dataContext, path),
     );
     if (onTap == null || config.type == GenericComponentType.button) {
       return widget;
@@ -150,8 +158,35 @@ class ScreenRenderer {
     // Navigate directly to the route — routes are first-class paths in the
     // ShellRoute setup (/products, /checkout, /product/1, etc.)
     return () {
-      debugPrint('[Engine] ➡️ Navigate to: $route');
+      AppLogger.debug('[Engine] navigate to: $route');
       context.go(route);
     };
+  }
+
+  Map<String, dynamic> _withPath(
+    Map<String, dynamic>? dataContext,
+    String path,
+  ) {
+    final next = dataContext == null
+        ? <String, dynamic>{}
+        : Map<String, dynamic>.from(dataContext);
+    next[_pathKey] = path;
+    return next;
+  }
+
+  String _childPath(
+    String parentPath,
+    ComponentConfig parent,
+    ComponentConfig child,
+  ) {
+    if (parent.child == child) {
+      return '$parentPath.child';
+    }
+    final children = parent.children;
+    if (children == null) return '$parentPath.child';
+    final index = children.indexOf(child);
+    return index == -1
+        ? '$parentPath.children[?]'
+        : '$parentPath.children[$index]';
   }
 }

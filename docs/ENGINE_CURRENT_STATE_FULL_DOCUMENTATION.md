@@ -39,6 +39,7 @@ Primary runtime flow today:
 - `lib/features/variantscreen/data/repos/variant_repository.dart`
   - `AssetVariantRepository` loads JSON from `assets/config/{variantId}.json`.
   - Parses JSON into `ScreenConfig` and recursive `ComponentConfig` nodes.
+  - Validates structure + types against `GenericComponentType.values` (strict).
   - Validates properties with schema catalog (lenient mode).
 
 - `lib/config/screen_config.dart`
@@ -48,7 +49,7 @@ Primary runtime flow today:
   - Tree node contract: `type`, `properties`, `child`, `children`.
 
 - `lib/core/enums/generic_component_type.dart`
-  - Supported enum types: `scaffold`, `column`, `row`, `container`, `text`, `button`, `card`, `spacer`, `image`.
+  - Supported enum types: `scaffold`, `column`, `row`, `container`, `text`, `button`, `card`, `spacer`, `image`, `appBar`, `divider`, `icon`, `richtext`, `unsupported`.
 
 - `lib/engine/screen_renderer/screen_renderer.dart`
   - Recursive renderer orchestrator.
@@ -133,8 +134,9 @@ May include:
 - `children` (array of component objects)
 
 Parser behavior:
+- Validates structure and type against `GenericComponentType.values`
+- Throws with explicit path on missing/unsupported types or invalid child shape
 - Converts type string to `GenericComponentType`
-- Unknown type throws `ArgumentError`
 - Recursively parses `child` and `children`
 
 ### 3.4 Property Types Input Rules
@@ -198,15 +200,16 @@ This is the exact runtime process today.
 
 For each component JSON node:
 
-1. Read `type` string.
-2. Convert to enum `GenericComponentType`.
-3. Build `properties` map from all keys except `type/child/children`.
-4. Lookup schema in `ComponentSchemas`.
-5. Validate properties:
-   - missing required property -> schema error thrown in validator
-   - repository catches and logs warning, continues (lenient mode)
-6. Recursively parse `child` and `children` if present.
-7. Return `ComponentConfig` node.
+1. Validate node structure and type using `GenericComponentType.values`.
+2. Read `type` string.
+3. Convert to enum `GenericComponentType`.
+4. Build `properties` map from all keys except `type/child/children`.
+5. Lookup schema in `ComponentSchemas`.
+6. Validate properties:
+  - missing required property -> schema error thrown in validator
+  - repository catches and logs warning, continues (lenient mode)
+7. Recursively parse `child` and `children` if present.
+8. Return `ComponentConfig` node.
 
 ### Stage 6: State Output
 

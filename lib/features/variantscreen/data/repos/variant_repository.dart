@@ -1,11 +1,11 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../config/component_config.dart';
 import '../../../../config/screen_config.dart';
 import '../../../../core/enums/generic_component_type.dart';
+import '../../../../core/utils/app_logger.dart';
 import '../../../../engine/validation/component_schemas.dart';
 
 /// Abstract repository for loading dynamic screen configurations.
@@ -53,6 +53,10 @@ abstract class VariantRepository {
 /// ```
 class AssetVariantRepository implements VariantRepository {
   static const _configPath = 'assets/config';
+  static final Set<String> _allowedTypes = GenericComponentType.values
+      .where((type) => type != GenericComponentType.unsupported)
+      .map((type) => type.name)
+      .toSet();
 
   @override
   Future<ScreenConfig> loadVariant(
@@ -78,8 +82,12 @@ class AssetVariantRepository implements VariantRepository {
   ScreenConfig _parseScreenConfig(Map<String, dynamic> json) {
     final pageId = json['id'] as String;
     final pageName = json['pageName'] as String?;
-    final rootJson = json['root'] as Map<String, dynamic>;
-    final root = _parseComponentConfig(rootJson);
+    final rootJson = json['root'];
+    if (rootJson is! Map<String, dynamic>) {
+      throw ArgumentError('root must be an Object at root');
+    }
+    _validateComponentJson(rootJson, path: 'root');
+    final root = _parseComponentConfig(rootJson, path: 'root');
     return ScreenConfig(
       pageId: pageId,
       pageName:
@@ -109,16 +117,51 @@ class AssetVariantRepository implements VariantRepository {
       orElse: () => pages.first,
     );
 
-    final body =
-        (selectedPage['body'] as List?)
-            ?.whereType<Map<String, dynamic>>()
-            .map(_parseBuilderComponentConfig)
-            .toList() ??
-        <ComponentConfig>[];
+    final body = <ComponentConfig>[];
+    final rawBody = selectedPage['body'] as List?;
+    if (selectedPage.containsKey('body') && rawBody == null) {
+      throw ArgumentError(
+        'children must be a List at pages[${pages.indexOf(selectedPage)}].body',
+      );
+    }
+    if (rawBody != null) {
+      for (var i = 0; i < rawBody.length; i++) {
+        final entry = rawBody[i];
+        if (entry is! Map<String, dynamic>) {
+          throw ArgumentError(
+            'children must contain objects at pages[${pages.indexOf(selectedPage)}].body[$i]',
+          );
+        }
+        _validateComponentJson(
+          entry,
+          path: 'pages[${pages.indexOf(selectedPage)}].body[$i]',
+        );
+        body.add(
+          _parseBuilderComponentConfig(
+            entry,
+            path: 'pages[${pages.indexOf(selectedPage)}].body[$i]',
+          ),
+        );
+      }
+    }
+    if (selectedPage.containsKey('appBar') &&
+        selectedPage['appBar'] is! Map<String, dynamic>) {
+      throw ArgumentError(
+        'child must be an Object at pages[${pages.indexOf(selectedPage)}].appBar',
+      );
+    }
     final appBar = selectedPage['appBar'] is Map<String, dynamic>
-        ? _parseBuilderComponentConfig(
-            selectedPage['appBar'] as Map<String, dynamic>,
-          )
+        ? () {
+            final appBarJson = selectedPage['appBar'] as Map<String, dynamic>;
+            _validateComponentJson(
+              appBarJson,
+              path: 'pages[${pages.indexOf(selectedPage)}].appBar',
+            );
+            return _parseBuilderComponentConfig(
+              appBarJson,
+              path: 'pages[${pages.indexOf(selectedPage)}].appBar',
+            );
+          }()
         : null;
     final children = <ComponentConfig>[if (appBar != null) appBar, ...body];
 
@@ -144,24 +187,40 @@ class AssetVariantRepository implements VariantRepository {
     return ScreenConfig(pageId: variantId, pageName: pageName, root: root);
   }
 
-  ComponentConfig _parseBuilderComponentConfig(Map<String, dynamic> json) {
-    final rawType = json['type'] as String? ?? 'unsupported';
-    final type = _componentTypeFromString(rawType, strict: false);
+  ComponentConfig _parseBuilderComponentConfig(
+    Map<String, dynamic> json, {
+    required String path,
+  }) {
+    final rawType = json['type'] as String?;
+    if (rawType == null || rawType.isEmpty) {
+      throw ArgumentError('Missing type at $path');
+    }
+    final type = _componentTypeFromString(rawType);
+    AppLogger.debug('[VariantRepository] parse node type=$rawType path=$path');
     final properties = _normalizeBuilderProperties(json, rawType);
 
     ComponentConfig? child;
     if (json['child'] is Map<String, dynamic>) {
       child = _parseBuilderComponentConfig(
         json['child'] as Map<String, dynamic>,
+        path: '$path.child',
       );
     }
 
     List<ComponentConfig>? children;
     if (json['children'] is List) {
-      children = (json['children'] as List)
-          .whereType<Map<String, dynamic>>()
-          .map(_parseBuilderComponentConfig)
-          .toList();
+      children = (json['children'] as List).asMap().entries.map((entry) {
+        final value = entry.value;
+        if (value is! Map<String, dynamic>) {
+          throw ArgumentError(
+            'children must contain objects at $path.children[${entry.key}]',
+          );
+        }
+        return _parseBuilderComponentConfig(
+          value,
+          path: '$path.children[${entry.key}]',
+        );
+      }).toList();
     }
 
     return ComponentConfig(
@@ -235,9 +294,18 @@ class AssetVariantRepository implements VariantRepository {
   /// - `children`: Multiple child components (optional; for rows, columns, etc.)
   ///
   /// **Recursion**: Child and children are recursively parsed into [ComponentConfig] trees.
-  ComponentConfig _parseComponentConfig(Map<String, dynamic> json) {
-    final typeString = json['type'] as String;
+  ComponentConfig _parseComponentConfig(
+    Map<String, dynamic> json, {
+    required String path,
+  }) {
+    final typeString = json['type'] as String?;
+    if (typeString == null || typeString.isEmpty) {
+      throw ArgumentError('Missing type at $path');
+    }
     final type = _componentTypeFromString(typeString);
+    AppLogger.debug(
+      '[VariantRepository] parse node type=$typeString path=$path',
+    );
 
     final properties = <String, dynamic>{};
     for (final entry in json.entries) {
@@ -255,20 +323,30 @@ class AssetVariantRepository implements VariantRepository {
       } catch (e) {
         // Log warning but don't fail - lenient parsing
         // In production, consider strict mode: throw;
-        debugPrint('[ComponentConfig] Schema validation warning: $e');
+        AppLogger.debug('[ComponentConfig] Schema validation warning: $e');
       }
     }
 
     ComponentConfig? child;
     if (json['child'] != null) {
-      child = _parseComponentConfig(json['child'] as Map<String, dynamic>);
+      child = _parseComponentConfig(
+        json['child'] as Map<String, dynamic>,
+        path: '$path.child',
+      );
     }
 
     List<ComponentConfig>? children;
     if (json['children'] != null) {
       final list = json['children'] as List;
       children = list
-          .map((e) => _parseComponentConfig(e as Map<String, dynamic>))
+          .asMap()
+          .entries
+          .map(
+            (entry) => _parseComponentConfig(
+              entry.value as Map<String, dynamic>,
+              path: '$path.children[${entry.key}]',
+            ),
+          )
           .toList();
     }
 
@@ -289,5 +367,49 @@ class AssetVariantRepository implements VariantRepository {
     }
     if (!strict) return GenericComponentType.unsupported;
     throw ArgumentError('Unknown component type: $typeString');
+  }
+
+  void _validateComponentJson(
+    Map<String, dynamic> json, {
+    required String path,
+  }) {
+    final rawType = json['type'] as String?;
+    if (rawType == null || rawType.isEmpty) {
+      throw ArgumentError('Missing type at $path');
+    }
+
+    if (!_allowedTypes.contains(rawType)) {
+      throw ArgumentError('Unsupported component type: $rawType at $path');
+    }
+
+    if (json.containsKey('child') && json.containsKey('children')) {
+      throw ArgumentError(
+        'Node cannot contain both child and children at $path',
+      );
+    }
+
+    if (json.containsKey('children')) {
+      final children = json['children'];
+      if (children is! List) {
+        throw ArgumentError('children must be a List at $path.children');
+      }
+      for (var i = 0; i < children.length; i++) {
+        final entry = children[i];
+        if (entry is! Map<String, dynamic>) {
+          throw ArgumentError(
+            'children must contain objects at $path.children[$i]',
+          );
+        }
+        _validateComponentJson(entry, path: '$path.children[$i]');
+      }
+    }
+
+    if (json.containsKey('child')) {
+      final child = json['child'];
+      if (child is! Map<String, dynamic>) {
+        throw ArgumentError('child must be an Object at $path.child');
+      }
+      _validateComponentJson(child, path: '$path.child');
+    }
   }
 }

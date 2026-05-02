@@ -36,7 +36,8 @@ The rendering engine consists of five layer:
 │  Parser (AssetVariantRepository)                        │
 │  - Load JSON from assets                                │
 │  - Parse into ComponentConfig tree                      │
-│  - Validate against ComponentSchemas                    │
+│  - Validate structure + types against GenericComponentType.values │
+│  - Validate against ComponentSchemas (property-level)    │
 └────────────────────┬────────────────────────────────────┘
                      │
 ┌────────────────────▼────────────────────────────────────┐
@@ -192,7 +193,7 @@ static Map<GenericComponentType, ComponentRenderer> _createDefaultRenderers() {
 ```dart
 enum GenericComponentType {
   // ... existing
-  iconButton,  // Add to enum (optional - string registry can work without it)
+  iconButton,  // Add to enum (required so validator recognizes it)
 }
 ```
 

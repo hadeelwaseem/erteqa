@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../config/component_config.dart';
+import '../../../core/utils/app_logger.dart';
 
 import '../../component_renderer/component_renderer.dart';
 import '../parsers/property_parsers.dart';
@@ -25,17 +26,35 @@ class RowRenderer implements ComponentRenderer {
       gap,
     );
 
-    final row = Row(
-      mainAxisSize: MainAxisSize.max,
-      mainAxisAlignment: mainAxisAlignment,
-      crossAxisAlignment: crossAxisAlignment,
-      children: childWidgets,
-    );
+    final resolvedMainAxisAlignment = mainAxisAlignment;
+    final resolvedCrossAxisAlignment = crossAxisAlignment;
+    final path = dataContext?['_enginePath'] as String? ?? 'unknown';
 
-    // IntrinsicHeight ensures Row gets bounded height when parent gives unbounded
-    // (e.g. Column child). Prevents "BoxConstraints forces an infinite height"
-    // when crossAxisAlignment is stretch.
-    return IntrinsicHeight(child: row);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isUnboundedHeight = !constraints.hasBoundedHeight;
+        final safeCrossAxisAlignment =
+            isUnboundedHeight &&
+                resolvedCrossAxisAlignment == CrossAxisAlignment.stretch
+            ? CrossAxisAlignment.center
+            : resolvedCrossAxisAlignment;
+
+        if (isUnboundedHeight &&
+            resolvedCrossAxisAlignment == CrossAxisAlignment.stretch) {
+          AppLogger.debug(
+            '[RowRenderer] unbounded height at $path; '
+            'fallback stretch -> center',
+          );
+        }
+
+        return Row(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: resolvedMainAxisAlignment,
+          crossAxisAlignment: safeCrossAxisAlignment,
+          children: childWidgets,
+        );
+      },
+    );
   }
 
   List<Widget> _withGap(List<Widget> children, double gap) {
