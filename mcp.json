@@ -1,0 +1,8 @@
+{
+  "servers": {
+    "puck-editor.git Docs": {
+      "type": "sse",
+      "url": "https://gitmcp.io/yasser-jam/puck-editor.git"
+    }
+  }
+}
