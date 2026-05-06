@@ -1,0 +1,38 @@
+import 'package:flutter/widgets.dart';
+
+class FormStateStore {
+  static const contextKey = '_engineFormState';
+
+  final Map<String, TextEditingController> _controllers = {};
+  final Map<String, String> _values = {};
+
+  TextEditingController controllerFor(String key, {String? initialValue}) {
+    final controller = _controllers.putIfAbsent(
+      key,
+      () => TextEditingController(text: initialValue ?? ''),
+    );
+    if (initialValue != null && controller.text.isEmpty) {
+      controller.text = initialValue;
+    }
+    if (initialValue != null && !_values.containsKey(key)) {
+      _values[key] = initialValue;
+    }
+    return controller;
+  }
+
+  void updateValue(String key, String value) {
+    _values[key] = value;
+  }
+
+  String? valueFor(String key) => _values[key];
+
+  Map<String, String> snapshot() => Map<String, String>.from(_values);
+
+  void dispose() {
+    for (final controller in _controllers.values) {
+      controller.dispose();
+    }
+    _controllers.clear();
+    _values.clear();
+  }
+}

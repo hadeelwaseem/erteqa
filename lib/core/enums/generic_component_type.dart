@@ -16,5 +16,6 @@ enum GenericComponentType {
   divider,
   icon,
   richtext,
+  textFormField,
   unsupported,
 }

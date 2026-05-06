@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../core/enums/generic_component_type.dart';
 import '../../config/component_config.dart';
@@ -18,12 +17,15 @@ import '../tree/renderers/row_renderer.dart';
 import '../tree/renderers/scaffold_renderer.dart';
 import '../tree/renderers/single_child_scroll_view_renderer.dart';
 import '../tree/renderers/text_renderer.dart';
+import '../tree/renderers/text_form_field_renderer.dart';
 import '../tree/renderers/spacer_renderer.dart';
 import '../tree/renderers/image_renderer.dart';
 import '../tree/renderers/list_view_renderer.dart';
 import '../tree/renderers/grid_view_renderer.dart';
 import '../tree/renderers/rich_text_renderer.dart';
 import '../tree/renderers/unsupported_component_renderer.dart';
+import '../actions/action_dispatcher.dart';
+import '../form/form_state_store.dart';
 
 /// Recursively renders a tree-based [ScreenConfig] into a widget tree.
 ///
@@ -39,7 +41,7 @@ class ScreenRenderer {
   /// Pass a map of component types to their renderer implementations.
   ScreenRenderer(this._renderers);
 
-  /// Creates a [ScreenRenderer] with all 9 primitive renderers pre-configured.
+  /// Creates a [ScreenRenderer] with all primitive renderers pre-configured.
   ///
   /// This is the default factory for typical usage. Use the main constructor
   /// if you need to inject custom renderers or override specific implementations.
@@ -71,6 +73,7 @@ class ScreenRenderer {
       GenericComponentType.listView: ListViewRenderer(),
       GenericComponentType.gridView: GridViewRenderer(),
       GenericComponentType.text: TextRenderer(),
+      GenericComponentType.textFormField: TextFormFieldRenderer(),
       GenericComponentType.button: ButtonRenderer(),
       GenericComponentType.card: CardRenderer(),
       GenericComponentType.spacer: SpacerRenderer(),
@@ -89,9 +92,14 @@ class ScreenRenderer {
     BuildContext? context,
     Map<String, dynamic>? dataContext,
   }) {
+    final rootContext = dataContext ?? <String, dynamic>{};
+    _ensureFormState(rootContext);
+    if (context != null) {
+      _ensureActionDispatcher(rootContext, context);
+    }
     return _buildComponent(
       config.root,
-      dataContext: dataContext,
+      dataContext: rootContext,
       context: context,
       variantId: config.pageId,
       path: 'root',
@@ -120,11 +128,12 @@ class ScreenRenderer {
         '(id="$id") at $path',
       );
     }
-    final onTap = _resolveTapAction(config, context, variantId);
     final mergedContext = _mergeContext(
       dataContext,
       config.dataContextOverride,
     );
+    final dispatcher = _resolveActionDispatcher(mergedContext, context);
+    final onTap = _resolveTapAction(config, dispatcher);
     final renderConfig = onTap == null
         ? config
         : ComponentConfig(
@@ -163,22 +172,44 @@ class ScreenRenderer {
 
   VoidCallback? _resolveTapAction(
     ComponentConfig config,
-    BuildContext? context,
-    String variantId,
+    EngineActionDispatcher? dispatcher,
   ) {
-    if (context == null) return null;
+    if (dispatcher == null) return null;
     final tap = config.properties['tap'];
     if (tap is! Map) return null;
-    final tapType = tap['type'];
-    if (tapType != 'navigate') return null;
-    final route = tap['route'];
-    if (route is! String || route.isEmpty) return null;
-    // Navigate directly to the route — routes are first-class paths in the
-    // ShellRoute setup (/products, /checkout, /product/1, etc.)
-    return () {
-      AppLogger.debug('[Engine] navigate to: $route');
-      context.go(route);
-    };
+    return dispatcher.resolveTap(tap.cast<String, dynamic>());
+  }
+
+  EngineActionDispatcher? _resolveActionDispatcher(
+    Map<String, dynamic>? dataContext,
+    BuildContext? context,
+  ) {
+    if (dataContext != null) {
+      final existing = dataContext[EngineActionDispatcher.contextKey];
+      if (existing is EngineActionDispatcher) return existing;
+    }
+    if (context == null) return null;
+    final created = EngineActionDispatcher(context: context);
+    dataContext?[EngineActionDispatcher.contextKey] = created;
+    return created;
+  }
+
+  void _ensureFormState(Map<String, dynamic> dataContext) {
+    if (dataContext[FormStateStore.contextKey] is FormStateStore) return;
+    dataContext[FormStateStore.contextKey] = FormStateStore();
+  }
+
+  void _ensureActionDispatcher(
+    Map<String, dynamic> dataContext,
+    BuildContext context,
+  ) {
+    if (dataContext[EngineActionDispatcher.contextKey]
+        is EngineActionDispatcher) {
+      return;
+    }
+    dataContext[EngineActionDispatcher.contextKey] = EngineActionDispatcher(
+      context: context,
+    );
   }
 
   Map<String, dynamic> _withPath(

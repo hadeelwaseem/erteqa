@@ -28,6 +28,12 @@
         "route": "/"
       },
       {
+        "id": "tab-auth",
+        "label": "Auth",
+        "icon": "person",
+        "route": "/auth"
+      },
+      {
         "id": "tab-products",
         "label": "Products",
         "icon": "grid_view",
@@ -1726,6 +1732,109 @@
               }
             }
           ]
+        }
+      ]
+    },
+    {
+      "id": "auth-screen",
+      "route": "/auth",
+      "title": "Sign In",
+      "background": "#F8FAFC",
+      "scroll": "vertical",
+      "appBar": {
+        "id": "auth-appbar",
+        "type": "appBar",
+        "props": {
+          "title": "Sign In"
+        }
+      },
+      "body": [
+        {
+          "id": "auth-card",
+          "type": "container",
+          "props": {},
+          "style": {
+            "margin": {
+              "left": 16,
+              "right": 16,
+              "top": 16,
+              "bottom": 12
+            },
+            "padding": 16,
+            "background": "#FFFFFF",
+            "borderRadius": 12
+          },
+          "child": {
+            "id": "auth-card-content",
+            "type": "column",
+            "props": {
+              "crossAxis": "stretch",
+              "gap": 12
+            },
+            "children": [
+              {
+                "id": "auth-title",
+                "type": "text",
+                "props": {
+                  "value": "Welcome back",
+                  "fontSize": 20,
+                  "fontWeight": "bold",
+                  "color": "#0F172A"
+                }
+              },
+              {
+                "id": "auth-email",
+                "type": "textFormField",
+                "props": {
+                  "label": "Email",
+                  "hint": "you@example.com",
+                  "keyboardType": "email",
+                  "textInputAction": "next",
+                  "autofocus": false,
+                  "required": true,
+                  "requiredMessage": "Email is required",
+                  "inputFormatters": ["denyWhitespace"],
+                  "prefixIcon": "mail",
+                  "onChanged": {
+                    "type": "apiCall",
+                    "endpoint": "https://api.example.com/auth/track",
+                    "method": "post",
+                    "body": {"field": "email"}
+                  }
+                }
+              },
+              {
+                "id": "auth-password",
+                "type": "textFormField",
+                "props": {
+                  "label": "Password",
+                  "hint": "Enter your password",
+                  "obscureText": true,
+                  "textInputAction": "done",
+                  "required": true,
+                  "requiredMessage": "Password is required",
+                  "prefixIcon": "lock",
+                  "onSubmitted": {
+                    "type": "navigate",
+                    "route": "/products"
+                  }
+                }
+              },
+              {
+                "id": "auth-submit",
+                "type": "button",
+                "props": {
+                  "label": "Sign In",
+                  "backgroundColor": "#1D4ED8",
+                  "borderRadius": 10
+                },
+                "tap": {
+                  "type": "navigate",
+                  "route": "/products"
+                }
+              }
+            ]
+          }
         }
       ]
     },

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:sooq_merchant/engine/actions/action_dispatcher.dart';
+import 'package:sooq_merchant/engine/form/form_state_store.dart';
 import 'package:sooq_merchant/engine/tree/tree_engine.dart';
 import 'package:sooq_merchant/features/variantscreen/data/repos/variant_repository.dart';
 import 'package:sooq_merchant/features/variantscreen/presentation/manager/variant_cubit/variant_cubit.dart';
@@ -23,7 +25,7 @@ import 'package:sooq_merchant/features/variantscreen/presentation/manager/varian
 ///
 /// **No outer Scaffold**: The Scaffold is provided by [TabShellWidget] via
 /// ShellRoute. Adding another Scaffold here would cause nesting issues.
-class VariantScreen extends StatelessWidget {
+class VariantScreen extends StatefulWidget {
   const VariantScreen({
     super.key,
     required this.variantId,
@@ -41,11 +43,43 @@ class VariantScreen extends StatelessWidget {
   final String? pageRoute;
 
   @override
+  State<VariantScreen> createState() => _VariantScreenState();
+}
+
+class _VariantScreenState extends State<VariantScreen> {
+  late final FormStateStore _formStateStore;
+  late final Map<String, dynamic> _dataContext;
+  EngineActionDispatcher? _dispatcher;
+
+  @override
+  void initState() {
+    super.initState();
+    _formStateStore = FormStateStore();
+    _dataContext = {FormStateStore.contextKey: _formStateStore};
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _dispatcher ??= EngineActionDispatcher(context: context);
+    _dataContext[EngineActionDispatcher.contextKey] = _dispatcher;
+  }
+
+  @override
+  void dispose() {
+    _formStateStore.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      key: ValueKey('$variantId:${pageRoute ?? ""}'),
-      create: (context) =>
-          VariantCubit(variantRepository, variantId, pageRoute: pageRoute),
+      key: ValueKey('${widget.variantId}:${widget.pageRoute ?? ""}'),
+      create: (context) => VariantCubit(
+        widget.variantRepository,
+        widget.variantId,
+        pageRoute: widget.pageRoute,
+      ),
       child: BlocBuilder<VariantCubit, VariantState>(
         builder: (context, state) {
           return switch (state) {
@@ -58,6 +92,7 @@ class VariantScreen extends StatelessWidget {
               ScreenRenderer.withPrimitives().render(
                 config,
                 context: context,
+                dataContext: _dataContext,
               ),
             // Failure: Show error message
             VariantFailure(:final message) => Center(

@@ -256,6 +256,91 @@ class ComponentSchemas {
     optionalProperties: {'value', 'color'},
   );
 
+  static const textFormField = ComponentSchema(
+    type: 'textFormField',
+    requiredProperties: {},
+    optionalProperties: {
+      'label',
+      'hint',
+      'helper',
+      'error',
+      'prefixText',
+      'suffixText',
+      'prefixIcon',
+      'suffixIcon',
+      'controllerId',
+      'initialValue',
+      'value',
+      'keyboardType',
+      'textInputAction',
+      'textCapitalization',
+      'autofocus',
+      'enabled',
+      'readOnly',
+      'obscureText',
+      'autocorrect',
+      'enableSuggestions',
+      'maxLines',
+      'minLines',
+      'maxLength',
+      'expands',
+      'textAlign',
+      'required',
+      'requiredMessage',
+      'inputFormatters',
+      'onChanged',
+      'onSubmitted',
+      'padding',
+      'margin',
+      'color',
+      'borderRadius',
+      'width',
+      'height',
+      'border',
+      'shadow',
+    },
+    propertyTypes: {
+      'label': 'string',
+      'hint': 'string',
+      'helper': 'string',
+      'error': 'string',
+      'prefixText': 'string',
+      'suffixText': 'string',
+      'prefixIcon': 'string',
+      'suffixIcon': 'string',
+      'controllerId': 'string',
+      'initialValue': 'string',
+      'value': 'string',
+      'keyboardType': 'string',
+      'textInputAction': 'string',
+      'textCapitalization': 'string',
+      'autofocus': 'bool',
+      'enabled': 'bool',
+      'readOnly': 'bool',
+      'obscureText': 'bool',
+      'autocorrect': 'bool',
+      'enableSuggestions': 'bool',
+      'maxLines': 'number (integer)',
+      'minLines': 'number (integer)',
+      'maxLength': 'number (integer)',
+      'expands': 'bool',
+      'textAlign': 'string (left|center|right|justify)',
+      'required': 'bool',
+      'requiredMessage': 'string',
+      'inputFormatters': 'array (string)',
+      'onChanged': 'action object',
+      'onSubmitted': 'action object',
+      'padding': 'number | object',
+      'margin': 'number | object',
+      'color': 'string (hex)',
+      'borderRadius': 'number',
+      'width': 'number',
+      'height': 'number',
+      'border': 'object',
+      'shadow': 'string',
+    },
+  );
+
   static const unsupported = ComponentSchema(
     type: 'unsupported',
     requiredProperties: {},
@@ -299,6 +384,8 @@ class ComponentSchemas {
         return icon;
       case 'richtext':
         return richtext;
+      case 'textFormField':
+        return textFormField;
       case 'unsupported':
         return unsupported;
       default:
@@ -325,6 +412,7 @@ class ComponentSchemas {
       'divider': divider,
       'icon': icon,
       'richtext': richtext,
+      'textFormField': textFormField,
       'unsupported': unsupported,
     };
   }

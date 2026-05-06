@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 /// Shared property parsing utilities for the tree-based UI engine.
 class PropertyParsers {
@@ -138,6 +139,131 @@ class PropertyParsers {
         return Alignment.bottomRight;
       default:
         return null;
+    }
+  }
+
+  static TextInputType? parseKeyboardType(String? v) {
+    switch (v) {
+      case 'text':
+        return TextInputType.text;
+      case 'multiline':
+        return TextInputType.multiline;
+      case 'email':
+      case 'emailAddress':
+        return TextInputType.emailAddress;
+      case 'number':
+        return TextInputType.number;
+      case 'phone':
+        return TextInputType.phone;
+      case 'url':
+        return TextInputType.url;
+      case 'datetime':
+        return TextInputType.datetime;
+      case 'name':
+        return TextInputType.name;
+      case 'password':
+        return TextInputType.visiblePassword;
+      default:
+        return null;
+    }
+  }
+
+  static TextInputAction? parseTextInputAction(String? v) {
+    switch (v) {
+      case 'done':
+        return TextInputAction.done;
+      case 'go':
+        return TextInputAction.go;
+      case 'next':
+        return TextInputAction.next;
+      case 'previous':
+        return TextInputAction.previous;
+      case 'search':
+        return TextInputAction.search;
+      case 'send':
+        return TextInputAction.send;
+      case 'newline':
+        return TextInputAction.newline;
+      case 'continueAction':
+        return TextInputAction.continueAction;
+      case 'join':
+        return TextInputAction.join;
+      case 'route':
+        return TextInputAction.route;
+      case 'emergencyCall':
+        return TextInputAction.emergencyCall;
+      default:
+        return null;
+    }
+  }
+
+  static TextCapitalization parseTextCapitalization(String? v) {
+    switch (v) {
+      case 'words':
+        return TextCapitalization.words;
+      case 'sentences':
+        return TextCapitalization.sentences;
+      case 'characters':
+        return TextCapitalization.characters;
+      case 'none':
+      default:
+        return TextCapitalization.none;
+    }
+  }
+
+  static List<TextInputFormatter>? parseInputFormatters(dynamic v) {
+    if (v is! List) return null;
+    final formatters = <TextInputFormatter>[];
+    for (final entry in v) {
+      if (entry is! String) continue;
+      if (entry == 'digitsOnly') {
+        formatters.add(FilteringTextInputFormatter.digitsOnly);
+      } else if (entry == 'denyWhitespace') {
+        formatters.add(FilteringTextInputFormatter.deny(RegExp(r'\s')));
+      } else if (entry.startsWith('allowRegex:')) {
+        final pattern = entry.substring('allowRegex:'.length);
+        if (pattern.isNotEmpty) {
+          formatters.add(FilteringTextInputFormatter.allow(RegExp(pattern)));
+        }
+      } else if (entry.startsWith('denyRegex:')) {
+        final pattern = entry.substring('denyRegex:'.length);
+        if (pattern.isNotEmpty) {
+          formatters.add(FilteringTextInputFormatter.deny(RegExp(pattern)));
+        }
+      }
+    }
+    return formatters.isEmpty ? null : formatters;
+  }
+
+  static IconData parseIconData(String? name) {
+    switch (name) {
+      case 'home':
+        return Icons.home;
+      case 'list':
+        return Icons.list;
+      case 'grid_view':
+        return Icons.grid_view;
+      case 'settings':
+        return Icons.settings;
+      case 'search':
+        return Icons.search;
+      case 'cart':
+      case 'shopping_cart':
+        return Icons.shopping_cart;
+      case 'favorite':
+        return Icons.favorite;
+      case 'person':
+        return Icons.person;
+      case 'visibility':
+        return Icons.visibility;
+      case 'visibility_off':
+        return Icons.visibility_off;
+      case 'mail':
+        return Icons.mail;
+      case 'lock':
+        return Icons.lock;
+      default:
+        return Icons.circle;
     }
   }
 
