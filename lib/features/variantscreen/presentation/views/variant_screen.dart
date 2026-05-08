@@ -61,7 +61,10 @@ class _VariantScreenState extends State<VariantScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _dispatcher ??= EngineActionDispatcher(context: context);
+    _dispatcher ??= EngineActionDispatcher(
+      context: context,
+      formState: _formStateStore,
+    );
     _dataContext[EngineActionDispatcher.contextKey] = _dispatcher;
   }
 

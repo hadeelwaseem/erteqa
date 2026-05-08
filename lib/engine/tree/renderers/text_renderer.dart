@@ -31,6 +31,7 @@ class TextRenderer implements ComponentRenderer {
         fontSize: fontSize,
         fontWeight: fontWeight,
         color: color,
+        decoration: TextDecoration.none,
       ),
       textAlign: textAlign,
     );

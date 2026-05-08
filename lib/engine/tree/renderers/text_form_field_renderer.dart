@@ -57,7 +57,16 @@ class TextFormFieldRenderer implements ComponentRenderer {
     final minLines = _parseInt(properties['minLines']);
     final maxLength = _parseInt(properties['maxLength']);
 
-    final requiredField = properties['required'] == true;
+    final requiredField =
+        properties['required'] == true ||
+        properties['validateRequired'] == true;
+    final validateEmail = properties['validateEmail'] == true;
+    final validatePhone = properties['validatePhone'] == true;
+    final validatePassword = properties['validatePassword'] == true;
+    final validateMinLength = _parseInt(properties['validateMinLength']);
+    final validateMaxLength = _parseInt(properties['validateMaxLength']);
+    final validatePattern = properties['validatePattern'] as String?;
+    final validationMessage = properties['validationMessage'] as String?;
     final requiredMessage =
         properties['requiredMessage'] as String? ?? 'Required';
 
@@ -109,7 +118,16 @@ class TextFormFieldRenderer implements ComponentRenderer {
           maxLines: expands ? null : (maxLines ?? 1),
           minLines: expands ? null : minLines,
           maxLength: maxLength,
-          autovalidateMode: requiredField
+          autovalidateMode:
+              _hasValidation(
+                requiredField,
+                validateEmail,
+                validatePhone,
+                validatePassword,
+                validateMinLength,
+                validateMaxLength,
+                validatePattern,
+              )
               ? AutovalidateMode.onUserInteraction
               : AutovalidateMode.disabled,
           decoration: InputDecoration(
@@ -127,11 +145,17 @@ class TextFormFieldRenderer implements ComponentRenderer {
                 : null,
             border: hasBoxDecoration ? InputBorder.none : null,
           ),
-          validator: requiredField
-              ? (value) => value == null || value.trim().isEmpty
-                    ? requiredMessage
-                    : null
-              : null,
+          validator: _buildValidator(
+            requiredField: requiredField,
+            requiredMessage: requiredMessage,
+            validateEmail: validateEmail,
+            validatePhone: validatePhone,
+            validatePassword: validatePassword,
+            validateMinLength: validateMinLength,
+            validateMaxLength: validateMaxLength,
+            validatePattern: validatePattern,
+            validationMessage: validationMessage,
+          ),
           onChanged: (value) {
             if (controllerKey.isNotEmpty) {
               formState.updateValue(controllerKey, value);
@@ -158,8 +182,14 @@ class TextFormFieldRenderer implements ComponentRenderer {
           },
         );
 
+        final needsMaterial =
+            context.findAncestorWidgetOfExactType<Material>() == null;
+        final fieldWidget = needsMaterial
+            ? Material(type: MaterialType.transparency, child: field)
+            : field;
+
         if (!hasBoxDecoration && padding == null && margin == null) {
-          return field;
+          return fieldWidget;
         }
 
         return Container(
@@ -175,7 +205,7 @@ class TextFormFieldRenderer implements ComponentRenderer {
                   boxShadow: shadow != null ? [shadow] : null,
                 )
               : null,
-          child: field,
+          child: fieldWidget,
         );
       },
     );
@@ -208,6 +238,96 @@ class TextFormFieldRenderer implements ComponentRenderer {
     if (v is num) return v.toInt();
     if (v is String) return int.tryParse(v);
     return null;
+  }
+
+  bool _hasValidation(
+    bool requiredField,
+    bool validateEmail,
+    bool validatePhone,
+    bool validatePassword,
+    int? validateMinLength,
+    int? validateMaxLength,
+    String? validatePattern,
+  ) {
+    return requiredField ||
+        validateEmail ||
+        validatePhone ||
+        validatePassword ||
+        validateMinLength != null ||
+        validateMaxLength != null ||
+        (validatePattern != null && validatePattern.isNotEmpty);
+  }
+
+  FormFieldValidator<String>? _buildValidator({
+    required bool requiredField,
+    required String requiredMessage,
+    required bool validateEmail,
+    required bool validatePhone,
+    required bool validatePassword,
+    required int? validateMinLength,
+    required int? validateMaxLength,
+    required String? validatePattern,
+    required String? validationMessage,
+  }) {
+    if (!_hasValidation(
+      requiredField,
+      validateEmail,
+      validatePhone,
+      validatePassword,
+      validateMinLength,
+      validateMaxLength,
+      validatePattern,
+    )) {
+      return null;
+    }
+
+    return (value) {
+      final text = value?.trim() ?? '';
+      if (requiredField && text.isEmpty) {
+        return validationMessage ?? requiredMessage;
+      }
+      if (text.isEmpty) return null;
+      if (validateEmail && !_isEmail(text)) {
+        return validationMessage ?? 'Enter a valid email';
+      }
+      if (validatePhone && !_isPhone(text)) {
+        return validationMessage ?? 'Enter a valid phone number';
+      }
+      if (validatePassword && !_isPassword(text)) {
+        return validationMessage ??
+            'Password must be at least 8 characters and include a number';
+      }
+      if (validateMinLength != null && text.length < validateMinLength) {
+        return validationMessage ??
+            'Must be at least $validateMinLength characters';
+      }
+      if (validateMaxLength != null && text.length > validateMaxLength) {
+        return validationMessage ??
+            'Must be at most $validateMaxLength characters';
+      }
+      if (validatePattern != null && validatePattern.isNotEmpty) {
+        final regex = RegExp(validatePattern);
+        if (!regex.hasMatch(text)) {
+          return validationMessage ?? 'Invalid format';
+        }
+      }
+      return null;
+    };
+  }
+
+  bool _isEmail(String value) {
+    final regex = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
+    return regex.hasMatch(value);
+  }
+
+  bool _isPhone(String value) {
+    final regex = RegExp(r'^\+?[0-9]{7,15}$');
+    return regex.hasMatch(value);
+  }
+
+  bool _isPassword(String value) {
+    final regex = RegExp(r'^(?=.*[A-Za-z])(?=.*\d).{8,}$');
+    return regex.hasMatch(value);
   }
 
   BoxShadow? _parseShadow(dynamic v) {

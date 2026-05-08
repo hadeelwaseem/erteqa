@@ -262,6 +262,8 @@ class PropertyParsers {
         return Icons.mail;
       case 'lock':
         return Icons.lock;
+      case 'phone':
+        return Icons.phone;
       default:
         return Icons.circle;
     }

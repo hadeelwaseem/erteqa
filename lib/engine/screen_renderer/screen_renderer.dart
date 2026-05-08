@@ -18,6 +18,7 @@ import '../tree/renderers/scaffold_renderer.dart';
 import '../tree/renderers/single_child_scroll_view_renderer.dart';
 import '../tree/renderers/text_renderer.dart';
 import '../tree/renderers/text_form_field_renderer.dart';
+import '../tree/renderers/form_renderer.dart';
 import '../tree/renderers/spacer_renderer.dart';
 import '../tree/renderers/image_renderer.dart';
 import '../tree/renderers/list_view_renderer.dart';
@@ -74,6 +75,7 @@ class ScreenRenderer {
       GenericComponentType.gridView: GridViewRenderer(),
       GenericComponentType.text: TextRenderer(),
       GenericComponentType.textFormField: TextFormFieldRenderer(),
+      GenericComponentType.form: FormRenderer(),
       GenericComponentType.button: ButtonRenderer(),
       GenericComponentType.card: CardRenderer(),
       GenericComponentType.spacer: SpacerRenderer(),
@@ -189,7 +191,10 @@ class ScreenRenderer {
       if (existing is EngineActionDispatcher) return existing;
     }
     if (context == null) return null;
-    final created = EngineActionDispatcher(context: context);
+    final created = EngineActionDispatcher(
+      context: context,
+      formState: dataContext?[FormStateStore.contextKey] as FormStateStore?,
+    );
     dataContext?[EngineActionDispatcher.contextKey] = created;
     return created;
   }
@@ -209,6 +214,7 @@ class ScreenRenderer {
     }
     dataContext[EngineActionDispatcher.contextKey] = EngineActionDispatcher(
       context: context,
+      formState: dataContext[FormStateStore.contextKey] as FormStateStore?,
     );
   }
 

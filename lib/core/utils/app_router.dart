@@ -26,6 +26,22 @@ abstract class AppRouter {
       // ── Tab shell mode ──────────────────────────────────────────────────────
       final variantId = mobileConfig.variantId;
       final tabs = mobileConfig.navigation.tabs;
+      final shellExcludes = mobileConfig.navigation.shellExcludeRoutes.toSet();
+
+      // Standalone routes (outside the shell)
+      for (final route in mobileConfig.pageRoutes) {
+        if (!shellExcludes.contains(route)) continue;
+        routes.add(
+          GoRoute(
+            path: route,
+            builder: (context, state) => VariantScreen(
+              variantId: variantId,
+              pageRoute: route,
+              variantRepository: getIt<VariantRepository>(),
+            ),
+          ),
+        );
+      }
 
       // Build sub-routes for every page in the JSON
       final shellRoutes = <RouteBase>[];
@@ -46,6 +62,7 @@ abstract class AppRouter {
 
       // 2. Non-tab page routes (e.g. /product/1)
       for (final route in mobileConfig.nonTabRoutes) {
+        if (shellExcludes.contains(route)) continue;
         shellRoutes.add(
           GoRoute(
             path: route,
@@ -108,6 +125,7 @@ abstract class AppRouter {
     final router = GoRouter(
       routes: routes,
       debugLogDiagnostics: kDebugMode,
+      initialLocation: mobileConfig?.navigation.initialRoute ?? '/',
     );
 
     return router;

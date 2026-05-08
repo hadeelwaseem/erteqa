@@ -19,19 +19,14 @@
   },
   "navigation": {
     "type": "tabs",
-    "initialRoute": "/",
+    "initialRoute": "/login",
+    "shellExcludeRoutes": ["/login", "/register"],
     "tabs": [
       {
         "id": "tab-home",
         "label": "Home",
         "icon": "home",
         "route": "/"
-      },
-      {
-        "id": "tab-auth",
-        "label": "Auth",
-        "icon": "person",
-        "route": "/auth"
       },
       {
         "id": "tab-products",
@@ -1736,13 +1731,13 @@
       ]
     },
     {
-      "id": "auth-screen",
-      "route": "/auth",
+      "id": "login-screen",
+      "route": "/login",
       "title": "Sign In",
       "background": "#F8FAFC",
       "scroll": "vertical",
       "appBar": {
-        "id": "auth-appbar",
+        "id": "login-appbar",
         "type": "appBar",
         "props": {
           "title": "Sign In"
@@ -1750,7 +1745,7 @@
       },
       "body": [
         {
-          "id": "auth-card",
+          "id": "login-card",
           "type": "container",
           "props": {},
           "style": {
@@ -1765,15 +1760,21 @@
             "borderRadius": 12
           },
           "child": {
-            "id": "auth-card-content",
-            "type": "column",
+            "id": "login-form",
+            "type": "form",
             "props": {
-              "crossAxis": "stretch",
-              "gap": 12
+              "formId": "login-form"
             },
-            "children": [
-              {
-                "id": "auth-title",
+            "child": {
+              "id": "login-card-content",
+              "type": "column",
+              "props": {
+                "crossAxis": "stretch",
+                "gap": 12
+              },
+              "children": [
+                {
+                "id": "login-title",
                 "type": "text",
                 "props": {
                   "value": "Welcome back",
@@ -1782,46 +1783,44 @@
                   "color": "#0F172A"
                 }
               },
-              {
-                "id": "auth-email",
+                {
+                "id": "login-email",
                 "type": "textFormField",
                 "props": {
                   "label": "Email",
                   "hint": "you@example.com",
                   "keyboardType": "email",
                   "textInputAction": "next",
-                  "autofocus": false,
-                  "required": true,
-                  "requiredMessage": "Email is required",
+                  "validateRequired": true,
+                  "validateEmail": true,
+                  "validationMessage": "Enter a valid email",
                   "inputFormatters": ["denyWhitespace"],
-                  "prefixIcon": "mail",
-                  "onChanged": {
-                    "type": "apiCall",
-                    "endpoint": "https://api.example.com/auth/track",
-                    "method": "post",
-                    "body": {"field": "email"}
-                  }
+                  "prefixIcon": "mail"
                 }
               },
-              {
-                "id": "auth-password",
+                {
+                "id": "login-password",
                 "type": "textFormField",
                 "props": {
                   "label": "Password",
                   "hint": "Enter your password",
                   "obscureText": true,
                   "textInputAction": "done",
-                  "required": true,
-                  "requiredMessage": "Password is required",
+                  "validateRequired": true,
+                  "validatePassword": true,
+                  "validateMinLength": 8,
+                  "validationMessage": "Password must be at least 8 characters",
                   "prefixIcon": "lock",
                   "onSubmitted": {
                     "type": "navigate",
-                    "route": "/products"
+                    "route": "/",
+                    "requireValidForm": true,
+                    "formId": "login-form"
                   }
                 }
               },
-              {
-                "id": "auth-submit",
+                {
+                "id": "login-submit",
                 "type": "button",
                 "props": {
                   "label": "Sign In",
@@ -1830,10 +1829,172 @@
                 },
                 "tap": {
                   "type": "navigate",
-                  "route": "/products"
+                  "route": "/",
+                  "requireValidForm": true,
+                  "formId": "login-form"
                 }
-              }
-            ]
+              },
+                {
+                "id": "login-register",
+                "type": "button",
+                "props": {
+                  "label": "Create Account",
+                  "backgroundColor": "#E2E8F0",
+                  "textColor": "#0F172A",
+                  "borderRadius": 10
+                },
+                "tap": {
+                  "type": "navigate",
+                  "route": "/register"
+                }
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "register-screen",
+      "route": "/register",
+      "title": "Create Account",
+      "background": "#F8FAFC",
+      "scroll": "vertical",
+      "appBar": {
+        "id": "register-appbar",
+        "type": "appBar",
+        "props": {
+          "title": "Create Account"
+        }
+      },
+      "body": [
+        {
+          "id": "register-card",
+          "type": "container",
+          "props": {},
+          "style": {
+            "margin": {
+              "left": 16,
+              "right": 16,
+              "top": 16,
+              "bottom": 12
+            },
+            "padding": 16,
+            "background": "#FFFFFF",
+            "borderRadius": 12
+          },
+          "child": {
+            "id": "register-form",
+            "type": "form",
+            "props": {
+              "formId": "register-form"
+            },
+            "child": {
+              "id": "register-card-content",
+              "type": "column",
+              "props": {
+                "crossAxis": "stretch",
+                "gap": 12
+              },
+              "children": [
+                {
+                "id": "register-title",
+                "type": "text",
+                "props": {
+                  "value": "Create your account",
+                  "fontSize": 20,
+                  "fontWeight": "bold",
+                  "color": "#0F172A"
+                }
+              },
+                {
+                "id": "register-name",
+                "type": "textFormField",
+                "props": {
+                  "label": "Full name",
+                  "hint": "Jane Doe",
+                  "textInputAction": "next",
+                  "validateRequired": true,
+                  "validationMessage": "Name is required",
+                  "prefixIcon": "person"
+                }
+              },
+                {
+                "id": "register-email",
+                "type": "textFormField",
+                "props": {
+                  "label": "Email",
+                  "hint": "you@example.com",
+                  "keyboardType": "email",
+                  "textInputAction": "next",
+                  "validateRequired": true,
+                  "validateEmail": true,
+                  "validationMessage": "Enter a valid email",
+                  "inputFormatters": ["denyWhitespace"],
+                  "prefixIcon": "mail"
+                }
+              },
+                {
+                "id": "register-phone",
+                "type": "textFormField",
+                "props": {
+                  "label": "Phone number",
+                  "hint": "+9665XXXXXXXX",
+                  "keyboardType": "phone",
+                  "textInputAction": "next",
+                  "validateRequired": true,
+                  "validatePhone": true,
+                  "validationMessage": "Enter a valid phone number",
+                  "inputFormatters": ["digitsOnly"],
+                  "prefixIcon": "phone"
+                }
+              },
+                {
+                "id": "register-password",
+                "type": "textFormField",
+                "props": {
+                  "label": "Password",
+                  "hint": "Create a password",
+                  "obscureText": true,
+                  "textInputAction": "done",
+                  "validateRequired": true,
+                  "validatePassword": true,
+                  "validateMinLength": 8,
+                  "validationMessage": "Password must be at least 8 characters",
+                  "prefixIcon": "lock"
+                }
+              },
+                {
+                "id": "register-submit",
+                "type": "button",
+                "props": {
+                  "label": "Create Account",
+                  "backgroundColor": "#16A34A",
+                  "borderRadius": 10
+                },
+                "tap": {
+                  "type": "navigate",
+                  "route": "/",
+                  "requireValidForm": true,
+                  "formId": "register-form"
+                }
+              },
+                {
+                "id": "register-back",
+                "type": "button",
+                "props": {
+                  "label": "Back to Sign In",
+                  "backgroundColor": "#E2E8F0",
+                  "textColor": "#0F172A",
+                  "borderRadius": 10
+                },
+                "tap": {
+                  "type": "navigate",
+                  "route": "/login"
+                }
+                }
+              ]
+            }
           }
         }
       ]

@@ -17,5 +17,6 @@ enum GenericComponentType {
   icon,
   richtext,
   textFormField,
+  form,
   unsupported,
 }

@@ -287,6 +287,14 @@ class ComponentSchemas {
       'textAlign',
       'required',
       'requiredMessage',
+      'validateRequired',
+      'validateEmail',
+      'validatePhone',
+      'validatePassword',
+      'validateMinLength',
+      'validateMaxLength',
+      'validatePattern',
+      'validationMessage',
       'inputFormatters',
       'onChanged',
       'onSubmitted',
@@ -327,6 +335,14 @@ class ComponentSchemas {
       'textAlign': 'string (left|center|right|justify)',
       'required': 'bool',
       'requiredMessage': 'string',
+      'validateRequired': 'bool',
+      'validateEmail': 'bool',
+      'validatePhone': 'bool',
+      'validatePassword': 'bool',
+      'validateMinLength': 'number (integer)',
+      'validateMaxLength': 'number (integer)',
+      'validatePattern': 'string',
+      'validationMessage': 'string',
       'inputFormatters': 'array (string)',
       'onChanged': 'action object',
       'onSubmitted': 'action object',
@@ -338,6 +354,15 @@ class ComponentSchemas {
       'height': 'number',
       'border': 'object',
       'shadow': 'string',
+    },
+  );
+
+  static const form = ComponentSchema(
+    type: 'form',
+    requiredProperties: {},
+    optionalProperties: {'formId', 'child', 'children'},
+    propertyTypes: {
+      'formId': 'string',
     },
   );
 
@@ -386,6 +411,8 @@ class ComponentSchemas {
         return richtext;
       case 'textFormField':
         return textFormField;
+      case 'form':
+        return form;
       case 'unsupported':
         return unsupported;
       default:
@@ -413,6 +440,7 @@ class ComponentSchemas {
       'icon': icon,
       'richtext': richtext,
       'textFormField': textFormField,
+      'form': form,
       'unsupported': unsupported,
     };
   }

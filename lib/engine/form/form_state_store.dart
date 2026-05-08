@@ -5,6 +5,7 @@ class FormStateStore {
 
   final Map<String, TextEditingController> _controllers = {};
   final Map<String, String> _values = {};
+  final Map<String, GlobalKey<FormState>> _formKeys = {};
 
   TextEditingController controllerFor(String key, {String? initialValue}) {
     final controller = _controllers.putIfAbsent(
@@ -28,11 +29,23 @@ class FormStateStore {
 
   Map<String, String> snapshot() => Map<String, String>.from(_values);
 
+  GlobalKey<FormState> formKeyFor(String formId) {
+    final key = formId.isEmpty ? 'default' : formId;
+    return _formKeys.putIfAbsent(key, () => GlobalKey<FormState>());
+  }
+
+  bool validate(String formId) {
+    final key = formId.isEmpty ? 'default' : formId;
+    final formKey = _formKeys[key];
+    return formKey?.currentState?.validate() ?? true;
+  }
+
   void dispose() {
     for (final controller in _controllers.values) {
       controller.dispose();
     }
     _controllers.clear();
     _values.clear();
+    _formKeys.clear();
   }
 }

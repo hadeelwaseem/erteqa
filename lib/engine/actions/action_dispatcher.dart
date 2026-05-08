@@ -4,13 +4,19 @@ import 'package:go_router/go_router.dart';
 import '../../core/utils/api_service.dart';
 import '../../core/utils/app_logger.dart';
 import '../../core/utils/service_locator.dart';
+import '../form/form_state_store.dart';
 
 class EngineActionDispatcher {
   static const contextKey = '_engineActionDispatcher';
 
-  EngineActionDispatcher({required BuildContext context}) : _context = context;
+  EngineActionDispatcher({
+    required BuildContext context,
+    FormStateStore? formState,
+  })  : _context = context,
+        _formState = formState;
 
   final BuildContext _context;
+  final FormStateStore? _formState;
 
   VoidCallback? resolveTap(Map<String, dynamic>? action) {
     if (action == null) return null;
@@ -22,6 +28,13 @@ class EngineActionDispatcher {
     String? value,
     String? fieldId,
   }) async {
+    final requireValidForm = action['requireValidForm'] == true;
+    if (requireValidForm && _formState != null) {
+      final formId = action['formId'] as String? ?? '';
+      if (!_formState.validate(formId)) {
+        return;
+      }
+    }
     final type = action['type'] as String?;
     switch (type) {
       case 'navigate':
@@ -85,12 +98,19 @@ class EngineActionDispatcher {
   }
 
   dynamic _buildPayload(dynamic body, String? value, String? fieldId) {
-    if (body is! Map<String, dynamic>) return body;
-    if (fieldId == null || fieldId.isEmpty || value == null) {
-      return body;
+    final includeFormValues = body is Map<String, dynamic>
+        ? body['includeFormValues'] == true
+        : false;
+    final isMap = body is Map<String, dynamic>;
+    if (!isMap && !includeFormValues) return body;
+    final next = isMap ? Map<String, dynamic>.from(body) : <String, dynamic>{};
+    next.remove('includeFormValues');
+    if (fieldId != null && fieldId.isNotEmpty && value != null) {
+      next.putIfAbsent(fieldId, () => value);
     }
-    final next = Map<String, dynamic>.from(body);
-    next.putIfAbsent(fieldId, () => value);
+    if (includeFormValues && _formState != null) {
+      next['form'] = _formState.snapshot();
+    }
     return next;
   }
 }

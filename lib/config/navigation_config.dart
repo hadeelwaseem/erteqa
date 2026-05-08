@@ -5,11 +5,13 @@ class NavigationConfig {
   final String type;
   final String initialRoute;
   final List<TabConfig> tabs;
+  final List<String> shellExcludeRoutes;
 
   const NavigationConfig({
     required this.type,
     required this.initialRoute,
     required this.tabs,
+    required this.shellExcludeRoutes,
   });
 
   factory NavigationConfig.fromJson(Map<String, dynamic> json) {
@@ -18,10 +20,16 @@ class NavigationConfig {
             .map(TabConfig.fromJson)
             .toList() ??
         [];
+    final excludeRoutes = (json['shellExcludeRoutes'] as List?)
+            ?.whereType<String>()
+            .where((route) => route.isNotEmpty)
+            .toList() ??
+        [];
     return NavigationConfig(
       type: json['type'] as String? ?? 'stack',
       initialRoute: json['initialRoute'] as String? ?? '/',
       tabs: tabList,
+      shellExcludeRoutes: excludeRoutes,
     );
   }
 

@@ -16,7 +16,10 @@ class RichTextRenderer implements ComponentRenderer {
       config.properties['color'] as String?,
     );
 
-    return Text(_stripHtml(value), style: TextStyle(color: color));
+    return Text(
+      _stripHtml(value),
+      style: TextStyle(color: color, decoration: TextDecoration.none),
+    );
   }
 
   String _stripHtml(String value) {
