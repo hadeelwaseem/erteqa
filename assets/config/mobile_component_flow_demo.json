@@ -14,13 +14,71 @@
       "muted": "#64748B",
       "success": "#16A34A",
       "warning": "#D97706",
-      "error": "#DC2626"
+      "error": "#DC2626",
+      "accent": "#0EA5E9"
+    },
+    "typography": {
+      "fontFamily": "SF Pro Display",
+      "scale": {
+        "xs": 12,
+        "sm": 14,
+        "md": 16,
+        "lg": 18,
+        "xl": 22,
+        "xxl": 28,
+        "display": 34
+      },
+      "weights": {
+        "normal": 400,
+        "medium": 500,
+        "bold": 700
+      },
+      "lineHeight": {
+        "tight": 1.1,
+        "normal": 1.4,
+        "relaxed": 1.6
+      }
+    },
+    "radius": {
+      "none": 0,
+      "sm": 6,
+      "md": 12,
+      "lg": 18,
+      "xl": 24,
+      "full": 999
+    },
+    "spacing": {
+      "xs": 4,
+      "sm": 8,
+      "md": 12,
+      "lg": 16,
+      "xl": 24
+    },
+    "buttons": {
+      "sm": {
+        "height": 36,
+        "padX": 12,
+        "fontSize": 13,
+        "radius": 12
+      },
+      "md": {
+        "height": 44,
+        "padX": 16,
+        "fontSize": 14,
+        "radius": 14
+      },
+      "lg": {
+        "height": 52,
+        "padX": 18,
+        "fontSize": 16,
+        "radius": 16
+      }
     }
   },
   "navigation": {
     "type": "tabs",
-    "initialRoute": "/login",
-    "shellExcludeRoutes": ["/login", "/register"],
+    "initialRoute": "/",
+    "shellExcludeRoutes": ["/product/1"],
     "tabs": [
       {
         "id": "tab-home",
@@ -30,7 +88,7 @@
       },
       {
         "id": "tab-products",
-        "label": "Products",
+        "label": "Catalog",
         "icon": "grid_view",
         "route": "/products"
       },
@@ -53,7 +111,7 @@
         "id": "home-appbar",
         "type": "appBar",
         "props": {
-          "title": "SOOQ Merchant"
+          "title": "Sooq Merchant"
         },
         "style": {
           "background": "#FFFFFF"
@@ -61,7 +119,7 @@
       },
       "body": [
         {
-          "id": "hero-card",
+          "id": "home-hero",
           "type": "container",
           "props": {},
           "style": {
@@ -71,482 +129,94 @@
               "top": 16,
               "bottom": 12
             },
-            "padding": 16,
-            "background": "#1D4ED8",
-            "borderRadius": 14
+            "padding": 20,
+            "background": "#0F172A",
+            "borderRadius": 24,
+            "shadow": "lg"
           },
           "child": {
-            "id": "hero-content",
+            "id": "home-hero-column",
             "type": "column",
             "props": {
-              "crossAxis": "start",
-              "gap": 10
+              "crossAxisAlignment": "start",
+              "gap": 12
             },
             "children": [
               {
-                "id": "hero-title",
+                "id": "home-hero-kicker",
                 "type": "text",
                 "props": {
-                  "value": "Grow your catalog sales",
-                  "fontSize": 22,
+                  "value": "Premium commerce, built for mobile",
+                  "fontSize": 13,
+                  "fontWeight": "bold",
+                  "color": "#93C5FD"
+                }
+              },
+              {
+                "id": "home-hero-title",
+                "type": "text",
+                "props": {
+                  "value": "Sell more with a cleaner storefront",
+                  "fontSize": 26,
                   "fontWeight": "bold",
                   "color": "#FFFFFF"
                 }
               },
               {
-                "id": "hero-subtitle",
-                "type": "text",
+                "id": "home-hero-body",
+                "type": "richtext",
                 "props": {
-                  "value": "Manage products, view details, and complete checkout in one flow.",
-                  "fontSize": 14,
-                  "color": "#DBEAFE"
+                  "value": "<p>Curated product discovery, fast checkout, and an app-store-ready experience for real customers.</p>",
+                  "color": "#E2E8F0"
                 }
               },
               {
-                "id": "hero-cta",
-                "type": "button",
+                "id": "home-hero-actions",
+                "type": "row",
                 "props": {
-                  "label": "Browse Products",
-                  "backgroundColor": "#FFFFFF",
-                  "textColor": "#0F172A",
-                  "padding": {
-                    "left": 18,
-                    "right": 18,
-                    "top": 12,
-                    "bottom": 12
-                  },
-                  "borderRadius": 10
-                },
-                "tap": {
-                  "type": "navigate",
-                  "route": "/products"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "id": "quick-stats",
-          "type": "container",
-          "props": {},
-          "style": {
-            "margin": {
-              "left": 16,
-              "right": 16,
-              "bottom": 12
-            }
-          },
-          "child": {
-            "id": "quick-stats-scroll",
-            "type": "singleChildScrollView",
-            "props": {
-              "axis": "horizontal"
-            },
-            "child": {
-              "id": "quick-stats-row",
-              "type": "row",
-              "props": {
-                "mainAxisAlignment": "spaceBetween",
-                "crossAxis": "stretch",
-                "gap": 12
-              },
-              "children": [
-                {
-                  "id": "stat-card-1",
-                  "type": "card",
-                  "props": {
-                    "elevation": 1,
-                    "borderRadius": 12,
-                    "color": "#FFFFFF"
-                  },
-                  "child": {
-                    "id": "stat-card-1-content",
-                    "type": "container",
-                    "props": {
-                      "padding": 12,
-                      "width": 120
-                    },
-                    "child": {
-                      "id": "stat-card-1-column",
-                      "type": "column",
-                      "props": {
-                        "crossAxis": "start",
-                        "gap": 4
-                      },
-                      "children": [
-                        {
-                          "id": "stat-1-label",
-                          "type": "text",
-                          "props": {
-                            "value": "Orders",
-                            "fontSize": 12,
-                            "color": "#64748B"
-                          }
-                        },
-                        {
-                          "id": "stat-1-value",
-                          "type": "text",
-                          "props": {
-                            "value": "128",
-                            "fontSize": 18,
-                            "fontWeight": "bold",
-                            "color": "#0F172A"
-                          }
-                        }
-                      ]
-                    }
-                  }
-                },
-                {
-                  "id": "stat-card-2",
-                  "type": "card",
-                  "props": {
-                    "elevation": 1,
-                    "borderRadius": 12,
-                    "color": "#FFFFFF"
-                  },
-                  "child": {
-                    "id": "stat-card-2-content",
-                    "type": "container",
-                    "props": {
-                      "padding": 12,
-                      "width": 120
-                    },
-                    "child": {
-                      "id": "stat-card-2-column",
-                      "type": "column",
-                      "props": {
-                        "crossAxis": "start",
-                        "gap": 4
-                      },
-                      "children": [
-                        {
-                          "id": "stat-2-label",
-                          "type": "text",
-                          "props": {
-                            "value": "Revenue",
-                            "fontSize": 12,
-                            "color": "#64748B"
-                          }
-                        },
-                        {
-                          "id": "stat-2-value",
-                          "type": "text",
-                          "props": {
-                            "value": "$14.2K",
-                            "fontSize": 18,
-                            "fontWeight": "bold",
-                            "color": "#0F172A"
-                          }
-                        }
-                      ]
-                    }
-                  }
-                },
-                {
-                  "id": "stat-card-3",
-                  "type": "card",
-                  "props": {
-                    "elevation": 1,
-                    "borderRadius": 12,
-                    "color": "#FFFFFF"
-                  },
-                  "child": {
-                    "id": "stat-card-3-content",
-                    "type": "container",
-                    "props": {
-                      "padding": 12,
-                      "width": 120
-                    },
-                    "child": {
-                      "id": "stat-card-3-column",
-                      "type": "column",
-                      "props": {
-                        "crossAxis": "start",
-                        "gap": 4
-                      },
-                      "children": [
-                        {
-                          "id": "stat-3-label",
-                          "type": "text",
-                          "props": {
-                            "value": "Visitors",
-                            "fontSize": 12,
-                            "color": "#64748B"
-                          }
-                        },
-                        {
-                          "id": "stat-3-value",
-                          "type": "text",
-                          "props": {
-                            "value": "3.1K",
-                            "fontSize": 18,
-                            "fontWeight": "bold",
-                            "color": "#0F172A"
-                          }
-                        }
-                      ]
-                    }
-                  }
-                }
-              ]
-            }
-          }
-        },
-        {
-          "id": "featured-products",
-          "type": "container",
-          "props": {},
-          "style": {
-            "margin": {
-              "left": 16,
-              "right": 16,
-              "bottom": 12
-            },
-            "padding": 12,
-            "background": "#FFFFFF",
-            "borderRadius": 12
-          },
-          "child": {
-            "id": "featured-products-column",
-            "type": "column",
-            "props": {
-              "crossAxis": "start",
-              "gap": 12
-            },
-            "children": [
-              {
-                "id": "featured-products-title",
-                "type": "text",
-                "props": {
-                  "value": "Featured Products",
-                  "fontSize": 16,
-                  "fontWeight": "bold",
-                  "color": "#0F172A"
-                }
-              },
-              {
-                "id": "featured-products-grid",
-                "type": "gridView",
-                "props": {
-                  "crossAxisCount": 2,
-                  "mainAxisSpacing": 12,
-                  "crossAxisSpacing": 12,
-                  "enableInnerScroll": false,
-                  "items": [
-                    {"id": "sku-1", "name": "Performance Sneakers"},
-                    {"id": "sku-2", "name": "Minimal T-Shirt"},
-                    {"id": "sku-3", "name": "Travel Backpack"},
-                    {"id": "sku-4", "name": "Wireless Headset"}
-                  ]
+                  "mainAxisAlignment": "start",
+                  "crossAxisAlignment": "center",
+                  "gap": 12
                 },
                 "children": [
                   {
-                    "id": "featured-card-1",
-                    "type": "card",
+                    "id": "home-hero-browse",
+                    "type": "button",
                     "props": {
-                      "elevation": 1,
-                      "borderRadius": 12,
-                      "color": "#F8FAFC"
-                    },
-                    "child": {
-                      "id": "featured-card-1-body",
-                      "type": "column",
-                      "props": {
-                        "crossAxis": "start",
-                        "gap": 6
-                      },
-                      "children": [
-                        {
-                          "id": "featured-card-1-image",
-                          "type": "image",
-                          "props": {
-                            "source": "network",
-                            "url": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&q=80",
-                            "height": 120,
-                            "fit": "cover"
-                          }
-                        },
-                        {
-                          "id": "featured-card-1-name",
-                          "type": "text",
-                          "props": {
-                            "value": "Performance Sneakers",
-                            "fontSize": 13,
-                            "fontWeight": "bold",
-                            "color": "#0F172A"
-                          }
-                        },
-                        {
-                          "id": "featured-card-1-price",
-                          "type": "text",
-                          "props": {
-                            "value": "$129.00",
-                            "fontSize": 12,
-                            "color": "#1D4ED8"
-                          }
-                        }
-                      ]
+                      "label": "Browse Catalog",
+                      "backgroundColor": "#FFFFFF",
+                      "textColor": "#0F172A",
+                      "borderRadius": 16,
+                      "padding": {
+                        "left": 16,
+                        "right": 16,
+                        "top": 12,
+                        "bottom": 12
+                      }
                     },
                     "tap": {
                       "type": "navigate",
-                      "route": "/product/1"
+                      "route": "/products"
                     }
                   },
                   {
-                    "id": "featured-card-2",
-                    "type": "card",
+                    "id": "home-hero-checkout",
+                    "type": "button",
                     "props": {
-                      "elevation": 1,
-                      "borderRadius": 12,
-                      "color": "#F8FAFC"
-                    },
-                    "child": {
-                      "id": "featured-card-2-body",
-                      "type": "column",
-                      "props": {
-                        "crossAxis": "start",
-                        "gap": 6
-                      },
-                      "children": [
-                        {
-                          "id": "featured-card-2-image",
-                          "type": "image",
-                          "props": {
-                            "source": "network",
-                            "url": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80",
-                            "height": 120,
-                            "fit": "cover"
-                          }
-                        },
-                        {
-                          "id": "featured-card-2-name",
-                          "type": "text",
-                          "props": {
-                            "value": "Minimal T-Shirt",
-                            "fontSize": 13,
-                            "fontWeight": "bold",
-                            "color": "#0F172A"
-                          }
-                        },
-                        {
-                          "id": "featured-card-2-price",
-                          "type": "text",
-                          "props": {
-                            "value": "$39.00",
-                            "fontSize": 12,
-                            "color": "#1D4ED8"
-                          }
-                        }
-                      ]
+                      "label": "Go to Checkout",
+                      "backgroundColor": "#1D4ED8",
+                      "textColor": "#FFFFFF",
+                      "borderRadius": 16,
+                      "padding": {
+                        "left": 16,
+                        "right": 16,
+                        "top": 12,
+                        "bottom": 12
+                      }
                     },
                     "tap": {
                       "type": "navigate",
-                      "route": "/product/2"
-                    }
-                  },
-                  {
-                    "id": "featured-card-3",
-                    "type": "card",
-                    "props": {
-                      "elevation": 1,
-                      "borderRadius": 12,
-                      "color": "#F8FAFC"
-                    },
-                    "child": {
-                      "id": "featured-card-3-body",
-                      "type": "column",
-                      "props": {
-                        "crossAxis": "start",
-                        "gap": 6
-                      },
-                      "children": [
-                        {
-                          "id": "featured-card-3-image",
-                          "type": "image",
-                          "props": {
-                            "source": "network",
-                            "url": "https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=800&q=80",
-                            "height": 120,
-                            "fit": "cover"
-                          }
-                        },
-                        {
-                          "id": "featured-card-3-name",
-                          "type": "text",
-                          "props": {
-                            "value": "Travel Backpack",
-                            "fontSize": 13,
-                            "fontWeight": "bold",
-                            "color": "#0F172A"
-                          }
-                        },
-                        {
-                          "id": "featured-card-3-price",
-                          "type": "text",
-                          "props": {
-                            "value": "$89.00",
-                            "fontSize": 12,
-                            "color": "#1D4ED8"
-                          }
-                        }
-                      ]
-                    },
-                    "tap": {
-                      "type": "navigate",
-                      "route": "/product/2"
-                    }
-                  },
-                  {
-                    "id": "featured-card-4",
-                    "type": "card",
-                    "props": {
-                      "elevation": 1,
-                      "borderRadius": 12,
-                      "color": "#F8FAFC"
-                    },
-                    "child": {
-                      "id": "featured-card-4-body",
-                      "type": "column",
-                      "props": {
-                        "crossAxis": "start",
-                        "gap": 6
-                      },
-                      "children": [
-                        {
-                          "id": "featured-card-4-image",
-                          "type": "image",
-                          "props": {
-                            "source": "network",
-                            "url": "https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb?w=800&q=80",
-                            "height": 120,
-                            "fit": "cover"
-                          }
-                        },
-                        {
-                          "id": "featured-card-4-name",
-                          "type": "text",
-                          "props": {
-                            "value": "Wireless Headset",
-                            "fontSize": 13,
-                            "fontWeight": "bold",
-                            "color": "#0F172A"
-                          }
-                        },
-                        {
-                          "id": "featured-card-4-price",
-                          "type": "text",
-                          "props": {
-                            "value": "$159.00",
-                            "fontSize": 12,
-                            "color": "#1D4ED8"
-                          }
-                        }
-                      ]
-                    },
-                    "tap": {
-                      "type": "navigate",
-                      "route": "/product/2"
+                      "route": "/checkout"
                     }
                   }
                 ]
@@ -555,25 +225,677 @@
           }
         },
         {
-          "id": "home-footer-note",
+          "id": "home-metrics",
           "type": "container",
           "props": {},
           "style": {
             "margin": {
               "left": 16,
               "right": 16,
-              "bottom": 20
-            },
-            "padding": 12,
-            "background": "#FFFFFF",
-            "borderRadius": 10
+              "bottom": 12
+            }
           },
           "child": {
-            "id": "home-footer-rich",
-            "type": "richtext",
+            "id": "home-metrics-row",
+            "type": "row",
             "props": {
-              "value": "<p><b>Demo Flow:</b> Home -> Products -> Product Details -> Checkout</p>"
+              "mainAxisAlignment": "spaceBetween",
+              "crossAxisAlignment": "stretch",
+              "gap": 10
+            },
+            "children": [
+              {
+                "id": "metric-orders-card",
+                "type": "card",
+                "props": {
+                  "elevation": 1,
+                  "borderRadius": 18,
+                  "color": "#FFFFFF"
+                },
+                "child": {
+                  "id": "metric-orders-body",
+                  "type": "container",
+                  "props": {
+                    "padding": 14,
+                    "width": 105
+                  },
+                  "child": {
+                    "id": "metric-orders-column",
+                    "type": "column",
+                    "props": {
+                      "crossAxisAlignment": "start",
+                      "gap": 4
+                    },
+                    "children": [
+                      {
+                        "id": "metric-orders-label",
+                        "type": "text",
+                        "props": {
+                          "value": "Orders",
+                          "fontSize": 12,
+                          "color": "#64748B"
+                        }
+                      },
+                      {
+                        "id": "metric-orders-value",
+                        "type": "text",
+                        "props": {
+                          "value": "128",
+                          "fontSize": 20,
+                          "fontWeight": "bold",
+                          "color": "#0F172A"
+                        }
+                      },
+                      {
+                        "id": "metric-orders-note",
+                        "type": "text",
+                        "props": {
+                          "value": "+12% this week",
+                          "fontSize": 11,
+                          "color": "#16A34A"
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "id": "metric-revenue-card",
+                "type": "card",
+                "props": {
+                  "elevation": 1,
+                  "borderRadius": 18,
+                  "color": "#FFFFFF"
+                },
+                "child": {
+                  "id": "metric-revenue-body",
+                  "type": "container",
+                  "props": {
+                    "padding": 14,
+                    "width": 105
+                  },
+                  "child": {
+                    "id": "metric-revenue-column",
+                    "type": "column",
+                    "props": {
+                      "crossAxisAlignment": "start",
+                      "gap": 4
+                    },
+                    "children": [
+                      {
+                        "id": "metric-revenue-label",
+                        "type": "text",
+                        "props": {
+                          "value": "Revenue",
+                          "fontSize": 12,
+                          "color": "#64748B"
+                        }
+                      },
+                      {
+                        "id": "metric-revenue-value",
+                        "type": "text",
+                        "props": {
+                          "value": "$14.2K",
+                          "fontSize": 20,
+                          "fontWeight": "bold",
+                          "color": "#0F172A"
+                        }
+                      },
+                      {
+                        "id": "metric-revenue-note",
+                        "type": "text",
+                        "props": {
+                          "value": "Healthy margin",
+                          "fontSize": 11,
+                          "color": "#1D4ED8"
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "id": "metric-rating-card",
+                "type": "card",
+                "props": {
+                  "elevation": 1,
+                  "borderRadius": 18,
+                  "color": "#FFFFFF"
+                },
+                "child": {
+                  "id": "metric-rating-body",
+                  "type": "container",
+                  "props": {
+                    "padding": 14,
+                    "width": 105
+                  },
+                  "child": {
+                    "id": "metric-rating-column",
+                    "type": "column",
+                    "props": {
+                      "crossAxisAlignment": "start",
+                      "gap": 4
+                    },
+                    "children": [
+                      {
+                        "id": "metric-rating-label",
+                        "type": "text",
+                        "props": {
+                          "value": "Rating",
+                          "fontSize": 12,
+                          "color": "#64748B"
+                        }
+                      },
+                      {
+                        "id": "metric-rating-value",
+                        "type": "text",
+                        "props": {
+                          "value": "4.9/5",
+                          "fontSize": 20,
+                          "fontWeight": "bold",
+                          "color": "#0F172A"
+                        }
+                      },
+                      {
+                        "id": "metric-rating-note",
+                        "type": "text",
+                        "props": {
+                          "value": "Customer favorite",
+                          "fontSize": 11,
+                          "color": "#D97706"
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "home-rail",
+          "type": "container",
+          "props": {},
+          "style": {
+            "margin": {
+              "left": 16,
+              "right": 16,
+              "bottom": 12
             }
+          },
+          "child": {
+            "id": "home-rail-scroll",
+            "type": "singleChildScrollView",
+            "props": {
+              "axis": "horizontal"
+            },
+            "child": {
+              "id": "home-rail-row",
+              "type": "row",
+              "props": {
+                "crossAxisAlignment": "center",
+                "gap": 10
+              },
+              "children": [
+                {
+                  "id": "rail-all",
+                  "type": "button",
+                  "props": {
+                    "label": "All",
+                    "backgroundColor": "#1D4ED8",
+                    "textColor": "#FFFFFF",
+                    "borderRadius": 18,
+                    "padding": {
+                      "left": 14,
+                      "right": 14,
+                      "top": 9,
+                      "bottom": 9
+                    }
+                  }
+                },
+                {
+                  "id": "rail-shoes",
+                  "type": "button",
+                  "props": {
+                    "label": "Shoes",
+                    "backgroundColor": "#FFFFFF",
+                    "textColor": "#0F172A",
+                    "borderRadius": 18,
+                    "padding": {
+                      "left": 14,
+                      "right": 14,
+                      "top": 9,
+                      "bottom": 9
+                    }
+                  }
+                },
+                {
+                  "id": "rail-apparel",
+                  "type": "button",
+                  "props": {
+                    "label": "Apparel",
+                    "backgroundColor": "#FFFFFF",
+                    "textColor": "#0F172A",
+                    "borderRadius": 18,
+                    "padding": {
+                      "left": 14,
+                      "right": 14,
+                      "top": 9,
+                      "bottom": 9
+                    }
+                  }
+                },
+                {
+                  "id": "rail-accessories",
+                  "type": "button",
+                  "props": {
+                    "label": "Accessories",
+                    "backgroundColor": "#FFFFFF",
+                    "textColor": "#0F172A",
+                    "borderRadius": 18,
+                    "padding": {
+                      "left": 14,
+                      "right": 14,
+                      "top": 9,
+                      "bottom": 9
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "home-featured-section",
+          "type": "container",
+          "props": {},
+          "style": {
+            "margin": {
+              "left": 16,
+              "right": 16,
+              "bottom": 12
+            },
+            "padding": 16,
+            "background": "#FFFFFF",
+            "borderRadius": 24,
+            "shadow": "sm"
+          },
+          "child": {
+            "id": "home-featured-column",
+            "type": "column",
+            "props": {
+              "crossAxisAlignment": "start",
+              "gap": 14
+            },
+            "children": [
+              {
+                "id": "home-featured-header",
+                "type": "row",
+                "props": {
+                  "mainAxisAlignment": "spaceBetween",
+                  "crossAxisAlignment": "center"
+                },
+                "children": [
+                  {
+                    "id": "home-featured-title",
+                    "type": "text",
+                    "props": {
+                      "value": "Featured products",
+                      "fontSize": 18,
+                      "fontWeight": "bold",
+                      "color": "#0F172A"
+                    }
+                  },
+                  {
+                    "id": "home-featured-link",
+                    "type": "button",
+                    "props": {
+                      "label": "See all",
+                      "backgroundColor": "#E2E8F0",
+                      "textColor": "#0F172A",
+                      "borderRadius": 14,
+                      "padding": {
+                        "left": 12,
+                        "right": 12,
+                        "top": 8,
+                        "bottom": 8
+                      }
+                    },
+                    "tap": {
+                      "type": "navigate",
+                      "route": "/products"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "home-featured-grid",
+                "type": "gridView",
+                "props": {
+                  "crossAxisCount": 2,
+                  "mainAxisSpacing": 12,
+                  "crossAxisSpacing": 12,
+                  "enableInnerScroll": false
+                },
+                "children": [
+                  {
+                    "id": "featured-product-1",
+                    "type": "card",
+                    "props": {
+                      "elevation": 1,
+                      "borderRadius": 20,
+                      "color": "#FFFFFF"
+                    },
+                    "tap": {
+                      "type": "navigate",
+                      "route": "/product/1"
+                    },
+                    "child": {
+                      "id": "featured-product-1-body",
+                      "type": "container",
+                      "props": {
+                        "padding": 12
+                      },
+                      "child": {
+                        "id": "featured-product-1-column",
+                        "type": "column",
+                        "props": {
+                          "crossAxisAlignment": "start",
+                          "gap": 8
+                        },
+                        "children": [
+                          {
+                            "id": "featured-product-1-image",
+                            "type": "image",
+                            "props": {
+                              "source": "network",
+                              "url": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1000&q=80",
+                              "aspectRatio": 1.15,
+                              "fit": "cover"
+                            }
+                          },
+                          {
+                            "id": "featured-product-1-name",
+                            "type": "text",
+                            "props": {
+                              "value": "Performance Sneakers",
+                              "fontSize": 14,
+                              "fontWeight": "bold",
+                              "color": "#0F172A"
+                            }
+                          },
+                          {
+                            "id": "featured-product-1-meta",
+                            "type": "text",
+                            "props": {
+                              "value": "Fast moving inventory",
+                              "fontSize": 12,
+                              "color": "#64748B"
+                            }
+                          },
+                          {
+                            "id": "featured-product-1-price",
+                            "type": "text",
+                            "props": {
+                              "value": "$129.00",
+                              "fontSize": 14,
+                              "fontWeight": "bold",
+                              "color": "#1D4ED8"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "id": "featured-product-2",
+                    "type": "card",
+                    "props": {
+                      "elevation": 1,
+                      "borderRadius": 20,
+                      "color": "#FFFFFF"
+                    },
+                    "tap": {
+                      "type": "navigate",
+                      "route": "/product/1"
+                    },
+                    "child": {
+                      "id": "featured-product-2-body",
+                      "type": "container",
+                      "props": {
+                        "padding": 12
+                      },
+                      "child": {
+                        "id": "featured-product-2-column",
+                        "type": "column",
+                        "props": {
+                          "crossAxisAlignment": "start",
+                          "gap": 8
+                        },
+                        "children": [
+                          {
+                            "id": "featured-product-2-image",
+                            "type": "image",
+                            "props": {
+                              "source": "network",
+                              "url": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=1000&q=80",
+                              "aspectRatio": 1.15,
+                              "fit": "cover"
+                            }
+                          },
+                          {
+                            "id": "featured-product-2-name",
+                            "type": "text",
+                            "props": {
+                              "value": "Minimal T-Shirt",
+                              "fontSize": 14,
+                              "fontWeight": "bold",
+                              "color": "#0F172A"
+                            }
+                          },
+                          {
+                            "id": "featured-product-2-meta",
+                            "type": "text",
+                            "props": {
+                              "value": "Best seller today",
+                              "fontSize": 12,
+                              "color": "#64748B"
+                            }
+                          },
+                          {
+                            "id": "featured-product-2-price",
+                            "type": "text",
+                            "props": {
+                              "value": "$39.00",
+                              "fontSize": 14,
+                              "fontWeight": "bold",
+                              "color": "#1D4ED8"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "id": "featured-product-3",
+                    "type": "card",
+                    "props": {
+                      "elevation": 1,
+                      "borderRadius": 20,
+                      "color": "#FFFFFF"
+                    },
+                    "tap": {
+                      "type": "navigate",
+                      "route": "/product/1"
+                    },
+                    "child": {
+                      "id": "featured-product-3-body",
+                      "type": "container",
+                      "props": {
+                        "padding": 12
+                      },
+                      "child": {
+                        "id": "featured-product-3-column",
+                        "type": "column",
+                        "props": {
+                          "crossAxisAlignment": "start",
+                          "gap": 8
+                        },
+                        "children": [
+                          {
+                            "id": "featured-product-3-image",
+                            "type": "image",
+                            "props": {
+                              "source": "network",
+                              "url": "https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=1000&q=80",
+                              "aspectRatio": 1.15,
+                              "fit": "cover"
+                            }
+                          },
+                          {
+                            "id": "featured-product-3-name",
+                            "type": "text",
+                            "props": {
+                              "value": "Travel Backpack",
+                              "fontSize": 14,
+                              "fontWeight": "bold",
+                              "color": "#0F172A"
+                            }
+                          },
+                          {
+                            "id": "featured-product-3-meta",
+                            "type": "text",
+                            "props": {
+                              "value": "Low stock alert",
+                              "fontSize": 12,
+                              "color": "#64748B"
+                            }
+                          },
+                          {
+                            "id": "featured-product-3-price",
+                            "type": "text",
+                            "props": {
+                              "value": "$89.00",
+                              "fontSize": 14,
+                              "fontWeight": "bold",
+                              "color": "#1D4ED8"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "id": "featured-product-4",
+                    "type": "card",
+                    "props": {
+                      "elevation": 1,
+                      "borderRadius": 20,
+                      "color": "#FFFFFF"
+                    },
+                    "tap": {
+                      "type": "navigate",
+                      "route": "/product/1"
+                    },
+                    "child": {
+                      "id": "featured-product-4-body",
+                      "type": "container",
+                      "props": {
+                        "padding": 12
+                      },
+                      "child": {
+                        "id": "featured-product-4-column",
+                        "type": "column",
+                        "props": {
+                          "crossAxisAlignment": "start",
+                          "gap": 8
+                        },
+                        "children": [
+                          {
+                            "id": "featured-product-4-image",
+                            "type": "image",
+                            "props": {
+                              "source": "network",
+                              "url": "https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb?w=1000&q=80",
+                              "aspectRatio": 1.15,
+                              "fit": "cover"
+                            }
+                          },
+                          {
+                            "id": "featured-product-4-name",
+                            "type": "text",
+                            "props": {
+                              "value": "Wireless Headset",
+                              "fontSize": 14,
+                              "fontWeight": "bold",
+                              "color": "#0F172A"
+                            }
+                          },
+                          {
+                            "id": "featured-product-4-meta",
+                            "type": "text",
+                            "props": {
+                              "value": "High intent accessory",
+                              "fontSize": 12,
+                              "color": "#64748B"
+                            }
+                          },
+                          {
+                            "id": "featured-product-4-price",
+                            "type": "text",
+                            "props": {
+                              "value": "$159.00",
+                              "fontSize": 14,
+                              "fontWeight": "bold",
+                              "color": "#1D4ED8"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "home-trust",
+                "type": "container",
+                "props": {},
+                "style": {
+                  "padding": 14,
+                  "background": "#F8FAFC",
+                  "borderRadius": 18
+                },
+                "child": {
+                  "id": "home-trust-row",
+                  "type": "row",
+                  "props": {
+                    "mainAxisAlignment": "start",
+                    "crossAxisAlignment": "center",
+                    "gap": 10
+                  },
+                  "children": [
+                    {
+                      "id": "home-trust-icon",
+                      "type": "icon",
+                      "props": {
+                        "name": "store",
+                        "size": 20,
+                        "color": "#16A34A"
+                      }
+                    },
+                    {
+                      "id": "home-trust-text",
+                      "type": "text",
+                      "props": {
+                        "value": "RTL-friendly layouts, large touch targets, and conversion-first product discovery.",
+                        "fontSize": 13,
+                        "color": "#334155"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
           }
         }
       ]
@@ -581,19 +903,22 @@
     {
       "id": "products-screen",
       "route": "/products",
-      "title": "Products",
+      "title": "Catalog",
       "background": "#F8FAFC",
       "scroll": "vertical",
       "appBar": {
         "id": "products-appbar",
         "type": "appBar",
         "props": {
-          "title": "Products"
+          "title": "Catalog"
+        },
+        "style": {
+          "background": "#FFFFFF"
         }
       },
       "body": [
         {
-          "id": "products-intro",
+          "id": "products-summary",
           "type": "container",
           "props": {},
           "style": {
@@ -603,22 +928,60 @@
               "top": 16,
               "bottom": 12
             },
-            "padding": 14,
+            "padding": 16,
             "background": "#FFFFFF",
-            "borderRadius": 12
+            "borderRadius": 22,
+            "shadow": "sm"
           },
           "child": {
-            "id": "products-intro-text",
-            "type": "text",
+            "id": "products-summary-column",
+            "type": "column",
             "props": {
-              "value": "Choose a featured product to open details.",
-              "fontSize": 14,
-              "color": "#334155"
-            }
+              "crossAxisAlignment": "start",
+              "gap": 12
+            },
+            "children": [
+              {
+                "id": "products-summary-title",
+                "type": "text",
+                "props": {
+                  "value": "Browse a cleaner, higher-converting catalog.",
+                  "fontSize": 18,
+                  "fontWeight": "bold",
+                  "color": "#0F172A"
+                }
+              },
+              {
+                "id": "products-summary-body",
+                "type": "richtext",
+                "props": {
+                  "value": "<p>Use structured merchandising, visible stock cues, and fast purchase paths to move customers from discovery to checkout.</p>",
+                  "color": "#475569"
+                }
+              },
+              {
+                "id": "products-search",
+                "type": "textFormField",
+                "props": {
+                  "label": "Search products",
+                  "hint": "Sneakers, apparel, accessories",
+                  "prefixIcon": "search",
+                  "validateRequired": false,
+                  "color": "#FFFFFF",
+                  "borderRadius": 16,
+                  "padding": {
+                    "left": 14,
+                    "right": 14,
+                    "top": 14,
+                    "bottom": 14
+                  }
+                }
+              }
+            ]
           }
         },
         {
-          "id": "product-category-scroll",
+          "id": "products-filters",
           "type": "container",
           "props": {},
           "style": {
@@ -629,76 +992,80 @@
             }
           },
           "child": {
-            "id": "product-category-scrollview",
+            "id": "products-filters-scroll",
             "type": "singleChildScrollView",
             "props": {
               "axis": "horizontal"
             },
             "child": {
-              "id": "product-category-row",
+              "id": "products-filters-row",
               "type": "row",
               "props": {
-                "crossAxis": "center",
+                "crossAxisAlignment": "center",
                 "gap": 10
               },
               "children": [
                 {
-                  "id": "category-all",
+                  "id": "filter-all",
                   "type": "button",
                   "props": {
                     "label": "All",
                     "backgroundColor": "#1D4ED8",
+                    "textColor": "#FFFFFF",
                     "borderRadius": 18,
                     "padding": {
                       "left": 14,
                       "right": 14,
-                      "top": 8,
-                      "bottom": 8
+                      "top": 9,
+                      "bottom": 9
                     }
                   }
                 },
                 {
-                  "id": "category-shoes",
+                  "id": "filter-shoes",
                   "type": "button",
                   "props": {
                     "label": "Shoes",
-                    "backgroundColor": "#E2E8F0",
+                    "backgroundColor": "#FFFFFF",
+                    "textColor": "#0F172A",
                     "borderRadius": 18,
                     "padding": {
                       "left": 14,
                       "right": 14,
-                      "top": 8,
-                      "bottom": 8
+                      "top": 9,
+                      "bottom": 9
                     }
                   }
                 },
                 {
-                  "id": "category-apparel",
+                  "id": "filter-apparel",
                   "type": "button",
                   "props": {
                     "label": "Apparel",
-                    "backgroundColor": "#E2E8F0",
+                    "backgroundColor": "#FFFFFF",
+                    "textColor": "#0F172A",
                     "borderRadius": 18,
                     "padding": {
                       "left": 14,
                       "right": 14,
-                      "top": 8,
-                      "bottom": 8
+                      "top": 9,
+                      "bottom": 9
                     }
                   }
                 },
                 {
-                  "id": "category-accessories",
+                  "id": "filter-accessories",
                   "type": "button",
                   "props": {
                     "label": "Accessories",
-                    "backgroundColor": "#E2E8F0",
+                    "backgroundColor": "#FFFFFF",
+                    "textColor": "#0F172A",
                     "borderRadius": 18,
                     "padding": {
                       "left": 14,
                       "right": 14,
-                      "top": 8,
-                      "bottom": 8
+                      "top": 9,
+                      "bottom": 9
                     }
                   }
                 }
@@ -707,80 +1074,65 @@
           }
         },
         {
-          "id": "products-list-container",
-          "type": "container",
+          "id": "products-list",
+          "type": "listView",
           "props": {
-            "height": 420
+            "scrollDirection": "vertical",
+            "enableInnerScroll": false
           },
-          "child": {
-            "id": "products-list",
-            "type": "listView",
-            "props": {
-              "scrollDirection": "vertical",
-              "enableInnerScroll": true,
-              "items": [
-                {"id": "sku-1", "name": "Performance Sneakers"},
-                {"id": "sku-2", "name": "Minimal T-Shirt"},
-                {"id": "sku-3", "name": "Travel Backpack"},
-                {"id": "sku-4", "name": "Wireless Headset"},
-                {"id": "sku-5", "name": "Canvas Tote"},
-                {"id": "sku-6", "name": "Sport Jacket"},
-                {"id": "sku-7", "name": "Smartwatch Band"},
-                {"id": "sku-8", "name": "Running Shorts"},
-                {"id": "sku-9", "name": "Leather Wallet"},
-                {"id": "sku-10", "name": "Training Cap"},
-                {"id": "sku-11", "name": "Travel Mug"},
-                {"id": "sku-12", "name": "Yoga Mat"}
-              ]
-            },
-            "children": [
-              {
-                "id": "product-item-1",
+          "children": [
+            {
+              "id": "catalog-item-1",
+              "type": "card",
+              "props": {
+                "elevation": 1,
+                "borderRadius": 20,
+                "color": "#FFFFFF"
+              },
+              "tap": {
+                "type": "navigate",
+                "route": "/product/1"
+              },
+              "child": {
+                "id": "catalog-item-1-body",
                 "type": "container",
-                "props": {},
-                "style": {
+                "props": {
+                  "padding": 12,
                   "margin": {
                     "left": 16,
                     "right": 16,
                     "bottom": 12
-                  },
-                  "padding": 12,
-                  "background": "#FFFFFF",
-                  "borderRadius": 12
-                },
-                "tap": {
-                  "type": "navigate",
-                  "route": "/product/1"
+                  }
                 },
                 "child": {
-                  "id": "product-item-1-row",
+                  "id": "catalog-item-1-row",
                   "type": "row",
                   "props": {
-                    "crossAxis": "center",
+                    "crossAxisAlignment": "center",
                     "gap": 12
                   },
                   "children": [
                     {
-                      "id": "product-item-1-image",
+                      "id": "catalog-item-1-image",
                       "type": "image",
                       "props": {
                         "source": "network",
-                        "url": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&q=80",
-                        "width": 88,
-                        "height": 88,
+                        "url": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1000&q=80",
+                        "width": 84,
+                        "height": 84,
                         "fit": "cover"
                       }
                     },
                     {
-                      "id": "product-item-1-meta",
+                      "id": "catalog-item-1-meta",
                       "type": "column",
                       "props": {
-                        "crossAxis": "start",
+                        "crossAxisAlignment": "start",
                         "gap": 4
                       },
                       "children": [
                         {
-                          "id": "product-item-1-title",
+                          "id": "catalog-item-1-title",
                           "type": "text",
                           "props": {
                             "value": "Performance Sneakers",
@@ -790,20 +1142,20 @@
                           }
                         },
                         {
-                          "id": "product-item-1-sub",
+                          "id": "catalog-item-1-sub",
                           "type": "text",
                           "props": {
-                            "value": "In stock: 42 units",
+                            "value": "In stock • fast ship",
                             "fontSize": 13,
                             "color": "#64748B"
                           }
                         },
                         {
-                          "id": "product-item-1-price",
+                          "id": "catalog-item-1-price",
                           "type": "text",
                           "props": {
                             "value": "$129.00",
-                            "fontSize": 14,
+                            "fontSize": 15,
                             "fontWeight": "bold",
                             "color": "#1D4ED8"
                           }
@@ -812,54 +1164,60 @@
                     }
                   ]
                 }
+              }
+            },
+            {
+              "id": "catalog-item-2",
+              "type": "card",
+              "props": {
+                "elevation": 1,
+                "borderRadius": 20,
+                "color": "#FFFFFF"
               },
-              {
-                "id": "product-item-2",
+              "tap": {
+                "type": "navigate",
+                "route": "/product/1"
+              },
+              "child": {
+                "id": "catalog-item-2-body",
                 "type": "container",
-                "props": {},
-                "style": {
+                "props": {
+                  "padding": 12,
                   "margin": {
                     "left": 16,
                     "right": 16,
                     "bottom": 12
-                  },
-                  "padding": 12,
-                  "background": "#FFFFFF",
-                  "borderRadius": 12
-                },
-                "tap": {
-                  "type": "navigate",
-                  "route": "/product/2"
+                  }
                 },
                 "child": {
-                  "id": "product-item-2-row",
+                  "id": "catalog-item-2-row",
                   "type": "row",
                   "props": {
-                    "crossAxis": "center",
+                    "crossAxisAlignment": "center",
                     "gap": 12
                   },
                   "children": [
                     {
-                      "id": "product-item-2-image",
+                      "id": "catalog-item-2-image",
                       "type": "image",
                       "props": {
                         "source": "network",
-                        "url": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80",
-                        "width": 88,
-                        "height": 88,
+                        "url": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=1000&q=80",
+                        "width": 84,
+                        "height": 84,
                         "fit": "cover"
                       }
                     },
                     {
-                      "id": "product-item-2-meta",
+                      "id": "catalog-item-2-meta",
                       "type": "column",
                       "props": {
-                        "crossAxis": "start",
+                        "crossAxisAlignment": "start",
                         "gap": 4
                       },
                       "children": [
                         {
-                          "id": "product-item-2-title",
+                          "id": "catalog-item-2-title",
                           "type": "text",
                           "props": {
                             "value": "Minimal T-Shirt",
@@ -869,20 +1227,20 @@
                           }
                         },
                         {
-                          "id": "product-item-2-sub",
+                          "id": "catalog-item-2-sub",
                           "type": "text",
                           "props": {
-                            "value": "In stock: 75 units",
+                            "value": "Best seller today",
                             "fontSize": 13,
                             "color": "#64748B"
                           }
                         },
                         {
-                          "id": "product-item-2-price",
+                          "id": "catalog-item-2-price",
                           "type": "text",
                           "props": {
                             "value": "$39.00",
-                            "fontSize": 14,
+                            "fontSize": 15,
                             "fontWeight": "bold",
                             "color": "#1D4ED8"
                           }
@@ -891,54 +1249,60 @@
                     }
                   ]
                 }
+              }
+            },
+            {
+              "id": "catalog-item-3",
+              "type": "card",
+              "props": {
+                "elevation": 1,
+                "borderRadius": 20,
+                "color": "#FFFFFF"
               },
-              {
-                "id": "product-item-3",
+              "tap": {
+                "type": "navigate",
+                "route": "/product/1"
+              },
+              "child": {
+                "id": "catalog-item-3-body",
                 "type": "container",
-                "props": {},
-                "style": {
+                "props": {
+                  "padding": 12,
                   "margin": {
                     "left": 16,
                     "right": 16,
                     "bottom": 12
-                  },
-                  "padding": 12,
-                  "background": "#FFFFFF",
-                  "borderRadius": 12
-                },
-                "tap": {
-                  "type": "navigate",
-                  "route": "/product/2"
+                  }
                 },
                 "child": {
-                  "id": "product-item-3-row",
+                  "id": "catalog-item-3-row",
                   "type": "row",
                   "props": {
-                    "crossAxis": "center",
+                    "crossAxisAlignment": "center",
                     "gap": 12
                   },
                   "children": [
                     {
-                      "id": "product-item-3-image",
+                      "id": "catalog-item-3-image",
                       "type": "image",
                       "props": {
                         "source": "network",
-                        "url": "https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=800&q=80",
-                        "width": 88,
-                        "height": 88,
+                        "url": "https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=1000&q=80",
+                        "width": 84,
+                        "height": 84,
                         "fit": "cover"
                       }
                     },
                     {
-                      "id": "product-item-3-meta",
+                      "id": "catalog-item-3-meta",
                       "type": "column",
                       "props": {
-                        "crossAxis": "start",
+                        "crossAxisAlignment": "start",
                         "gap": 4
                       },
                       "children": [
                         {
-                          "id": "product-item-3-title",
+                          "id": "catalog-item-3-title",
                           "type": "text",
                           "props": {
                             "value": "Travel Backpack",
@@ -948,20 +1312,20 @@
                           }
                         },
                         {
-                          "id": "product-item-3-sub",
+                          "id": "catalog-item-3-sub",
                           "type": "text",
                           "props": {
-                            "value": "In stock: 18 units",
+                            "value": "Low stock alert",
                             "fontSize": 13,
                             "color": "#64748B"
                           }
                         },
                         {
-                          "id": "product-item-3-price",
+                          "id": "catalog-item-3-price",
                           "type": "text",
                           "props": {
                             "value": "$89.00",
-                            "fontSize": 14,
+                            "fontSize": 15,
                             "fontWeight": "bold",
                             "color": "#1D4ED8"
                           }
@@ -970,54 +1334,60 @@
                     }
                   ]
                 }
+              }
+            },
+            {
+              "id": "catalog-item-4",
+              "type": "card",
+              "props": {
+                "elevation": 1,
+                "borderRadius": 20,
+                "color": "#FFFFFF"
               },
-              {
-                "id": "product-item-4",
+              "tap": {
+                "type": "navigate",
+                "route": "/product/1"
+              },
+              "child": {
+                "id": "catalog-item-4-body",
                 "type": "container",
-                "props": {},
-                "style": {
+                "props": {
+                  "padding": 12,
                   "margin": {
                     "left": 16,
                     "right": 16,
                     "bottom": 12
-                  },
-                  "padding": 12,
-                  "background": "#FFFFFF",
-                  "borderRadius": 12
-                },
-                "tap": {
-                  "type": "navigate",
-                  "route": "/product/2"
+                  }
                 },
                 "child": {
-                  "id": "product-item-4-row",
+                  "id": "catalog-item-4-row",
                   "type": "row",
                   "props": {
-                    "crossAxis": "center",
+                    "crossAxisAlignment": "center",
                     "gap": 12
                   },
                   "children": [
                     {
-                      "id": "product-item-4-image",
+                      "id": "catalog-item-4-image",
                       "type": "image",
                       "props": {
                         "source": "network",
-                        "url": "https://images.unsplash.com/photo-1505740106531-4243f3831c78?w=800&q=80",
-                        "width": 88,
-                        "height": 88,
+                        "url": "https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb?w=1000&q=80",
+                        "width": 84,
+                        "height": 84,
                         "fit": "cover"
                       }
                     },
                     {
-                      "id": "product-item-4-meta",
+                      "id": "catalog-item-4-meta",
                       "type": "column",
                       "props": {
-                        "crossAxis": "start",
+                        "crossAxisAlignment": "start",
                         "gap": 4
                       },
                       "children": [
                         {
-                          "id": "product-item-4-title",
+                          "id": "catalog-item-4-title",
                           "type": "text",
                           "props": {
                             "value": "Wireless Headset",
@@ -1027,652 +1397,20 @@
                           }
                         },
                         {
-                          "id": "product-item-4-sub",
+                          "id": "catalog-item-4-sub",
                           "type": "text",
                           "props": {
-                            "value": "In stock: 24 units",
+                            "value": "High intent accessory",
                             "fontSize": 13,
                             "color": "#64748B"
                           }
                         },
                         {
-                          "id": "product-item-4-price",
+                          "id": "catalog-item-4-price",
                           "type": "text",
                           "props": {
                             "value": "$159.00",
-                            "fontSize": 14,
-                            "fontWeight": "bold",
-                            "color": "#1D4ED8"
-                          }
-                        }
-                      ]
-                    }
-                  ]
-                }
-              },
-              {
-                "id": "product-item-5",
-                "type": "container",
-                "props": {},
-                "style": {
-                  "margin": {
-                    "left": 16,
-                    "right": 16,
-                    "bottom": 12
-                  },
-                  "padding": 12,
-                  "background": "#FFFFFF",
-                  "borderRadius": 12
-                },
-                "tap": {
-                  "type": "navigate",
-                  "route": "/product/2"
-                },
-                "child": {
-                  "id": "product-item-5-row",
-                  "type": "row",
-                  "props": {
-                    "crossAxis": "center",
-                    "gap": 12
-                  },
-                  "children": [
-                    {
-                      "id": "product-item-5-image",
-                      "type": "image",
-                      "props": {
-                        "source": "network",
-                        "url": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80",
-                        "width": 88,
-                        "height": 88,
-                        "fit": "cover"
-                      }
-                    },
-                    {
-                      "id": "product-item-5-meta",
-                      "type": "column",
-                      "props": {
-                        "crossAxis": "start",
-                        "gap": 4
-                      },
-                      "children": [
-                        {
-                          "id": "product-item-5-title",
-                          "type": "text",
-                          "props": {
-                            "value": "Canvas Tote",
-                            "fontSize": 16,
-                            "fontWeight": "bold",
-                            "color": "#0F172A"
-                          }
-                        },
-                        {
-                          "id": "product-item-5-sub",
-                          "type": "text",
-                          "props": {
-                            "value": "In stock: 56 units",
-                            "fontSize": 13,
-                            "color": "#64748B"
-                          }
-                        },
-                        {
-                          "id": "product-item-5-price",
-                          "type": "text",
-                          "props": {
-                            "value": "$29.00",
-                            "fontSize": 14,
-                            "fontWeight": "bold",
-                            "color": "#1D4ED8"
-                          }
-                        }
-                      ]
-                    }
-                  ]
-                }
-              },
-              {
-                "id": "product-item-6",
-                "type": "container",
-                "props": {},
-                "style": {
-                  "margin": {
-                    "left": 16,
-                    "right": 16,
-                    "bottom": 12
-                  },
-                  "padding": 12,
-                  "background": "#FFFFFF",
-                  "borderRadius": 12
-                },
-                "tap": {
-                  "type": "navigate",
-                  "route": "/product/2"
-                },
-                "child": {
-                  "id": "product-item-6-row",
-                  "type": "row",
-                  "props": {
-                    "crossAxis": "center",
-                    "gap": 12
-                  },
-                  "children": [
-                    {
-                      "id": "product-item-6-image",
-                      "type": "image",
-                      "props": {
-                        "source": "network",
-                        "url": "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=800&q=80",
-                        "width": 88,
-                        "height": 88,
-                        "fit": "cover"
-                      }
-                    },
-                    {
-                      "id": "product-item-6-meta",
-                      "type": "column",
-                      "props": {
-                        "crossAxis": "start",
-                        "gap": 4
-                      },
-                      "children": [
-                        {
-                          "id": "product-item-6-title",
-                          "type": "text",
-                          "props": {
-                            "value": "Sport Jacket",
-                            "fontSize": 16,
-                            "fontWeight": "bold",
-                            "color": "#0F172A"
-                          }
-                        },
-                        {
-                          "id": "product-item-6-sub",
-                          "type": "text",
-                          "props": {
-                            "value": "In stock: 20 units",
-                            "fontSize": 13,
-                            "color": "#64748B"
-                          }
-                        },
-                        {
-                          "id": "product-item-6-price",
-                          "type": "text",
-                          "props": {
-                            "value": "$109.00",
-                            "fontSize": 14,
-                            "fontWeight": "bold",
-                            "color": "#1D4ED8"
-                          }
-                        }
-                      ]
-                    }
-                  ]
-                }
-              },
-              {
-                "id": "product-item-7",
-                "type": "container",
-                "props": {},
-                "style": {
-                  "margin": {
-                    "left": 16,
-                    "right": 16,
-                    "bottom": 12
-                  },
-                  "padding": 12,
-                  "background": "#FFFFFF",
-                  "borderRadius": 12
-                },
-                "tap": {
-                  "type": "navigate",
-                  "route": "/product/2"
-                },
-                "child": {
-                  "id": "product-item-7-row",
-                  "type": "row",
-                  "props": {
-                    "crossAxis": "center",
-                    "gap": 12
-                  },
-                  "children": [
-                    {
-                      "id": "product-item-7-image",
-                      "type": "image",
-                      "props": {
-                        "source": "network",
-                        "url": "https://images.unsplash.com/photo-1518544889280-55b70d4f8f11?w=800&q=80",
-                        "width": 88,
-                        "height": 88,
-                        "fit": "cover"
-                      }
-                    },
-                    {
-                      "id": "product-item-7-meta",
-                      "type": "column",
-                      "props": {
-                        "crossAxis": "start",
-                        "gap": 4
-                      },
-                      "children": [
-                        {
-                          "id": "product-item-7-title",
-                          "type": "text",
-                          "props": {
-                            "value": "Smartwatch Band",
-                            "fontSize": 16,
-                            "fontWeight": "bold",
-                            "color": "#0F172A"
-                          }
-                        },
-                        {
-                          "id": "product-item-7-sub",
-                          "type": "text",
-                          "props": {
-                            "value": "In stock: 62 units",
-                            "fontSize": 13,
-                            "color": "#64748B"
-                          }
-                        },
-                        {
-                          "id": "product-item-7-price",
-                          "type": "text",
-                          "props": {
-                            "value": "$25.00",
-                            "fontSize": 14,
-                            "fontWeight": "bold",
-                            "color": "#1D4ED8"
-                          }
-                        }
-                      ]
-                    }
-                  ]
-                }
-              },
-              {
-                "id": "product-item-8",
-                "type": "container",
-                "props": {},
-                "style": {
-                  "margin": {
-                    "left": 16,
-                    "right": 16,
-                    "bottom": 12
-                  },
-                  "padding": 12,
-                  "background": "#FFFFFF",
-                  "borderRadius": 12
-                },
-                "tap": {
-                  "type": "navigate",
-                  "route": "/product/2"
-                },
-                "child": {
-                  "id": "product-item-8-row",
-                  "type": "row",
-                  "props": {
-                    "crossAxis": "center",
-                    "gap": 12
-                  },
-                  "children": [
-                    {
-                      "id": "product-item-8-image",
-                      "type": "image",
-                      "props": {
-                        "source": "network",
-                        "url": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80",
-                        "width": 88,
-                        "height": 88,
-                        "fit": "cover"
-                      }
-                    },
-                    {
-                      "id": "product-item-8-meta",
-                      "type": "column",
-                      "props": {
-                        "crossAxis": "start",
-                        "gap": 4
-                      },
-                      "children": [
-                        {
-                          "id": "product-item-8-title",
-                          "type": "text",
-                          "props": {
-                            "value": "Running Shorts",
-                            "fontSize": 16,
-                            "fontWeight": "bold",
-                            "color": "#0F172A"
-                          }
-                        },
-                        {
-                          "id": "product-item-8-sub",
-                          "type": "text",
-                          "props": {
-                            "value": "In stock: 34 units",
-                            "fontSize": 13,
-                            "color": "#64748B"
-                          }
-                        },
-                        {
-                          "id": "product-item-8-price",
-                          "type": "text",
-                          "props": {
-                            "value": "$45.00",
-                            "fontSize": 14,
-                            "fontWeight": "bold",
-                            "color": "#1D4ED8"
-                          }
-                        }
-                      ]
-                    }
-                  ]
-                }
-              },
-              {
-                "id": "product-item-9",
-                "type": "container",
-                "props": {},
-                "style": {
-                  "margin": {
-                    "left": 16,
-                    "right": 16,
-                    "bottom": 12
-                  },
-                  "padding": 12,
-                  "background": "#FFFFFF",
-                  "borderRadius": 12
-                },
-                "tap": {
-                  "type": "navigate",
-                  "route": "/product/2"
-                },
-                "child": {
-                  "id": "product-item-9-row",
-                  "type": "row",
-                  "props": {
-                    "crossAxis": "center",
-                    "gap": 12
-                  },
-                  "children": [
-                    {
-                      "id": "product-item-9-image",
-                      "type": "image",
-                      "props": {
-                        "source": "network",
-                        "url": "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=800&q=80",
-                        "width": 88,
-                        "height": 88,
-                        "fit": "cover"
-                      }
-                    },
-                    {
-                      "id": "product-item-9-meta",
-                      "type": "column",
-                      "props": {
-                        "crossAxis": "start",
-                        "gap": 4
-                      },
-                      "children": [
-                        {
-                          "id": "product-item-9-title",
-                          "type": "text",
-                          "props": {
-                            "value": "Leather Wallet",
-                            "fontSize": 16,
-                            "fontWeight": "bold",
-                            "color": "#0F172A"
-                          }
-                        },
-                        {
-                          "id": "product-item-9-sub",
-                          "type": "text",
-                          "props": {
-                            "value": "In stock: 40 units",
-                            "fontSize": 13,
-                            "color": "#64748B"
-                          }
-                        },
-                        {
-                          "id": "product-item-9-price",
-                          "type": "text",
-                          "props": {
-                            "value": "$59.00",
-                            "fontSize": 14,
-                            "fontWeight": "bold",
-                            "color": "#1D4ED8"
-                          }
-                        }
-                      ]
-                    }
-                  ]
-                }
-              },
-              {
-                "id": "product-item-10",
-                "type": "container",
-                "props": {},
-                "style": {
-                  "margin": {
-                    "left": 16,
-                    "right": 16,
-                    "bottom": 12
-                  },
-                  "padding": 12,
-                  "background": "#FFFFFF",
-                  "borderRadius": 12
-                },
-                "tap": {
-                  "type": "navigate",
-                  "route": "/product/2"
-                },
-                "child": {
-                  "id": "product-item-10-row",
-                  "type": "row",
-                  "props": {
-                    "crossAxis": "center",
-                    "gap": 12
-                  },
-                  "children": [
-                    {
-                      "id": "product-item-10-image",
-                      "type": "image",
-                      "props": {
-                        "source": "network",
-                        "url": "https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb?w=800&q=80",
-                        "width": 88,
-                        "height": 88,
-                        "fit": "cover"
-                      }
-                    },
-                    {
-                      "id": "product-item-10-meta",
-                      "type": "column",
-                      "props": {
-                        "crossAxis": "start",
-                        "gap": 4
-                      },
-                      "children": [
-                        {
-                          "id": "product-item-10-title",
-                          "type": "text",
-                          "props": {
-                            "value": "Training Cap",
-                            "fontSize": 16,
-                            "fontWeight": "bold",
-                            "color": "#0F172A"
-                          }
-                        },
-                        {
-                          "id": "product-item-10-sub",
-                          "type": "text",
-                          "props": {
-                            "value": "In stock: 73 units",
-                            "fontSize": 13,
-                            "color": "#64748B"
-                          }
-                        },
-                        {
-                          "id": "product-item-10-price",
-                          "type": "text",
-                          "props": {
-                            "value": "$22.00",
-                            "fontSize": 14,
-                            "fontWeight": "bold",
-                            "color": "#1D4ED8"
-                          }
-                        }
-                      ]
-                    }
-                  ]
-                }
-              },
-              {
-                "id": "product-item-11",
-                "type": "container",
-                "props": {},
-                "style": {
-                  "margin": {
-                    "left": 16,
-                    "right": 16,
-                    "bottom": 12
-                  },
-                  "padding": 12,
-                  "background": "#FFFFFF",
-                  "borderRadius": 12
-                },
-                "tap": {
-                  "type": "navigate",
-                  "route": "/product/2"
-                },
-                "child": {
-                  "id": "product-item-11-row",
-                  "type": "row",
-                  "props": {
-                    "crossAxis": "center",
-                    "gap": 12
-                  },
-                  "children": [
-                    {
-                      "id": "product-item-11-image",
-                      "type": "image",
-                      "props": {
-                        "source": "network",
-                        "url": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80",
-                        "width": 88,
-                        "height": 88,
-                        "fit": "cover"
-                      }
-                    },
-                    {
-                      "id": "product-item-11-meta",
-                      "type": "column",
-                      "props": {
-                        "crossAxis": "start",
-                        "gap": 4
-                      },
-                      "children": [
-                        {
-                          "id": "product-item-11-title",
-                          "type": "text",
-                          "props": {
-                            "value": "Travel Mug",
-                            "fontSize": 16,
-                            "fontWeight": "bold",
-                            "color": "#0F172A"
-                          }
-                        },
-                        {
-                          "id": "product-item-11-sub",
-                          "type": "text",
-                          "props": {
-                            "value": "In stock: 90 units",
-                            "fontSize": 13,
-                            "color": "#64748B"
-                          }
-                        },
-                        {
-                          "id": "product-item-11-price",
-                          "type": "text",
-                          "props": {
-                            "value": "$19.00",
-                            "fontSize": 14,
-                            "fontWeight": "bold",
-                            "color": "#1D4ED8"
-                          }
-                        }
-                      ]
-                    }
-                  ]
-                }
-              },
-              {
-                "id": "product-item-12",
-                "type": "container",
-                "props": {},
-                "style": {
-                  "margin": {
-                    "left": 16,
-                    "right": 16,
-                    "bottom": 12
-                  },
-                  "padding": 12,
-                  "background": "#FFFFFF",
-                  "borderRadius": 12
-                },
-                "tap": {
-                  "type": "navigate",
-                  "route": "/product/2"
-                },
-                "child": {
-                  "id": "product-item-12-row",
-                  "type": "row",
-                  "props": {
-                    "crossAxis": "center",
-                    "gap": 12
-                  },
-                  "children": [
-                    {
-                      "id": "product-item-12-image",
-                      "type": "image",
-                      "props": {
-                        "source": "network",
-                        "url": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&q=80",
-                        "width": 88,
-                        "height": 88,
-                        "fit": "cover"
-                      }
-                    },
-                    {
-                      "id": "product-item-12-meta",
-                      "type": "column",
-                      "props": {
-                        "crossAxis": "start",
-                        "gap": 4
-                      },
-                      "children": [
-                        {
-                          "id": "product-item-12-title",
-                          "type": "text",
-                          "props": {
-                            "value": "Yoga Mat",
-                            "fontSize": 16,
-                            "fontWeight": "bold",
-                            "color": "#0F172A"
-                          }
-                        },
-                        {
-                          "id": "product-item-12-sub",
-                          "type": "text",
-                          "props": {
-                            "value": "In stock: 48 units",
-                            "fontSize": 13,
-                            "color": "#64748B"
-                          }
-                        },
-                        {
-                          "id": "product-item-12-price",
-                          "type": "text",
-                          "props": {
-                            "value": "$35.00",
-                            "fontSize": 14,
+                            "fontSize": 15,
                             "fontWeight": "bold",
                             "color": "#1D4ED8"
                           }
@@ -1682,15 +1420,15 @@
                   ]
                 }
               }
-            ]
-          }
+            }
+          ]
         },
         {
-          "id": "products-cta-row",
+          "id": "products-cta",
           "type": "row",
           "props": {
             "mainAxisAlignment": "spaceBetween",
-            "crossAxis": "center"
+            "crossAxisAlignment": "center"
           },
           "style": {
             "margin": {
@@ -1701,12 +1439,13 @@
           },
           "children": [
             {
-              "id": "products-back-home",
+              "id": "products-home-button",
               "type": "button",
               "props": {
                 "label": "Back Home",
-                "backgroundColor": "#334155",
-                "borderRadius": 10
+                "backgroundColor": "#E2E8F0",
+                "textColor": "#0F172A",
+                "borderRadius": 14
               },
               "tap": {
                 "type": "navigate",
@@ -1714,12 +1453,13 @@
               }
             },
             {
-              "id": "products-go-checkout",
+              "id": "products-checkout-button",
               "type": "button",
               "props": {
-                "label": "Go Checkout",
+                "label": "Checkout",
                 "backgroundColor": "#1D4ED8",
-                "borderRadius": 10
+                "textColor": "#FFFFFF",
+                "borderRadius": 14
               },
               "tap": {
                 "type": "navigate",
@@ -1731,316 +1471,156 @@
       ]
     },
     {
-      "id": "login-screen",
-      "route": "/login",
-      "title": "Sign In",
+      "id": "product-detail-screen",
+      "route": "/product/1",
+      "title": "Product Detail",
       "background": "#F8FAFC",
       "scroll": "vertical",
       "appBar": {
-        "id": "login-appbar",
+        "id": "product-detail-appbar",
         "type": "appBar",
         "props": {
-          "title": "Sign In"
+          "title": "Performance Sneakers"
+        },
+        "style": {
+          "background": "#FFFFFF"
         }
       },
       "body": [
         {
-          "id": "login-card",
-          "type": "container",
-          "props": {},
+          "id": "detail-hero-card",
+          "type": "card",
+          "props": {
+            "elevation": 1,
+            "borderRadius": 24,
+            "color": "#FFFFFF"
+          },
           "style": {
             "margin": {
               "left": 16,
               "right": 16,
               "top": 16,
               "bottom": 12
-            },
-            "padding": 16,
-            "background": "#FFFFFF",
-            "borderRadius": 12
+            }
           },
           "child": {
-            "id": "login-form",
-            "type": "form",
+            "id": "detail-hero-body",
+            "type": "container",
             "props": {
-              "formId": "login-form"
+              "padding": 12
             },
             "child": {
-              "id": "login-card-content",
+              "id": "detail-hero-column",
               "type": "column",
               "props": {
-                "crossAxis": "stretch",
+                "crossAxisAlignment": "start",
                 "gap": 12
               },
               "children": [
                 {
-                "id": "login-title",
-                "type": "text",
-                "props": {
-                  "value": "Welcome back",
-                  "fontSize": 20,
-                  "fontWeight": "bold",
-                  "color": "#0F172A"
-                }
-              },
+                  "id": "detail-image",
+                  "type": "image",
+                  "props": {
+                    "source": "network",
+                    "url": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200&q=80",
+                    "aspectRatio": 1.2,
+                    "fit": "cover"
+                  }
+                },
                 {
-                "id": "login-email",
-                "type": "textFormField",
-                "props": {
-                  "label": "Email",
-                  "hint": "you@example.com",
-                  "keyboardType": "email",
-                  "textInputAction": "next",
-                  "validateRequired": true,
-                  "validateEmail": true,
-                  "validationMessage": "Enter a valid email",
-                  "inputFormatters": ["denyWhitespace"],
-                  "prefixIcon": "mail"
-                }
-              },
+                  "id": "detail-badges-row",
+                  "type": "row",
+                  "props": {
+                    "crossAxisAlignment": "center",
+                    "gap": 8
+                  },
+                  "children": [
+                    {
+                      "id": "detail-instock-badge",
+                      "type": "container",
+                      "props": {},
+                      "style": {
+                        "padding": {
+                          "left": 10,
+                          "right": 10,
+                          "top": 6,
+                          "bottom": 6
+                        },
+                        "background": "#DCFCE7",
+                        "borderRadius": 999
+                      },
+                      "child": {
+                        "id": "detail-instock-text",
+                        "type": "text",
+                        "props": {
+                          "value": "In stock",
+                          "fontSize": 12,
+                          "fontWeight": "bold",
+                          "color": "#166534"
+                        }
+                      }
+                    },
+                    {
+                      "id": "detail-trusted-badge",
+                      "type": "container",
+                      "props": {},
+                      "style": {
+                        "padding": {
+                          "left": 10,
+                          "right": 10,
+                          "top": 6,
+                          "bottom": 6
+                        },
+                        "background": "#E0F2FE",
+                        "borderRadius": 999
+                      },
+                      "child": {
+                        "id": "detail-trusted-text",
+                        "type": "text",
+                        "props": {
+                          "value": "4.9 rating",
+                          "fontSize": 12,
+                          "fontWeight": "bold",
+                          "color": "#075985"
+                        }
+                      }
+                    }
+                  ]
+                },
                 {
-                "id": "login-password",
-                "type": "textFormField",
-                "props": {
-                  "label": "Password",
-                  "hint": "Enter your password",
-                  "obscureText": true,
-                  "textInputAction": "done",
-                  "validateRequired": true,
-                  "validatePassword": true,
-                  "validateMinLength": 8,
-                  "validationMessage": "Password must be at least 8 characters",
-                  "prefixIcon": "lock",
-                  "onSubmitted": {
-                    "type": "navigate",
-                    "route": "/",
-                    "requireValidForm": true,
-                    "formId": "login-form"
+                  "id": "detail-title",
+                  "type": "text",
+                  "props": {
+                    "value": "Performance Sneakers",
+                    "fontSize": 24,
+                    "fontWeight": "bold",
+                    "color": "#0F172A"
+                  }
+                },
+                {
+                  "id": "detail-price",
+                  "type": "text",
+                  "props": {
+                    "value": "$129.00",
+                    "fontSize": 22,
+                    "fontWeight": "bold",
+                    "color": "#1D4ED8"
+                  }
+                },
+                {
+                  "id": "detail-description",
+                  "type": "richtext",
+                  "props": {
+                    "value": "<p>Premium everyday sneakers designed for comfort, durable wear, and a clean storefront presentation that feels native on mobile.</p>",
+                    "color": "#475569"
                   }
                 }
-              },
-                {
-                "id": "login-submit",
-                "type": "button",
-                "props": {
-                  "label": "Sign In",
-                  "backgroundColor": "#1D4ED8",
-                  "borderRadius": 10
-                },
-                "tap": {
-                  "type": "navigate",
-                  "route": "/",
-                  "requireValidForm": true,
-                  "formId": "login-form"
-                }
-              },
-                {
-                "id": "login-register",
-                "type": "button",
-                "props": {
-                  "label": "Create Account",
-                  "backgroundColor": "#E2E8F0",
-                  "textColor": "#0F172A",
-                  "borderRadius": 10
-                },
-                "tap": {
-                  "type": "navigate",
-                  "route": "/register"
-                }
-                }
               ]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "id": "register-screen",
-      "route": "/register",
-      "title": "Create Account",
-      "background": "#F8FAFC",
-      "scroll": "vertical",
-      "appBar": {
-        "id": "register-appbar",
-        "type": "appBar",
-        "props": {
-          "title": "Create Account"
-        }
-      },
-      "body": [
-        {
-          "id": "register-card",
-          "type": "container",
-          "props": {},
-          "style": {
-            "margin": {
-              "left": 16,
-              "right": 16,
-              "top": 16,
-              "bottom": 12
-            },
-            "padding": 16,
-            "background": "#FFFFFF",
-            "borderRadius": 12
-          },
-          "child": {
-            "id": "register-form",
-            "type": "form",
-            "props": {
-              "formId": "register-form"
-            },
-            "child": {
-              "id": "register-card-content",
-              "type": "column",
-              "props": {
-                "crossAxis": "stretch",
-                "gap": 12
-              },
-              "children": [
-                {
-                "id": "register-title",
-                "type": "text",
-                "props": {
-                  "value": "Create your account",
-                  "fontSize": 20,
-                  "fontWeight": "bold",
-                  "color": "#0F172A"
-                }
-              },
-                {
-                "id": "register-name",
-                "type": "textFormField",
-                "props": {
-                  "label": "Full name",
-                  "hint": "Jane Doe",
-                  "textInputAction": "next",
-                  "validateRequired": true,
-                  "validationMessage": "Name is required",
-                  "prefixIcon": "person"
-                }
-              },
-                {
-                "id": "register-email",
-                "type": "textFormField",
-                "props": {
-                  "label": "Email",
-                  "hint": "you@example.com",
-                  "keyboardType": "email",
-                  "textInputAction": "next",
-                  "validateRequired": true,
-                  "validateEmail": true,
-                  "validationMessage": "Enter a valid email",
-                  "inputFormatters": ["denyWhitespace"],
-                  "prefixIcon": "mail"
-                }
-              },
-                {
-                "id": "register-phone",
-                "type": "textFormField",
-                "props": {
-                  "label": "Phone number",
-                  "hint": "+9665XXXXXXXX",
-                  "keyboardType": "phone",
-                  "textInputAction": "next",
-                  "validateRequired": true,
-                  "validatePhone": true,
-                  "validationMessage": "Enter a valid phone number",
-                  "inputFormatters": ["digitsOnly"],
-                  "prefixIcon": "phone"
-                }
-              },
-                {
-                "id": "register-password",
-                "type": "textFormField",
-                "props": {
-                  "label": "Password",
-                  "hint": "Create a password",
-                  "obscureText": true,
-                  "textInputAction": "done",
-                  "validateRequired": true,
-                  "validatePassword": true,
-                  "validateMinLength": 8,
-                  "validationMessage": "Password must be at least 8 characters",
-                  "prefixIcon": "lock"
-                }
-              },
-                {
-                "id": "register-submit",
-                "type": "button",
-                "props": {
-                  "label": "Create Account",
-                  "backgroundColor": "#16A34A",
-                  "borderRadius": 10
-                },
-                "tap": {
-                  "type": "navigate",
-                  "route": "/",
-                  "requireValidForm": true,
-                  "formId": "register-form"
-                }
-              },
-                {
-                "id": "register-back",
-                "type": "button",
-                "props": {
-                  "label": "Back to Sign In",
-                  "backgroundColor": "#E2E8F0",
-                  "textColor": "#0F172A",
-                  "borderRadius": 10
-                },
-                "tap": {
-                  "type": "navigate",
-                  "route": "/login"
-                }
-                }
-              ]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "id": "product-details-screen",
-      "route": "/product/1",
-      "title": "Product Details",
-      "background": "#F8FAFC",
-      "scroll": "vertical",
-      "appBar": {
-        "id": "details-appbar",
-        "type": "appBar",
-        "props": {
-          "title": "Product Details"
-        }
-      },
-      "body": [
-        {
-          "id": "details-image",
-          "type": "container",
-          "props": {},
-          "style": {
-            "margin": {
-              "left": 16,
-              "right": 16,
-              "top": 16,
-              "bottom": 12
-            },
-            "background": "#FFFFFF",
-            "padding": 12,
-            "borderRadius": 12
-          },
-          "child": {
-            "id": "details-image-node",
-            "type": "image",
-            "props": {
-              "source": "network",
-              "url": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200&q=80",
-              "fit": "cover",
-              "aspectRatio": 1.45
             }
           }
         },
         {
-          "id": "details-content-card",
+          "id": "detail-highlights",
           "type": "container",
           "props": {},
           "style": {
@@ -2051,143 +1631,116 @@
             },
             "padding": 16,
             "background": "#FFFFFF",
-            "borderRadius": 12
+            "borderRadius": 24,
+            "shadow": "sm"
           },
           "child": {
-            "id": "details-content-col",
+            "id": "detail-highlights-column",
             "type": "column",
             "props": {
-              "crossAxis": "start",
-              "gap": 8
+              "crossAxisAlignment": "start",
+              "gap": 12
             },
             "children": [
               {
-                "id": "details-title",
+                "id": "detail-highlights-title",
                 "type": "text",
                 "props": {
-                  "value": "Performance Sneakers",
-                  "fontSize": 22,
+                  "value": "Why customers buy",
+                  "fontSize": 18,
                   "fontWeight": "bold",
                   "color": "#0F172A"
                 }
               },
               {
-                "id": "details-price",
-                "type": "text",
+                "id": "detail-highlight-1",
+                "type": "row",
                 "props": {
-                  "value": "$129.00",
-                  "fontSize": 18,
-                  "fontWeight": "bold",
-                  "color": "#1D4ED8"
-                }
+                  "crossAxisAlignment": "center",
+                  "gap": 10
+                },
+                "children": [
+                  {
+                    "id": "detail-highlight-1-icon",
+                    "type": "icon",
+                    "props": {
+                      "name": "star",
+                      "size": 18,
+                      "color": "#D97706"
+                    }
+                  },
+                  {
+                    "id": "detail-highlight-1-text",
+                    "type": "text",
+                    "props": {
+                      "value": "Comfort-first build for all-day use",
+                      "fontSize": 14,
+                      "color": "#334155"
+                    }
+                  }
+                ]
               },
               {
-                "id": "details-divider",
-                "type": "divider",
+                "id": "detail-highlight-2",
+                "type": "row",
                 "props": {
-                  "thickness": 1,
-                  "color": "#E2E8F0"
-                }
+                  "crossAxisAlignment": "center",
+                  "gap": 10
+                },
+                "children": [
+                  {
+                    "id": "detail-highlight-2-icon",
+                    "type": "icon",
+                    "props": {
+                      "name": "local_offer",
+                      "size": 18,
+                      "color": "#1D4ED8"
+                    }
+                  },
+                  {
+                    "id": "detail-highlight-2-text",
+                    "type": "text",
+                    "props": {
+                      "value": "Low-friction price point for conversion",
+                      "fontSize": 14,
+                      "color": "#334155"
+                    }
+                  }
+                ]
               },
               {
-                "id": "details-description",
-                "type": "text",
+                "id": "detail-highlight-3",
+                "type": "row",
                 "props": {
-                  "value": "Lightweight design with breathable fabric, ideal for daily activity and long shifts.",
-                  "fontSize": 14,
-                  "color": "#475569"
-                }
+                  "crossAxisAlignment": "center",
+                  "gap": 10
+                },
+                "children": [
+                  {
+                    "id": "detail-highlight-3-icon",
+                    "type": "icon",
+                    "props": {
+                      "name": "shopping_bag",
+                      "size": 18,
+                      "color": "#16A34A"
+                    }
+                  },
+                  {
+                    "id": "detail-highlight-3-text",
+                    "type": "text",
+                    "props": {
+                      "value": "Fast shipping and simple returns",
+                      "fontSize": 14,
+                      "color": "#334155"
+                    }
+                  }
+                ]
               }
             ]
           }
         },
         {
-          "id": "details-actions",
-          "type": "row",
-          "props": {
-            "mainAxisAlignment": "spaceBetween",
-            "crossAxis": "center"
-          },
-          "style": {
-            "margin": {
-              "left": 16,
-              "right": 16,
-              "bottom": 20
-            }
-          },
-          "children": [
-            {
-              "id": "details-back-products",
-              "type": "button",
-              "props": {
-                "label": "Back to Products",
-                "backgroundColor": "#334155",
-                "borderRadius": 10
-              },
-              "tap": {
-                "type": "navigate",
-                "route": "/products"
-              }
-            },
-            {
-              "id": "details-proceed-checkout",
-              "type": "button",
-              "props": {
-                "label": "Proceed to Checkout",
-                "backgroundColor": "#16A34A",
-                "borderRadius": 10
-              },
-              "tap": {
-                "type": "navigate",
-                "route": "/checkout"
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "product-details-screen-2",
-      "route": "/product/2",
-      "title": "Product Details",
-      "background": "#F8FAFC",
-      "scroll": "vertical",
-      "appBar": {
-        "id": "details-2-appbar",
-        "type": "appBar",
-        "props": {
-          "title": "Product Details"
-        }
-      },
-      "body": [
-        {
-          "id": "details-2-image",
-          "type": "container",
-          "props": {},
-          "style": {
-            "margin": {
-              "left": 16,
-              "right": 16,
-              "top": 16,
-              "bottom": 12
-            },
-            "background": "#FFFFFF",
-            "padding": 12,
-            "borderRadius": 12
-          },
-          "child": {
-            "id": "details-2-image-node",
-            "type": "image",
-            "props": {
-              "source": "network",
-              "url": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=1200&q=80",
-              "fit": "cover",
-              "aspectRatio": 1.45
-            }
-          }
-        },
-        {
-          "id": "details-2-content-card",
+          "id": "detail-related-section",
           "type": "container",
           "props": {},
           "style": {
@@ -2198,98 +1751,210 @@
             },
             "padding": 16,
             "background": "#FFFFFF",
-            "borderRadius": 12
+            "borderRadius": 24,
+            "shadow": "sm"
           },
           "child": {
-            "id": "details-2-content-col",
+            "id": "detail-related-column",
             "type": "column",
             "props": {
-              "crossAxis": "start",
-              "gap": 8
+              "crossAxisAlignment": "start",
+              "gap": 14
             },
             "children": [
               {
-                "id": "details-2-title",
+                "id": "detail-related-header",
                 "type": "text",
                 "props": {
-                  "value": "Minimal T-Shirt",
-                  "fontSize": 22,
+                  "value": "Related products",
+                  "fontSize": 18,
                   "fontWeight": "bold",
                   "color": "#0F172A"
                 }
               },
               {
-                "id": "details-2-price",
-                "type": "text",
+                "id": "detail-related-grid",
+                "type": "gridView",
                 "props": {
-                  "value": "$39.00",
-                  "fontSize": 18,
-                  "fontWeight": "bold",
-                  "color": "#1D4ED8"
-                }
+                  "crossAxisCount": 2,
+                  "mainAxisSpacing": 12,
+                  "crossAxisSpacing": 12,
+                  "enableInnerScroll": false
+                },
+                "children": [
+                  {
+                    "id": "related-product-1",
+                    "type": "card",
+                    "props": {
+                      "elevation": 1,
+                      "borderRadius": 18,
+                      "color": "#FFFFFF"
+                    },
+                    "tap": {
+                      "type": "navigate",
+                      "route": "/product/1"
+                    },
+                    "child": {
+                      "id": "related-product-1-body",
+                      "type": "container",
+                      "props": {
+                        "padding": 10
+                      },
+                      "child": {
+                        "id": "related-product-1-column",
+                        "type": "column",
+                        "props": {
+                          "crossAxisAlignment": "start",
+                          "gap": 6
+                        },
+                        "children": [
+                          {
+                            "id": "related-product-1-image",
+                            "type": "image",
+                            "props": {
+                              "source": "network",
+                              "url": "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=1000&q=80",
+                              "aspectRatio": 1.05,
+                              "fit": "cover"
+                            }
+                          },
+                          {
+                            "id": "related-product-1-title",
+                            "type": "text",
+                            "props": {
+                              "value": "Sport Jacket",
+                              "fontSize": 13,
+                              "fontWeight": "bold",
+                              "color": "#0F172A"
+                            }
+                          },
+                          {
+                            "id": "related-product-1-price",
+                            "type": "text",
+                            "props": {
+                              "value": "$109.00",
+                              "fontSize": 12,
+                              "color": "#1D4ED8"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "id": "related-product-2",
+                    "type": "card",
+                    "props": {
+                      "elevation": 1,
+                      "borderRadius": 18,
+                      "color": "#FFFFFF"
+                    },
+                    "tap": {
+                      "type": "navigate",
+                      "route": "/product/1"
+                    },
+                    "child": {
+                      "id": "related-product-2-body",
+                      "type": "container",
+                      "props": {
+                        "padding": 10
+                      },
+                      "child": {
+                        "id": "related-product-2-column",
+                        "type": "column",
+                        "props": {
+                          "crossAxisAlignment": "start",
+                          "gap": 6
+                        },
+                        "children": [
+                          {
+                            "id": "related-product-2-image",
+                            "type": "image",
+                            "props": {
+                              "source": "network",
+                              "url": "https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=1000&q=80",
+                              "aspectRatio": 1.05,
+                              "fit": "cover"
+                            }
+                          },
+                          {
+                            "id": "related-product-2-title",
+                            "type": "text",
+                            "props": {
+                              "value": "Travel Backpack",
+                              "fontSize": 13,
+                              "fontWeight": "bold",
+                              "color": "#0F172A"
+                            }
+                          },
+                          {
+                            "id": "related-product-2-price",
+                            "type": "text",
+                            "props": {
+                              "value": "$89.00",
+                              "fontSize": 12,
+                              "color": "#1D4ED8"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
               },
               {
-                "id": "details-2-divider",
-                "type": "divider",
+                "id": "detail-cta-row",
+                "type": "row",
                 "props": {
-                  "thickness": 1,
-                  "color": "#E2E8F0"
-                }
-              },
-              {
-                "id": "details-2-description",
-                "type": "text",
-                "props": {
-                  "value": "Soft cotton blend with a clean silhouette for everyday wear.",
-                  "fontSize": 14,
-                  "color": "#475569"
-                }
+                  "mainAxisAlignment": "spaceBetween",
+                  "crossAxisAlignment": "center",
+                  "gap": 12
+                },
+                "children": [
+                  {
+                    "id": "detail-add-cart",
+                    "type": "button",
+                    "props": {
+                      "label": "Add to Cart",
+                      "backgroundColor": "#E2E8F0",
+                      "textColor": "#0F172A",
+                      "borderRadius": 16,
+                      "padding": {
+                        "left": 16,
+                        "right": 16,
+                        "top": 12,
+                        "bottom": 12
+                      }
+                    },
+                    "tap": {
+                      "type": "navigate",
+                      "route": "/checkout"
+                    }
+                  },
+                  {
+                    "id": "detail-buy-now",
+                    "type": "button",
+                    "props": {
+                      "label": "Buy Now",
+                      "backgroundColor": "#1D4ED8",
+                      "textColor": "#FFFFFF",
+                      "borderRadius": 16,
+                      "padding": {
+                        "left": 16,
+                        "right": 16,
+                        "top": 12,
+                        "bottom": 12
+                      }
+                    },
+                    "tap": {
+                      "type": "navigate",
+                      "route": "/checkout"
+                    }
+                  }
+                ]
               }
             ]
           }
-        },
-        {
-          "id": "details-2-actions",
-          "type": "row",
-          "props": {
-            "mainAxisAlignment": "spaceBetween",
-            "crossAxis": "center"
-          },
-          "style": {
-            "margin": {
-              "left": 16,
-              "right": 16,
-              "bottom": 20
-            }
-          },
-          "children": [
-            {
-              "id": "details-2-back-products",
-              "type": "button",
-              "props": {
-                "label": "Back to Products",
-                "backgroundColor": "#334155",
-                "borderRadius": 10
-              },
-              "tap": {
-                "type": "navigate",
-                "route": "/products"
-              }
-            },
-            {
-              "id": "details-2-proceed-checkout",
-              "type": "button",
-              "props": {
-                "label": "Proceed to Checkout",
-                "backgroundColor": "#16A34A",
-                "borderRadius": 10
-              },
-              "tap": {
-                "type": "navigate",
-                "route": "/checkout"
-              }
-            }
-          ]
         }
       ]
     },
@@ -2304,6 +1969,9 @@
         "type": "appBar",
         "props": {
           "title": "Checkout"
+        },
+        "style": {
+          "background": "#FFFFFF"
         }
       },
       "body": [
@@ -2320,50 +1988,129 @@
             },
             "padding": 16,
             "background": "#FFFFFF",
-            "borderRadius": 12
+            "borderRadius": 24,
+            "shadow": "sm"
           },
           "child": {
-            "id": "checkout-summary-col",
+            "id": "checkout-summary-column",
             "type": "column",
             "props": {
-              "crossAxis": "start",
-              "gap": 8
+              "crossAxisAlignment": "start",
+              "gap": 12
             },
             "children": [
               {
-                "id": "checkout-title",
+                "id": "checkout-summary-title",
                 "type": "text",
                 "props": {
-                  "value": "Order Summary",
-                  "fontSize": 20,
+                  "value": "Order summary",
+                  "fontSize": 18,
                   "fontWeight": "bold",
                   "color": "#0F172A"
                 }
               },
               {
-                "id": "checkout-item",
-                "type": "text",
+                "id": "checkout-summary-row",
+                "type": "row",
                 "props": {
-                  "value": "Performance Sneakers x1",
-                  "fontSize": 14,
-                  "color": "#334155"
+                  "crossAxisAlignment": "center",
+                  "gap": 12
+                },
+                "children": [
+                  {
+                    "id": "checkout-summary-image",
+                    "type": "image",
+                    "props": {
+                      "source": "network",
+                      "url": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1000&q=80",
+                      "width": 72,
+                      "height": 72,
+                      "fit": "cover"
+                    }
+                  },
+                  {
+                    "id": "checkout-summary-meta",
+                    "type": "column",
+                    "props": {
+                      "crossAxisAlignment": "start",
+                      "gap": 4
+                    },
+                    "children": [
+                      {
+                        "id": "checkout-summary-product",
+                        "type": "text",
+                        "props": {
+                          "value": "Performance Sneakers",
+                          "fontSize": 16,
+                          "fontWeight": "bold",
+                          "color": "#0F172A"
+                        }
+                      },
+                      {
+                        "id": "checkout-summary-qty",
+                        "type": "text",
+                        "props": {
+                          "value": "Qty 1 • Fast shipping",
+                          "fontSize": 13,
+                          "color": "#64748B"
+                        }
+                      },
+                      {
+                        "id": "checkout-summary-price",
+                        "type": "text",
+                        "props": {
+                          "value": "$129.00",
+                          "fontSize": 15,
+                          "fontWeight": "bold",
+                          "color": "#1D4ED8"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "checkout-summary-divider",
+                "type": "divider",
+                "props": {
+                  "thickness": 1,
+                  "color": "#E2E8F0"
                 }
               },
               {
-                "id": "checkout-total",
-                "type": "text",
+                "id": "checkout-total-row",
+                "type": "row",
                 "props": {
-                  "value": "Total: $129.00",
-                  "fontSize": 16,
-                  "fontWeight": "bold",
-                  "color": "#1D4ED8"
-                }
+                  "mainAxisAlignment": "spaceBetween",
+                  "crossAxisAlignment": "center"
+                },
+                "children": [
+                  {
+                    "id": "checkout-total-label",
+                    "type": "text",
+                    "props": {
+                      "value": "Total",
+                      "fontSize": 14,
+                      "color": "#334155"
+                    }
+                  },
+                  {
+                    "id": "checkout-total-value",
+                    "type": "text",
+                    "props": {
+                      "value": "$129.00",
+                      "fontSize": 18,
+                      "fontWeight": "bold",
+                      "color": "#0F172A"
+                    }
+                  }
+                ]
               }
             ]
           }
         },
         {
-          "id": "checkout-note",
+          "id": "checkout-form-card",
           "type": "container",
           "props": {},
           "style": {
@@ -2372,27 +2119,171 @@
               "right": 16,
               "bottom": 12
             },
-            "padding": 14,
-            "background": "#ECFDF5",
-            "borderRadius": 12
+            "padding": 16,
+            "background": "#FFFFFF",
+            "borderRadius": 24,
+            "shadow": "sm"
           },
           "child": {
-            "id": "checkout-note-text",
-            "type": "text",
+            "id": "checkout-form",
+            "type": "form",
             "props": {
-              "value": "This is a UI flow demo. Payment is not connected.",
-              "fontSize": 13,
-              "color": "#065F46"
+              "formId": "checkout-form"
+            },
+            "child": {
+              "id": "checkout-form-column",
+              "type": "column",
+              "props": {
+                "crossAxisAlignment": "stretch",
+                "gap": 12
+              },
+              "children": [
+                {
+                  "id": "checkout-form-title",
+                  "type": "text",
+                  "props": {
+                    "value": "Delivery details",
+                    "fontSize": 18,
+                    "fontWeight": "bold",
+                    "color": "#0F172A"
+                  }
+                },
+                {
+                  "id": "checkout-name",
+                  "type": "textFormField",
+                  "props": {
+                    "label": "Full name",
+                    "hint": "Enter customer name",
+                    "prefixIcon": "person",
+                    "validateRequired": true,
+                    "requiredMessage": "Full name is required",
+                    "color": "#FFFFFF",
+                    "borderRadius": 16
+                  }
+                },
+                {
+                  "id": "checkout-phone",
+                  "type": "textFormField",
+                  "props": {
+                    "label": "Phone number",
+                    "hint": "+971 ...",
+                    "prefixIcon": "shopping_bag",
+                    "keyboardType": "phone",
+                    "validateRequired": true,
+                    "validatePhone": true,
+                    "requiredMessage": "Phone number is required",
+                    "validationMessage": "Enter a valid phone number",
+                    "color": "#FFFFFF",
+                    "borderRadius": 16
+                  }
+                },
+                {
+                  "id": "checkout-address",
+                  "type": "textFormField",
+                  "props": {
+                    "label": "Address",
+                    "hint": "Street, building, apartment",
+                    "prefixIcon": "local_offer",
+                    "validateRequired": true,
+                    "requiredMessage": "Address is required",
+                    "color": "#FFFFFF",
+                    "borderRadius": 16,
+                    "maxLines": 3
+                  }
+                },
+                {
+                  "id": "checkout-notes",
+                  "type": "textFormField",
+                  "props": {
+                    "label": "Delivery notes",
+                    "hint": "Gate code, landmark, preferred time",
+                    "prefixIcon": "info",
+                    "validateRequired": false,
+                    "color": "#FFFFFF",
+                    "borderRadius": 16,
+                    "maxLines": 3
+                  }
+                }
+              ]
             }
           }
         },
         {
-          "id": "checkout-actions",
-          "type": "row",
-          "props": {
-            "mainAxisAlignment": "spaceBetween",
-            "crossAxis": "center"
+          "id": "checkout-payment-card",
+          "type": "container",
+          "props": {},
+          "style": {
+            "margin": {
+              "left": 16,
+              "right": 16,
+              "bottom": 12
+            },
+            "padding": 16,
+            "background": "#FFFFFF",
+            "borderRadius": 24,
+            "shadow": "sm"
           },
+          "child": {
+            "id": "checkout-payment-column",
+            "type": "column",
+            "props": {
+              "crossAxisAlignment": "start",
+              "gap": 12
+            },
+            "children": [
+              {
+                "id": "checkout-payment-title",
+                "type": "text",
+                "props": {
+                  "value": "Payment",
+                  "fontSize": 18,
+                  "fontWeight": "bold",
+                  "color": "#0F172A"
+                }
+              },
+              {
+                "id": "checkout-payment-note",
+                "type": "richtext",
+                "props": {
+                  "value": "<p>Card, wallet, and cash on delivery are ready for a follow-up action system.</p>",
+                  "color": "#475569"
+                }
+              },
+              {
+                "id": "checkout-payment-row",
+                "type": "row",
+                "props": {
+                  "crossAxisAlignment": "center",
+                  "gap": 10
+                },
+                "children": [
+                  {
+                    "id": "checkout-payment-card-icon",
+                    "type": "icon",
+                    "props": {
+                      "name": "receipt",
+                      "size": 20,
+                      "color": "#1D4ED8"
+                    }
+                  },
+                  {
+                    "id": "checkout-payment-text",
+                    "type": "text",
+                    "props": {
+                      "value": "Payment method: card on file or cash on delivery",
+                      "fontSize": 14,
+                      "color": "#334155"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "checkout-submit-row",
+          "type": "container",
+          "props": {},
           "style": {
             "margin": {
               "left": 16,
@@ -2400,34 +2291,26 @@
               "bottom": 20
             }
           },
-          "children": [
-            {
-              "id": "checkout-back-products",
-              "type": "button",
-              "props": {
-                "label": "Continue Shopping",
-                "backgroundColor": "#334155",
-                "borderRadius": 10
-              },
-              "tap": {
-                "type": "navigate",
-                "route": "/products"
+          "child": {
+            "id": "checkout-submit-button",
+            "type": "button",
+            "props": {
+              "label": "Place order",
+              "backgroundColor": "#1D4ED8",
+              "textColor": "#FFFFFF",
+              "borderRadius": 18,
+              "padding": {
+                "left": 18,
+                "right": 18,
+                "top": 14,
+                "bottom": 14
               }
             },
-            {
-              "id": "checkout-finish",
-              "type": "button",
-              "props": {
-                "label": "Finish Demo",
-                "backgroundColor": "#16A34A",
-                "borderRadius": 10
-              },
-              "tap": {
-                "type": "navigate",
-                "route": "/"
-              }
+            "tap": {
+              "type": "navigate",
+              "route": "/"
             }
-          ]
+          }
         }
       ]
     }
