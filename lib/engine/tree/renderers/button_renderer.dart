@@ -12,11 +12,16 @@ class ButtonRenderer implements ComponentRenderer {
     Map<String, dynamic>? dataContext,
   }) {
     final label = config.properties['label'] as String? ?? '';
+    final variant = (config.properties['variant'] as String? ?? 'elevated')
+        .toLowerCase();
     final backgroundColor = PropertyParsers.parseColor(
       config.properties['backgroundColor'] as String?,
     );
     final textColor = PropertyParsers.parseColor(
       config.properties['textColor'] as String?,
+    );
+    final foregroundColor = PropertyParsers.parseColor(
+      config.properties['foregroundColor'] as String?,
     );
     final borderRadius = PropertyParsers.parseBorderRadius(
       config.properties['borderRadius'],
@@ -28,26 +33,80 @@ class ButtonRenderer implements ComponentRenderer {
       config.properties['alignment'] as String?,
     );
     final onTap = config.properties['onTap'] as VoidCallback?;
+    final maxWidth = PropertyParsers.parseDouble(config.properties['maxWidth']);
 
-    final button = ElevatedButton(
-      onPressed: onTap ?? () {},
-      style: ElevatedButton.styleFrom(
-        backgroundColor: backgroundColor,
-        padding:
-            padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: borderRadius ?? BorderRadius.circular(8),
-        ),
-      ),
-      child: Text(
-        label,
-        style: textColor != null ? TextStyle(color: textColor) : null,
-      ),
+    final shape = RoundedRectangleBorder(
+      borderRadius: borderRadius ?? BorderRadius.circular(8),
     );
 
-    if (alignment != null) {
-      return Align(alignment: alignment, child: button);
+    late final Widget button;
+    switch (variant) {
+      case 'text':
+        button = TextButton(
+          onPressed: onTap ?? () {},
+          style: TextButton.styleFrom(
+            foregroundColor: foregroundColor ?? textColor,
+            padding:
+                padding ?? const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            shape: shape,
+          ),
+          child: Text(
+            label,
+            style: textColor != null && foregroundColor == null
+                ? TextStyle(color: textColor)
+                : null,
+          ),
+        );
+        break;
+      case 'outlined':
+      case 'secondary':
+        button = OutlinedButton(
+          onPressed: onTap ?? () {},
+          style: OutlinedButton.styleFrom(
+            foregroundColor: foregroundColor ?? textColor,
+            padding:
+                padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            shape: shape,
+            side: BorderSide(
+              color: textColor ?? const Color(0xFF1D4ED8),
+            ),
+          ),
+          child: Text(
+            label,
+            style: textColor != null && foregroundColor == null
+                ? TextStyle(color: textColor)
+                : null,
+          ),
+        );
+        break;
+      case 'elevated':
+      default:
+        button = ElevatedButton(
+          onPressed: onTap ?? () {},
+          style: ElevatedButton.styleFrom(
+            backgroundColor: backgroundColor,
+            foregroundColor: foregroundColor ?? textColor,
+            padding:
+                padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            shape: shape,
+          ),
+          child: Text(
+            label,
+            style: textColor != null && foregroundColor == null
+                ? TextStyle(color: textColor)
+                : null,
+          ),
+        );
     }
-    return button;
+
+    Widget wrapped = button;
+    if (maxWidth != null && maxWidth > 0) {
+      wrapped = SizedBox(width: maxWidth, child: wrapped);
+    }
+
+    if (alignment != null) {
+      return Align(alignment: alignment, child: wrapped);
+    }
+    return wrapped;
   }
 }

@@ -28,7 +28,19 @@ class ScaffoldRenderer implements ComponentRenderer {
     return ColoredBox(
       color: backgroundColor ?? const Color(0xFFF8FAFC),
       child: child != null
-          ? SingleChildScrollView(child: child)
+          ? Builder(
+              builder: (context) {
+                final h = MediaQuery.sizeOf(context).height;
+                final pad = MediaQuery.paddingOf(context).vertical;
+                final minHeight = (h - pad).clamp(0.0, double.infinity);
+                return SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: minHeight),
+                    child: Center(child: child),
+                  ),
+                );
+              },
+            )
           : const SizedBox.expand(),
     );
   }

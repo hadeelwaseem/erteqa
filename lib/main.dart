@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -15,7 +17,7 @@ import 'package:sooq_merchant/engine/app_config_loader.dart';
 
 /// The JSON file that drives the app.
 /// Change this to switch to a different config at any time.
-const _kActiveConfig = 'mobile_component_flow_demo';
+const _kActiveConfig = 'mobile_production_v2';
 
 void main() async {
   // 1. Initialize Flutter bindings
@@ -64,7 +66,7 @@ void main() async {
       supportedLocales: const [Locale('ar', 'AE'), Locale('en', 'US')],
       path: 'assets/translations',
       fallbackLocale: const Locale('ar', 'AE'),
-      startLocale: const Locale('en', 'US'),
+      startLocale: const Locale('ar', 'AE'),
       child: SOOQApp(
         router: router,
         tokenCubit: tokenCubit,
@@ -105,6 +107,14 @@ class SOOQApp extends StatelessWidget {
             localizationsDelegates: context.localizationDelegates,
             supportedLocales: context.supportedLocales,
             locale: context.locale,
+            builder: (context, child) {
+              final isRtl = context.locale.languageCode == 'ar';
+              return Directionality(
+                textDirection:
+                    isRtl ? ui.TextDirection.rtl : ui.TextDirection.ltr,
+                child: child ?? const SizedBox.shrink(),
+              );
+            },
             routerConfig: router,
             debugShowCheckedModeBanner: false,
           );

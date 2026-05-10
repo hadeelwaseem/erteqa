@@ -126,11 +126,13 @@ class ComponentSchemas {
       'itemBuilder',
       'children',
       'enableInnerScroll',
+      'childAspectRatio',
     },
     propertyTypes: {
       'crossAxisCount': 'number (integer)',
       'mainAxisSpacing': 'number',
       'crossAxisSpacing': 'number',
+      'childAspectRatio': 'number',
       'scrollDirection': 'string (vertical|horizontal)',
       'itemBuilder': 'object (type=repeat, source=string|array, item=object)',
     },
@@ -166,6 +168,9 @@ class ComponentSchemas {
     requiredProperties: {}, // 'label' recommended but not enforced
     optionalProperties: {
       'label',
+      'variant',
+      'foregroundColor',
+      'maxWidth',
       'backgroundColor',
       'textColor',
       'borderRadius',
@@ -253,7 +258,14 @@ class ComponentSchemas {
   static const richtext = ComponentSchema(
     type: 'richtext',
     requiredProperties: {},
-    optionalProperties: {'value', 'color'},
+    optionalProperties: {
+      'value',
+      'color',
+      'fontSize',
+      'fontWeight',
+      'textAlign',
+      'height',
+    },
   );
 
   static const textFormField = ComponentSchema(
@@ -366,6 +378,18 @@ class ComponentSchemas {
     },
   );
 
+  static const videoPlayer = ComponentSchema(
+    type: 'videoPlayer',
+    requiredProperties: {'url'},
+    optionalProperties: {
+      'semanticType',
+      'autoplay',
+      'showControls',
+      'height',
+      'borderRadius',
+    },
+  );
+
   static const unsupported = ComponentSchema(
     type: 'unsupported',
     requiredProperties: {},
@@ -413,6 +437,8 @@ class ComponentSchemas {
         return textFormField;
       case 'form':
         return form;
+      case 'videoPlayer':
+        return videoPlayer;
       case 'unsupported':
         return unsupported;
       default:
@@ -441,6 +467,7 @@ class ComponentSchemas {
       'richtext': richtext,
       'textFormField': textFormField,
       'form': form,
+      'videoPlayer': videoPlayer,
       'unsupported': unsupported,
     };
   }

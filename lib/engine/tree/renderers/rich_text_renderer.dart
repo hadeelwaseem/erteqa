@@ -15,10 +15,25 @@ class RichTextRenderer implements ComponentRenderer {
     final color = PropertyParsers.parseColor(
       config.properties['color'] as String?,
     );
+    final fontSize = PropertyParsers.parseDouble(config.properties['fontSize']);
+    final fontWeight = PropertyParsers.parseFontWeight(
+      config.properties['fontWeight'] as String?,
+    );
+    final textAlign = PropertyParsers.parseTextAlign(
+      config.properties['textAlign'] as String?,
+    );
+    final height = PropertyParsers.parseDouble(config.properties['height']);
 
     return Text(
       _stripHtml(value),
-      style: TextStyle(color: color, decoration: TextDecoration.none),
+      textAlign: textAlign,
+      style: TextStyle(
+        color: color,
+        decoration: TextDecoration.none,
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+        height: height,
+      ),
     );
   }
 

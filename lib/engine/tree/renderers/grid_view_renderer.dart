@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../../config/component_config.dart';
 import '../../component_renderer/component_renderer.dart';
+import '../parsers/property_parsers.dart';
 
 class GridViewRenderer implements ComponentRenderer {
   @override
@@ -23,6 +24,9 @@ class GridViewRenderer implements ComponentRenderer {
         config.crossAxisSpacing ??
         _parseDouble(config.properties['crossAxisSpacing']) ??
         0.0;
+    final childAspectRatio =
+        PropertyParsers.parseDouble(config.properties['childAspectRatio']) ??
+        1.0;
 
     final itemTemplate = config.itemBuilder?.item ?? config.child;
     final children = config.children ?? const <ComponentConfig>[];
@@ -45,6 +49,7 @@ class GridViewRenderer implements ComponentRenderer {
       crossAxisCount: crossAxisCount,
       mainAxisSpacing: mainAxisSpacing,
       crossAxisSpacing: crossAxisSpacing,
+      childAspectRatio: childAspectRatio,
     );
 
     if (itemTemplate != null) {

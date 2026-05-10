@@ -24,6 +24,7 @@ import '../tree/renderers/image_renderer.dart';
 import '../tree/renderers/list_view_renderer.dart';
 import '../tree/renderers/grid_view_renderer.dart';
 import '../tree/renderers/rich_text_renderer.dart';
+import '../tree/renderers/video_player_renderer.dart';
 import '../tree/renderers/unsupported_component_renderer.dart';
 import '../actions/action_dispatcher.dart';
 import '../form/form_state_store.dart';
@@ -84,6 +85,7 @@ class ScreenRenderer {
       GenericComponentType.divider: DividerRenderer(),
       GenericComponentType.icon: IconRenderer(),
       GenericComponentType.richtext: RichTextRenderer(),
+      GenericComponentType.videoPlayer: VideoPlayerRenderer(),
       GenericComponentType.unsupported: UnsupportedComponentRenderer(),
     };
   }

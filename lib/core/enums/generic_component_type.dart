@@ -18,5 +18,6 @@ enum GenericComponentType {
   richtext,
   textFormField,
   form,
+  videoPlayer,
   unsupported,
 }
