@@ -41,6 +41,7 @@ Status Note:
 - navigation.type must support tabs shell semantics.
 - navigation must include initialRoute.
 - navigation must include tabs array when type is tabs.
+- navigation must preserve all keys present in input including shellExcludeRoutes when present.
 - Each tab must include id.
 - Each tab must include label.
 - Each tab must include icon.
@@ -70,6 +71,7 @@ Status Note:
 - [Critical] Nesting inside props is disallowed except node composition through child or children.
 - child must be used for single-child container shapes.
 - children must be used for multi-child container shapes.
+- node.props may include semanticType as metadata preserved verbatim from input.
 - theme must expose mode.
 - theme.colors must include primary.
 - theme.colors must include surface.
@@ -127,6 +129,27 @@ Status Note:
 - stack children may carry alignment metadata.
 - spacer must use size in pixels or flex as integer.
 - scroll wrapper is reserved for explicit directional scrolling where row overflow handling is insufficient.
+- gridView must support grid layout with children array composition.
+- gridView may support props.crossAxisCount.
+- gridView may support props.mainAxisSpacing.
+- gridView may support props.crossAxisSpacing.
+- gridView may support props.childAspectRatio.
+- gridView may support props.enableInnerScroll.
+- listView must support list layout with children array composition.
+- listView may support props.enableInnerScroll.
+- form must contain a single child (column or other container).
+- form props must include formId for form identification.
+- form may support data binding to submit actions.
+- textFormField must support text input with validation.
+- textFormField props must include id for field identification.
+- textFormField may include label.
+- textFormField may include hint.
+- textFormField may include keyboardType (emailAddress, phone, etc.).
+- textFormField may include validateRequired boolean.
+- textFormField may include validateEmail boolean.
+- textFormField may include requiredMessage string.
+- textFormField may include textAlign.
+- textFormField may support onSubmitted action.
 - appBar supports title.
 - appBar supports leading.
 - appBar supports actions array.
@@ -162,6 +185,10 @@ Status Note:
 - videoPlayer must include url.
 - videoPlayer may include autoplay.
 - videoPlayer may include controls.
+- videoPlayer may include showControls boolean.
+- videoPlayer may include height numeric value.
+- videoPlayer may include borderRadius numeric value.
+- videoPlayer may include width numeric value.
 - statsRow must contain items array.
 - logosRow must contain items array.
 - text must include value.
@@ -169,7 +196,12 @@ Status Note:
 - heading text level must be 1 through 6.
 - text may include align.
 - text may include color.
+- text may include fontSize.
+- text may include fontWeight.
+- text may include textAlign.
+- richtext must support content string or HTML markup.
 - richtext content must be sanitized.
+- richtext may include formatting tags (p, strong, em, u, a, br, ul, ol, li, blockquote).
 - image.source must be network or asset.
 - image may include url.
 - image may include fit.
@@ -179,6 +211,7 @@ Status Note:
 - button.variant must be primary, secondary, or ghost.
 - button may include size.
 - button interaction must be expressed via tap.
+- button may include onSubmitted action (for form context).
 - icon must include name from supported icon sets.
 - icon may include size.
 - icon may include color.
@@ -238,6 +271,8 @@ Status Note:
 - apiCall action may define templated body.
 - openSheet action must include sheet node tree.
 - share action must trigger share flow.
+- onSubmitted action is valid in textFormField for form submission.
+- onSubmitted may contain navigate, apiCall, or other action types.
 - [Critical] Action side effects must be executed by one ActionDispatcher.
 - Content button links must be normalized into tap actions during transform.
 - Internal href targets must map to navigate.
@@ -310,6 +345,9 @@ Status Note:
 - ContentHtml must map to richtext with sanitation.
 - Legacy Card must map to container with shadow sm and borderRadius.
 - Legacy Flex must map to row or column.
+- Form nodes must be preserved with type form and formId prop forwarded.
+- FormField nodes must map to textFormField with validation rules preserved.
+- FormField validation attributes must map to validateRequired, validateEmail, and requiredMessage props.
 - Template blocks must be expanded recursively before remapping.
 - Blank blocks must be dropped.
 - [Critical] Section collapse rule order must be applied exactly.
@@ -363,6 +401,9 @@ Status Note:
 - style.height must support wrap semantics.
 - [Implicit] style.height may use numeric sizing where widget supports explicit height.
 - style.aspectRatio may be numeric.
+- textFormField may define style for field styling (padding, borderRadius, background).
+- form child containers may define style for layout and spacing.
+- videoPlayer may define style with height, borderRadius, width properties.
 - [Critical] spanCol must not be represented in mobile style.
 - [Critical] spanRow must not be represented in mobile style.
 - [Critical] position floating/fixed must not be represented in mobile style.
@@ -395,12 +436,28 @@ Status Note:
 - stack type must render as Stack with positioned/aligned child support.
 - spacer with flex must render as Expanded.
 - spacer with size must render as SizedBox.
+- gridView type must render as GridView or SliverGrid with configured crossAxisCount, spacing, and childAspectRatio.
+- gridView enableInnerScroll false must render within parent scroll context.
+- gridView enableInnerScroll true must support independent internal scrolling.
+- listView type must render as ListView or SliverList.
+- listView enableInnerScroll false must render within parent scroll context.
+- listView enableInnerScroll true must support independent internal scrolling.
+- form type must render as a FormWidget container preserving formId.
+- form must pass form state to child components.
+- form validation must aggregate from nested textFormField validators.
+- textFormField type must render as a TextFormField widget.
+- textFormField validation rules must include validateRequired and validateEmail when present.
+- textFormField keyboardType must map to appropriate Flutter keyboard type.
+- textFormField onSubmitted must dispatch action via ActionDispatcher.
 - text type must render with theme-driven style resolution by variant/level/color.
+- text fontSize and fontWeight must override theme defaults when present.
+- text textAlign must control text alignment.
 - richtext type must render using flutter_html constrained to allowed tags.
 - image type must render using CachedNetworkImage with placeholder support.
 - image with aspect ratio must render inside aspect-ratio wrapper.
 - button type must map variants to FilledButton, OutlinedButton, or TextButton.
 - button sizing must use theme.buttons size tokens.
+- button onSubmitted action must dispatch via ActionDispatcher in form context.
 - icon type must resolve names through icon registry.
 - divider type must render as Divider.
 - badge type must render as compact chip widget.
@@ -408,6 +465,11 @@ Status Note:
 - appBar nodes must auto-promote to sliver in scroll context.
 - hero type must use dedicated HeroSection widget.
 - bannerCarousel must use PageView.builder with timer-based autoplay when enabled.
+- videoPlayer type must render with video player controls as specified.
+- videoPlayer showControls must control visibility of player controls.
+- videoPlayer autoplay must auto-start video playback.
+- videoPlayer height and width must be applied to container dimensions.
+- videoPlayer borderRadius must apply rounded corners to player.
 - productList grid mode must render as SliverGrid.
 - productList list mode must render as SliverList.
 - productList carousel mode must render as horizontal list in fixed-height container.
@@ -419,9 +481,8 @@ Status Note:
 - categoryList must resolve category data through DataResolver.
 - searchBar submit must call ActionDispatcher.navigate.
 - cartSummary must bind to cart state provider.
-- checkoutForm must render from field schema.
+- checkoutForm must render from field schema with validation.
 - imageGallery must be implemented as functional widget.
-- videoPlayer must be implemented as functional widget.
 - statsRow must be implemented as functional widget.
 - logosRow must be implemented as functional widget.
 - [Critical] Existing if/else widget switching must be replaced by registry dispatch.
@@ -523,3 +584,18 @@ Status Note:
 - [Implicit] Golden transform snapshots are required to lock deterministic output behavior.
 - [Implicit] Flutter widget tests are required to catch visual regressions from schema/transform changes.
 - [Implicit] The system is designed for extension by adding new registry node builders and DataResolver source cases only.
+
+14. Deterministic Transform Rules
+
+- **Node Type Preservation and `semanticType` Precedence**
+- Rule: For every input node, the transform MUST copy the top-level `type` value verbatim into the output mobile JSON as the node's `type`. If the input node contains `props.semanticType`, the transform MUST copy `props.semanticType` verbatim into the output under `props.semanticType` and MUST NOT promote, rename, or replace the node's top-level `type` with the `semanticType` value.
+- For `type: "gridView"` specifically: the transform MUST preserve all keys and values present in the input node's `props` object (including but not limited to `crossAxisCount`, `mainAxisSpacing`, `crossAxisSpacing`, `childAspectRatio`, `enableInnerScroll`) and MUST NOT add, remove, or reorder `props` keys. The transform MUST NOT inject default `gridView` props that were absent in the input.
+- Precedence: top-level `type` has higher precedence than `props.semanticType` for determining the output node `type`. `props.semanticType` is treated strictly as a preserved metadata field and MAY be used by downstream runtime registries, but it MUST remain nested under `props` in the output.
+- Conflict / missing fields: if `props.semanticType` is present but top-level `type` is present and differs, the output MUST keep the top-level `type` value unchanged and keep `props.semanticType` unchanged. If any `gridView` `props` keys are missing in the input, the transform MUST NOT synthesize them; the output MUST omit those keys as well.
+- Justification: Guarantees that nodes observed in `mobile_production_v2.json` such as `type: "gridView"` with `props.semanticType` and explicit `gridView` props are reproduced exactly and prevents transforms that would rename the node or alter its `props` set.
+
+- **Navigation Field Preservation (`shellExcludeRoutes`)**
+- Rule: For the top-level `navigation` object, the transform MUST copy verbatim any keys that exist in the input navigation object into the output mobile JSON, including their values and ordering. In particular, if the input contains a `shellExcludeRoutes` array, the transform MUST include an identical `shellExcludeRoutes` array in the output with the same element order and string values.
+- Precedence: This preservation rule applies to all keys not explicitly defined elsewhere in this Rules.md transform section. If another Rules.md clause later defines a conflicting mandatory navigation key, this preservation rule takes precedence for keys present in the input (i.e., do not remove or alter input-provided keys).
+- Conflict / missing fields: If `shellExcludeRoutes` is absent in the input, the transform MUST NOT create or synthesize a `shellExcludeRoutes` key. If `shellExcludeRoutes` is present but empty, the transform MUST emit the empty array as-is. If `shellExcludeRoutes` is present but contains duplicate entries, the transform MUST preserve duplicates and ordering as they appear in the input.
+- Justification: Ensures deterministic reproduction of the `navigation` object observed in `mobile_production_v2.json` and prevents transforms that would omit or synthesize `shellExcludeRoutes` differently.
