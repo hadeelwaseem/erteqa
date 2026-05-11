@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sooq_merchant/config/mobile_app_config.dart';
 import 'package:sooq_merchant/core/utils/service_locator.dart';
@@ -34,10 +35,9 @@ abstract class AppRouter {
         routes.add(
           GoRoute(
             path: route,
-            builder: (context, state) => VariantScreen(
+            builder: (context, state) => _buildVariantScreen(
               variantId: variantId,
               pageRoute: route,
-              variantRepository: getIt<VariantRepository>(),
             ),
           ),
         );
@@ -51,10 +51,9 @@ abstract class AppRouter {
         shellRoutes.add(
           GoRoute(
             path: tab.route,
-            builder: (context, state) => VariantScreen(
+            builder: (context, state) => _buildVariantScreen(
               variantId: variantId,
               pageRoute: tab.route,
-              variantRepository: getIt<VariantRepository>(),
             ),
           ),
         );
@@ -66,10 +65,9 @@ abstract class AppRouter {
         shellRoutes.add(
           GoRoute(
             path: route,
-            builder: (context, state) => VariantScreen(
+            builder: (context, state) => _buildVariantScreen(
               variantId: variantId,
               pageRoute: route,
-              variantRepository: getIt<VariantRepository>(),
             ),
           ),
         );
@@ -90,9 +88,8 @@ abstract class AppRouter {
       routes.add(
         GoRoute(
           path: '/',
-          builder: (context, state) => VariantScreen(
+          builder: (context, state) => _buildVariantScreen(
             variantId: 'mobile_component_flow_demo',
-            variantRepository: getIt<VariantRepository>(),
           ),
         ),
       );
@@ -113,10 +110,9 @@ abstract class AppRouter {
         builder: (context, state) {
           final pageId = state.pathParameters['id'] ?? 'mobile_component_flow_demo';
           final pageRoute = state.uri.queryParameters['route'];
-          return VariantScreen(
+          return _buildVariantScreen(
             variantId: pageId,
             pageRoute: pageRoute,
-            variantRepository: getIt<VariantRepository>(),
           );
         },
       ),
@@ -129,5 +125,16 @@ abstract class AppRouter {
     );
 
     return router;
+  }
+
+  static Widget _buildVariantScreen({
+    required String variantId,
+    String? pageRoute,
+  }) {
+    return VariantScreen(
+      variantId: variantId,
+      pageRoute: pageRoute,
+      variantRepository: getIt<VariantRepository>(),
+    );
   }
 }

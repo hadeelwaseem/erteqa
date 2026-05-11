@@ -36,7 +36,12 @@ class ImageRenderer implements ComponentRenderer {
     final source = PropertyParsers.parseImageSource(
       config.properties['source'] as String?,
     );
-    final url = config.properties['url'] as String? ?? '';
+    final urlPath = config.properties['urlPath'] as String?;
+    final boundUrl = _resolvePath(dataContext, urlPath);
+    final url =
+      (boundUrl?.toString().trim().isNotEmpty ?? false)
+      ? boundUrl.toString()
+      : (config.properties['url'] as String? ?? '');
     final width = PropertyParsers.parseDouble(config.properties['width']);
     final height = PropertyParsers.parseDouble(config.properties['height']);
     final fitString = PropertyParsers.parseImageFitString(
@@ -68,6 +73,20 @@ class ImageRenderer implements ComponentRenderer {
       return AspectRatio(aspectRatio: aspectRatio, child: image);
     }
     return image;
+  }
+
+  dynamic _resolvePath(Map<String, dynamic>? root, String? path) {
+    if (root == null || path == null || path.isEmpty) return null;
+
+    dynamic current = root;
+    for (final segment in path.split('.')) {
+      if (current is Map<String, dynamic> && current.containsKey(segment)) {
+        current = current[segment];
+      } else {
+        return null;
+      }
+    }
+    return current;
   }
 
   /// Converts a fit string to BoxFit enum.

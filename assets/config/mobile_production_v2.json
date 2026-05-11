@@ -1271,6 +1271,7 @@
             "data": {
               "source": "collection",
               "id": "featured-home",
+              "requestUrl": "/api/products?collection=featured-home&limit=6",
               "limit": 6
             }
           },
@@ -1768,7 +1769,96 @@
             "data": {
               "source": "collection",
               "id": "all-products",
-              "limit": 20
+              "requestKey": "product-list",
+              "requestUrl": "/api/v1/public/products?page=0&size=20",
+              "page": 0,
+              "size": 20
+            }
+          },
+          "itemBuilder": {
+            "type": "repeat",
+            "source": "dataContext.products",
+            "item": {
+              "id": "products-grid-item",
+              "type": "card",
+              "props": {
+                "semanticType": "ProductCard",
+                "color": "#FFFFFF",
+                "borderRadius": 12,
+                "elevation": 1
+              },
+              "child": {
+                "id": "products-grid-item-content",
+                "type": "column",
+                "props": {
+                  "crossAxis": "stretch",
+                  "gap": 8
+                },
+                "children": [
+                  {
+                    "id": "products-grid-item-image",
+                    "type": "image",
+                    "props": {
+                      "source": "network",
+                      "urlPath": "item.image",
+                      "url": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=900",
+                      "height": 120,
+                      "fit": "cover"
+                    }
+                  },
+                  {
+                    "id": "products-grid-item-info",
+                    "type": "container",
+                    "props": {
+                      "semanticType": "ProductInfo"
+                    },
+                    "style": {
+                      "padding": {
+                        "left": 8,
+                        "right": 8,
+                        "bottom": 8
+                      }
+                    },
+                    "child": {
+                      "id": "products-grid-item-info-col",
+                      "type": "column",
+                      "props": {
+                        "crossAxis": "start",
+                        "gap": 4
+                      },
+                      "children": [
+                        {
+                          "id": "products-grid-item-name",
+                          "type": "text",
+                          "props": {
+                            "valuePath": "item.name",
+                            "value": "منتج",
+                            "fontSize": 14,
+                            "fontWeight": "medium",
+                            "textAlign": "right"
+                          }
+                        },
+                        {
+                          "id": "products-grid-item-price",
+                          "type": "text",
+                          "props": {
+                            "valuePath": "item.price",
+                            "value": "--",
+                            "fontSize": 15,
+                            "fontWeight": "bold",
+                            "textAlign": "right",
+                            "color": "#0B57D0"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "tap": {
+                "type": "navigate",
+                "route": "/product/details/:productId"
+              }
             }
           },
           "style": {
@@ -1777,167 +1867,7 @@
               "right": 16,
               "bottom": 24
             }
-          },
-          "children": [
-            {
-              "id": "products-grid-item-1",
-              "type": "card",
-              "props": {
-                "semanticType": "ProductCard",
-                "color": "#FFFFFF",
-                "borderRadius": 12,
-                "elevation": 1
-              },
-              "child": {
-                "id": "products-grid-item-1-content",
-                "type": "column",
-                "props": {
-                  "crossAxis": "stretch",
-                  "gap": 8
-                },
-                "children": [
-                  {
-                    "id": "products-grid-item-1-image",
-                    "type": "image",
-                    "props": {
-                      "source": "network",
-                      "url": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=900",
-                      "height": 120,
-                      "fit": "cover"
-                    }
-                  },
-                  {
-                    "id": "products-grid-item-1-info",
-                    "type": "container",
-                    "props": {
-                      "semanticType": "ProductInfo"
-                    },
-                    "style": {
-                      "padding": {
-                        "left": 8,
-                        "right": 8,
-                        "bottom": 8
-                      }
-                    },
-                    "child": {
-                      "id": "products-grid-item-1-info-col",
-                      "type": "column",
-                      "props": {
-                        "crossAxis": "start",
-                        "gap": 4
-                      },
-                      "children": [
-                        {
-                          "id": "products-grid-item-1-name",
-                          "type": "text",
-                          "props": {
-                            "value": "سماعات لاسلكية",
-                            "fontSize": 14,
-                            "fontWeight": "medium",
-                            "textAlign": "right"
-                          }
-                        },
-                        {
-                          "id": "products-grid-item-1-price",
-                          "type": "text",
-                          "props": {
-                            "value": "299 ر.س",
-                            "fontSize": 15,
-                            "fontWeight": "bold",
-                            "textAlign": "right",
-                            "color": "#0B57D0"
-                          }
-                        }
-                      ]
-                    }
-                  }
-                ]
-              },
-              "tap": {
-                "type": "navigate",
-                "route": "/product/details/sku-2001"
-              }
-            },
-            {
-              "id": "products-grid-item-2",
-              "type": "card",
-              "props": {
-                "semanticType": "ProductCard",
-                "color": "#FFFFFF",
-                "borderRadius": 12,
-                "elevation": 1
-              },
-              "child": {
-                "id": "products-grid-item-2-content",
-                "type": "column",
-                "props": {
-                  "crossAxis": "stretch",
-                  "gap": 8
-                },
-                "children": [
-                  {
-                    "id": "products-grid-item-2-image",
-                    "type": "image",
-                    "props": {
-                      "source": "network",
-                      "url": "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=900",
-                      "height": 120,
-                      "fit": "cover"
-                    }
-                  },
-                  {
-                    "id": "products-grid-item-2-info",
-                    "type": "container",
-                    "props": {
-                      "semanticType": "ProductInfo"
-                    },
-                    "style": {
-                      "padding": {
-                        "left": 8,
-                        "right": 8,
-                        "bottom": 8
-                      }
-                    },
-                    "child": {
-                      "id": "products-grid-item-2-info-col",
-                      "type": "column",
-                      "props": {
-                        "crossAxis": "start",
-                        "gap": 4
-                      },
-                      "children": [
-                        {
-                          "id": "products-grid-item-2-name",
-                          "type": "text",
-                          "props": {
-                            "value": "ساعة ذكية",
-                            "fontSize": 14,
-                            "fontWeight": "medium",
-                            "textAlign": "right"
-                          }
-                        },
-                        {
-                          "id": "products-grid-item-2-price",
-                          "type": "text",
-                          "props": {
-                            "value": "799 ر.س",
-                            "fontSize": 15,
-                            "fontWeight": "bold",
-                            "textAlign": "right",
-                            "color": "#0B57D0"
-                          }
-                        }
-                      ]
-                    }
-                  }
-                ]
-              },
-              "tap": {
-                "type": "navigate",
-                "route": "/product/details/sku-2002"
-              }
-            }
-          ]
+          }
         }
       ]
     },

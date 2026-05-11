@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "app": {
-    "name": "SOOQ Merchant Mobile",
+    "name": "SOOQ",
     "bundleId": "com.sooq.merchant.mobile"
   },
   "theme": {
@@ -162,17 +162,17 @@
                   "color": "#0B57D0"
                 }
               },
-              {
-                "id": "splash-title",
-                "type": "text",
-                "props": {
-                  "value": "SOOQ Merchant",
-                  "fontSize": 28,
-                  "fontWeight": "bold",
-                  "textAlign": "center",
-                  "color": "#0F172A"
-                }
-              },
+                {
+                  "id": "splash-title",
+                  "type": "text",
+                  "props": {
+                    "value": "SOOQ",
+                    "fontSize": 28,
+                    "fontWeight": "bold",
+                    "textAlign": "center",
+                    "color": "#0F172A"
+                  }
+                },
               {
                 "id": "splash-subtitle",
                 "type": "text",

@@ -1,6 +1,18 @@
 {
     "terminal.integrated.suggest.enabled": true,
     "chat.tools.terminal.autoApprove": {
-        "Move-Item": true
+        "Move-Item": true,
+        "dart": true,
+        "/^Get-Content 'C:\\\\Users\\\\Golden\\\\Documents\\\\flutter_projects\\\\sooq-merchant\\\\assets\\\\config\\\\mobile_production_v2\\.json' -Raw \\| ConvertFrom-Json \\| Out-Null; Write-Output 'JSON OK'$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^flutter analyze$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "ConvertFrom-Json": true,
+        "Out-Null": true,
+        "flutter": true
     }
 }

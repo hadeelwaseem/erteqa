@@ -405,7 +405,17 @@ class AssetVariantRepository implements VariantRepository {
       if (itemJson is! Map<String, dynamic>) {
         throw ArgumentError('itemBuilder.item must be an Object at $path');
       }
-      item = _parseComponentConfig(itemJson, path: '$path.item');
+      // Support both component formats inside itemBuilder templates:
+      // 1) Generic component format: {type, value, url, children...}
+      // 2) Builder format: {type, props, style, tap, children...}
+      final hasBuilderKeys =
+          itemJson.containsKey('props') ||
+          itemJson.containsKey('style') ||
+          itemJson.containsKey('tap');
+
+      item = hasBuilderKeys
+          ? _parseBuilderComponentConfig(itemJson, path: '$path.item')
+          : _parseComponentConfig(itemJson, path: '$path.item');
     }
 
     return ItemBuilderConfig(

@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET" />
     <application
-        android:label="sooq_merchant"
+        android:label="SOOQ"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

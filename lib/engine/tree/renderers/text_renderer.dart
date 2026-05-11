@@ -12,7 +12,12 @@ class TextRenderer implements ComponentRenderer {
     required ComponentWidgetBuilder buildChild,
     Map<String, dynamic>? dataContext,
   }) {
-    final value = config.properties['value'] as String? ?? '';
+    final valuePath = config.properties['valuePath'] as String?;
+    final boundValue = _resolvePath(dataContext, valuePath);
+    final value =
+        (boundValue?.toString().trim().isNotEmpty ?? false)
+        ? boundValue.toString()
+        : (config.properties['value'] as String? ?? '');
     final fontSize =
         (config.properties['fontSize'] as num?)?.toDouble() ?? 16.0;
     final fontWeight = PropertyParsers.parseFontWeight(
@@ -35,5 +40,19 @@ class TextRenderer implements ComponentRenderer {
       ),
       textAlign: textAlign,
     );
+  }
+
+  dynamic _resolvePath(Map<String, dynamic>? root, String? path) {
+    if (root == null || path == null || path.isEmpty) return null;
+
+    dynamic current = root;
+    for (final segment in path.split('.')) {
+      if (current is Map<String, dynamic> && current.containsKey(segment)) {
+        current = current[segment];
+      } else {
+        return null;
+      }
+    }
+    return current;
   }
 }

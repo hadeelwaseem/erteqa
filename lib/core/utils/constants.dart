@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 
 // const kBaseUrl = 'http://192.168.137.8:8000/api';
 // const kBaseUrl = 'http://10.0.2.2:8000/api';
-const kBaseUrl = 'https://jaramana-clinic-center.onrender.com/api';
+const kBaseUrl = 'https://sooq.up.railway.app';
 
 final kBaseUrlAsset = kBaseUrl.split('/api')[0];
 
 // const kWebSocketUrl = 'ws://jaramana-clinic-center.onrender.com/ws';
 
-const kAppName = 'SOOQ Merchant';
+const kAppName = 'SOOQ';
 
 //TODO: Need Updates
 const Color primaryColor = Color(0xff4A4BB3);

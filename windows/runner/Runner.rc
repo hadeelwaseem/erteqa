@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "sooq_merchant" "\0"
+            VALUE "FileDescription", "SOOQ" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "sooq_merchant" "\0"
+            VALUE "InternalName", "SOOQ" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "sooq_merchant.exe" "\0"
-            VALUE "ProductName", "sooq_merchant" "\0"
+            VALUE "OriginalFilename", "SOOQ.exe" "\0"
+            VALUE "ProductName", "SOOQ" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

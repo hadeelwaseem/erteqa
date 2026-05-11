@@ -1,30 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:sooq_merchant/core/utils/service_locator.dart';
 import 'package:sooq_merchant/engine/actions/action_dispatcher.dart';
 import 'package:sooq_merchant/engine/form/form_state_store.dart';
+import 'package:sooq_merchant/engine/requests/request_mapper.dart';
 import 'package:sooq_merchant/engine/tree/tree_engine.dart';
+import 'package:sooq_merchant/features/product/presentation/manager/product_cubit/product_cubit.dart';
 import 'package:sooq_merchant/features/variantscreen/data/repos/variant_repository.dart';
 import 'package:sooq_merchant/features/variantscreen/presentation/manager/variant_cubit/variant_cubit.dart';
 
 /// Dynamic screen host widget.
-///
-/// **Responsibility**: Render a single dynamic screen (page) from a ScreenConfig.
-///
-/// **How it works**:
-/// 1. Receives a [variantId] (JSON file name) and an optional [pageRoute]
-/// 2. Creates a [VariantCubit] to load the screen config
-/// 3. Renders UI based on Cubit state:
-///    - Loading: Shows progress indicator
-///    - Success: Renders component tree via [ScreenRenderer]
-///    - Failure: Shows error message
-///
-/// **Key**: Uses `ValueKey(pageRoute ?? variantId)` on the BlocProvider so
-/// that go_router rebuilds and re-fetches when navigating to a different page
-/// within the same JSON file (variantId unchanged, pageRoute changed).
-///
-/// **No outer Scaffold**: The Scaffold is provided by [TabShellWidget] via
-/// ShellRoute. Adding another Scaffold here would cause nesting issues.
 class VariantScreen extends StatefulWidget {
   const VariantScreen({
     super.key,
@@ -33,13 +19,8 @@ class VariantScreen extends StatefulWidget {
     this.pageRoute,
   });
 
-  /// The JSON file identifier (e.g., 'mobile_component_flow_demo').
   final String variantId;
-
-  /// Repository for loading screen configs from assets.
   final VariantRepository variantRepository;
-
-  /// The route of the page within the JSON file (e.g., '/', '/products').
   final String? pageRoute;
 
   @override
@@ -49,6 +30,7 @@ class VariantScreen extends StatefulWidget {
 class _VariantScreenState extends State<VariantScreen> {
   late final FormStateStore _formStateStore;
   late final Map<String, dynamic> _dataContext;
+  final Map<String, dynamic> _requestResults = <String, dynamic>{};
   EngineActionDispatcher? _dispatcher;
 
   @override
@@ -76,9 +58,9 @@ class _VariantScreenState extends State<VariantScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      key: ValueKey('${widget.variantId}:${widget.pageRoute ?? ""}'),
-      create: (context) => VariantCubit(
+    return BlocProvider<VariantCubit>(
+      key: ValueKey('${widget.variantId}:${widget.pageRoute ?? ''}'),
+      create: (_) => VariantCubit(
         widget.variantRepository,
         widget.variantId,
         pageRoute: widget.pageRoute,
@@ -86,30 +68,208 @@ class _VariantScreenState extends State<VariantScreen> {
       child: BlocBuilder<VariantCubit, VariantState>(
         builder: (context, state) {
           return switch (state) {
-            // Loading: Show spinner
             VariantInitial() || VariantLoading() => const Center(
-              child: CircularProgressIndicator(),
-            ),
-            // Success: Render the component tree
-            VariantSuccess(:final config) =>
-              ScreenRenderer.withPrimitives().render(
-                config,
-                context: context,
-                dataContext: _dataContext,
+                child: CircularProgressIndicator(),
               ),
-            // Failure: Show error message
+            VariantSuccess(:final config) => _buildSuccessView(config),
             VariantFailure(:final message) => Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Text(
-                  message,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.red),
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Text(
+                    message,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.red),
+                  ),
                 ),
               ),
-            ),
           };
         },
+      ),
+    );
+  }
+
+  Widget _buildSuccessView(dynamic config) {
+    final mappedRequests = EngineRequestMapper.collectRequests(config);
+    final renderContext = _buildRenderContext();
+
+    if (mappedRequests.isEmpty) {
+      return ScreenRenderer.withPrimitives().render(
+        config,
+        context: context,
+        dataContext: renderContext,
+      );
+    }
+
+    return BlocProvider<ProductCubit>(
+      create: (_) => getIt<ProductCubit>(),
+      child: _ProductRequestHost(
+        config: config,
+        renderContext: renderContext,
+        onProductSuccess: _handleProductSuccess,
+        onProductFailure: _handleProductFailure,
+      ),
+    );
+  }
+
+  void _handleProductSuccess(
+    String requestKey,
+    dynamic productListResponse,
+  ) {
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _requestResults[requestKey] = {
+        'success': productListResponse.success,
+        'message': productListResponse.message,
+        'data': productListResponse.data
+            .map((item) => item.toJson())
+            .toList(),
+        'meta': productListResponse.meta.toJson(),
+        'timestamp': productListResponse.timestamp,
+      };
+    });
+  }
+
+  void _handleProductFailure(String requestKey, String message) {
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _requestResults[requestKey] = {
+        'success': false,
+        'message': message,
+        'data': const <Map<String, dynamic>>[],
+        'meta': const {},
+      };
+    });
+  }
+
+  Map<String, dynamic> _buildRenderContext() {
+    final merged = <String, dynamic>{..._dataContext};
+    if (_requestResults.isNotEmpty) {
+      merged['requests'] = _requestResults;
+
+      final productResult = _requestResults['product-list'];
+      if (productResult is Map<String, dynamic>) {
+        merged['products'] = productResult['data'] ?? const <dynamic>[];
+      }
+    }
+    return merged;
+  }
+}
+
+class _ProductRequestHost extends StatefulWidget {
+  const _ProductRequestHost({
+    required this.config,
+    required this.renderContext,
+    required this.onProductSuccess,
+    required this.onProductFailure,
+  });
+
+  final dynamic config;
+  final Map<String, dynamic> renderContext;
+  final void Function(String requestKey, dynamic productListResponse)
+      onProductSuccess;
+  final void Function(String requestKey, String message) onProductFailure;
+
+  @override
+  State<_ProductRequestHost> createState() => _ProductRequestHostState();
+}
+
+class _ProductRequestHostState extends State<_ProductRequestHost> {
+  final Set<String> _dispatchedRequestKeys = <String>{};
+  final Set<String> _loadingRequestKeys = <String>{};
+  bool _dispatchScheduled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scheduleDispatch();
+  }
+
+  @override
+  void didUpdateWidget(covariant _ProductRequestHost oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.config != widget.config) {
+      _dispatchedRequestKeys.clear();
+      _dispatchScheduled = false;
+      _scheduleDispatch();
+    }
+  }
+
+  void _scheduleDispatch() {
+    if (_dispatchScheduled) {
+      return;
+    }
+    _dispatchScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      _dispatchRequests();
+    });
+  }
+
+  Future<void> _dispatchRequests() async {
+    final mapped = EngineRequestMapper.collectRequests(widget.config);
+    final pending = mapped
+        .where((request) => !_dispatchedRequestKeys.contains(request.key))
+        .toList(growable: false);
+
+    if (pending.isEmpty) {
+      return;
+    }
+
+    _dispatchedRequestKeys.addAll(pending.map((request) => request.key));
+    await EngineRequestMapper.dispatchRequests(
+      productCubit: context.read<ProductCubit>(),
+      tenantId: null,
+      requests: pending,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<ProductCubit, ProductState>(
+          listener: (context, state) {
+            if (state is ProductLoading) {
+              setState(() {
+                _loadingRequestKeys.add(state.requestKey);
+              });
+            } else if (state is ProductSuccess) {
+              setState(() {
+                _loadingRequestKeys.remove(state.requestKey);
+              });
+              widget.onProductSuccess(state.requestKey, state.productListResponse);
+            } else if (state is ProductFailure) {
+              setState(() {
+                _loadingRequestKeys.remove(state.requestKey);
+              });
+              widget.onProductFailure(state.requestKey, state.errMessage);
+            }
+          },
+        ),
+      ],
+      child: Stack(
+        children: [
+          ScreenRenderer.withPrimitives().render(
+            widget.config,
+            context: context,
+            dataContext: widget.renderContext,
+          ),
+          if (_loadingRequestKeys.isNotEmpty)
+            const Positioned.fill(
+              child: ColoredBox(
+                color: Color(0x14FFFFFF),
+                child: Center(child: CircularProgressIndicator()),
+              ),
+            ),
+        ],
       ),
     );
   }
