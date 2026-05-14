@@ -102,7 +102,7 @@
         "route": "/home"
       },
       {
-        "id": "tab-categories",
+        "id":"الرئيسية" ,
         "label": "الأقسام",
         "icon": "grid_view",
         "route": "/categories"
@@ -115,13 +115,13 @@
       },
       {
         "id": "tab-cart",
-        "label": "السلة",
+        "label": "╪º┘ä╪│┘ä╪⌐",
         "icon": "shopping_cart",
         "route": "/cart"
       },
       {
         "id": "tab-profile",
-        "label": "الحساب",
+        "label": "╪º┘ä╪¡╪│╪º╪¿",
         "icon": "person",
         "route": "/profile"
       }
@@ -382,7 +382,7 @@
                 "type": "textFormField",
                 "props": {
                   "id": "email",
-                  "label": "البريد الإلكتروني",
+                  "label": "╪º┘ä╪¿╪▒┘è╪» ╪º┘ä╪Ñ┘ä┘â╪¬╪▒┘ê┘å┘è",
                   "hint": "example@domain.com",
                   "keyboardType": "emailAddress",
                   "textAlign": "right",
@@ -450,7 +450,7 @@
                 "id": "auth-login-submit",
                 "type": "button",
                 "props": {
-                  "label": "دخول",
+                  "label": "╪»╪«┘ê┘ä",
                   "variant": "elevated",
                   "backgroundColor": "#1D4ED8",
                   "textColor": "#FFFFFF",
@@ -600,7 +600,7 @@
                 "id": "auth-register-submit",
                 "type": "button",
                 "props": {
-                  "label": "إنشاء الحساب",
+                  "label": "╪Ñ┘å╪┤╪º╪í ╪º┘ä╪¡╪│╪º╪¿",
                   "backgroundColor": "#0B57D0",
                   "textColor": "#FFFFFF",
                   "borderRadius": 10
@@ -860,7 +860,7 @@
                 "id": "home-search-tap",
                 "type": "button",
                 "props": {
-                  "label": "بحث",
+                  "label": "╪¿╪¡╪½",
                   "backgroundColor": "#0B57D0",
                   "textColor": "#FFFFFF",
                   "borderRadius": 8,
@@ -946,7 +946,7 @@
                 "id": "home-hero-description",
                 "type": "richtext",
                 "props": {
-                  "value": "<p>أفضل العروض اليومية على الإلكترونيات، الأزياء، والمنتجات المنزلية.</p>",
+                  "value": "<p>╪ú┘ü╪╢┘ä ╪º┘ä╪╣╪▒┘ê╪╢ ╪º┘ä┘è┘ê┘à┘è╪⌐ ╪╣┘ä┘ë ╪º┘ä╪Ñ┘ä┘â╪¬╪▒┘ê┘å┘è╪º╪¬╪î ╪º┘ä╪ú╪▓┘è╪º╪í╪î ┘ê╪º┘ä┘à┘å╪¬╪¼╪º╪¬ ╪º┘ä┘à┘å╪▓┘ä┘è╪⌐.</p>",
                   "color": "#E2E8F0"
                 }
               },
@@ -1118,7 +1118,7 @@
                       "id": "home-cat-2-text",
                       "type": "text",
                       "props": {
-                        "value": "أزياء",
+                        "value": "╪ú╪▓┘è╪º╪í",
                         "fontSize": 14,
                         "fontWeight": "medium",
                         "textAlign": "center"
@@ -1271,8 +1271,95 @@
             "data": {
               "source": "collection",
               "id": "featured-home",
-              "requestUrl": "/api/products?collection=featured-home&limit=6",
-              "limit": 6
+              "requestKey": "home-featured-products",
+              "requestUrl": "/api/v1/public/products?page=0&size=6",
+              "page": 0,
+              "size": 6
+            }
+          },
+          "itemBuilder": {
+            "type": "repeat",
+            "source": "dataContext.requests.home-featured-products.data",
+            "item": {
+              "id": "home-product-item",
+              "type": "card",
+              "props": {
+                "semanticType": "ProductCard",
+                "color": "#FFFFFF",
+                "borderRadius": 12,
+                "elevation": 1
+              },
+              "child": {
+                "id": "home-product-item-content",
+                "type": "column",
+                "props": {
+                  "crossAxis": "stretch",
+                  "gap": 8
+                },
+                "children": [
+                  {
+                    "id": "home-product-item-image",
+                    "type": "image",
+                    "props": {
+                      "semanticType": "ProductImage",
+                      "source": "network",
+                      "urlPath": "item.image",
+                      "url": "",
+                      "height": 120,
+                      "fit": "cover"
+                    }
+                  },
+                  {
+                    "id": "home-product-item-body",
+                    "type": "container",
+                    "props": {},
+                    "style": {
+                      "padding": {
+                        "left": 8,
+                        "right": 8,
+                        "bottom": 8
+                      }
+                    },
+                    "child": {
+                      "id": "home-product-item-col",
+                      "type": "column",
+                      "props": {
+                        "crossAxis": "start",
+                        "gap": 4
+                      },
+                      "children": [
+                        {
+                          "id": "home-product-item-title",
+                          "type": "text",
+                          "props": {
+                            "valuePath": "item.name",
+                            "value": "",
+                            "fontSize": 14,
+                            "fontWeight": "medium",
+                            "textAlign": "right"
+                          }
+                        },
+                        {
+                          "id": "home-product-item-price",
+                          "type": "text",
+                          "props": {
+                            "valuePath": "item.price",
+                            "value": "--",
+                            "fontSize": 15,
+                            "fontWeight": "bold",
+                            "textAlign": "right",
+                            "color": "#0B57D0"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "tap": {
+                "type": "navigate",
+                "route": "/product/details/:productId"
+              }
             }
           },
           "style": {
@@ -2045,7 +2132,7 @@
                 "id": "product-add-cart",
                 "type": "button",
                 "props": {
-                  "label": "أضف إلى السلة",
+                  "label": "╪ú╪╢┘ü ╪Ñ┘ä┘ë ╪º┘ä╪│┘ä╪⌐",
                   "backgroundColor": "#0B57D0",
                   "textColor": "#FFFFFF",
                   "borderRadius": 10
@@ -2331,7 +2418,7 @@
         "id": "cart-appbar",
         "type": "appBar",
         "props": {
-          "title": "السلة"
+          "title": "╪º┘ä╪│┘ä╪⌐"
         }
       },
       "body": [
@@ -2885,7 +2972,7 @@
         "id": "payment-appbar",
         "type": "appBar",
         "props": {
-          "title": "الدفع"
+          "title": "╪º┘ä╪»┘ü╪╣"
         }
       },
       "body": [
@@ -3149,7 +3236,7 @@
                 "id": "order-failure-retry",
                 "type": "button",
                 "props": {
-                  "label": "إعادة المحاولة",
+                  "label": "╪Ñ╪╣╪º╪»╪⌐ ╪º┘ä┘à╪¡╪º┘ê┘ä╪⌐",
                   "backgroundColor": "#0B57D0",
                   "textColor": "#FFFFFF",
                   "borderRadius": 10
@@ -3260,7 +3347,7 @@
               "id": "profile-link-orders",
               "type": "button",
               "props": {
-                "label": "طلباتي",
+                "label": "╪╖┘ä╪¿╪º╪¬┘è",
                 "backgroundColor": "#F8FAFC",
                 "textColor": "#0F172A",
                 "borderRadius": 10
@@ -3503,7 +3590,72 @@
             "enableInnerScroll": false,
             "data": {
               "source": "collection",
-              "id": "wishlist-products"
+              "id": "wishlist-products",
+              "requestKey": "wishlist-products",
+              "requestUrl": "/api/v1/public/products?page=0&size=20",
+              "page": 0,
+              "size": 20
+            }
+          },
+          "itemBuilder": {
+            "type": "repeat",
+            "source": "dataContext.requests.wishlist-products.data",
+            "item": {
+              "id": "wishlist-item",
+              "type": "card",
+              "props": {
+                "color": "#FFFFFF",
+                "borderRadius": 12,
+                "elevation": 1
+              },
+              "child": {
+                "id": "wishlist-item-col",
+                "type": "column",
+                "props": {
+                  "crossAxis": "stretch",
+                  "gap": 8
+                },
+                "children": [
+                  {
+                    "id": "wishlist-item-image",
+                    "type": "image",
+                    "props": {
+                      "source": "network",
+                      "urlPath": "item.image",
+                      "url": "",
+                      "height": 120,
+                      "fit": "cover"
+                    }
+                  },
+                  {
+                    "id": "wishlist-item-name",
+                    "type": "text",
+                    "props": {
+                      "valuePath": "item.name",
+                      "value": "",
+                      "fontSize": 14,
+                      "fontWeight": "medium",
+                      "textAlign": "right"
+                    }
+                  },
+                  {
+                    "id": "wishlist-item-price",
+                    "type": "text",
+                    "props": {
+                      "valuePath": "item.price",
+                      "value": "--",
+                      "fontSize": 15,
+                      "fontWeight": "bold",
+                      "textAlign": "right",
+                      "color": "#0B57D0"
+                    }
+                  }
+                ]
+              },
+              "tap": {
+                "type": "navigate",
+                "route": "/product/details/:productId"
+              }
             }
           },
           "style": {
@@ -3739,7 +3891,7 @@
               "id": "settings-language",
               "type": "button",
               "props": {
-                "label": "اللغة",
+                "label": "╪º┘ä┘ä╪║╪⌐",
                 "backgroundColor": "#F8FAFC",
                 "textColor": "#0F172A",
                 "borderRadius": 10
@@ -3851,7 +4003,7 @@
               "id": "support-contact-cta",
               "type": "button",
               "props": {
-                "label": "تواصل مع الدعم",
+                "label": "╪¬┘ê╪º╪╡┘ä ┘à╪╣ ╪º┘ä╪»╪╣┘à",
                 "backgroundColor": "#0B57D0",
                 "textColor": "#FFFFFF",
                 "borderRadius": 10

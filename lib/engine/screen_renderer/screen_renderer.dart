@@ -137,7 +137,7 @@ class ScreenRenderer {
       config.dataContextOverride,
     );
     final dispatcher = _resolveActionDispatcher(mergedContext, context);
-    final onTap = _resolveTapAction(config, dispatcher);
+    final onTap = _resolveTapAction(config, dispatcher, mergedContext);
     final renderConfig = onTap == null
         ? config
         : ComponentConfig(
@@ -177,11 +177,15 @@ class ScreenRenderer {
   VoidCallback? _resolveTapAction(
     ComponentConfig config,
     EngineActionDispatcher? dispatcher,
+    Map<String, dynamic>? dataContext,
   ) {
     if (dispatcher == null) return null;
     final tap = config.properties['tap'];
     if (tap is! Map) return null;
-    return dispatcher.resolveTap(tap.cast<String, dynamic>());
+    return dispatcher.resolveTap(
+      tap.cast<String, dynamic>(),
+      dataContext: dataContext,
+    );
   }
 
   EngineActionDispatcher? _resolveActionDispatcher(

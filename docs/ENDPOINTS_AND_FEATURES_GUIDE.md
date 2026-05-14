@@ -1,0 +1,268 @@
+# Endpoints and Features Guide
+
+Last updated: 2026-05-14
+
+This guide defines how to add new backend endpoints and how to organize feature files in this project.
+Use it as the reference before creating a new API flow, a new feature module, or a new JSON-driven screen section.
+
+## 1. Purpose
+
+The project uses a feature-first Flutter structure with Cubit state management and a JSON-driven rendering engine.
+
+When adding a new endpoint or feature, the goal is to keep the work separated into clear layers:
+- UI and screens stay in `presentation/`
+- API access and parsing stay in `data/`
+- Shared infrastructure stays in `core/`
+- Dynamic JSON screens stay in `assets/config/` and `lib/engine/`
+
+Do not place API calls directly in widgets unless the codebase already follows that pattern for a specific legacy case.
+
+## 2. Standard Feature Structure
+
+Each feature should follow the same folder pattern:
+
+```text
+lib/features/<feature_name>/
+├── data/
+│   ├── models/
+│   └── repos/
+└── presentation/
+    ├── manager/
+    │   └── <feature>_cubit/
+    └── views/
+```
+
+### What each folder contains
+
+- `data/models/`
+  - Response DTOs and entity models.
+  - JSON parsing, `fromJson`, `toJson`, and compatibility getters.
+  - Keep backend field translation here.
+
+- `data/repos/`
+  - Repository interface and repository implementation.
+  - Endpoint URLs, query parameters, headers, and error mapping.
+  - Do not put UI logic here.
+
+- `presentation/manager/`
+  - Cubits and state files.
+  - Loading, success, failure, and pagination state.
+  - Dispatch repository calls and expose simple screen state.
+
+- `presentation/views/`
+  - Flutter widgets, page composition, and UI-specific interaction handling.
+  - Listen to cubits and transform state into visible UI.
+
+## 3. New Endpoint Workflow
+
+Use this order when adding a new API call:
+
+1. Define or update the response model in `data/models/`.
+2. Add the repository contract in `data/repos/<feature>_repo.dart`.
+3. Implement the request in `data/repos/<feature>_repo_impl.dart`.
+4. Add cubit methods and states in `presentation/manager/`.
+5. Wire the cubit into the screen or page host.
+6. Register dependencies in `lib/core/utils/service_locator.dart`.
+7. If the endpoint is driven by JSON config, update `assets/config/*.json` and the engine request mapping if needed.
+8. Validate parsing, loading, and failure behavior.
+
+## 4. Repository Responsibilities
+
+Repository implementations should own all transport details:
+
+- HTTP method selection
+- Query parameter construction
+- Path construction
+- Headers and tenant/auth configuration
+- Response envelope validation
+- Parsing raw response data into models
+- Converting transport errors into `Failure`
+
+### Repository file layout
+
+- `<feature>_repo.dart`
+  - Abstract contract.
+  - Exposes methods the cubit can call.
+
+- `<feature>_repo_impl.dart`
+  - Concrete Dio/API implementation.
+  - Builds `Uri`, applies headers, and parses response JSON.
+
+### Repository rules
+
+- Keep the endpoint URL in one place.
+- Validate response type before parsing.
+- Prefer typed parsing over passing raw JSON upward.
+- Support pagination explicitly when the backend returns it.
+
+## 5. Model Responsibilities
+
+Models should be resilient to backend changes.
+
+For each model:
+- Parse backend field names in `fromJson`.
+- Normalize inconsistent field names into one consistent app-facing API.
+- Expose compatibility getters when the UI still expects older field names.
+- Keep `toJson` useful for caching, screen state, or dynamic rendering.
+
+### Example pattern
+
+- Backend may send `productId`, `titleAr`, `titleEn`, `primaryImageUrl`, `basePrice`.
+- App-facing getters may expose `name`, `image`, `price`, and `currency`.
+
+This keeps the UI stable while the backend evolves.
+
+## 6. Cubit and State Rules
+
+Cubits should only orchestrate data flow and state transitions.
+
+### Cubit responsibilities
+
+- Hold the current request state
+- Call repository methods
+- Emit loading, success, and failure states
+- Handle pagination entry points such as `loadNextPage`
+
+### State recommendations
+
+For data-backed features, state should usually include:
+- `requestKey`
+- `isLoadMore` when pagination is supported
+- success payload or error message
+
+### Loading rules
+
+- Initial page load should emit a full loading state.
+- Load-more should emit a separate pagination state.
+- The UI should be able to show a full-screen loader or a footer loader depending on the state.
+
+## 7. Dynamic JSON Screen Rules
+
+This project also supports JSON-driven pages in `assets/config/mobile_production_v2.json`.
+
+When a page needs backend data:
+
+- Add `data.requestKey` so the request can be tracked.
+- Add `data.requestUrl` for the endpoint path.
+- Add `data.page` and `data.size` when pagination is needed.
+- Use `itemBuilder.source` to bind the rendered list/grid to `dataContext.requests.<requestKey>.data`.
+- Use `valuePath` and `urlPath` for bindings inside the item template.
+
+### JSON data contract pattern
+
+```json
+"data": {
+  "source": "collection",
+  "id": "all-products",
+  "requestKey": "product-list",
+  "requestUrl": "/api/v1/public/products?page=0&size=20",
+  "page": 0,
+  "size": 20
+}
+```
+
+### Item binding pattern
+
+```json
+"itemBuilder": {
+  "type": "repeat",
+  "source": "dataContext.requests.product-list.data",
+  "item": {
+    "type": "card",
+    "child": {
+      "type": "text",
+      "props": {
+        "valuePath": "item.name",
+        "value": ""
+      }
+    }
+  }
+}
+```
+
+## 8. Engine Responsibilities
+
+If the feature is driven by dynamic JSON, the engine may also need changes.
+
+Update engine code when you need:
+- new component rendering behavior
+- new action types
+- new binding paths
+- dynamic image URL resolution
+- route placeholder interpolation
+- list pagination support
+
+### Main engine files
+
+- `lib/engine/screen_renderer/screen_renderer.dart`
+  - Recursively builds the widget tree.
+  - Passes context into action handlers and renderers.
+
+- `lib/engine/requests/request_mapper.dart`
+  - Collects request definitions from JSON.
+  - Dispatches product requests for tracked data blocks.
+
+- `lib/engine/actions/action_dispatcher.dart`
+  - Handles tap actions like navigation and API calls.
+
+- `lib/engine/tree/renderers/image_renderer.dart`
+  - Resolves image source URLs.
+
+- `lib/engine/tree/renderers/scaffold_renderer.dart`
+  - Handles page-level scrolling and load-more behavior.
+
+## 9. Dependency Registration
+
+When adding a feature that uses repositories or cubits, register them in `lib/core/utils/service_locator.dart`.
+
+Use the existing style:
+
+- `registerLazySingleton` for repositories and shared services
+- `registerFactory` for cubits that should be recreated per screen
+
+Example:
+
+```dart
+getIt.registerLazySingleton<FeatureRepo>(
+  () => FeatureRepoImpl(getIt<Dio>()),
+);
+
+getIt.registerFactory<FeatureCubit>(
+  () => FeatureCubit(getIt<FeatureRepo>()),
+);
+```
+
+## 10. Endpoint Checklist
+
+Before merging a new endpoint, confirm:
+
+- The repository parses the real backend payload shape.
+- The model exposes stable UI-friendly getters.
+- Pagination metadata is handled if the endpoint supports pages.
+- The cubit exposes loading and error states for the screen.
+- The feature is registered in the service locator.
+- The UI is not depending on raw backend keys directly unless unavoidable.
+- JSON-driven screens are updated if the endpoint powers a dynamic page.
+
+## 11. Feature Checklist
+
+Before merging a new feature, confirm:
+
+- The feature folder follows the standard `data/` and `presentation/` split.
+- State management lives in cubit files, not in widgets.
+- API concerns stay out of view files.
+- Model names are consistent across parsing, state, and UI.
+- Errors are surfaced in a user-visible way.
+- Any dynamic JSON blocks have matching request keys and bindings.
+
+## 12. Recommended Pattern for New Product-Like Features
+
+Use this pattern for any list-based backend feature:
+
+- Repository gets `page`, `size`, and optional filter parameters.
+- Response model parses `data` plus `meta`.
+- Cubit exposes `getItems`, `loadNextPage`, and `loadPreviousPage` only if needed.
+- Screen listens to loading and appends data when `isLoadMore` is true.
+- JSON config uses `requestKey` and `itemBuilder.source` to render items dynamically.
+
+This is the preferred structure for future API-backed features in this app.

@@ -18,10 +18,12 @@ class ProductListResponse extends Equatable {
   });
 
   factory ProductListResponse.fromJson(Map<String, dynamic> json) {
+    final rawData = json['data'] ?? json['content'] ?? const [];
     return ProductListResponse(
       success: json['success'] as bool? ?? false,
       message: json['message'] as String?,
-      data: (json['data'] as List<dynamic>?)
+      data:
+          (rawData as List<dynamic>?)
               ?.map((item) => Product.fromJson(item as Map<String, dynamic>))
               .toList() ??
           [],
@@ -35,10 +37,13 @@ class ProductListResponse extends Equatable {
       'success': success,
       'message': message,
       'data': data.map((item) => item.toJson()).toList(),
+      'content': data.map((item) => item.toJson()).toList(),
       'meta': meta.toJson(),
       'timestamp': timestamp,
     };
   }
+
+  List<Product> get content => data;
 
   ProductListResponse copyWith({
     bool? success,

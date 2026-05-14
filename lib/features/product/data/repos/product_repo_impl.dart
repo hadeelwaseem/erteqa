@@ -18,10 +18,9 @@ class ProductRepoImpl implements ProductRepo {
     required String tenantId,
   }) async {
     try {
-      final queryParameters = {
-        'page': page,
-        'size': size,
-      };
+      final uri = Uri.parse(
+        '$kBaseUrl/api/v1/public/products',
+      ).replace(queryParameters: {'page': '$page', 'size': '$size'});
 
       final Map<String, String> headers = {
         'Accept': 'application/json',
@@ -29,29 +28,32 @@ class ProductRepoImpl implements ProductRepo {
       };
 
       AppLogger.debug(
-        '[ProductRepo] GET $kBaseUrl/api/v1/public/products '
+        '[ProductRepo] GET $uri '
         'page=$page size=$size tenant=${tenantId.isEmpty ? 'empty' : tenantId}',
       );
 
       final response = await _dio.get(
-        '$kBaseUrl/api/v1/public/products',
-        queryParameters: queryParameters,
+        uri.toString(),
         options: Options(headers: headers),
       );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final productListResponse =
-            ProductListResponse.fromJson(response.data as Map<String, dynamic>);
+      if (response.statusCode == 200) {
+        final responseData = response.data;
+        if (responseData is! Map<String, dynamic>) {
+          return Left(ServerFailure('Unexpected products response format'));
+        }
+
+        final productListResponse = ProductListResponse.fromJson(responseData);
         AppLogger.debug(
           '[ProductRepo] success items=${productListResponse.data.length} '
-          'page=${productListResponse.meta.page} total=${productListResponse.meta.total}',
+          'page=${productListResponse.meta.page} '
+          'total=${productListResponse.meta.total} '
+          'totalPages=${productListResponse.meta.totalPages}',
         );
         return Right(productListResponse);
       } else {
         return Left(
-          ServerFailure(
-            'Failed to fetch products: ${response.statusCode}',
-          ),
+          ServerFailure('Failed to fetch products: ${response.statusCode}'),
         );
       }
     } on DioException catch (e) {

@@ -9,6 +9,7 @@ Complete guide to all documentation for the Dynamic UI Rendering System.
 ```
 docs/
 ├── README.md                          ← START HERE (this file)
+├── ENDPOINTS_AND_FEATURES_GUIDE.md     ← How to add APIs and features
 ├── QUICK_START.md                     ← New? Read this first
 ├── RENDERING_ENGINE_GUIDE.md          ← Full developer guide  
 ├── API_REFERENCE.md                   ← API lookup
@@ -38,6 +39,13 @@ docs/
 - Testing patterns
 - Best practices
 - Troubleshooting
+
+**If you are adding backend endpoints or a new feature module**, read: [ENDPOINTS_AND_FEATURES_GUIDE.md](ENDPOINTS_AND_FEATURES_GUIDE.md)
+- Feature folder layout
+- Repository and cubit responsibilities
+- Endpoint checklist
+- JSON-driven screen bindings
+- Service locator registration
 
 ### 📚 I Need API Reference
 

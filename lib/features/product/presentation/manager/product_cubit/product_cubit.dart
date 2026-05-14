@@ -6,7 +6,7 @@ part 'product_state.dart';
 
 class ProductCubit extends Cubit<ProductState> {
   final ProductRepo _productRepo;
-  String _tenantId = '00000000-0000-0000-0000-000000000001';
+  String _tenantId = 'aefc4436-3fd2-44cd-9647-09b8bd32e02a';
 
   ProductCubit(this._productRepo) : super(ProductInitial());
 
@@ -23,8 +23,9 @@ class ProductCubit extends Cubit<ProductState> {
     int page = 0,
     int size = 20,
     String requestKey = 'product-list',
+    bool isLoadMore = false,
   }) async {
-    emit(ProductLoading(requestKey: requestKey));
+    emit(ProductLoading(requestKey: requestKey, isLoadMore: isLoadMore));
 
     final result = await _productRepo.getProducts(
       page: page,
@@ -45,6 +46,7 @@ class ProductCubit extends Cubit<ProductState> {
           ProductFailure(
             requestKey: requestKey,
             errMessage: failure.errMessage,
+            isLoadMore: isLoadMore,
           ),
         );
       },
@@ -56,6 +58,7 @@ class ProductCubit extends Cubit<ProductState> {
           ProductSuccess(
             requestKey: requestKey,
             productListResponse: productListResponse,
+            isLoadMore: isLoadMore,
           ),
         );
       },
@@ -72,6 +75,7 @@ class ProductCubit extends Cubit<ProductState> {
         page: currentResponse.meta.page + 1,
         size: currentResponse.meta.size,
         requestKey: requestKey,
+        isLoadMore: true,
       );
     }
   }

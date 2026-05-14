@@ -31,6 +31,7 @@ class _VariantScreenState extends State<VariantScreen> {
   late final FormStateStore _formStateStore;
   late final Map<String, dynamic> _dataContext;
   final Map<String, dynamic> _requestResults = <String, dynamic>{};
+  final Set<String> _loadingMoreRequestKeys = <String>{};
   EngineActionDispatcher? _dispatcher;
 
   @override
@@ -69,19 +70,19 @@ class _VariantScreenState extends State<VariantScreen> {
         builder: (context, state) {
           return switch (state) {
             VariantInitial() || VariantLoading() => const Center(
-                child: CircularProgressIndicator(),
-              ),
+              child: CircularProgressIndicator(),
+            ),
             VariantSuccess(:final config) => _buildSuccessView(config),
             VariantFailure(:final message) => Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Text(
-                    message,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.red),
-                  ),
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.red),
                 ),
               ),
+            ),
           };
         },
       ),
@@ -114,36 +115,68 @@ class _VariantScreenState extends State<VariantScreen> {
   void _handleProductSuccess(
     String requestKey,
     dynamic productListResponse,
+    bool isLoadMore,
   ) {
     if (!mounted) {
       return;
     }
 
     setState(() {
-      _requestResults[requestKey] = {
-        'success': productListResponse.success,
-        'message': productListResponse.message,
-        'data': productListResponse.data
-            .map((item) => item.toJson())
-            .toList(),
-        'meta': productListResponse.meta.toJson(),
-        'timestamp': productListResponse.timestamp,
-      };
+      final nextData = productListResponse.data
+          .map((item) => item.toJson())
+          .toList();
+      final existing = _requestResults[requestKey];
+      final existingData = existing is Map<String, dynamic>
+          ? (existing['data'] as List<dynamic>? ?? const <dynamic>[])
+                .cast<dynamic>()
+          : const <dynamic>[];
+
+      _requestResults[requestKey] =
+          isLoadMore && existing is Map<String, dynamic>
+          ? {
+              ...existing,
+              'success': productListResponse.success,
+              'message': productListResponse.message,
+              'data': [...existingData, ...nextData],
+              'meta': productListResponse.meta.toJson(),
+              'timestamp': productListResponse.timestamp,
+            }
+          : {
+              'success': productListResponse.success,
+              'message': productListResponse.message,
+              'data': nextData,
+              'meta': productListResponse.meta.toJson(),
+              'timestamp': productListResponse.timestamp,
+            };
+      _loadingMoreRequestKeys.remove(requestKey);
     });
   }
 
-  void _handleProductFailure(String requestKey, String message) {
+  void _handleProductFailure(
+    String requestKey,
+    String message,
+    bool isLoadMore,
+  ) {
     if (!mounted) {
       return;
     }
 
     setState(() {
-      _requestResults[requestKey] = {
-        'success': false,
-        'message': message,
-        'data': const <Map<String, dynamic>>[],
-        'meta': const {},
-      };
+      _loadingMoreRequestKeys.remove(requestKey);
+      if (isLoadMore && _requestResults[requestKey] is Map<String, dynamic>) {
+        _requestResults[requestKey] = {
+          ..._requestResults[requestKey] as Map<String, dynamic>,
+          'loadMoreError': message,
+        };
+      } else {
+        _requestResults[requestKey] = {
+          'success': false,
+          'message': message,
+          'data': const <Map<String, dynamic>>[],
+          'meta': const {},
+          'timestamp': 0,
+        };
+      }
     });
   }
 
@@ -151,6 +184,9 @@ class _VariantScreenState extends State<VariantScreen> {
     final merged = <String, dynamic>{..._dataContext};
     if (_requestResults.isNotEmpty) {
       merged['requests'] = _requestResults;
+      merged['loadingMoreRequests'] = {
+        for (final key in _loadingMoreRequestKeys) key: true,
+      };
 
       final productResult = _requestResults['product-list'];
       if (productResult is Map<String, dynamic>) {
@@ -171,9 +207,14 @@ class _ProductRequestHost extends StatefulWidget {
 
   final dynamic config;
   final Map<String, dynamic> renderContext;
-  final void Function(String requestKey, dynamic productListResponse)
-      onProductSuccess;
-  final void Function(String requestKey, String message) onProductFailure;
+  final void Function(
+    String requestKey,
+    dynamic productListResponse,
+    bool isLoadMore,
+  )
+  onProductSuccess;
+  final void Function(String requestKey, String message, bool isLoadMore)
+  onProductFailure;
 
   @override
   State<_ProductRequestHost> createState() => _ProductRequestHostState();
@@ -182,6 +223,7 @@ class _ProductRequestHost extends StatefulWidget {
 class _ProductRequestHostState extends State<_ProductRequestHost> {
   final Set<String> _dispatchedRequestKeys = <String>{};
   final Set<String> _loadingRequestKeys = <String>{};
+  final Set<String> _loadingMoreRequestKeys = <String>{};
   bool _dispatchScheduled = false;
 
   @override
@@ -239,18 +281,41 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
           listener: (context, state) {
             if (state is ProductLoading) {
               setState(() {
-                _loadingRequestKeys.add(state.requestKey);
+                if (state.isLoadMore) {
+                  _loadingMoreRequestKeys.add(state.requestKey);
+                  widget.renderContext['loadingMoreRequests'] = {
+                    for (final key in _loadingMoreRequestKeys) key: true,
+                  };
+                } else {
+                  _loadingRequestKeys.add(state.requestKey);
+                }
               });
             } else if (state is ProductSuccess) {
               setState(() {
                 _loadingRequestKeys.remove(state.requestKey);
+                _loadingMoreRequestKeys.remove(state.requestKey);
+                widget.renderContext['loadingMoreRequests'] = {
+                  for (final key in _loadingMoreRequestKeys) key: true,
+                };
               });
-              widget.onProductSuccess(state.requestKey, state.productListResponse);
+              widget.onProductSuccess(
+                state.requestKey,
+                state.productListResponse,
+                state.isLoadMore,
+              );
             } else if (state is ProductFailure) {
               setState(() {
                 _loadingRequestKeys.remove(state.requestKey);
+                _loadingMoreRequestKeys.remove(state.requestKey);
+                widget.renderContext['loadingMoreRequests'] = {
+                  for (final key in _loadingMoreRequestKeys) key: true,
+                };
               });
-              widget.onProductFailure(state.requestKey, state.errMessage);
+              widget.onProductFailure(
+                state.requestKey,
+                state.errMessage,
+                state.isLoadMore,
+              );
             }
           },
         ),

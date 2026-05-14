@@ -12,21 +12,25 @@ class EngineActionDispatcher {
   EngineActionDispatcher({
     required BuildContext context,
     FormStateStore? formState,
-  })  : _context = context,
-        _formState = formState;
+  }) : _context = context,
+       _formState = formState;
 
   final BuildContext _context;
   final FormStateStore? _formState;
 
-  VoidCallback? resolveTap(Map<String, dynamic>? action) {
+  VoidCallback? resolveTap(
+    Map<String, dynamic>? action, {
+    Map<String, dynamic>? dataContext,
+  }) {
     if (action == null) return null;
-    return () => dispatch(action);
+    return () => dispatch(action, dataContext: dataContext);
   }
 
   Future<void> dispatch(
     Map<String, dynamic> action, {
     String? value,
     String? fieldId,
+    Map<String, dynamic>? dataContext,
   }) async {
     final requireValidForm = action['requireValidForm'] == true;
     if (requireValidForm && _formState != null) {
@@ -38,7 +42,7 @@ class EngineActionDispatcher {
     final type = action['type'] as String?;
     switch (type) {
       case 'navigate':
-        _handleNavigate(action);
+        _handleNavigate(action, dataContext: dataContext);
         return;
       case 'apiCall':
         await _handleApiCall(action, value: value, fieldId: fieldId);
@@ -49,11 +53,43 @@ class EngineActionDispatcher {
     }
   }
 
-  void _handleNavigate(Map<String, dynamic> action) {
+  void _handleNavigate(
+    Map<String, dynamic> action, {
+    Map<String, dynamic>? dataContext,
+  }) {
     final route = action['route'] as String?;
     if (route == null || route.isEmpty) return;
-    AppLogger.debug('[ActionDispatcher] navigate to $route');
-    _context.go(route);
+    final resolvedRoute = _resolveRoute(route, dataContext);
+    AppLogger.debug('[ActionDispatcher] navigate to $resolvedRoute');
+    _context.go(resolvedRoute);
+  }
+
+  String _resolveRoute(String route, Map<String, dynamic>? dataContext) {
+    return route.replaceAllMapped(RegExp(r':([A-Za-z0-9_]+)'), (match) {
+      final key = match.group(1) ?? '';
+      final value = _lookupRouteValue(key, dataContext);
+      return value ?? match.group(0) ?? '';
+    });
+  }
+
+  String? _lookupRouteValue(String key, Map<String, dynamic>? dataContext) {
+    if (dataContext == null || key.isEmpty) return null;
+
+    final direct = dataContext[key];
+    if (direct != null) return direct.toString();
+
+    final item = dataContext['item'];
+    if (item is Map<String, dynamic>) {
+      dynamic itemValue = item[key];
+      if (itemValue == null && key == 'productId') {
+        itemValue = item['id'];
+      } else if (itemValue == null && key == 'id') {
+        itemValue = item['productId'];
+      }
+      if (itemValue != null) return itemValue.toString();
+    }
+
+    return null;
   }
 
   Future<void> _handleApiCall(

@@ -3,6 +3,10 @@
     "puck-editor.git Docs": {
       "type": "sse",
       "url": "https://gitmcp.io/yasser-jam/puck-editor.git"
+    },
+    "ShopEngine.git Docs": {
+      "type": "sse",
+      "url": "https://gitmcp.io/KAREEMALMOSAFII/ShopEngine.git"
     }
   }
 }

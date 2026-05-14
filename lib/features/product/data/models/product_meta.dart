@@ -7,6 +7,7 @@ class ProductMeta extends Equatable {
   final int totalPages;
   final bool hasNext;
   final bool hasPrev;
+  final bool last;
 
   const ProductMeta({
     required this.page,
@@ -15,16 +16,30 @@ class ProductMeta extends Equatable {
     required this.totalPages,
     required this.hasNext,
     required this.hasPrev,
+    required this.last,
   });
 
   factory ProductMeta.fromJson(Map<String, dynamic> json) {
+    final page = (json['page'] as num?)?.toInt() ?? 0;
+    final size = (json['size'] as num?)?.toInt() ?? 20;
+    final total =
+        (json['total'] as num?)?.toInt() ??
+        (json['totalElements'] as num?)?.toInt() ??
+        0;
+    final totalPages = (json['totalPages'] as num?)?.toInt() ?? 0;
+    final last = json['last'] as bool? ?? false;
+    final hasNext =
+        json['hasNext'] as bool? ?? (!last && page < (totalPages - 1));
+    final hasPrev = json['hasPrev'] as bool? ?? page > 0;
+
     return ProductMeta(
-      page: json['page'] as int? ?? 0,
-      size: json['size'] as int? ?? 20,
-      total: json['total'] as int? ?? 0,
-      totalPages: json['totalPages'] as int? ?? 0,
-      hasNext: json['hasNext'] as bool? ?? false,
-      hasPrev: json['hasPrev'] as bool? ?? false,
+      page: page,
+      size: size,
+      total: total,
+      totalPages: totalPages,
+      hasNext: hasNext,
+      hasPrev: hasPrev,
+      last: last || !hasNext,
     );
   }
 
@@ -36,6 +51,7 @@ class ProductMeta extends Equatable {
       'totalPages': totalPages,
       'hasNext': hasNext,
       'hasPrev': hasPrev,
+      'last': last,
     };
   }
 
@@ -46,6 +62,7 @@ class ProductMeta extends Equatable {
     int? totalPages,
     bool? hasNext,
     bool? hasPrev,
+    bool? last,
   }) {
     return ProductMeta(
       page: page ?? this.page,
@@ -54,9 +71,18 @@ class ProductMeta extends Equatable {
       totalPages: totalPages ?? this.totalPages,
       hasNext: hasNext ?? this.hasNext,
       hasPrev: hasPrev ?? this.hasPrev,
+      last: last ?? this.last,
     );
   }
 
   @override
-  List<Object?> get props => [page, size, total, totalPages, hasNext, hasPrev];
+  List<Object?> get props => [
+    page,
+    size,
+    total,
+    totalPages,
+    hasNext,
+    hasPrev,
+    last,
+  ];
 }

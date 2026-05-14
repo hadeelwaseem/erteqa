@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/utils/constants.dart';
 import '../../../config/component_config.dart';
 import '../../component_renderer/component_renderer.dart';
 import '../parsers/property_parsers.dart';
@@ -38,10 +39,10 @@ class ImageRenderer implements ComponentRenderer {
     );
     final urlPath = config.properties['urlPath'] as String?;
     final boundUrl = _resolvePath(dataContext, urlPath);
-    final url =
-      (boundUrl?.toString().trim().isNotEmpty ?? false)
-      ? boundUrl.toString()
-      : (config.properties['url'] as String? ?? '');
+    final url = (boundUrl?.toString().trim().isNotEmpty ?? false)
+        ? boundUrl.toString()
+        : (config.properties['url'] as String? ?? '');
+    final resolvedUrl = _resolveNetworkUrl(url);
     final width = PropertyParsers.parseDouble(config.properties['width']);
     final height = PropertyParsers.parseDouble(config.properties['height']);
     final fitString = PropertyParsers.parseImageFitString(
@@ -55,7 +56,7 @@ class ImageRenderer implements ComponentRenderer {
     // For network images, use Image.network
     Widget image;
     if (source == 'network') {
-      image = _buildNetworkImage(url, width, height, fit);
+      image = _buildNetworkImage(resolvedUrl, width, height, fit);
     } else if (source == 'asset') {
       image = _buildAssetImage(url, width, height, fit);
     } else if (source == 'file') {
@@ -73,6 +74,17 @@ class ImageRenderer implements ComponentRenderer {
       return AspectRatio(aspectRatio: aspectRatio, child: image);
     }
     return image;
+  }
+
+  String _resolveNetworkUrl(String url) {
+    final value = url.trim();
+    if (value.startsWith('http://') || value.startsWith('https://')) {
+      return value;
+    }
+    if (value.startsWith('/')) {
+      return '$kBaseUrlAsset$value';
+    }
+    return value;
   }
 
   dynamic _resolvePath(Map<String, dynamic>? root, String? path) {
