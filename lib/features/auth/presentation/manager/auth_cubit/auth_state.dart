@@ -1,17 +1,75 @@
-  part of 'auth_cubit.dart';
+part of 'auth_cubit.dart';
 
-  sealed class AuthState {}
+sealed class AuthState {
+  const AuthState();
+}
 
-  final class AuthInitial extends AuthState {}
+final class AuthInitial extends AuthState {
+  const AuthInitial();
+}
 
-  final class AuthLoading extends AuthState {}
+final class AuthRequestingOtp extends AuthState {
+  final String phone;
+  final String? tenantId;
+  final String? tenantSlug;
 
-  final class AuthFailure extends AuthState {
-    final String errMessage;
-    AuthFailure({required this.errMessage});
-  }
+  const AuthRequestingOtp({
+    required this.phone,
+    this.tenantId,
+    this.tenantSlug,
+  });
+}
 
-  final class AuthSuccess extends AuthState {
-    final String success;
-    AuthSuccess(this.success);
-  }
+final class AuthOtpRequested extends AuthState {
+  final String phone;
+  final String? tenantId;
+  final String? tenantSlug;
+  final String? fullName;
+  final String message;
+
+  const AuthOtpRequested({
+    required this.phone,
+    required this.message,
+    this.tenantId,
+    this.tenantSlug,
+    this.fullName,
+  });
+}
+
+final class AuthVerifyingOtp extends AuthState {
+  final String phone;
+  final String? tenantId;
+  final String? tenantSlug;
+
+  const AuthVerifyingOtp({
+    required this.phone,
+    this.tenantId,
+    this.tenantSlug,
+  });
+}
+
+final class AuthAuthenticated extends AuthState {
+  final AuthTokenResponse tokenResponse;
+
+  const AuthAuthenticated({required this.tokenResponse});
+}
+
+final class AuthFailureState extends AuthState {
+  final String errMessage;
+  final String? code;
+  final int? retryAfterSeconds;
+
+  const AuthFailureState({
+    required this.errMessage,
+    this.code,
+    this.retryAfterSeconds,
+  });
+}
+
+final class AuthRateLimited extends AuthFailureState {
+  const AuthRateLimited({
+    required super.errMessage,
+    super.code,
+    super.retryAfterSeconds,
+  });
+}

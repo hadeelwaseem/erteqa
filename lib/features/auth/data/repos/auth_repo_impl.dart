@@ -1,216 +1,255 @@
-// import 'package:dartz/dartz.dart';
-// import 'package:dio/dio.dart';
-// import 'package:encrypt/encrypt.dart';
-// import 'package:hive/hive.dart';
-// import 'package:lms_student/constants.dart';
-// import 'package:lms_student/core/cubits/shared_preferences_cubit/shared_preferences_cubit.dart';
-// import 'package:lms_student/core/errors/failures.dart';
-// import 'package:lms_student/core/cubits/token_cubit/token_cubit.dart';
-// import 'package:lms_student/core/utils/api_service.dart';
-// import 'package:lms_student/core/utils/functions/init_firebase.dart';
-// import 'package:lms_student/core/utils/service_locator.dart';
-// import 'package:lms_student/features/auth/data/models/index_address_years/index_address_years.dart';
-// import 'package:lms_student/features/auth/data/models/user_model/user.dart';
-// import 'package:lms_student/features/auth/data/models/user_model/user_model.dart';
-// import 'package:lms_student/features/auth/data/repos/auth_repo.dart';
-// import 'package:encrypt/encrypt.dart' as encrypt;
+import 'dart:async';
 
-import 'package:sooq_merchant/core/utils/api_service.dart';
+import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
+import 'package:sooq_merchant/core/errors/failures.dart';
+import 'package:sooq_merchant/core/network/auth_token_storage.dart';
+import 'package:sooq_merchant/core/utils/constants.dart';
+import 'package:sooq_merchant/features/auth/data/models/auth_token_response.dart';
+import 'package:sooq_merchant/features/auth/data/models/customer_otp_request.dart';
+import 'package:sooq_merchant/features/auth/data/models/customer_otp_verify_request.dart';
 import 'package:sooq_merchant/features/auth/data/repos/auth_repo.dart';
 
 class AuthRepoImpl implements AuthRepo {
-  final ApiService _apiService;
-  // final TokenCubit tokenCubit = getIt<TokenCubit>();
-  // final SharedPreferencesCubit sharedPreferencesCubit =
-  //     getIt<SharedPreferencesCubit>();
-  AuthRepoImpl(this._apiService);
+  AuthRepoImpl(
+    this._dio,
+    this._tokenStorage, {
+    Future<void> Function(Duration) sleep = _defaultSleep,
+  }) : _sleep = sleep;
 
-  //   @override
-  //   Future<Either<Failure, IndexAddressYears>> fetchAuthData() async {
-  //     try {
-  //       final response = await _apiService.get(
-  //           queryParameters: null,
-  //           url: '$kBaseUrl/auth/indexAddressYears',
-  //           token: null,
-  //           body: null);
-  //       IndexAddressYears indexAddressYears =
-  //           IndexAddressYears.fromJson(response);
+  static const String _requestOtpPath = '/api/v1/customer/auth/otp/request';
+  static const String _verifyOtpPath = '/api/v1/customer/auth/otp/verify';
 
-  //       return right(indexAddressYears);
-  //     } on Exception catch (e) {
-  //       if (e is DioException) {
-  //         return Left(ServerFailure.fromDioException(e));
-  //       }
-  //       return Left(ServerFailure(e.toString()));
-  //     }
-  //   }
+  final Dio _dio;
+  final AuthTokenStorage _tokenStorage;
+  final Future<void> Function(Duration) _sleep;
 
-  //   @override
-  //   Future<Either<Failure, Map<String, dynamic>>> signInWithDeviceToken({
-  //     required String deviceToken,
-  //     String? verificationCode,
-  //   }) async {
-  //     try {
-  //       final key = encrypt.Key.fromUtf8(
-  //           'majd123djam321maleh321helam456mm'); // 32 bytes key for AES encryption
-  //       final iv = encrypt.IV
-  //           .fromUtf8('nottonwelbil0990'); // 16 bytes IV for AES encryption
+  @override
+  Future<Either<Failure, String>> requestOtp({
+    required CustomerOtpRequest request,
+  }) async {
+    final validationError = request.validate();
+    if (validationError != null) {
+      return Left(AuthFailure(validationError));
+    }
 
-  //       final encrypter = Encrypter(AES(key, mode: AESMode.cbc));
+    return _executeWithRetry<String>(
+      operation: () async {
+        final response = await _dio.post(
+          '$kBaseUrl$_requestOtpPath',
+          data: request.toJson(),
+          options: _jsonOptions(),
+        );
+        return _parseOtpRequestResponse(response.data);
+      },
+      maxAttempts: 3,
+      retryDelays: const [
+        Duration(milliseconds: 500),
+        Duration(seconds: 1),
+        Duration(seconds: 2),
+      ],
+    );
+  }
 
-  // // Encrypting
-  //       final encryptedDeviceId = encrypter.encrypt(deviceToken, iv: iv);
-  //       Map<String, dynamic> body;
-  //       if (verificationCode!.trim().isNotEmpty &&
-  //           verificationCode.trim().length == 7) {
-  //         body = {
-  //           'device_id': encryptedDeviceId.base64, // encryptedDeviceId.base64,
-  //           'verificationCode': verificationCode,
-  //         };
-  //       } else {
-  //         body = {
-  //           'device_id': encryptedDeviceId.base64, // encryptedDeviceId.base64,
-  //         };
-  //       }
-  //       final response = await _apiService.post(
-  //         url: '$kBaseUrl/auth/login',
-  //         body: body,
-  //         token: null,
-  //       );
-  //       var box = Hive.box<User>(kUser);
-  //       Future.wait([
-  //         box.add(UserModel.fromJson(response).user!),
-  //         tokenCubit.storeToken(response['access_token']),
-  //       ]);
+  @override
+  Future<Either<Failure, AuthTokenResponse>> verifyOtp({
+    required CustomerOtpVerifyRequest request,
+  }) async {
+    final validationError = request.validate();
+    if (validationError != null) {
+      return Left(AuthFailure(validationError));
+    }
 
-  //       return right(response);
-  //     } on Exception catch (e) {
-  //       if (e is DioException) {
-  //         return Left(ServerFailure.fromDioException(e));
-  //       }
-  //       return Left(ServerFailure(e.toString()));
-  //     }
-  //   }
+    return _executeWithRetry<AuthTokenResponse>(
+      operation: () async {
+        final response = await _dio.post(
+          '$kBaseUrl$_verifyOtpPath',
+          data: request.toJson(),
+          options: _jsonOptions(),
+        );
+        final tokenResponse = _parseVerifyOtpResponse(response.data);
+        await _tokenStorage.saveTokens(
+          accessToken: tokenResponse.accessToken,
+          refreshToken: tokenResponse.refreshToken,
+        );
+        return tokenResponse;
+      },
+      maxAttempts: 2,
+      retryDelays: const [Duration(milliseconds: 500), Duration(seconds: 1)],
+    );
+  }
 
-  //     @override
-  //     Future<Either<Failure, Map<String, dynamic>>> signUpWithDataAndToken(
-  //         {required String username,
-  //         required String addressId,
-  //         required String birthdate,
-  //         required String yearId,
-  //         required String imageId,
-  //         required String gender,
-  //         required String userId,
-  //         required String deviceToken}) async {
-  //       try {
-  //         final key = encrypt.Key.fromUtf8(
-  //             'majd123djam321maleh321helam456mm'); // 32 bytes key for AES encryption
-  //         final iv = encrypt.IV
-  //             .fromUtf8('nottonwelbil0990'); // 16 bytes IV for AES encryption
+  Options _jsonOptions() {
+    return Options(headers: const {'Accept': 'application/json'});
+  }
 
-  //         final encrypter = Encrypter(AES(key, mode: AESMode.cbc));
-  //   // Encrypting
-  //         final encryptedDeviceId = encrypter.encrypt(deviceToken, iv: iv);
-  //         print(encryptedDeviceId.base64);
-  //           String? firebaseToken = await initFirebase();
-  //           print(firebaseToken );
-  //         final response = await _apiService.post(
-  //           url: '$kBaseUrl/auth/register',
-  //           body: {
-  //             'name': username,
-  //             'address_id': addressId,
-  //             'birth_date': birthdate,
-  //             'year_id': yearId,
-  //             'image_id': imageId,
-  //             'gender': gender,
-  //             'user_id': userId,
-  //             'device_id': encryptedDeviceId.base64,
-  //             'fcm':firebaseToken
-  //           },
-  //           token: null,
-  //         );
-  //         var box = Hive.box<User>(kUser);
-  //         Future.wait([
-  //           box.add(UserModel.fromJson(response).user!),
-  //           tokenCubit.storeToken(response['access_token']),
+  Future<Either<Failure, T>> _executeWithRetry<T>({
+    required Future<T> Function() operation,
+    required int maxAttempts,
+    required List<Duration> retryDelays,
+  }) async {
+    var attempt = 0;
+    while (true) {
+      attempt += 1;
+      try {
+        final result = await operation();
+        return Right(result);
+      } on Failure catch (failure) {
+        return Left(failure);
+      } on DioException catch (error) {
+        final failure = _mapDioException(error);
+        final shouldRetry = _isNetworkIssue(error) && attempt < maxAttempts;
+        if (!shouldRetry) {
+          return Left(failure);
+        }
 
-  //           sharedPreferencesCubit.deleteId(),
+        final delayIndex = (attempt - 1).clamp(0, retryDelays.length - 1);
+        await _sleep(retryDelays[delayIndex]);
+      } catch (error) {
+        return Left(ServerFailure('Unexpected error: $error'));
+      }
+    }
+  }
 
-  //           // sharedPreferencesCubit.setUsername(response['user']['name']),
-  //           // sharedPreferencesCubit.setFatherName(response['user']['father_name']),
-  //           // sharedPreferencesCubit.setpoints(response['user']['total_points']),
-  //           // sharedPreferencesCubit.setId((response['user']['id']).toString()),
-  //         ]);
+  bool _isNetworkIssue(DioException error) {
+    return switch (error.type) {
+      DioExceptionType.connectionError ||
+      DioExceptionType.connectionTimeout ||
+      DioExceptionType.sendTimeout ||
+      DioExceptionType.receiveTimeout ||
+      DioExceptionType.unknown => true,
+      _ => false,
+    };
+  }
 
-  //         return right(response);
-  //       } on Exception catch (e) {
-  //         if (e is DioException) {
-  //           return Left(ServerFailure.fromDioException(e));
-  //         }
-  //         return Left(ServerFailure(e.toString()));
-  //       }
-  //     }
+  Failure _mapDioException(DioException error) {
+    final response = error.response;
+    if (response == null) {
+      return ServerFailure.fromDioException(error);
+    }
 
-  //   @override
-  //   Future<Either<Failure, bool>> createUser({required String email}) async {
-  //     try {
-  //       //final response =
-  //       await _apiService.post(
-  //         url: '$kBaseUrl/auth/createUser',
-  //         body: {
-  //           'email': email,
-  //         },
-  //         token: null,
-  //       );
-  //       return right(true);
-  //     } on Exception catch (e) {
-  //       if (e is DioException) {
-  //         //print(e);
-  //         return Left(ServerFailure.fromDioException(e));
-  //       }
-  //       return Left(ServerFailure(e.toString()));
-  //     }
-  //   }
+    final statusCode = response.statusCode;
+    final payload = response.data;
+    final payloadMap = payload is Map<String, dynamic> ? payload : <String, dynamic>{};
+    final code = _readString(payloadMap, const ['code', 'errorCode', 'error', 'error_code']);
+    final message = _readString(payloadMap, const ['message', 'detail', 'error_description']) ??
+        _defaultErrorMessage(statusCode);
+    final retryAfterSeconds = _readRetryAfter(response.headers, payloadMap);
 
-  //   @override
-  //   Future<Either<Failure, int>> verifyUser(
-  //       {required String email, required String verificationCode}) async {
-  //     try {
-  //       final response = await _apiService.post(
-  //         url: '$kBaseUrl/auth/verifyUser',
-  //         body: {
-  //           'verificationCode': verificationCode,
-  //           'email': email,
-  //         },
-  //         token: null,
-  //       );
-  //       Future.wait([
-  //         sharedPreferencesCubit.setId((response['user_id']).toString()),
-  //       ]);
-  //       return right(response['user_id']);
-  //     } on Exception catch (e) {
-  //       if (e is DioException) {
-  //         return Left(ServerFailure.fromDioException(e));
-  //       }
-  //       return Left(ServerFailure(e.toString()));
-  //     }
-  //   }
+    if (statusCode == 429) {
+      return AuthFailure(
+        message,
+        code: code ?? 'RATE_LIMITED',
+        statusCode: statusCode,
+        retryAfterSeconds: retryAfterSeconds,
+        details: payloadMap,
+      );
+    }
 
-  //   @override
-  //   Future<Either<Failure, bool>> resendEmail({required String email}) async {
-  //     try {
-  //       //final response =
-  //       await _apiService.post(
-  //         url: '$kBaseUrl/auth/resend_email',
-  //         body: {'email': email},
-  //         token: null,
-  //       );
-  //       return right(true);
-  //     } on Exception catch (e) {
-  //       if (e is DioException) {
-  //         return Left(ServerFailure.fromDioException(e));
-  //       }
-  //       return Left(ServerFailure(e.toString()));
-  //     }
-  //   }
+    if (code == 'OTP_EXPIRED' || code == 'OTP_INVALID' || code == 'RESOURCE_NOT_FOUND') {
+      return AuthFailure(
+        message,
+        code: code,
+        statusCode: statusCode,
+        details: payloadMap,
+      );
+    }
+
+    if (statusCode != null && statusCode >= 500) {
+      return AuthFailure(
+        'حدث خطأ, يرجى المحاولة مجدداً',
+        code: code,
+        statusCode: statusCode,
+        details: payloadMap,
+      );
+    }
+
+    return AuthFailure(
+      message,
+      code: code,
+      statusCode: statusCode,
+      details: payloadMap,
+    );
+  }
+
+  String _parseOtpRequestResponse(dynamic responseData) {
+    final responseMap = _requireEnvelope(responseData);
+    final payload = responseMap['data'] ?? responseMap['message'];
+    if (payload is String && payload.isNotEmpty) {
+      return payload;
+    }
+    if (payload is Map<String, dynamic>) {
+      final message = _readString(payload, const ['message', 'detail']);
+      if (message != null) {
+        return message;
+      }
+    }
+    return 'OTP sent via WhatsApp';
+  }
+
+  AuthTokenResponse _parseVerifyOtpResponse(dynamic responseData) {
+    final responseMap = _requireEnvelope(responseData);
+    final payload = responseMap['data'];
+    if (payload is! Map<String, dynamic>) {
+      throw const FormatException('OTP verify response envelope is invalid');
+    }
+    return AuthTokenResponse.fromJson(payload);
+  }
+
+  Map<String, dynamic> _requireEnvelope(dynamic responseData) {
+    if (responseData is! Map<String, dynamic>) {
+      throw const FormatException('API response is not a JSON object');
+    }
+
+    final success = responseData['success'];
+    if (success is bool && !success) {
+      throw AuthFailure(
+        _readString(responseData, const ['message', 'detail']) ?? 'Request failed',
+        code: _readString(responseData, const ['code', 'errorCode', 'error']),
+        statusCode: responseData['status'] is int ? responseData['status'] as int : null,
+        details: responseData,
+      );
+    }
+
+    return responseData;
+  }
+
+  String? _readString(Map<String, dynamic> payload, List<String> keys) {
+    for (final key in keys) {
+      final value = payload[key];
+      if (value is String && value.isNotEmpty) {
+        return value;
+      }
+    }
+    return null;
+  }
+
+  int? _readRetryAfter(Headers headers, Map<String, dynamic> payload) {
+    final headerValue = headers.value('retry-after');
+    final parsedHeader = int.tryParse(headerValue ?? '');
+    if (parsedHeader != null) {
+      return parsedHeader;
+    }
+
+    final retryAfterSeconds = payload['retryAfterSeconds'] ?? payload['retry_after_seconds'];
+    if (retryAfterSeconds is int) {
+      return retryAfterSeconds;
+    }
+    if (retryAfterSeconds is String) {
+      return int.tryParse(retryAfterSeconds);
+    }
+    return null;
+  }
+
+  String _defaultErrorMessage(int? statusCode) {
+    return switch (statusCode) {
+      400 || 403 => 'Request could not be completed',
+      404 => 'غير موجود, يرجى المحاولة لاحقاً',
+      429 => 'Please wait before trying again',
+      500 || 502 || 503 || 504 => 'حدث خطأ, يرجى المحاولة مجدداً',
+      _ => 'حدث خطأ, يرجى المحاولة مجدداً',
+    };
+  }
+
+  static Future<void> _defaultSleep(Duration duration) => Future<void>.delayed(duration);
 }

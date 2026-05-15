@@ -1,22 +1,15 @@
-abstract class AuthRepo {
-  // Future<Either<Failure, Map<String, dynamic>>> signInWithDeviceToken({
-  //   required String deviceToken,
-  //   String? verificationCode,
-  // });
-  // Future<Either<Failure, Map<String, dynamic>>> signUpWithDataAndToken({
-  //   required String username,
-  //   required String addressId,
-  //   required String birthdate,
-  //   required String yearId,
-  //   required String imageId,
-  //   required String deviceToken,
-  //   required String gender,
-  //   required String userId,
-  // });
+import 'package:dartz/dartz.dart';
+import 'package:sooq_merchant/core/errors/failures.dart';
+import 'package:sooq_merchant/features/auth/data/models/auth_token_response.dart';
+import 'package:sooq_merchant/features/auth/data/models/customer_otp_request.dart';
+import 'package:sooq_merchant/features/auth/data/models/customer_otp_verify_request.dart';
 
-  // Future<Either<Failure, IndexAddressYears>> fetchAuthData();
-  // Future<Either<Failure, bool>> createUser({required String email});
-  // Future<Either<Failure, int>> verifyUser(
-  //     {required String email, required String verificationCode});
-  // Future<Either<Failure, bool>> resendEmail({required String email});
+abstract class AuthRepo {
+  Future<Either<Failure, String>> requestOtp({
+    required CustomerOtpRequest request,
+  });
+
+  Future<Either<Failure, AuthTokenResponse>> verifyOtp({
+    required CustomerOtpVerifyRequest request,
+  });
 }

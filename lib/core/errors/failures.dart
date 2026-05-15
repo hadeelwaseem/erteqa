@@ -6,6 +6,27 @@ abstract class Failure {
   const Failure(this.errMessage);
 }
 
+class AuthFailure extends Failure {
+  final String? code;
+  final int? statusCode;
+  final int? retryAfterSeconds;
+  final Map<String, dynamic>? details;
+
+  const AuthFailure(
+    super.errMessage, {
+    this.code,
+    this.statusCode,
+    this.retryAfterSeconds,
+    this.details,
+  });
+
+  bool get isRateLimited => statusCode == 429 || code == 'RATE_LIMITED';
+
+  bool get isOtpExpired => code == 'OTP_EXPIRED';
+
+  bool get isOtpInvalid => code == 'OTP_INVALID';
+}
+
 class ServerFailure extends Failure {
   ServerFailure(super.errMessage);
 
