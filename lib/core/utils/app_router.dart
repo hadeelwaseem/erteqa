@@ -2,6 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sooq_merchant/config/mobile_app_config.dart';
+import 'package:sooq_merchant/core/cubits/token_cubit/token_cubit.dart';
+import 'package:sooq_merchant/core/navigation/auth_redirect.dart';
+import 'package:sooq_merchant/core/navigation/token_refresh_listenable.dart';
 import 'package:sooq_merchant/core/utils/service_locator.dart';
 import 'package:sooq_merchant/features/homescreen/presentation/views/home_screen.dart';
 import 'package:sooq_merchant/features/shell/presentation/views/tab_shell_widget.dart';
@@ -11,25 +14,19 @@ import 'package:sooq_merchant/features/variantscreen/presentation/views/variant_
 abstract class AppRouter {
   static const kMvp2View = '/mvp2';
 
-  /// Builds the app router.
-  ///
-  /// When [mobileConfig] is provided (tab-shell mode):
-  ///   - A [ShellRoute] wraps all JSON-defined pages with a [TabShellWidget]
-  ///   - Tab routes (e.g. /, /products, /checkout) are first-class GoRoutes
-  ///   - Non-tab routes (e.g. /product/1) are added as sub-routes in the shell
-  ///
-  /// When [mobileConfig] is null:
-  ///   - Falls back to a simple direct VariantScreen (no shell / bottom bar)
-  static GoRouter setupRouter(String? token, {MobileAppConfig? mobileConfig}) {
+  /// Builds the app router with auth-aware redirects and session restore.
+  static GoRouter setupRouter({
+    required TokenCubit tokenCubit,
+    MobileAppConfig? mobileConfig,
+  }) {
     final routes = <RouteBase>[];
+    final refreshListenable = TokenRefreshListenable(tokenCubit);
 
     if (mobileConfig != null && mobileConfig.navigation.hasTabs) {
-      // ── Tab shell mode ──────────────────────────────────────────────────────
       final variantId = mobileConfig.variantId;
       final tabs = mobileConfig.navigation.tabs;
       final shellExcludes = mobileConfig.navigation.shellExcludeRoutes.toSet();
 
-      // Standalone routes (outside the shell)
       for (final route in mobileConfig.pageRoutes) {
         if (!shellExcludes.contains(route)) continue;
         routes.add(
@@ -43,10 +40,8 @@ abstract class AppRouter {
         );
       }
 
-      // Build sub-routes for every page in the JSON
       final shellRoutes = <RouteBase>[];
 
-      // 1. Tab routes
       for (final tab in tabs) {
         shellRoutes.add(
           GoRoute(
@@ -59,7 +54,6 @@ abstract class AppRouter {
         );
       }
 
-      // 2. Non-tab page routes (e.g. /product/1)
       for (final route in mobileConfig.nonTabRoutes) {
         if (shellExcludes.contains(route)) continue;
         shellRoutes.add(
@@ -84,7 +78,6 @@ abstract class AppRouter {
         ),
       );
     } else {
-      // ── Fallback: no mobileConfig, simple single-screen route ────────────
       routes.add(
         GoRoute(
           path: '/',
@@ -95,7 +88,6 @@ abstract class AppRouter {
       );
     }
 
-    // ── Always-available diagnostic/legacy routes ─────────────────────────
     routes.add(
       GoRoute(
         path: kMvp2View,
@@ -103,7 +95,6 @@ abstract class AppRouter {
       ),
     );
 
-    // Legacy /variant/:id route (for direct deep-link / debug access)
     routes.add(
       GoRoute(
         path: '/variant/:id',
@@ -118,13 +109,21 @@ abstract class AppRouter {
       ),
     );
 
-    final router = GoRouter(
+    return GoRouter(
       routes: routes,
       debugLogDiagnostics: kDebugMode,
-      initialLocation: mobileConfig?.navigation.initialRoute ?? '/',
+      refreshListenable: refreshListenable,
+      initialLocation: AuthRedirect.initialLocation(
+        token: tokenCubit.state,
+        mobileConfig: mobileConfig,
+      ),
+      redirect: (context, state) {
+        return AuthRedirect.resolve(
+          token: tokenCubit.state,
+          matchedLocation: state.matchedLocation,
+        );
+      },
     );
-
-    return router;
   }
 
   static Widget _buildVariantScreen({
@@ -135,6 +134,7 @@ abstract class AppRouter {
       variantId: variantId,
       pageRoute: pageRoute,
       variantRepository: getIt<VariantRepository>(),
+      mobileAppConfig: registeredMobileAppConfig,
     );
   }
 }

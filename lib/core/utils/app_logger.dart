@@ -9,4 +9,11 @@ class AppLogger {
       debugPrint(message);
     }
   }
+
+  /// Auth-flow logs (request params, API errors). Never logs OTP codes or tokens.
+  static void auth(String message) {
+    if (kDebugMode) {
+      debugPrint('[Auth] $message');
+    }
+  }
 }

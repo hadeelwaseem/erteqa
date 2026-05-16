@@ -5,7 +5,7 @@ class AuthTokenResponse extends Equatable {
     required this.accessToken,
     required this.refreshToken,
     required this.tokenType,
-    required this.expiresIn,
+    this.expiresIn,
     this.issuedAt,
     this.expiresAt,
     this.username,
@@ -18,7 +18,7 @@ class AuthTokenResponse extends Equatable {
   final String accessToken;
   final String refreshToken;
   final String tokenType;
-  final int expiresIn;
+  final int? expiresIn;
   final DateTime? issuedAt;
   final DateTime? expiresAt;
   final String? username;
@@ -38,7 +38,7 @@ class AuthTokenResponse extends Equatable {
       accessToken: accessToken,
       refreshToken: refreshToken,
       tokenType: _readString(json, const ['tokenType', 'token_type']) ?? 'Bearer',
-      expiresIn: _readInt(json, const ['expiresIn', 'expires_in']) ?? 0,
+      expiresIn: _readInt(json, const ['expiresIn', 'expires_in']),
       issuedAt: _readDateTime(json, const ['issuedAt', 'issued_at']),
       expiresAt: _readDateTime(json, const ['expiresAt', 'expires_at']),
       username: _readString(json, const ['username']),

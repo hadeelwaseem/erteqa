@@ -2,7 +2,9 @@
   "schemaVersion": "1.0",
   "app": {
     "name": "SOOQ Merchant Mobile",
-    "bundleId": "com.sooq.merchant.mobile"
+    "bundleId": "com.sooq.merchant.mobile",
+    "apiBaseUrl": "https://sooq.up.railway.app",
+    "tenantSlug": "anasgoldenmer"
   },
   "theme": {
     "mode": "light",
@@ -81,8 +83,6 @@
       "/splash",
       "/onboarding",
       "/auth/login",
-      "/auth/register",
-      "/auth/forgot-password",
       "/auth/otp-reset",
       "/checkout",
       "/checkout/address",
@@ -115,13 +115,13 @@
       },
       {
         "id": "tab-cart",
-        "label": "╪º┘ä╪│┘ä╪⌐",
+        "label": "السلة",
         "icon": "shopping_cart",
         "route": "/cart"
       },
       {
         "id": "tab-profile",
-        "label": "╪º┘ä╪¡╪│╪º╪¿",
+        "label": "الحساب",
         "icon": "person",
         "route": "/profile"
       }
@@ -319,7 +319,7 @@
                     },
                     "tap": {
                       "type": "navigate",
-                      "route": "/auth/register"
+                      "route": "/auth/login"
                     }
                   }
                 ]
@@ -347,8 +347,8 @@
           "id": "auth-login-form",
           "type": "form",
           "props": {
-            "id": "login-form",
-            "formId": "login-form"
+            "id": "otp-request-form",
+            "formId": "otp-request-form"
           },
           "child": {
             "id": "auth-login-column",
@@ -370,7 +370,7 @@
                 "id": "auth-login-heading",
                 "type": "text",
                 "props": {
-                  "value": "أهلاً بعودتك",
+                  "value": "أدخل رقم جوالك",
                   "fontSize": 24,
                   "fontWeight": "bold",
                   "textAlign": "right",
@@ -378,41 +378,23 @@
                 }
               },
               {
-                "id": "auth-login-email",
-                "type": "textFormField",
+                "id": "auth-login-subheading",
+                "type": "text",
                 "props": {
-                  "id": "email",
-                  "label": "╪º┘ä╪¿╪▒┘è╪» ╪º┘ä╪Ñ┘ä┘â╪¬╪▒┘ê┘å┘è",
-                  "hint": "example@domain.com",
-                  "keyboardType": "emailAddress",
+                  "value": "سنرسل رمز التحقق عبر واتساب",
+                  "fontSize": 14,
                   "textAlign": "right",
-                  "validateRequired": true,
-                  "validateEmail": true,
-                  "requiredMessage": "هذا الحقل مطلوب"
-                },
-                "style": {
-                  "padding": {
-                    "left": 12,
-                    "right": 12,
-                    "top": 6,
-                    "bottom": 6
-                  },
-                  "background": "#F8FAFC",
-                  "borderRadius": 10,
-                  "border": {
-                    "width": 1,
-                    "color": "#E2E8F0"
-                  }
+                  "color": "#64748B"
                 }
               },
               {
-                "id": "auth-login-password",
+                "id": "auth-login-phone",
                 "type": "textFormField",
                 "props": {
-                  "id": "password",
-                  "label": "كلمة المرور",
-                  "hint": "********",
-                  "obscureText": true,
+                  "id": "phone",
+                  "label": "رقم الجوال",
+                  "hint": "+963911000111",
+                  "keyboardType": "phone",
                   "textAlign": "right",
                   "validateRequired": true,
                   "requiredMessage": "هذا الحقل مطلوب"
@@ -433,24 +415,33 @@
                 }
               },
               {
-                "id": "auth-login-forgot-link",
-                "type": "button",
+                "id": "auth-login-fullname",
+                "type": "textFormField",
                 "props": {
-                  "label": "هل نسيت كلمة المرور؟",
-                  "variant": "text",
-                  "textColor": "#1D4ED8",
-                  "alignment": "centerRight"
+                  "id": "fullName",
+                  "label": "الاسم (اختياري)",
+                  "textAlign": "right"
                 },
-                "tap": {
-                  "type": "navigate",
-                  "route": "/auth/forgot-password"
+                "style": {
+                  "padding": {
+                    "left": 12,
+                    "right": 12,
+                    "top": 6,
+                    "bottom": 6
+                  },
+                  "background": "#F8FAFC",
+                  "borderRadius": 10,
+                  "border": {
+                    "width": 1,
+                    "color": "#E2E8F0"
+                  }
                 }
               },
               {
                 "id": "auth-login-submit",
                 "type": "button",
                 "props": {
-                  "label": "╪»╪«┘ê┘ä",
+                  "label": "إرسال الرمز",
                   "variant": "elevated",
                   "backgroundColor": "#1D4ED8",
                   "textColor": "#FFFFFF",
@@ -459,236 +450,20 @@
                   "alignment": "center"
                 },
                 "tap": {
-                  "type": "navigate",
-                  "route": "/home"
-                }
-              },
-              {
-                "id": "auth-login-register-link",
-                "type": "button",
-                "props": {
-                  "label": "ليس لديك حساب؟ أنشئ حساباً",
-                  "backgroundColor": "#FFFFFF",
-                  "textColor": "#0B57D0",
-                  "alignment": "center"
-                },
-                "tap": {
-                  "type": "navigate",
-                  "route": "/auth/register"
-                }
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "page-auth-register",
-      "route": "/auth/register",
-      "title": "إنشاء حساب",
-      "background": "#F1F5F9",
-      "scroll": "vertical",
-      "appBar": {
-        "id": "auth-register-appbar",
-        "type": "appBar",
-        "props": {
-          "title": "إنشاء حساب"
-        }
-      },
-      "body": [
-        {
-          "id": "auth-register-form",
-          "type": "form",
-          "props": {
-            "id": "register-form",
-            "formId": "register-form",
-            "semanticType": "ContactForm"
-          },
-          "child": {
-            "id": "auth-register-column",
-            "type": "column",
-            "props": {
-              "crossAxis": "stretch",
-              "gap": 12
-            },
-            "style": {
-              "padding": 16
-            },
-            "children": [
-              {
-                "id": "auth-register-name",
-                "type": "textFormField",
-                "props": {
-                  "id": "fullName",
-                  "label": "الاسم الكامل",
-                  "textAlign": "right",
-                  "validateRequired": true
-                },
-                "style": {
-                  "padding": 8,
-                  "background": "#F8FAFC",
-                  "borderRadius": 10,
-                  "border": {
-                    "width": 1,
-                    "color": "#E2E8F0"
+                  "type": "cubitCall",
+                  "cubit": "auth",
+                  "method": "requestOtp",
+                  "requireValidForm": true,
+                  "formId": "otp-request-form",
+                  "params": {
+                    "phone": { "source": "form", "field": "phone" },
+                    "fullName": { "source": "form", "field": "fullName" },
+                    "tenantSlug": { "source": "app", "field": "tenantSlug" }
+                  },
+                  "onSuccess": {
+                    "type": "navigate",
+                    "route": "/auth/otp-reset"
                   }
-                }
-              },
-              {
-                "id": "auth-register-phone",
-                "type": "textFormField",
-                "props": {
-                  "id": "phone",
-                  "label": "رقم الجوال",
-                  "keyboardType": "phone",
-                  "textAlign": "right",
-                  "validateRequired": true
-                },
-                "style": {
-                  "padding": 8,
-                  "background": "#F8FAFC",
-                  "borderRadius": 10,
-                  "border": {
-                    "width": 1,
-                    "color": "#E2E8F0"
-                  }
-                }
-              },
-              {
-                "id": "auth-register-email",
-                "type": "textFormField",
-                "props": {
-                  "id": "email",
-                  "label": "البريد الإلكتروني",
-                  "keyboardType": "emailAddress",
-                  "textAlign": "right",
-                  "validateRequired": true,
-                  "validateEmail": true
-                },
-                "style": {
-                  "padding": 8,
-                  "background": "#F8FAFC",
-                  "borderRadius": 10,
-                  "border": {
-                    "width": 1,
-                    "color": "#E2E8F0"
-                  }
-                }
-              },
-              {
-                "id": "auth-register-password",
-                "type": "textFormField",
-                "props": {
-                  "id": "password",
-                  "label": "كلمة المرور",
-                  "obscureText": true,
-                  "textAlign": "right",
-                  "validateRequired": true,
-                  "validateMinLength": 8
-                },
-                "style": {
-                  "padding": 8,
-                  "background": "#F8FAFC",
-                  "borderRadius": 10,
-                  "border": {
-                    "width": 1,
-                    "color": "#E2E8F0"
-                  }
-                }
-              },
-              {
-                "id": "auth-register-submit",
-                "type": "button",
-                "props": {
-                  "label": "╪Ñ┘å╪┤╪º╪í ╪º┘ä╪¡╪│╪º╪¿",
-                  "backgroundColor": "#0B57D0",
-                  "textColor": "#FFFFFF",
-                  "borderRadius": 10
-                },
-                "tap": {
-                  "type": "navigate",
-                  "route": "/auth/otp-reset"
-                }
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "page-auth-forgot-password",
-      "route": "/auth/forgot-password",
-      "title": "نسيت كلمة المرور",
-      "background": "#F1F5F9",
-      "scroll": "vertical",
-      "appBar": {
-        "id": "auth-forgot-appbar",
-        "type": "appBar",
-        "props": {
-          "title": "استعادة كلمة المرور"
-        }
-      },
-      "body": [
-        {
-          "id": "auth-forgot-container",
-          "type": "container",
-          "props": {
-            "semanticType": "ForgotPassword"
-          },
-          "style": {
-            "padding": 16
-          },
-          "child": {
-            "id": "auth-forgot-column",
-            "type": "column",
-            "props": {
-              "crossAxis": "stretch",
-              "gap": 12
-            },
-            "children": [
-              {
-                "id": "auth-forgot-text",
-                "type": "text",
-                "props": {
-                  "value": "أدخل بريدك الإلكتروني لإرسال رمز التحقق",
-                  "textAlign": "right",
-                  "fontSize": 16,
-                  "color": "#0F172A"
-                }
-              },
-              {
-                "id": "auth-forgot-email",
-                "type": "textFormField",
-                "props": {
-                  "id": "recoveryEmail",
-                  "label": "البريد الإلكتروني",
-                  "keyboardType": "email",
-                  "textAlign": "right",
-                  "validateRequired": true,
-                  "validateEmail": true
-                },
-                "style": {
-                  "padding": 8,
-                  "background": "#F8FAFC",
-                  "borderRadius": 10,
-                  "border": {
-                    "width": 1,
-                    "color": "#E2E8F0"
-                  }
-                }
-              },
-              {
-                "id": "auth-forgot-send",
-                "type": "button",
-                "props": {
-                  "label": "إرسال الرمز",
-                  "backgroundColor": "#0B57D0",
-                  "textColor": "#FFFFFF",
-                  "borderRadius": 10
-                },
-                "tap": {
-                  "type": "navigate",
-                  "route": "/auth/otp-reset"
                 }
               }
             ]
@@ -706,7 +481,7 @@
         "id": "auth-otp-appbar",
         "type": "appBar",
         "props": {
-          "title": "التحقق وإعادة التعيين"
+          "title": "تأكيد الرمز"
         }
       },
       "body": [
@@ -714,8 +489,8 @@
           "id": "auth-otp-form",
           "type": "form",
           "props": {
-            "id": "otp-form",
-            "formId": "otp-form"
+            "id": "otp-verify-form",
+            "formId": "otp-verify-form"
           },
           "child": {
             "id": "auth-otp-column",
@@ -729,6 +504,16 @@
             },
             "children": [
               {
+                "id": "auth-otp-heading",
+                "type": "text",
+                "props": {
+                  "value": "أدخل رمز التحقق المكون من 6 أرقام",
+                  "fontSize": 16,
+                  "textAlign": "right",
+                  "color": "#0F172A"
+                }
+              },
+              {
                 "id": "auth-otp-code",
                 "type": "textFormField",
                 "props": {
@@ -737,29 +522,9 @@
                   "keyboardType": "number",
                   "textAlign": "center",
                   "validateRequired": true,
-                  "validateMinLength": 4,
-                  "validateMaxLength": 6
-                },
-                "style": {
-                  "padding": 8,
-                  "background": "#F8FAFC",
-                  "borderRadius": 10,
-                  "border": {
-                    "width": 1,
-                    "color": "#E2E8F0"
-                  }
-                }
-              },
-              {
-                "id": "auth-otp-new-password",
-                "type": "textFormField",
-                "props": {
-                  "id": "newPassword",
-                  "label": "كلمة المرور الجديدة",
-                  "obscureText": true,
-                  "textAlign": "right",
-                  "validateRequired": true,
-                  "validateMinLength": 8
+                  "validateMinLength": 6,
+                  "validateMaxLength": 6,
+                  "requiredMessage": "هذا الحقل مطلوب"
                 },
                 "style": {
                   "padding": 8,
@@ -775,14 +540,46 @@
                 "id": "auth-otp-submit",
                 "type": "button",
                 "props": {
-                  "label": "تأكيد",
+                  "label": "تأكيد وتسجيل الدخول",
                   "backgroundColor": "#16A34A",
                   "textColor": "#FFFFFF",
                   "borderRadius": 10
                 },
                 "tap": {
-                  "type": "navigate",
-                  "route": "/home"
+                  "type": "cubitCall",
+                  "cubit": "auth",
+                  "method": "verifyOtp",
+                  "requireValidForm": true,
+                  "formId": "otp-verify-form",
+                  "params": {
+                    "phone": { "source": "authState", "field": "phone" },
+                    "otpCode": { "source": "form", "field": "otpCode" },
+                    "tenantSlug": { "source": "app", "field": "tenantSlug" }
+                  },
+                  "onSuccess": {
+                    "type": "navigate",
+                    "route": "/home"
+                  }
+                }
+              },
+              {
+                "id": "auth-otp-resend",
+                "type": "button",
+                "props": {
+                  "label": "إعادة إرسال الرمز",
+                  "variant": "text",
+                  "textColor": "#1D4ED8",
+                  "alignment": "center"
+                },
+                "tap": {
+                  "type": "cubitCall",
+                  "cubit": "auth",
+                  "method": "requestOtp",
+                  "params": {
+                    "phone": { "source": "authState", "field": "phone" },
+                    "fullName": { "source": "authState", "field": "fullName" },
+                    "tenantSlug": { "source": "app", "field": "tenantSlug" }
+                  }
                 }
               }
             ]
@@ -860,7 +657,7 @@
                 "id": "home-search-tap",
                 "type": "button",
                 "props": {
-                  "label": "╪¿╪¡╪½",
+                  "label": "بحث",
                   "backgroundColor": "#0B57D0",
                   "textColor": "#FFFFFF",
                   "borderRadius": 8,
@@ -946,7 +743,7 @@
                 "id": "home-hero-description",
                 "type": "richtext",
                 "props": {
-                  "value": "<p>╪ú┘ü╪╢┘ä ╪º┘ä╪╣╪▒┘ê╪╢ ╪º┘ä┘è┘ê┘à┘è╪⌐ ╪╣┘ä┘ë ╪º┘ä╪Ñ┘ä┘â╪¬╪▒┘ê┘å┘è╪º╪¬╪î ╪º┘ä╪ú╪▓┘è╪º╪í╪î ┘ê╪º┘ä┘à┘å╪¬╪¼╪º╪¬ ╪º┘ä┘à┘å╪▓┘ä┘è╪⌐.</p>",
+                  "value": "<p>أفضل العروض اليومية على الإلكترونيات، الأزياء، والمنتجات المنزلية.</p>",
                   "color": "#E2E8F0"
                 }
               },
@@ -1118,7 +915,7 @@
                       "id": "home-cat-2-text",
                       "type": "text",
                       "props": {
-                        "value": "╪ú╪▓┘è╪º╪í",
+                        "value": "أزياء",
                         "fontSize": 14,
                         "fontWeight": "medium",
                         "textAlign": "center"
@@ -2132,7 +1929,7 @@
                 "id": "product-add-cart",
                 "type": "button",
                 "props": {
-                  "label": "╪ú╪╢┘ü ╪Ñ┘ä┘ë ╪º┘ä╪│┘ä╪⌐",
+                  "label": "أضف إلى السلة",
                   "backgroundColor": "#0B57D0",
                   "textColor": "#FFFFFF",
                   "borderRadius": 10
@@ -2418,7 +2215,7 @@
         "id": "cart-appbar",
         "type": "appBar",
         "props": {
-          "title": "╪º┘ä╪│┘ä╪⌐"
+          "title": "السلة"
         }
       },
       "body": [
@@ -2972,7 +2769,7 @@
         "id": "payment-appbar",
         "type": "appBar",
         "props": {
-          "title": "╪º┘ä╪»┘ü╪╣"
+          "title": "الدفع"
         }
       },
       "body": [
@@ -3236,7 +3033,7 @@
                 "id": "order-failure-retry",
                 "type": "button",
                 "props": {
-                  "label": "╪Ñ╪╣╪º╪»╪⌐ ╪º┘ä┘à╪¡╪º┘ê┘ä╪⌐",
+                  "label": "إعادة المحاولة",
                   "backgroundColor": "#0B57D0",
                   "textColor": "#FFFFFF",
                   "borderRadius": 10
@@ -3347,7 +3144,7 @@
               "id": "profile-link-orders",
               "type": "button",
               "props": {
-                "label": "╪╖┘ä╪¿╪º╪¬┘è",
+                "label": "طلباتي",
                 "backgroundColor": "#F8FAFC",
                 "textColor": "#0F172A",
                 "borderRadius": 10
@@ -3891,7 +3688,7 @@
               "id": "settings-language",
               "type": "button",
               "props": {
-                "label": "╪º┘ä┘ä╪║╪⌐",
+                "label": "اللغة",
                 "backgroundColor": "#F8FAFC",
                 "textColor": "#0F172A",
                 "borderRadius": 10
@@ -4003,7 +3800,7 @@
               "id": "support-contact-cta",
               "type": "button",
               "props": {
-                "label": "╪¬┘ê╪º╪╡┘ä ┘à╪╣ ╪º┘ä╪»╪╣┘à",
+                "label": "تواصل مع الدعم",
                 "backgroundColor": "#0B57D0",
                 "textColor": "#FFFFFF",
                 "borderRadius": 10

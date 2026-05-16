@@ -30,11 +30,15 @@ class FakeHttpClientAdapter implements HttpClientAdapter {
 class InMemoryAuthTokenStorage implements AuthTokenStorage {
   String? accessToken;
   String? refreshToken;
+  DateTime? expiresAt;
+  String? tenantId;
 
   @override
   Future<void> clearTokens() async {
     accessToken = null;
     refreshToken = null;
+    expiresAt = null;
+    tenantId = null;
   }
 
   @override
@@ -44,12 +48,34 @@ class InMemoryAuthTokenStorage implements AuthTokenStorage {
   Future<String?> readRefreshToken() async => refreshToken;
 
   @override
+  Future<DateTime?> readExpiresAt() async => expiresAt;
+
+  @override
+  Future<String?> readTenantId() async => tenantId;
+
+  @override
+  Future<AuthTokenBundle> readTokenBundle() async {
+    return AuthTokenBundle(
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+      expiresAt: expiresAt,
+      tenantId: tenantId,
+    );
+  }
+
+  @override
   Future<void> saveTokens({
     required String accessToken,
     required String refreshToken,
+    DateTime? expiresAt,
+    String? tenantId,
   }) async {
     this.accessToken = accessToken;
     this.refreshToken = refreshToken;
+    this.expiresAt = expiresAt;
+    if (tenantId != null && tenantId.isNotEmpty) {
+      this.tenantId = tenantId;
+    }
   }
 }
 

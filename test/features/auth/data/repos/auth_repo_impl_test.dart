@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sooq_merchant/core/errors/failures.dart';
-import 'package:sooq_merchant/core/utils/constants.dart';
+import 'package:sooq_merchant/core/network/network_config.dart';
 import 'package:sooq_merchant/features/auth/data/models/auth_token_response.dart';
 import 'package:sooq_merchant/features/auth/data/models/customer_otp_request.dart';
 import 'package:sooq_merchant/features/auth/data/models/customer_otp_verify_request.dart';
@@ -9,12 +9,17 @@ import 'package:sooq_merchant/features/auth/data/repos/auth_repo_impl.dart';
 
 import '../../support/auth_test_utils.dart';
 
+Dio _testDio(FakeHttpClientAdapter adapter) {
+  return Dio(BaseOptions(baseUrl: NetworkConfig.defaultBaseUrl))
+    ..httpClientAdapter = adapter;
+}
+
 void main() {
   group('AuthRepoImpl', () {
     test('requestOtp returns success message on envelope success', () async {
       final adapter = FakeHttpClientAdapter((options) async {
         expect(options.method, 'POST');
-        expect(options.uri.toString(), '$kBaseUrl/api/v1/customer/auth/otp/request');
+        expect(options.path, '/api/v1/customer/auth/otp/request');
         expect(options.data, isA<Map<String, dynamic>>());
         return jsonResponse({
           'success': true,
@@ -22,8 +27,7 @@ void main() {
           'data': 'OTP sent via WhatsApp',
         });
       });
-      final dio = Dio()..httpClientAdapter = adapter;
-      final repo = AuthRepoImpl(dio, InMemoryAuthTokenStorage(), sleep: (_) async {});
+      final repo = AuthRepoImpl(_testDio(adapter), InMemoryAuthTokenStorage(), sleep: (_) async {});
 
       final result = await repo.requestOtp(
         request: const CustomerOtpRequest(
@@ -50,8 +54,7 @@ void main() {
           statusCode: 400,
         );
       });
-      final dio = Dio()..httpClientAdapter = adapter;
-      final repo = AuthRepoImpl(dio, InMemoryAuthTokenStorage(), sleep: (_) async {});
+      final repo = AuthRepoImpl(_testDio(adapter), InMemoryAuthTokenStorage(), sleep: (_) async {});
 
       final result = await repo.requestOtp(
         request: const CustomerOtpRequest(
@@ -86,8 +89,7 @@ void main() {
           },
         );
       });
-      final dio = Dio()..httpClientAdapter = adapter;
-      final repo = AuthRepoImpl(dio, InMemoryAuthTokenStorage(), sleep: (_) async {});
+      final repo = AuthRepoImpl(_testDio(adapter), InMemoryAuthTokenStorage(), sleep: (_) async {});
 
       final result = await repo.requestOtp(
         request: const CustomerOtpRequest(
@@ -108,11 +110,11 @@ void main() {
       );
     });
 
-    test('verifyOtp stores tokens on success', () async {
+    test('verifyOtp stores tokens and expiry on success', () async {
       final storage = InMemoryAuthTokenStorage();
       final adapter = FakeHttpClientAdapter((options) async {
         expect(options.method, 'POST');
-        expect(options.uri.toString(), '$kBaseUrl/api/v1/customer/auth/otp/verify');
+        expect(options.path, '/api/v1/customer/auth/otp/verify');
         return jsonResponse({
           'success': true,
           'data': {
@@ -120,13 +122,14 @@ void main() {
             'refreshToken': 'refresh-456',
             'tokenType': 'Bearer',
             'expiresIn': 3600,
+            'expiresAt': '2026-05-03T13:00:00.000Z',
+            'tenantId': 'tenant-uuid-1',
             'username': '+963911000111',
             'roles': ['CUSTOMER'],
           },
         });
       });
-      final dio = Dio()..httpClientAdapter = adapter;
-      final repo = AuthRepoImpl(dio, storage, sleep: (_) async {});
+      final repo = AuthRepoImpl(_testDio(adapter), storage, sleep: (_) async {});
 
       final result = await repo.verifyOtp(
         request: const CustomerOtpVerifyRequest(
@@ -141,8 +144,11 @@ void main() {
         (tokenResponse) {
           expect(tokenResponse, isA<AuthTokenResponse>());
           expect(tokenResponse.accessToken, 'access-123');
+          expect(tokenResponse.tenantId, 'tenant-uuid-1');
           expect(storage.accessToken, 'access-123');
           expect(storage.refreshToken, 'refresh-456');
+          expect(storage.expiresAt, isNotNull);
+          expect(storage.tenantId, 'tenant-uuid-1');
         },
       );
     });
@@ -166,9 +172,8 @@ void main() {
           'data': 'OTP sent via WhatsApp',
         });
       });
-      final dio = Dio()..httpClientAdapter = adapter;
       final repo = AuthRepoImpl(
-        dio,
+        _testDio(adapter),
         InMemoryAuthTokenStorage(),
         sleep: (duration) async {
           sleepDurations.add(duration);

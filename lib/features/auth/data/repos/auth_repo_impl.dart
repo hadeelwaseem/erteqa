@@ -4,7 +4,7 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:sooq_merchant/core/errors/failures.dart';
 import 'package:sooq_merchant/core/network/auth_token_storage.dart';
-import 'package:sooq_merchant/core/utils/constants.dart';
+import 'package:sooq_merchant/core/utils/app_logger.dart';
 import 'package:sooq_merchant/features/auth/data/models/auth_token_response.dart';
 import 'package:sooq_merchant/features/auth/data/models/customer_otp_request.dart';
 import 'package:sooq_merchant/features/auth/data/models/customer_otp_verify_request.dart';
@@ -35,11 +35,16 @@ class AuthRepoImpl implements AuthRepo {
 
     return _executeWithRetry<String>(
       operation: () async {
+        final body = request.toJson();
+        AppLogger.auth(
+          'POST $_requestOtpPath baseUrl=${_dio.options.baseUrl} body=$body',
+        );
         final response = await _dio.post(
-          '$kBaseUrl$_requestOtpPath',
-          data: request.toJson(),
+          _requestOtpPath,
+          data: body,
           options: _jsonOptions(),
         );
+        AppLogger.auth('POST $_requestOtpPath status=${response.statusCode}');
         return _parseOtpRequestResponse(response.data);
       },
       maxAttempts: 3,
@@ -60,27 +65,46 @@ class AuthRepoImpl implements AuthRepo {
       return Left(AuthFailure(validationError));
     }
 
-    return _executeWithRetry<AuthTokenResponse>(
+    return _executeOnce<AuthTokenResponse>(
       operation: () async {
         final response = await _dio.post(
-          '$kBaseUrl$_verifyOtpPath',
+          _verifyOtpPath,
           data: request.toJson(),
           options: _jsonOptions(),
         );
         final tokenResponse = _parseVerifyOtpResponse(response.data);
+        final expiresAt = tokenResponse.expiresAt ??
+            (tokenResponse.expiresIn != null
+                ? DateTime.now().toUtc().add(Duration(seconds: tokenResponse.expiresIn!))
+                : null);
         await _tokenStorage.saveTokens(
           accessToken: tokenResponse.accessToken,
           refreshToken: tokenResponse.refreshToken,
+          expiresAt: expiresAt,
+          tenantId: tokenResponse.tenantId,
         );
         return tokenResponse;
       },
-      maxAttempts: 2,
-      retryDelays: const [Duration(milliseconds: 500), Duration(seconds: 1)],
     );
   }
 
   Options _jsonOptions() {
     return Options(headers: const {'Accept': 'application/json'});
+  }
+
+  Future<Either<Failure, T>> _executeOnce<T>({
+    required Future<T> Function() operation,
+  }) async {
+    try {
+      final result = await operation();
+      return Right(result);
+    } on Failure catch (failure) {
+      return Left(failure);
+    } on DioException catch (error) {
+      return Left(_mapDioException(error));
+    } catch (error) {
+      return Left(ServerFailure('Unexpected error: $error'));
+    }
   }
 
   Future<Either<Failure, T>> _executeWithRetry<T>({
@@ -125,11 +149,15 @@ class AuthRepoImpl implements AuthRepo {
   Failure _mapDioException(DioException error) {
     final response = error.response;
     if (response == null) {
+      AppLogger.auth('HTTP error (no response): ${error.message} type=${error.type}');
       return ServerFailure.fromDioException(error);
     }
 
     final statusCode = response.statusCode;
     final payload = response.data;
+    AppLogger.auth(
+      'HTTP $statusCode ${error.requestOptions.path} response=$payload',
+    );
     final payloadMap = payload is Map<String, dynamic> ? payload : <String, dynamic>{};
     final code = _readString(payloadMap, const ['code', 'errorCode', 'error', 'error_code']);
     final message = _readString(payloadMap, const ['message', 'detail', 'error_description']) ??

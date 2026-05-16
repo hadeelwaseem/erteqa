@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sooq_merchant/core/network/network_config.dart';
 import 'package:sooq_merchant/core/utils/constants.dart';
 import 'package:sooq_merchant/core/cubits/shared_preferences_cubit/shared_preferences_cubit.dart';
 import 'package:sooq_merchant/core/cubits/token_cubit/token_cubit.dart';
@@ -30,10 +31,19 @@ void main() async {
     return true;
   }());
 
-  // 2. Setup Dependency Injection
-  setupServiceLocator();
+  // 2. Load mobile app config before DI (base URL + tenant)
+  final mobileConfig = await AppConfigLoader.load(_kActiveConfig);
 
-  // 3. System UI
+  // 3. Setup Dependency Injection
+  setupServiceLocator(
+    networkConfig: NetworkConfig.fromAppConfig(
+      apiBaseUrl: mobileConfig?.apiBaseUrl,
+      tenantSlug: mobileConfig?.tenantSlug,
+    ),
+    mobileAppConfig: mobileConfig,
+  );
+
+  // 4. System UI
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: primaryColor,
@@ -44,21 +54,18 @@ void main() async {
   final tokenCubit = getIt<TokenCubit>();
   final sharedPreferencesCubit = getIt<SharedPreferencesCubit>();
 
-  // 4. Startup init — void-returning calls run before the parallel wait
+  // 5. Startup init
   await sharedPreferencesCubit.setup();
   await tokenCubit.fetchSavedToken();
   await EasyLocalization.ensureInitialized();
 
-  // Load mobile app config (async, non-void — may return null on failure)
-  final mobileConfig = await AppConfigLoader.load(_kActiveConfig);
-
-  // 5. Build router from config (tab shell) or fallback
+  // 6. Build router from config (tab shell) or fallback
   final router = AppRouter.setupRouter(
-    tokenCubit.state,
+    tokenCubit: tokenCubit,
     mobileConfig: mobileConfig,
   );
 
-  // 6. Bloc observer
+  // 7. Bloc observer
   Bloc.observer = AppBlocObserver();
 
   runApp(

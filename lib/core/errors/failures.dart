@@ -61,23 +61,47 @@ class ServerFailure extends Failure {
   }
 
   factory ServerFailure.fromResponse(int? statusCode, dynamic response) {
+    final message = _messageFromResponse(response);
+
     if (statusCode == 401) {
-      return ServerFailure('غير مصرح');
+      return ServerFailure(message ?? 'غير مصرح');
     }
-    if (statusCode == 400 || statusCode == 403) {
-      if (response['message'] == null) {
-        return ServerFailure(response['error']);
-      } else {
-        return ServerFailure(response['message']);
+    if (statusCode == 400 || statusCode == 403 || statusCode == 422) {
+      return ServerFailure(message ?? 'حدث خطأ, يرجى المحاولة مجدداً');
+    }
+    if (statusCode == 404) {
+      return ServerFailure(message ?? 'غير موجود, يرجى المحاولة لاحقاً');
+    }
+    if (statusCode == 500) {
+      return ServerFailure(message ?? 'حدث خطأ, يرجى المحاولة مجدداً');
+    }
+    return ServerFailure(message ?? 'حدث خطأ, يرجى المحاولة مجدداً');
+  }
+
+  static String? _messageFromResponse(dynamic response) {
+    if (response == null) {
+      return null;
+    }
+    if (response is String) {
+      final trimmed = response.trim();
+      return trimmed.isEmpty ? null : trimmed;
+    }
+    if (response is Map) {
+      final message = response['message'];
+      if (message is String && message.isNotEmpty) {
+        return message;
       }
-    } else if (statusCode == 404) {
-      return ServerFailure('غير موجود, يرجى المحاولة لاحقاً');
-    } else if (statusCode == 500) {
-      return ServerFailure('حدث خطأ, يرجى المحاولة لاحقاً');
-    } else if (statusCode == 422) {
-      return ServerFailure((response['message']));
-    } else {
-      return ServerFailure('حدث خطأ, يرجى المحاولة لاحقاً');
+      final error = response['error'];
+      if (error is String && error.isNotEmpty) {
+        return error;
+      }
+      if (error is Map) {
+        final nested = error['message'];
+        if (nested is String && nested.isNotEmpty) {
+          return nested;
+        }
+      }
     }
+    return null;
   }
 }

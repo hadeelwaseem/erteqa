@@ -64,6 +64,10 @@ final class AuthFailureState extends AuthState {
     this.code,
     this.retryAfterSeconds,
   });
+
+  @override
+  String toString() =>
+      'AuthFailureState(message: $errMessage, code: ${code ?? "n/a"}, retryAfter: ${retryAfterSeconds ?? "n/a"})';
 }
 
 final class AuthRateLimited extends AuthFailureState {
@@ -72,4 +76,8 @@ final class AuthRateLimited extends AuthFailureState {
     super.code,
     super.retryAfterSeconds,
   });
+
+  @override
+  String toString() =>
+      'AuthRateLimited(message: $errMessage, code: ${code ?? "n/a"}, retryAfter: ${retryAfterSeconds ?? "n/a"}s)';
 }

@@ -13,6 +13,8 @@ class MobileAppConfig {
   final String schemaVersion;
   final String appName;
   final String bundleId;
+  final String apiBaseUrl;
+  final String? tenantSlug;
   final NavigationConfig navigation;
 
   /// All page routes defined in `pages[]`, e.g. ['/', '/products', '/product/1', '/checkout'].
@@ -23,6 +25,8 @@ class MobileAppConfig {
     required this.schemaVersion,
     required this.appName,
     required this.bundleId,
+    required this.apiBaseUrl,
+    this.tenantSlug,
     required this.navigation,
     required this.pageRoutes,
   });
@@ -45,6 +49,8 @@ class MobileAppConfig {
       schemaVersion: json['schemaVersion'] as String? ?? '1.0',
       appName: app['name'] as String? ?? 'App',
       bundleId: app['bundleId'] as String? ?? '',
+      apiBaseUrl: app['apiBaseUrl'] as String? ?? '',
+      tenantSlug: app['tenantSlug'] as String?,
       navigation: NavigationConfig.fromJson(navJson),
       pageRoutes: routes,
     );

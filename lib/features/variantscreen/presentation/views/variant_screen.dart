@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:sooq_merchant/core/cubits/token_cubit/token_cubit.dart';
+import 'package:sooq_merchant/core/navigation/auth_redirect.dart';
 
+import 'package:sooq_merchant/config/mobile_app_config.dart';
 import 'package:sooq_merchant/core/utils/service_locator.dart';
 import 'package:sooq_merchant/engine/actions/action_dispatcher.dart';
 import 'package:sooq_merchant/engine/form/form_state_store.dart';
 import 'package:sooq_merchant/engine/requests/request_mapper.dart';
 import 'package:sooq_merchant/engine/tree/tree_engine.dart';
+import 'package:sooq_merchant/features/auth/presentation/manager/auth_cubit/auth_cubit.dart';
 import 'package:sooq_merchant/features/product/presentation/manager/product_cubit/product_cubit.dart';
 import 'package:sooq_merchant/features/variantscreen/data/repos/variant_repository.dart';
 import 'package:sooq_merchant/features/variantscreen/presentation/manager/variant_cubit/variant_cubit.dart';
@@ -17,11 +22,13 @@ class VariantScreen extends StatefulWidget {
     required this.variantId,
     required this.variantRepository,
     this.pageRoute,
+    this.mobileAppConfig,
   });
 
   final String variantId;
   final VariantRepository variantRepository;
   final String? pageRoute;
+  final MobileAppConfig? mobileAppConfig;
 
   @override
   State<VariantScreen> createState() => _VariantScreenState();
@@ -32,7 +39,11 @@ class _VariantScreenState extends State<VariantScreen> {
   late final Map<String, dynamic> _dataContext;
   final Map<String, dynamic> _requestResults = <String, dynamic>{};
   final Set<String> _loadingMoreRequestKeys = <String>{};
-  EngineActionDispatcher? _dispatcher;
+
+  static const _authRoutes = {'/auth/login', '/auth/otp-reset'};
+
+  bool get _isAuthRoute =>
+      widget.pageRoute != null && _authRoutes.contains(widget.pageRoute);
 
   @override
   void initState() {
@@ -44,11 +55,12 @@ class _VariantScreenState extends State<VariantScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _dispatcher ??= EngineActionDispatcher(
+    final dispatcher = EngineActionDispatcher(
       context: context,
       formState: _formStateStore,
+      dataContext: _buildRenderContext(),
     );
-    _dataContext[EngineActionDispatcher.contextKey] = _dispatcher;
+    _dataContext[EngineActionDispatcher.contextKey] = dispatcher;
   }
 
   @override
@@ -93,23 +105,36 @@ class _VariantScreenState extends State<VariantScreen> {
     final mappedRequests = EngineRequestMapper.collectRequests(config);
     final renderContext = _buildRenderContext();
 
+    Widget content;
     if (mappedRequests.isEmpty) {
-      return ScreenRenderer.withPrimitives().render(
+      content = ScreenRenderer.withPrimitives().render(
         config,
         context: context,
         dataContext: renderContext,
       );
+    } else {
+      content = BlocProvider<ProductCubit>(
+        create: (_) => getIt<ProductCubit>(),
+        child: _ProductRequestHost(
+          config: config,
+          renderContext: renderContext,
+          onProductSuccess: _handleProductSuccess,
+          onProductFailure: _handleProductFailure,
+        ),
+      );
     }
 
-    return BlocProvider<ProductCubit>(
-      create: (_) => getIt<ProductCubit>(),
-      child: _ProductRequestHost(
-        config: config,
-        renderContext: renderContext,
-        onProductSuccess: _handleProductSuccess,
-        onProductFailure: _handleProductFailure,
-      ),
-    );
+    if (_isAuthRoute) {
+      return BlocProvider<AuthCubit>.value(
+        value: getIt<AuthCubit>(),
+        child: _AuthRequestHost(
+          renderContext: renderContext,
+          child: content,
+        ),
+      );
+    }
+
+    return content;
   }
 
   void _handleProductSuccess(
@@ -182,6 +207,14 @@ class _VariantScreenState extends State<VariantScreen> {
 
   Map<String, dynamic> _buildRenderContext() {
     final merged = <String, dynamic>{..._dataContext};
+    final config = widget.mobileAppConfig;
+    if (config != null) {
+      merged['app'] = <String, dynamic>{
+        'apiBaseUrl': config.apiBaseUrl,
+        'tenantSlug': config.tenantSlug,
+        'bundleId': config.bundleId,
+      };
+    }
     if (_requestResults.isNotEmpty) {
       merged['requests'] = _requestResults;
       merged['loadingMoreRequests'] = {
@@ -194,6 +227,76 @@ class _VariantScreenState extends State<VariantScreen> {
       }
     }
     return merged;
+  }
+}
+
+class _AuthRequestHost extends StatelessWidget {
+  const _AuthRequestHost({
+    required this.child,
+    required this.renderContext,
+  });
+
+  final Widget child;
+  final Map<String, dynamic> renderContext;
+
+  @override
+  Widget build(BuildContext context) {
+    // Auth routes are shell-excluded and the JSON scaffold renderer does not
+    // create a Material Scaffold, so we need one here for SnackBars/overlays.
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: BlocListener<AuthCubit, AuthState>(
+        listenWhen: (previous, current) =>
+            current is AuthFailureState ||
+            current is AuthOtpRequested ||
+            current is AuthAuthenticated,
+        listener: (context, state) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!context.mounted) {
+              return;
+            }
+
+            if (state is AuthAuthenticated) {
+              context.go(AuthRedirect.homeRoute);
+              return;
+            }
+
+            final messenger = ScaffoldMessenger.maybeOf(context);
+            if (messenger == null) {
+              return;
+            }
+
+            if (state is AuthFailureState) {
+              var message = state.errMessage;
+              if (state is AuthRateLimited && state.retryAfterSeconds != null) {
+                message = '$message (${state.retryAfterSeconds}s)';
+              }
+              messenger.showSnackBar(SnackBar(content: Text(message)));
+            } else if (state is AuthOtpRequested) {
+              messenger.showSnackBar(SnackBar(content: Text(state.message)));
+            }
+          });
+        },
+        child: BlocBuilder<AuthCubit, AuthState>(
+          builder: (context, state) {
+            final isLoading =
+                state is AuthRequestingOtp || state is AuthVerifyingOtp;
+            return Stack(
+              children: [
+                child,
+                if (isLoading)
+                  const Positioned.fill(
+                    child: ColoredBox(
+                      color: Color(0x33FFFFFF),
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
   }
 }
 
@@ -268,7 +371,7 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
     _dispatchedRequestKeys.addAll(pending.map((request) => request.key));
     await EngineRequestMapper.dispatchRequests(
       productCubit: context.read<ProductCubit>(),
-      tenantId: null,
+      tenantId: getIt<TokenCubit>().tenantId,
       requests: pending,
     );
   }

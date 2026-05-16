@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/network/network_config.dart';
 import '../../../core/utils/constants.dart';
+import '../../../core/utils/service_locator.dart';
 import '../../../config/component_config.dart';
 import '../../component_renderer/component_renderer.dart';
 import '../parsers/property_parsers.dart';
@@ -82,7 +84,10 @@ class ImageRenderer implements ComponentRenderer {
       return value;
     }
     if (value.startsWith('/')) {
-      return '$kBaseUrlAsset$value';
+      final assetBase = getIt.isRegistered<NetworkConfig>()
+          ? getIt<NetworkConfig>().assetBaseUrl
+          : kBaseUrlAsset;
+      return '$assetBase$value';
     }
     return value;
   }

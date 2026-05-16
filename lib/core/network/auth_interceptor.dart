@@ -1,31 +1,25 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:sooq_merchant/core/network/auth_token_storage.dart';
-import 'package:sooq_merchant/core/utils/constants.dart';
 
 class AuthInterceptor extends Interceptor {
   AuthInterceptor({
+    required Dio mainDio,
     required AuthTokenStorage tokenStorage,
     Future<void> Function()? onAuthLost,
-    Dio? refreshClient,
-  })  : _tokenStorage = tokenStorage,
-        _onAuthLost = onAuthLost,
-        _refreshDio =
-            refreshClient ??
-            Dio(
-              BaseOptions(
-                headers: const {'Accept': 'application/json'},
-                connectTimeout: const Duration(seconds: 20),
-                receiveTimeout: const Duration(seconds: 20),
-                sendTimeout: const Duration(seconds: 20),
-              ),
-            );
+  })  : _mainDio = mainDio,
+        _tokenStorage = tokenStorage,
+        _onAuthLost = onAuthLost;
 
   static const String _refreshPath = '/api/v1/customer/auth/refresh';
   static const String _retryFlag = 'auth_refresh_retry';
 
+  final Dio _mainDio;
   final AuthTokenStorage _tokenStorage;
   final Future<void> Function()? _onAuthLost;
-  final Dio _refreshDio;
+
+  Completer<void>? _refreshCompleter;
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
@@ -42,7 +36,7 @@ class AuthInterceptor extends Interceptor {
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     final isUnauthorized = err.response?.statusCode == 401;
     final alreadyRetried = err.requestOptions.extra[_retryFlag] == true;
-    if (!isUnauthorized || alreadyRetried) {
+    if (!isUnauthorized || alreadyRetried || !_isRepeatableRequest(err.requestOptions)) {
       handler.next(err);
       return;
     }
@@ -55,32 +49,26 @@ class AuthInterceptor extends Interceptor {
     }
 
     try {
-      final refreshResponse = await _refreshDio.post(
-        '$kBaseUrl$_refreshPath',
-        data: {'refreshToken': refreshToken},
-        options: Options(
-          headers: const {'Accept': 'application/json'},
-          validateStatus: (status) => status != null && status >= 200 && status < 500,
-        ),
-      );
-
-      final refreshedTokens = _readTokens(refreshResponse.data);
+      final refreshedTokens = await _refreshTokens(refreshToken);
       if (refreshedTokens == null) {
         await _handleAuthLost();
         handler.next(err);
         return;
       }
 
+      final existingTenantId = await _tokenStorage.readTenantId();
       await _tokenStorage.saveTokens(
         accessToken: refreshedTokens.accessToken,
         refreshToken: refreshedTokens.refreshToken,
+        expiresAt: refreshedTokens.expiresAt,
+        tenantId: refreshedTokens.tenantId ?? existingTenantId,
       );
 
       final retryOptions = err.requestOptions;
       retryOptions.extra[_retryFlag] = true;
       retryOptions.headers['Authorization'] = 'Bearer ${refreshedTokens.accessToken}';
 
-      final response = await _refreshDio.fetch(retryOptions);
+      final response = await _mainDio.fetch(retryOptions);
       handler.resolve(response);
     } on DioException {
       await _handleAuthLost();
@@ -91,11 +79,74 @@ class AuthInterceptor extends Interceptor {
     }
   }
 
+  Future<_TokenBundle?> _refreshTokens(String refreshToken) async {
+    if (_refreshCompleter != null) {
+      await _refreshCompleter!.future;
+      final bundle = await _tokenStorage.readTokenBundle();
+      if (bundle.accessToken == null || bundle.refreshToken == null) {
+        return null;
+      }
+      return _TokenBundle(
+        accessToken: bundle.accessToken!,
+        refreshToken: bundle.refreshToken!,
+        expiresAt: bundle.expiresAt,
+      );
+    }
+
+    _refreshCompleter = Completer<void>();
+    try {
+      final refreshResponse = await _mainDio.post(
+        _refreshPath,
+        data: {'refreshToken': refreshToken},
+        options: Options(
+          headers: const {'Accept': 'application/json'},
+          validateStatus: (status) => status != null && status >= 200 && status < 500,
+        ),
+      );
+
+      final refreshedTokens = _readTokens(refreshResponse.data);
+      if (refreshedTokens == null) {
+        _refreshCompleter!.complete();
+        return null;
+      }
+
+      final existingTenantId = await _tokenStorage.readTenantId();
+      await _tokenStorage.saveTokens(
+        accessToken: refreshedTokens.accessToken,
+        refreshToken: refreshedTokens.refreshToken,
+        expiresAt: refreshedTokens.expiresAt,
+        tenantId: refreshedTokens.tenantId ?? existingTenantId,
+      );
+
+      _refreshCompleter!.complete();
+      return refreshedTokens;
+    } catch (_) {
+      if (!(_refreshCompleter?.isCompleted ?? true)) {
+        _refreshCompleter!.complete();
+      }
+      return null;
+    } finally {
+      _refreshCompleter = null;
+    }
+  }
+
   Future<void> _handleAuthLost() async {
     await _tokenStorage.clearTokens();
-    if (_onAuthLost != null) {
-      await _onAuthLost!();
+    await _onAuthLost?.call();
+  }
+
+  bool _isRepeatableRequest(RequestOptions options) {
+    final data = options.data;
+    if (data is FormData) {
+      return false;
     }
+    if (data is Stream) {
+      return false;
+    }
+    if (data is MultipartFile) {
+      return false;
+    }
+    return true;
   }
 
   _TokenBundle? _readTokens(dynamic data) {
@@ -112,7 +163,19 @@ class AuthInterceptor extends Interceptor {
       return null;
     }
 
-    return _TokenBundle(accessToken: accessToken, refreshToken: refreshToken);
+    final expiresAt = _readDateTime(tokenMap, const ['expiresAt', 'expires_at']);
+    final expiresIn = _readInt(tokenMap, const ['expiresIn', 'expires_in']);
+    final resolvedExpiry = expiresAt ??
+        (expiresIn != null ? DateTime.now().toUtc().add(Duration(seconds: expiresIn)) : null);
+
+    final tenantId = _readString(tokenMap, const ['tenantId', 'tenant_id']);
+
+    return _TokenBundle(
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+      expiresAt: resolvedExpiry,
+      tenantId: tenantId,
+    );
   }
 
   String? _readString(Map<String, dynamic> data, List<String> keys) {
@@ -124,11 +187,42 @@ class AuthInterceptor extends Interceptor {
     }
     return null;
   }
+
+  int? _readInt(Map<String, dynamic> data, List<String> keys) {
+    for (final key in keys) {
+      final value = data[key];
+      if (value is int) {
+        return value;
+      }
+      if (value is String) {
+        final parsed = int.tryParse(value);
+        if (parsed != null) {
+          return parsed;
+        }
+      }
+    }
+    return null;
+  }
+
+  DateTime? _readDateTime(Map<String, dynamic> data, List<String> keys) {
+    final value = _readString(data, keys);
+    if (value == null) {
+      return null;
+    }
+    return DateTime.tryParse(value);
+  }
 }
 
 class _TokenBundle {
-  _TokenBundle({required this.accessToken, required this.refreshToken});
+  _TokenBundle({
+    required this.accessToken,
+    required this.refreshToken,
+    this.expiresAt,
+    this.tenantId,
+  });
 
   final String accessToken;
   final String refreshToken;
+  final DateTime? expiresAt;
+  final String? tenantId;
 }

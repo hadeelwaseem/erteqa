@@ -6,7 +6,7 @@ part 'product_state.dart';
 
 class ProductCubit extends Cubit<ProductState> {
   final ProductRepo _productRepo;
-  String _tenantId = 'aefc4436-3fd2-44cd-9647-09b8bd32e02a';
+  String _tenantId = '';
 
   ProductCubit(this._productRepo) : super(ProductInitial());
 
