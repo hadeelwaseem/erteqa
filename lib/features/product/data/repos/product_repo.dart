@@ -6,6 +6,15 @@ abstract class ProductRepo {
   Future<Either<Failure, ProductListResponse>> getProducts({
     required int page,
     required int size,
-    required String tenantId,
+    String? sort,
+    String? tenantId,
+  });
+
+  Future<Either<Failure, ProductListResponse>> getCategoryProducts({
+    required String categorySlug,
+    required int page,
+    required int size,
+    String? sort,
+    String? tenantId,
   });
 }

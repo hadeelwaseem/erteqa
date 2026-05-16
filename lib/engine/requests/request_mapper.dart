@@ -9,6 +9,7 @@ class EngineMappedRequest {
   final String? semanticType;
   final int page;
   final int size;
+  final String? sort;
 
   const EngineMappedRequest({
     required this.key,
@@ -16,11 +17,16 @@ class EngineMappedRequest {
     required this.semanticType,
     required this.page,
     required this.size,
+    this.sort,
   });
 }
 
 class EngineRequestMapper {
   static const String _defaultProductRequestKey = 'product-list';
+  static final RegExp _categoryProductsPattern = RegExp(
+    r'/categories/([^/]+)/products',
+    caseSensitive: false,
+  );
 
   static List<EngineMappedRequest> collectRequests(ScreenConfig config) {
     final mapped = <EngineMappedRequest>[];
@@ -36,19 +42,46 @@ class EngineRequestMapper {
   }) async {
     if (requests.isEmpty) return;
 
+    if (tenantId != null && tenantId.isNotEmpty) {
+      productCubit.setTenantId(tenantId);
+    }
+
     for (final request in requests) {
-      if (_isProductListRequest(request)) {
-        AppLogger.debug(
-          '[RequestMapper] dispatch product request key=${request.key} '
-          'url=${request.requestUrl} page=${request.page} size=${request.size} '
-          'tenant=${tenantId ?? "not_set_using_default"}',
-        );
-        if (tenantId != null && tenantId.isNotEmpty) {
-          productCubit.setTenantId(tenantId);
+      final page = request.page;
+      final size = request.size;
+      final sort = request.sort;
+
+      if (_isCategoryProductsRequest(request)) {
+        final slug = _parseCategorySlug(request.requestUrl);
+        if (slug == null || slug.isEmpty) {
+          continue;
         }
+
+        AppLogger.debug(
+          '[RequestMapper] dispatch category products key=${request.key} '
+          'slug=$slug url=${request.requestUrl} page=$page size=$size '
+          'tenant=${tenantId ?? "not_set"}',
+        );
+        await productCubit.getCategoryProducts(
+          categorySlug: slug,
+          page: page,
+          size: size,
+          sort: sort,
+          requestKey: request.key,
+        );
+        continue;
+      }
+
+      if (_isBrowseProductsRequest(request)) {
+        AppLogger.debug(
+          '[RequestMapper] dispatch browse products key=${request.key} '
+          'url=${request.requestUrl} page=$page size=$size '
+          'tenant=${tenantId ?? "not_set"}',
+        );
         await productCubit.getProducts(
-          page: request.page,
-          size: request.size,
+          page: page,
+          size: size,
+          sort: sort,
           requestKey: request.key,
         );
       }
@@ -94,8 +127,8 @@ class EngineRequestMapper {
     }
 
     final key = explicitKey ?? requestUrl ?? semanticType ?? nodeId ??
-      _defaultProductRequestKey;
-    final pageSize = _parsePageSize(requestUrl, data);
+        _defaultProductRequestKey;
+    final pageSize = _parseListQuery(requestUrl, data);
 
     return EngineMappedRequest(
       key: key,
@@ -103,31 +136,80 @@ class EngineRequestMapper {
       semanticType: semanticType,
       page: pageSize.$1,
       size: pageSize.$2,
+      sort: pageSize.$3,
     );
   }
 
-  static bool _isProductListRequest(EngineMappedRequest request) {
+  static bool _isBrowseProductsRequest(EngineMappedRequest request) {
     final semantic = request.semanticType?.toLowerCase() ?? '';
+    if (semantic == 'productlist' &&
+        (request.requestUrl == null || request.requestUrl!.isEmpty)) {
+      return true;
+    }
+
     final url = request.requestUrl?.toLowerCase() ?? '';
-    return semantic == 'productlist' || url.contains('/products');
+    if (url.isEmpty) {
+      return semantic == 'productlist';
+    }
+
+    if (!url.contains('/public/products')) {
+      return false;
+    }
+    if (url.contains('/search') || url.contains('/autocomplete')) {
+      return false;
+    }
+
+    final uri = Uri.tryParse(url);
+    if (uri == null) {
+      return url.endsWith('/products') || url.contains('/products?');
+    }
+
+    return uri.path.endsWith('/products');
   }
 
-  static (int, int) _parsePageSize(String? requestUrl, Map<String, dynamic> data) {
+  static bool _isCategoryProductsRequest(EngineMappedRequest request) {
+    final url = request.requestUrl?.toLowerCase() ?? '';
+    if (url.isEmpty) {
+      return false;
+    }
+    return _categoryProductsPattern.hasMatch(url);
+  }
+
+  static String? _parseCategorySlug(String? requestUrl) {
+    if (requestUrl == null || requestUrl.isEmpty) {
+      return null;
+    }
+    return _categoryProductsPattern.firstMatch(requestUrl)?.group(1);
+  }
+
+  static (int, int, String?) _parseListQuery(
+    String? requestUrl,
+    Map<String, dynamic> data,
+  ) {
     int page = (data['page'] as num?)?.toInt() ?? 0;
-    int size = (data['size'] as num?)?.toInt() ?? (data['limit'] as num?)?.toInt() ?? 20;
+    int size =
+        (data['size'] as num?)?.toInt() ??
+        (data['limit'] as num?)?.toInt() ??
+        20;
+    String? sort = data['sort'] as String?;
 
     if (requestUrl == null || requestUrl.isEmpty) {
-      return (page, size);
+      return (page, size, sort);
     }
 
     final uri = Uri.tryParse(requestUrl);
     if (uri == null) {
-      return (page, size);
+      return (page, size, sort);
     }
 
     final pageParam = int.tryParse(uri.queryParameters['page'] ?? '');
     final sizeParam = int.tryParse(uri.queryParameters['size'] ?? '');
+    final sortParam = uri.queryParameters['sort'];
 
-    return (pageParam ?? page, sizeParam ?? size);
+    return (
+      pageParam ?? page,
+      sizeParam ?? size,
+      sortParam?.isNotEmpty == true ? sortParam : sort,
+    );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
-
-import '../../../../core/utils/constants.dart';
+import 'package:get_it/get_it.dart';
+import 'package:sooq_merchant/core/network/network_config.dart';
+import 'package:sooq_merchant/core/utils/constants.dart';
 
 class Product extends Equatable {
   final String? id;
@@ -217,7 +218,10 @@ class Product extends Equatable {
       return text;
     }
     if (text.startsWith('/')) {
-      return '$kBaseUrlAsset$text';
+      final assetBase = GetIt.I.isRegistered<NetworkConfig>()
+          ? GetIt.I<NetworkConfig>().assetBaseUrl
+          : kBaseUrlAsset;
+      return '$assetBase$text';
     }
     return text;
   }

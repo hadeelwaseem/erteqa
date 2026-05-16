@@ -1,6 +1,6 @@
 # Endpoints and Features Guide
 
-Last updated: 2026-05-14
+Last updated: 2026-05-16
 
 This guide defines how to add new backend endpoints and how to organize feature files in this project.
 Use it as the reference before creating a new API flow, a new feature module, or a new JSON-driven screen section.
@@ -95,9 +95,54 @@ Repository implementations should own all transport details:
 - Prefer typed parsing over passing raw JSON upward.
 - Support pagination explicitly when the backend returns it.
 
+### Repository return type
+
+- Public repository methods return `Future<Either<Failure, T>>` from `dartz`.
+- Cubits call repos and `fold` into loading / success / failure states.
+- Do not throw from repositories for expected API errors; return `Left(Failure)`.
+
+### API response envelope
+
+Backend responses use a common wrapper. Repositories must validate it before parsing models:
+
+```json
+{
+  "success": true,
+  "message": null,
+  "data": {},
+  "meta": {},
+  "timestamp": 1715824800000
+}
+```
+
+Rules:
+
+- Reject or map failures when `success == false` (use `message` / `detail` for user text).
+- Confirm `data` matches the expected shape (list vs object) before `fromJson`.
+- For paginated lists, read `meta` at the envelope root (sibling of `data`), not inside each item.
+- Some endpoints use a non-array `data` object (for example search). Do not assume all list endpoints return `data: []`.
+
+Reference: `AuthRepoImpl._requireEnvelope` in `lib/features/auth/data/repos/auth_repo_impl.dart`.
+
+### Retry, rate limits, and cancellation
+
+- **Idempotent GET** (lists, detail, categories): retry on `429` and `5xx` with bounded exponential backoff (for example 3 attempts: 500ms, 1s, 2s). Use an injectable `sleep` in tests.
+- **Non-idempotent POST** (OTP verify, checkout): execute once; do not auto-retry success paths.
+- **Search / autocomplete**: accept `CancelToken?`; cancelled requests must not surface as user-visible errors.
+- Map `DioException` through `ServerFailure.fromDioException` unless the feature needs a typed failure (for example `AuthFailure`).
+
+### Network and tenant configuration
+
+- **Never hardcode** API base URLs in feature repos. Use `Dio` configured with `NetworkConfig.baseUrl` from `assets/config/*.json` (`app.apiBaseUrl`, `app.tenantSlug`).
+- Resolve relative asset/image paths with `NetworkConfig.assetBaseUrl`.
+- Multi-tenant public endpoints may require `X-Tenant-ID` even when no `Authorization` header is needed. Prefer tenant id from token storage after login; fall back to config when documented for that endpoint.
+- Register `NetworkConfig` and `Dio` in `lib/core/utils/service_locator.dart` before repositories.
+
 ## 5. Model Responsibilities
 
 Models should be resilient to backend changes.
+
+Use `Equatable` and hand-written `fromJson` / `toJson` unless the project explicitly adopts code generation for that feature. Expose stable UI-facing getters (`name`, `image`, `price`) so JSON bindings and widgets never depend on raw backend keys.
 
 For each model:
 - Parse backend field names in `fromJson`.
@@ -232,10 +277,24 @@ getIt.registerFactory<FeatureCubit>(
 );
 ```
 
-## 10. Endpoint Checklist
+## 10. Testing Requirements
+
+Add tests under `test/features/<feature_name>/` for every new endpoint.
+
+Minimum coverage:
+
+- **Models:** `fromJson` happy path, missing optional fields, alternate backend key names.
+- **Repositories:** envelope `success: false`, malformed `data`, HTTP errors, retry on 429/5xx where applicable, cancel handling for debounced search.
+- **Cubits:** loading → success/failure, `requestKey`, `isLoadMore`, pagination guards (`hasNext`).
+
+Use `FakeHttpClientAdapter` (see `test/features/auth/support/auth_test_utils.dart`) and a `Dio` instance with `NetworkConfig.defaultBaseUrl`. Inject `sleep` in repos that retry so tests stay fast.
+
+## 11. Endpoint Checklist
 
 Before merging a new endpoint, confirm:
 
+- Repository methods return `Either<Failure, T>`.
+- The API envelope is validated (`success`, `data` shape, `meta` when paginated).
 - The repository parses the real backend payload shape.
 - The model exposes stable UI-friendly getters.
 - Pagination metadata is handled if the endpoint supports pages.
@@ -244,7 +303,7 @@ Before merging a new endpoint, confirm:
 - The UI is not depending on raw backend keys directly unless unavoidable.
 - JSON-driven screens are updated if the endpoint powers a dynamic page.
 
-## 11. Feature Checklist
+## 12. Feature Checklist
 
 Before merging a new feature, confirm:
 
@@ -255,7 +314,11 @@ Before merging a new feature, confirm:
 - Errors are surfaced in a user-visible way.
 - Any dynamic JSON blocks have matching request keys and bindings.
 
-## 12. Recommended Pattern for New Product-Like Features
+## 13. Module Implementation Prompts
+
+For large features with many endpoints, maintain a focused implementation prompt beside the feature (for example `lib/features/product/product_api_prompt.md`). The prompt must reference this guide and the feature API guide; it must not contradict folder layout or layer rules here.
+
+## 14. Recommended Pattern for New Product-Like Features
 
 Use this pattern for any list-based backend feature:
 

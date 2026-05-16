@@ -11,6 +11,7 @@ import 'package:sooq_merchant/core/utils/app_logger.dart';
 import 'package:sooq_merchant/features/auth/data/repos/auth_repo.dart';
 import 'package:sooq_merchant/features/auth/data/repos/auth_repo_impl.dart';
 import 'package:sooq_merchant/features/auth/presentation/manager/auth_cubit/auth_cubit.dart';
+import 'package:sooq_merchant/features/product/data/repos/product_repo.dart';
 import 'package:sooq_merchant/features/product/data/repos/product_repo_impl.dart';
 import 'package:sooq_merchant/features/product/presentation/manager/product_cubit/product_cubit.dart';
 import 'package:sooq_merchant/features/variantscreen/data/repos/variant_repository.dart';
@@ -33,7 +34,7 @@ void setupServiceLocator({
   _resetIfRegistered<AuthCubit>();
   _resetIfRegistered<TokenCubit>();
   _resetIfRegistered<SharedPreferencesCubit>();
-  _resetIfRegistered<ProductRepoImpl>();
+  _resetIfRegistered<ProductRepo>();
   _resetIfRegistered<ProductCubit>();
   _resetIfRegistered<VariantRepository>();
 
@@ -85,12 +86,12 @@ void setupServiceLocator({
     () => AuthCubit(getIt<AuthRepo>(), getIt<TokenCubit>()),
   );
 
-  getIt.registerLazySingleton<ProductRepoImpl>(
+  getIt.registerLazySingleton<ProductRepo>(
     () => ProductRepoImpl(getIt<Dio>()),
   );
 
   getIt.registerFactory<ProductCubit>(
-    () => ProductCubit(getIt<ProductRepoImpl>()),
+    () => ProductCubit(getIt<ProductRepo>()),
   );
 
   getIt.registerLazySingleton<VariantRepository>(

@@ -4,9 +4,22 @@ import 'package:sooq_merchant/features/product/data/repos/product_repo.dart';
 
 part 'product_state.dart';
 
+class _ListRequestContext {
+  const _ListRequestContext({
+    this.categorySlug,
+    this.sort,
+    required this.size,
+  });
+
+  final String? categorySlug;
+  final String? sort;
+  final int size;
+}
+
 class ProductCubit extends Cubit<ProductState> {
   final ProductRepo _productRepo;
   String _tenantId = '';
+  final Map<String, _ListRequestContext> _contextByKey = {};
 
   ProductCubit(this._productRepo) : super(ProductInitial());
 
@@ -18,19 +31,29 @@ class ProductCubit extends Cubit<ProductState> {
     }
   }
 
+  String? get _optionalTenantId => _tenantId.isEmpty ? null : _tenantId;
+
   /// Fetch products with pagination support
   Future<void> getProducts({
     int page = 0,
     int size = 20,
+    String? sort,
     String requestKey = 'product-list',
     bool isLoadMore = false,
   }) async {
+    _contextByKey[requestKey] = _ListRequestContext(sort: sort, size: size);
+    final previousPage = _previousPageForLoadMore(requestKey, isLoadMore);
+
+    if (isClosed) {
+      return;
+    }
     emit(ProductLoading(requestKey: requestKey, isLoadMore: isLoadMore));
 
     final result = await _productRepo.getProducts(
       page: page,
       size: size,
-      tenantId: _tenantId,
+      sort: sort,
+      tenantId: _optionalTenantId,
     );
 
     if (isClosed) {
@@ -57,11 +80,107 @@ class ProductCubit extends Cubit<ProductState> {
         emit(
           ProductSuccess(
             requestKey: requestKey,
-            productListResponse: productListResponse,
+            productListResponse: _mergeLoadMore(
+              previousPage: previousPage,
+              nextPage: productListResponse,
+            ),
             isLoadMore: isLoadMore,
           ),
         );
       },
+    );
+  }
+
+  /// Fetch paginated products for a category
+  Future<void> getCategoryProducts({
+    required String categorySlug,
+    int page = 0,
+    int size = 20,
+    String? sort,
+    String requestKey = 'product-list',
+    bool isLoadMore = false,
+  }) async {
+    _contextByKey[requestKey] = _ListRequestContext(
+      categorySlug: categorySlug,
+      sort: sort,
+      size: size,
+    );
+    final previousPage = _previousPageForLoadMore(requestKey, isLoadMore);
+
+    if (isClosed) {
+      return;
+    }
+    emit(ProductLoading(requestKey: requestKey, isLoadMore: isLoadMore));
+
+    final result = await _productRepo.getCategoryProducts(
+      categorySlug: categorySlug,
+      page: page,
+      size: size,
+      sort: sort,
+      tenantId: _optionalTenantId,
+    );
+
+    if (isClosed) {
+      return;
+    }
+
+    result.fold(
+      (failure) {
+        if (isClosed) {
+          return;
+        }
+        emit(
+          ProductFailure(
+            requestKey: requestKey,
+            errMessage: failure.errMessage,
+            isLoadMore: isLoadMore,
+          ),
+        );
+      },
+      (productListResponse) {
+        if (isClosed) {
+          return;
+        }
+        emit(
+          ProductSuccess(
+            requestKey: requestKey,
+            productListResponse: _mergeLoadMore(
+              previousPage: previousPage,
+              nextPage: productListResponse,
+            ),
+            isLoadMore: isLoadMore,
+          ),
+        );
+      },
+    );
+  }
+
+  ProductListResponse? _previousPageForLoadMore(
+    String requestKey,
+    bool isLoadMore,
+  ) {
+    if (!isLoadMore) {
+      return null;
+    }
+
+    final currentState = state;
+    if (currentState is! ProductSuccess || currentState.requestKey != requestKey) {
+      return null;
+    }
+
+    return currentState.productListResponse;
+  }
+
+  ProductListResponse _mergeLoadMore({
+    required ProductListResponse? previousPage,
+    required ProductListResponse nextPage,
+  }) {
+    if (previousPage == null) {
+      return nextPage;
+    }
+
+    return nextPage.copyWith(
+      data: [...previousPage.data, ...nextPage.data],
     );
   }
 
@@ -70,14 +189,33 @@ class ProductCubit extends Cubit<ProductState> {
     ProductListResponse currentResponse, {
     String requestKey = 'product-list',
   }) async {
-    if (currentResponse.meta.hasNext) {
-      await getProducts(
-        page: currentResponse.meta.page + 1,
-        size: currentResponse.meta.size,
+    if (!currentResponse.meta.hasNext) {
+      return;
+    }
+
+    final context = _contextByKey[requestKey];
+    final nextPage = currentResponse.meta.page + 1;
+    final size = context?.size ?? currentResponse.meta.size;
+
+    if (context?.categorySlug != null) {
+      await getCategoryProducts(
+        categorySlug: context!.categorySlug!,
+        page: nextPage,
+        size: size,
+        sort: context.sort,
         requestKey: requestKey,
         isLoadMore: true,
       );
+      return;
     }
+
+    await getProducts(
+      page: nextPage,
+      size: size,
+      sort: context?.sort,
+      requestKey: requestKey,
+      isLoadMore: true,
+    );
   }
 
   /// Load previous page of products
@@ -85,12 +223,30 @@ class ProductCubit extends Cubit<ProductState> {
     ProductListResponse currentResponse, {
     String requestKey = 'product-list',
   }) async {
-    if (currentResponse.meta.hasPrev) {
-      await getProducts(
-        page: currentResponse.meta.page - 1,
-        size: currentResponse.meta.size,
+    if (!currentResponse.meta.hasPrev) {
+      return;
+    }
+
+    final context = _contextByKey[requestKey];
+    final previousPage = currentResponse.meta.page - 1;
+    final size = context?.size ?? currentResponse.meta.size;
+
+    if (context?.categorySlug != null) {
+      await getCategoryProducts(
+        categorySlug: context!.categorySlug!,
+        page: previousPage,
+        size: size,
+        sort: context.sort,
         requestKey: requestKey,
       );
+      return;
     }
+
+    await getProducts(
+      page: previousPage,
+      size: size,
+      sort: context?.sort,
+      requestKey: requestKey,
+    );
   }
 }

@@ -150,29 +150,14 @@ class _VariantScreenState extends State<VariantScreen> {
       final nextData = productListResponse.data
           .map((item) => item.toJson())
           .toList();
-      final existing = _requestResults[requestKey];
-      final existingData = existing is Map<String, dynamic>
-          ? (existing['data'] as List<dynamic>? ?? const <dynamic>[])
-                .cast<dynamic>()
-          : const <dynamic>[];
 
-      _requestResults[requestKey] =
-          isLoadMore && existing is Map<String, dynamic>
-          ? {
-              ...existing,
-              'success': productListResponse.success,
-              'message': productListResponse.message,
-              'data': [...existingData, ...nextData],
-              'meta': productListResponse.meta.toJson(),
-              'timestamp': productListResponse.timestamp,
-            }
-          : {
-              'success': productListResponse.success,
-              'message': productListResponse.message,
-              'data': nextData,
-              'meta': productListResponse.meta.toJson(),
-              'timestamp': productListResponse.timestamp,
-            };
+      _requestResults[requestKey] = {
+        'success': productListResponse.success,
+        'message': productListResponse.message,
+        'data': nextData,
+        'meta': productListResponse.meta.toJson(),
+        'timestamp': productListResponse.timestamp,
+      };
       _loadingMoreRequestKeys.remove(requestKey);
     });
   }
