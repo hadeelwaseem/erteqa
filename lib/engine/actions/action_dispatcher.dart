@@ -84,14 +84,31 @@ class EngineActionDispatcher {
   String? _lookupRouteValue(String key, Map<String, dynamic>? dataContext) {
     if (dataContext == null || key.isEmpty) return null;
 
+    final routeParams = dataContext['routeParams'];
+    if (routeParams is Map<String, dynamic>) {
+      final fromRoute = routeParams[key];
+      if (fromRoute != null) return fromRoute.toString();
+    }
+
     final direct = dataContext[key];
     if (direct != null) return direct.toString();
 
     final item = dataContext['item'];
     if (item is Map<String, dynamic>) {
+      if (key == 'productId') {
+        final slug = item['slug'];
+        if (slug != null && slug.toString().trim().isNotEmpty) {
+          return slug.toString().trim();
+        }
+      }
+
       dynamic itemValue = item[key];
       if (itemValue == null && key == 'productId') {
-        itemValue = item['id'];
+        itemValue = item['slug'] ?? item['id'] ?? item['productId'];
+      } else if (itemValue == null && key == 'slug') {
+        itemValue = item['slug'];
+      } else if (itemValue == null && key == 'categorySlug') {
+        itemValue = item['slug'] ?? item['categoryId'];
       } else if (itemValue == null && key == 'id') {
         itemValue = item['productId'];
       }
@@ -275,6 +292,13 @@ class EngineActionDispatcher {
         network.tenantSlug != null) {
       resolved['tenantSlug'] = network.tenantSlug;
       AppLogger.auth('tenantSlug fallback from NetworkConfig: ${network.tenantSlug}');
+    }
+
+    final tenantId = resolved['tenantId'];
+    if ((tenantId == null || (tenantId is String && tenantId.isEmpty)) &&
+        network.tenantId != null) {
+      resolved['tenantId'] = network.tenantId;
+      AppLogger.auth('tenantId fallback from NetworkConfig: ${network.tenantId}');
     }
   }
 

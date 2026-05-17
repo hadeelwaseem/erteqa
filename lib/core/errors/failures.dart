@@ -27,6 +27,12 @@ class AuthFailure extends Failure {
   bool get isOtpInvalid => code == 'OTP_INVALID';
 }
 
+/// Returned when a cancellable request was aborted via [CancelToken].
+/// Cubits should ignore this failure (no user-visible error).
+class RequestCancelledFailure extends Failure {
+  const RequestCancelledFailure() : super('');
+}
+
 class ServerFailure extends Failure {
   ServerFailure(super.errMessage);
 

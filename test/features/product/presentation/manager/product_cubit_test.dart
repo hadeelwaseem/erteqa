@@ -1,9 +1,14 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sooq_merchant/core/errors/failures.dart';
+import 'package:dio/dio.dart';
+import 'package:sooq_merchant/features/product/data/models/category.dart';
 import 'package:sooq_merchant/features/product/data/models/product.dart';
+import 'package:sooq_merchant/features/product/data/models/product_autocomplete_result.dart';
+import 'package:sooq_merchant/features/product/data/models/product_detail.dart';
 import 'package:sooq_merchant/features/product/data/models/product_list_response.dart';
 import 'package:sooq_merchant/features/product/data/models/product_meta.dart';
+import 'package:sooq_merchant/features/product/data/models/product_search_result.dart';
 import 'package:sooq_merchant/features/product/data/repos/product_repo.dart';
 import 'package:sooq_merchant/features/product/presentation/manager/product_cubit/product_cubit.dart';
 
@@ -55,6 +60,49 @@ class _FakeProductRepo implements ProductRepo {
     getCategoryProductsCalls += 1;
     return getProducts(page: page, size: size, sort: sort, tenantId: tenantId);
   }
+
+  @override
+  Future<Either<Failure, ProductSearchResult>> searchProducts({
+    String? q,
+    String? categoryId,
+    String? tagId,
+    double? minPrice,
+    double? maxPrice,
+    bool? inStockOnly,
+    required int page,
+    required int size,
+    String? sort,
+    String? tenantId,
+    CancelToken? cancelToken,
+  }) =>
+      throw UnimplementedError();
+
+  @override
+  Future<Either<Failure, ProductAutocompleteResult>> autocomplete({
+    required String q,
+    String? tenantId,
+    CancelToken? cancelToken,
+  }) =>
+      throw UnimplementedError();
+
+  @override
+  Future<Either<Failure, ProductDetail>> getProductDetail({
+    required String slug,
+    String? include,
+    String? tenantId,
+  }) =>
+      throw UnimplementedError();
+
+  @override
+  Future<Either<Failure, List<Category>>> getCategories({String? tenantId}) =>
+      throw UnimplementedError();
+
+  @override
+  Future<Either<Failure, Category>> getCategory({
+    required String slug,
+    String? tenantId,
+  }) =>
+      throw UnimplementedError();
 }
 
 void main() {

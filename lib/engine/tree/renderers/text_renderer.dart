@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../config/component_config.dart';
 
 import '../../component_renderer/component_renderer.dart';
+import '../parsers/data_context_path.dart';
 import '../parsers/property_parsers.dart';
 
 class TextRenderer implements ComponentRenderer {
@@ -13,7 +14,7 @@ class TextRenderer implements ComponentRenderer {
     Map<String, dynamic>? dataContext,
   }) {
     final valuePath = config.properties['valuePath'] as String?;
-    final boundValue = _resolvePath(dataContext, valuePath);
+    final boundValue = resolveDataContextPath(dataContext, valuePath);
     final value =
         (boundValue?.toString().trim().isNotEmpty ?? false)
         ? boundValue.toString()
@@ -42,17 +43,4 @@ class TextRenderer implements ComponentRenderer {
     );
   }
 
-  dynamic _resolvePath(Map<String, dynamic>? root, String? path) {
-    if (root == null || path == null || path.isEmpty) return null;
-
-    dynamic current = root;
-    for (final segment in path.split('.')) {
-      if (current is Map<String, dynamic> && current.containsKey(segment)) {
-        current = current[segment];
-      } else {
-        return null;
-      }
-    }
-    return current;
-  }
 }

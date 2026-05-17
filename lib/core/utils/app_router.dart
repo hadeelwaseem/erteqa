@@ -35,6 +35,8 @@ abstract class AppRouter {
             builder: (context, state) => _buildVariantScreen(
               variantId: variantId,
               pageRoute: route,
+              routeParams: state.pathParameters,
+              queryParams: state.uri.queryParameters,
             ),
           ),
         );
@@ -49,6 +51,8 @@ abstract class AppRouter {
             builder: (context, state) => _buildVariantScreen(
               variantId: variantId,
               pageRoute: tab.route,
+              routeParams: state.pathParameters,
+              queryParams: state.uri.queryParameters,
             ),
           ),
         );
@@ -62,6 +66,8 @@ abstract class AppRouter {
             builder: (context, state) => _buildVariantScreen(
               variantId: variantId,
               pageRoute: route,
+              routeParams: state.pathParameters,
+              queryParams: state.uri.queryParameters,
             ),
           ),
         );
@@ -104,6 +110,8 @@ abstract class AppRouter {
           return _buildVariantScreen(
             variantId: pageId,
             pageRoute: pageRoute,
+            routeParams: state.pathParameters,
+            queryParams: state.uri.queryParameters,
           );
         },
       ),
@@ -129,10 +137,14 @@ abstract class AppRouter {
   static Widget _buildVariantScreen({
     required String variantId,
     String? pageRoute,
+    Map<String, String> routeParams = const {},
+    Map<String, String> queryParams = const {},
   }) {
     return VariantScreen(
       variantId: variantId,
       pageRoute: pageRoute,
+      routeParams: routeParams,
+      queryParams: queryParams,
       variantRepository: getIt<VariantRepository>(),
       mobileAppConfig: registeredMobileAppConfig,
     );

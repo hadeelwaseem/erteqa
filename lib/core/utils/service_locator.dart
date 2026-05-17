@@ -13,7 +13,11 @@ import 'package:sooq_merchant/features/auth/data/repos/auth_repo_impl.dart';
 import 'package:sooq_merchant/features/auth/presentation/manager/auth_cubit/auth_cubit.dart';
 import 'package:sooq_merchant/features/product/data/repos/product_repo.dart';
 import 'package:sooq_merchant/features/product/data/repos/product_repo_impl.dart';
+import 'package:sooq_merchant/features/product/presentation/manager/category_cubit/category_cubit.dart';
+import 'package:sooq_merchant/features/product/presentation/manager/product_autocomplete_cubit/product_autocomplete_cubit.dart';
 import 'package:sooq_merchant/features/product/presentation/manager/product_cubit/product_cubit.dart';
+import 'package:sooq_merchant/features/product/presentation/manager/product_detail_cubit/product_detail_cubit.dart';
+import 'package:sooq_merchant/features/product/presentation/manager/product_search_cubit/product_search_cubit.dart';
 import 'package:sooq_merchant/features/variantscreen/data/repos/variant_repository.dart';
 
 GetIt getIt = GetIt.instance;
@@ -36,6 +40,10 @@ void setupServiceLocator({
   _resetIfRegistered<SharedPreferencesCubit>();
   _resetIfRegistered<ProductRepo>();
   _resetIfRegistered<ProductCubit>();
+  _resetIfRegistered<ProductSearchCubit>();
+  _resetIfRegistered<ProductAutocompleteCubit>();
+  _resetIfRegistered<ProductDetailCubit>();
+  _resetIfRegistered<CategoryCubit>();
   _resetIfRegistered<VariantRepository>();
 
   _registeredMobileAppConfig = mobileAppConfig;
@@ -43,6 +51,7 @@ void setupServiceLocator({
   final resolvedNetworkConfig = networkConfig ??
       NetworkConfig.fromAppConfig(
         apiBaseUrl: mobileAppConfig?.apiBaseUrl,
+        tenantId: mobileAppConfig?.tenantId,
         tenantSlug: mobileAppConfig?.tenantSlug,
       );
 
@@ -92,6 +101,22 @@ void setupServiceLocator({
 
   getIt.registerFactory<ProductCubit>(
     () => ProductCubit(getIt<ProductRepo>()),
+  );
+
+  getIt.registerFactory<ProductSearchCubit>(
+    () => ProductSearchCubit(getIt<ProductRepo>()),
+  );
+
+  getIt.registerFactory<ProductAutocompleteCubit>(
+    () => ProductAutocompleteCubit(getIt<ProductRepo>()),
+  );
+
+  getIt.registerFactory<ProductDetailCubit>(
+    () => ProductDetailCubit(getIt<ProductRepo>()),
+  );
+
+  getIt.registerFactory<CategoryCubit>(
+    () => CategoryCubit(getIt<ProductRepo>()),
   );
 
   getIt.registerLazySingleton<VariantRepository>(

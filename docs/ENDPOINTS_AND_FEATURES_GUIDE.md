@@ -1,6 +1,6 @@
 # Endpoints and Features Guide
 
-Last updated: 2026-05-16
+Last updated: 2026-05-17
 
 This guide defines how to add new backend endpoints and how to organize feature files in this project.
 Use it as the reference before creating a new API flow, a new feature module, or a new JSON-driven screen section.
@@ -313,6 +313,7 @@ Before merging a new feature, confirm:
 - Model names are consistent across parsing, state, and UI.
 - Errors are surfaced in a user-visible way.
 - Any dynamic JSON blocks have matching request keys and bindings.
+- **Post-implementation review** (§15) completed—not only “code compiles.”
 
 ## 13. Module Implementation Prompts
 
@@ -329,3 +330,58 @@ Use this pattern for any list-based backend feature:
 - JSON config uses `requestKey` and `itemBuilder.source` to render items dynamically.
 
 This is the preferred structure for future API-backed features in this app.
+
+## 15. Post-Implementation Review (required before merge)
+
+After coding is finished—and **before** opening or merging a PR—perform a deliberate review pass. Do not treat “tests pass” as sufficient on its own.
+
+### When to run it
+
+- At the end of every endpoint or feature task.
+- At the end of each phased prompt (for example Prompt 1, then Prompt 2) when work is split across chats.
+- Again after all phases are combined, before the final merge.
+
+### What to review
+
+**Correctness**
+
+- Every planned endpoint exists on the repository contract and is implemented in the impl class.
+- Real backend payload shapes are parsed (compare against the feature API guide, not assumptions).
+- Envelope rules are applied consistently (`success`, `data` type, `meta` for paginated responses).
+- Edge cases from the API guide are handled (empty lists, 404, cancelled search, partial `include` blocks).
+- JSON-driven screens: `requestKey`, `requestUrl`, and `itemBuilder.source` paths match cubit state keys.
+
+**Architecture & boundaries**
+
+- No HTTP, parsing, or retry logic in widgets, renderers, or cubits beyond orchestration.
+- No duplicate URL strings, magic strings, or copy-pasted envelope parsing—shared helpers live in the repo (or a small shared parser if multiple repos need it).
+- Service locator registers **interfaces**, not only concrete impl types, where the project already follows that pattern.
+- Engine changes are limited to dispatch and bindings; no feature business rules in renderers.
+
+**Quality & maintainability**
+
+- Remove dead code, commented-out experiments, and debug-only logs not using `AppLogger`.
+- Prefer one clear code path over special-case branches that could be unified.
+- Models expose stable UI getters; callers do not depend on raw backend field names.
+- Names match existing feature conventions (files, classes, method params).
+
+**Optimization (proportionate, not premature)**
+
+- Avoid redundant API calls (double fetch on build, uncancelled search/autocomplete requests).
+- Pagination appends or replaces data in one documented place (cubit or engine), not both inconsistently.
+- Do not add caching, retries, or abstractions unless the API guide or this document calls for them.
+- Do not introduce new packages or patterns (for example code generation) without project alignment.
+
+### Review checklist
+
+- [ ] Re-read `docs/ENDPOINTS_AND_FEATURES_GUIDE.md` sections relevant to this feature.
+- [ ] Re-read the feature API guide sections for each endpoint touched.
+- [ ] Walk through **Endpoint Checklist** (§11) and **Feature Checklist** (§12) line by line.
+- [ ] Run `flutter analyze` on changed paths and `flutter test` for the feature test folder.
+- [ ] Manually smoke-test JSON screens that use new `requestUrl` values, if applicable.
+- [ ] Confirm no regressions in shared infrastructure (`NetworkConfig`, interceptors, service locator).
+- [ ] If anything was deferred or hacked, document it in the PR description or fix it before merge.
+
+### Outcome
+
+The implementation is merge-ready only when the review finds **no open gaps** against the guides and checklists above. If the review reveals missing endpoints, wrong parsing, or layer violations, fix them in the same branch before moving to the next prompt or merging.

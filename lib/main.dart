@@ -38,6 +38,7 @@ void main() async {
   setupServiceLocator(
     networkConfig: NetworkConfig.fromAppConfig(
       apiBaseUrl: mobileConfig?.apiBaseUrl,
+      tenantId: mobileConfig?.tenantId,
       tenantSlug: mobileConfig?.tenantSlug,
     ),
     mobileAppConfig: mobileConfig,

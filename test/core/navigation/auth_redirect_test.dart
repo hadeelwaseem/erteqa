@@ -27,11 +27,32 @@ void main() {
       );
     });
 
-    test('logged-out user on home redirects to login', () {
+    test('logged-out user may access storefront routes', () {
+      expect(
+        AuthRedirect.resolve(token: null, matchedLocation: '/home'),
+        isNull,
+      );
       expect(
         AuthRedirect.resolve(
           token: null,
-          matchedLocation: '/home',
+          matchedLocation: '/product/details/example-product',
+        ),
+        isNull,
+      );
+      expect(
+        AuthRedirect.resolve(
+          token: null,
+          matchedLocation: '/categories/clothing-test/products',
+        ),
+        isNull,
+      );
+    });
+
+    test('logged-out user on protected route redirects to login', () {
+      expect(
+        AuthRedirect.resolve(
+          token: null,
+          matchedLocation: '/checkout',
         ),
         '/auth/login',
       );

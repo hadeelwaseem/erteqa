@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sooq_merchant/core/cubits/token_cubit/token_cubit.dart';
+import 'package:sooq_merchant/core/network/network_config.dart';
+import 'package:sooq_merchant/core/network/tenant_resolver.dart';
 import 'package:sooq_merchant/core/navigation/auth_redirect.dart';
 
 import 'package:sooq_merchant/config/mobile_app_config.dart';
@@ -11,7 +15,15 @@ import 'package:sooq_merchant/engine/form/form_state_store.dart';
 import 'package:sooq_merchant/engine/requests/request_mapper.dart';
 import 'package:sooq_merchant/engine/tree/tree_engine.dart';
 import 'package:sooq_merchant/features/auth/presentation/manager/auth_cubit/auth_cubit.dart';
+import 'package:sooq_merchant/features/product/data/models/category.dart';
+import 'package:sooq_merchant/features/product/data/models/product_autocomplete_result.dart';
+import 'package:sooq_merchant/features/product/data/models/product_detail.dart';
+import 'package:sooq_merchant/features/product/data/models/product_search_result.dart';
+import 'package:sooq_merchant/features/product/presentation/manager/category_cubit/category_cubit.dart';
+import 'package:sooq_merchant/features/product/presentation/manager/product_autocomplete_cubit/product_autocomplete_cubit.dart';
 import 'package:sooq_merchant/features/product/presentation/manager/product_cubit/product_cubit.dart';
+import 'package:sooq_merchant/features/product/presentation/manager/product_detail_cubit/product_detail_cubit.dart';
+import 'package:sooq_merchant/features/product/presentation/manager/product_search_cubit/product_search_cubit.dart';
 import 'package:sooq_merchant/features/variantscreen/data/repos/variant_repository.dart';
 import 'package:sooq_merchant/features/variantscreen/presentation/manager/variant_cubit/variant_cubit.dart';
 
@@ -22,12 +34,16 @@ class VariantScreen extends StatefulWidget {
     required this.variantId,
     required this.variantRepository,
     this.pageRoute,
+    this.routeParams = const {},
+    this.queryParams = const {},
     this.mobileAppConfig,
   });
 
   final String variantId;
   final VariantRepository variantRepository;
   final String? pageRoute;
+  final Map<String, String> routeParams;
+  final Map<String, String> queryParams;
   final MobileAppConfig? mobileAppConfig;
 
   @override
@@ -72,7 +88,9 @@ class _VariantScreenState extends State<VariantScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<VariantCubit>(
-      key: ValueKey('${widget.variantId}:${widget.pageRoute ?? ''}'),
+      key: ValueKey(
+        '${widget.variantId}:${widget.pageRoute ?? ''}:${widget.routeParams}',
+      ),
       create: (_) => VariantCubit(
         widget.variantRepository,
         widget.variantId,
@@ -102,7 +120,11 @@ class _VariantScreenState extends State<VariantScreen> {
   }
 
   Widget _buildSuccessView(dynamic config) {
-    final mappedRequests = EngineRequestMapper.collectRequests(config);
+    final mappedRequests = EngineRequestMapper.collectRequests(
+      config,
+      routeParams: widget.routeParams,
+      queryParams: widget.queryParams,
+    );
     final renderContext = _buildRenderContext();
 
     Widget content;
@@ -113,13 +135,48 @@ class _VariantScreenState extends State<VariantScreen> {
         dataContext: renderContext,
       );
     } else {
-      content = BlocProvider<ProductCubit>(
-        create: (_) => getIt<ProductCubit>(),
+      final providers = <BlocProvider>[
+        if (EngineRequestMapper.needsProductCubit(mappedRequests))
+          BlocProvider<ProductCubit>(create: (_) => getIt<ProductCubit>()),
+        if (EngineRequestMapper.needsSearchCubit(mappedRequests))
+          BlocProvider<ProductSearchCubit>(
+            create: (_) => getIt<ProductSearchCubit>(),
+          ),
+        if (EngineRequestMapper.needsAutocompleteCubit(mappedRequests))
+          BlocProvider<ProductAutocompleteCubit>(
+            create: (_) => getIt<ProductAutocompleteCubit>(),
+          ),
+        if (EngineRequestMapper.needsProductDetailCubit(mappedRequests))
+          BlocProvider<ProductDetailCubit>(
+            create: (_) => getIt<ProductDetailCubit>(),
+          ),
+        if (EngineRequestMapper.needsCategoryCubit(mappedRequests))
+          BlocProvider<CategoryCubit>(
+            create: (_) => getIt<CategoryCubit>(),
+          ),
+      ];
+
+      content = MultiBlocProvider(
+        providers: providers,
         child: _ProductRequestHost(
           config: config,
+          mobileAppConfig: widget.mobileAppConfig,
+          routeParams: widget.routeParams,
+          queryParams: widget.queryParams,
+          mappedRequests: mappedRequests,
           renderContext: renderContext,
+          formStateStore: _formStateStore,
           onProductSuccess: _handleProductSuccess,
           onProductFailure: _handleProductFailure,
+          onSearchSuccess: _handleSearchSuccess,
+          onSearchFailure: _handleSearchFailure,
+          onAutocompleteSuccess: _handleAutocompleteSuccess,
+          onAutocompleteFailure: _handleAutocompleteFailure,
+          onProductDetailSuccess: _handleProductDetailSuccess,
+          onProductDetailFailure: _handleProductDetailFailure,
+          onCategoryTreeSuccess: _handleCategoryTreeSuccess,
+          onCategorySuccess: _handleCategorySuccess,
+          onCategoryFailure: _handleCategoryFailure,
         ),
       );
     }
@@ -162,6 +219,152 @@ class _VariantScreenState extends State<VariantScreen> {
     });
   }
 
+  void _handleSearchSuccess(
+    String requestKey,
+    ProductSearchResult searchResult,
+    bool isLoadMore,
+  ) {
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _requestResults[requestKey] = {
+        'success': true,
+        'data': searchResult.toJson(),
+      };
+      if (isLoadMore) {
+        _loadingMoreRequestKeys.remove(requestKey);
+      }
+    });
+  }
+
+  void _handleSearchFailure(
+    String requestKey,
+    String message,
+    bool isLoadMore,
+  ) {
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _loadingMoreRequestKeys.remove(requestKey);
+      if (isLoadMore && _requestResults[requestKey] is Map<String, dynamic>) {
+        _requestResults[requestKey] = {
+          ..._requestResults[requestKey] as Map<String, dynamic>,
+          'loadMoreError': message,
+        };
+      } else {
+        _requestResults[requestKey] = {
+          'success': false,
+          'message': message,
+          'data': const <String, dynamic>{},
+        };
+      }
+    });
+  }
+
+  void _handleAutocompleteSuccess(
+    String requestKey,
+    ProductAutocompleteResult autocompleteResult,
+  ) {
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _requestResults[requestKey] = {
+        'success': true,
+        'data': autocompleteResult.toJson(),
+      };
+    });
+  }
+
+  void _handleAutocompleteFailure(String requestKey, String message) {
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _requestResults[requestKey] = {
+        'success': false,
+        'message': message,
+        'data': const <String, dynamic>{},
+      };
+    });
+  }
+
+  void _handleProductDetailSuccess(String requestKey, ProductDetail detail) {
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _requestResults[requestKey] = {
+        'success': true,
+        'data': detail.toJson(),
+      };
+    });
+  }
+
+  void _handleProductDetailFailure(String requestKey, String message) {
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _requestResults[requestKey] = {
+        'success': false,
+        'message': message,
+        'data': const <String, dynamic>{},
+      };
+    });
+  }
+
+  void _handleCategoryTreeSuccess(
+    String requestKey,
+    List<Category> categories,
+  ) {
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _requestResults[requestKey] = {
+        'success': true,
+        'data': categories.map((item) => item.toJson()).toList(),
+      };
+    });
+  }
+
+  void _handleCategorySuccess(String requestKey, Category category) {
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _requestResults[requestKey] = {
+        'success': true,
+        'data': category.toJson(),
+      };
+    });
+  }
+
+  void _handleCategoryFailure(String requestKey, String message) {
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _requestResults[requestKey] = {
+        'success': false,
+        'message': message,
+        'data': const <String, dynamic>{},
+      };
+    });
+  }
+
   void _handleProductFailure(
     String requestKey,
     String message,
@@ -183,7 +386,12 @@ class _VariantScreenState extends State<VariantScreen> {
           'success': false,
           'message': message,
           'data': const <Map<String, dynamic>>[],
-          'meta': const {},
+          'meta': const {
+            'hasNext': false,
+            'last': true,
+            'page': 0,
+            'totalPages': 0,
+          },
           'timestamp': 0,
         };
       }
@@ -192,10 +400,17 @@ class _VariantScreenState extends State<VariantScreen> {
 
   Map<String, dynamic> _buildRenderContext() {
     final merged = <String, dynamic>{..._dataContext};
+    if (widget.routeParams.isNotEmpty) {
+      merged['routeParams'] = Map<String, String>.from(widget.routeParams);
+    }
+    if (widget.queryParams.isNotEmpty) {
+      merged['query'] = Map<String, String>.from(widget.queryParams);
+    }
     final config = widget.mobileAppConfig;
     if (config != null) {
       merged['app'] = <String, dynamic>{
         'apiBaseUrl': config.apiBaseUrl,
+        'tenantId': config.tenantId,
         'tenantSlug': config.tenantSlug,
         'bundleId': config.bundleId,
       };
@@ -288,13 +503,32 @@ class _AuthRequestHost extends StatelessWidget {
 class _ProductRequestHost extends StatefulWidget {
   const _ProductRequestHost({
     required this.config,
+    this.mobileAppConfig,
+    this.routeParams = const {},
+    this.queryParams = const {},
+    required this.mappedRequests,
     required this.renderContext,
+    required this.formStateStore,
     required this.onProductSuccess,
     required this.onProductFailure,
+    required this.onSearchSuccess,
+    required this.onSearchFailure,
+    required this.onAutocompleteSuccess,
+    required this.onAutocompleteFailure,
+    required this.onProductDetailSuccess,
+    required this.onProductDetailFailure,
+    required this.onCategoryTreeSuccess,
+    required this.onCategorySuccess,
+    required this.onCategoryFailure,
   });
 
   final dynamic config;
+  final MobileAppConfig? mobileAppConfig;
+  final Map<String, String> routeParams;
+  final Map<String, String> queryParams;
+  final List<EngineMappedRequest> mappedRequests;
   final Map<String, dynamic> renderContext;
+  final FormStateStore formStateStore;
   final void Function(
     String requestKey,
     dynamic productListResponse,
@@ -303,6 +537,27 @@ class _ProductRequestHost extends StatefulWidget {
   onProductSuccess;
   final void Function(String requestKey, String message, bool isLoadMore)
   onProductFailure;
+  final void Function(
+    String requestKey,
+    ProductSearchResult searchResult,
+    bool isLoadMore,
+  )
+  onSearchSuccess;
+  final void Function(String requestKey, String message, bool isLoadMore)
+  onSearchFailure;
+  final void Function(
+    String requestKey,
+    ProductAutocompleteResult autocompleteResult,
+  )
+  onAutocompleteSuccess;
+  final void Function(String requestKey, String message) onAutocompleteFailure;
+  final void Function(String requestKey, ProductDetail detail)
+  onProductDetailSuccess;
+  final void Function(String requestKey, String message) onProductDetailFailure;
+  final void Function(String requestKey, List<Category> categories)
+  onCategoryTreeSuccess;
+  final void Function(String requestKey, Category category) onCategorySuccess;
+  final void Function(String requestKey, String message) onCategoryFailure;
 
   @override
   State<_ProductRequestHost> createState() => _ProductRequestHostState();
@@ -312,22 +567,87 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
   final Set<String> _dispatchedRequestKeys = <String>{};
   final Set<String> _loadingRequestKeys = <String>{};
   final Set<String> _loadingMoreRequestKeys = <String>{};
+  final Map<String, VoidCallback> _queryListenerRemovers = {};
   bool _dispatchScheduled = false;
+  bool _isDispatching = false;
+  late String _routeSignature;
+  Timer? _queryDebounce;
 
   @override
   void initState() {
     super.initState();
+    _routeSignature = _buildRouteSignature(widget.routeParams);
+    _bindFormQueryListeners();
     _scheduleDispatch();
+  }
+
+  @override
+  void dispose() {
+    _queryDebounce?.cancel();
+    for (final remove in _queryListenerRemovers.values) {
+      remove();
+    }
+    _queryListenerRemovers.clear();
+    super.dispose();
+  }
+
+  void _bindFormQueryListeners() {
+    for (final request in widget.mappedRequests) {
+      final fieldId = request.qField;
+      if (fieldId == null || fieldId.isEmpty) {
+        continue;
+      }
+
+      final controller = widget.formStateStore.controllerFor(fieldId);
+      void onChanged() => _onFormQueryChanged(request);
+      controller.addListener(onChanged);
+      _queryListenerRemovers[request.key] = () {
+        controller.removeListener(onChanged);
+      };
+    }
+  }
+
+  void _onFormQueryChanged(EngineMappedRequest request) {
+    _queryDebounce?.cancel();
+    _queryDebounce = Timer(const Duration(milliseconds: 300), () {
+      if (!mounted) {
+        return;
+      }
+      unawaited(_dispatchQueryRequest(request));
+    });
+  }
+
+  String? _formValueFor(String fieldId) {
+    final stored = widget.formStateStore.valueFor(fieldId);
+    if (stored != null && stored.isNotEmpty) {
+      return stored;
+    }
+    final text = widget.formStateStore.controllerFor(fieldId).text.trim();
+    return text.isEmpty ? null : text;
   }
 
   @override
   void didUpdateWidget(covariant _ProductRequestHost oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.config != widget.config) {
+    final nextRouteSignature = _buildRouteSignature(widget.routeParams);
+    final routeParamsChanged = nextRouteSignature != _routeSignature;
+    if (routeParamsChanged) {
+      _routeSignature = nextRouteSignature;
+    }
+
+    if (oldWidget.config != widget.config || routeParamsChanged) {
       _dispatchedRequestKeys.clear();
       _dispatchScheduled = false;
       _scheduleDispatch();
     }
+  }
+
+  static String _buildRouteSignature(Map<String, String> routeParams) {
+    if (routeParams.isEmpty) {
+      return '';
+    }
+    final keys = routeParams.keys.toList()..sort();
+    return keys.map((key) => '$key=${routeParams[key]}').join('|');
   }
 
   void _scheduleDispatch() {
@@ -343,28 +663,104 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
     });
   }
 
-  Future<void> _dispatchRequests() async {
-    final mapped = EngineRequestMapper.collectRequests(widget.config);
-    final pending = mapped
-        .where((request) => !_dispatchedRequestKeys.contains(request.key))
-        .toList(growable: false);
+  Future<void> _dispatchQueryRequest(EngineMappedRequest request) async {
+    await _dispatchRequests(requests: [request]);
+  }
 
-    if (pending.isEmpty) {
+  Future<void> _dispatchRequests({List<EngineMappedRequest>? requests}) async {
+    final isInitialLoad = requests == null;
+    if (isInitialLoad && _isDispatching) {
       return;
     }
 
-    _dispatchedRequestKeys.addAll(pending.map((request) => request.key));
-    await EngineRequestMapper.dispatchRequests(
-      productCubit: context.read<ProductCubit>(),
-      tenantId: getIt<TokenCubit>().tenantId,
-      requests: pending,
+    final mapped = requests ?? widget.mappedRequests;
+    final pending = mapped
+        .where(
+          (request) =>
+              request.qField == null &&
+              !_dispatchedRequestKeys.contains(request.key),
+        )
+        .toList(growable: false);
+
+    if (pending.isEmpty && isInitialLoad) {
+      _dispatchScheduled = false;
+      return;
+    }
+
+    final toDispatch = requests ?? pending;
+    if (toDispatch.isEmpty) {
+      _dispatchScheduled = false;
+      return;
+    }
+
+    if (isInitialLoad) {
+      _dispatchedRequestKeys.addAll(toDispatch.map((request) => request.key));
+      _isDispatching = true;
+    }
+
+    ProductCubit? productCubit;
+    ProductSearchCubit? productSearchCubit;
+    ProductAutocompleteCubit? productAutocompleteCubit;
+    ProductDetailCubit? productDetailCubit;
+    CategoryCubit? categoryCubit;
+
+    if (EngineRequestMapper.needsProductCubit(widget.mappedRequests)) {
+      productCubit = context.read<ProductCubit>();
+    }
+    if (EngineRequestMapper.needsSearchCubit(widget.mappedRequests)) {
+      productSearchCubit = context.read<ProductSearchCubit>();
+    }
+    if (EngineRequestMapper.needsAutocompleteCubit(widget.mappedRequests)) {
+      productAutocompleteCubit = context.read<ProductAutocompleteCubit>();
+    }
+    if (EngineRequestMapper.needsProductDetailCubit(widget.mappedRequests)) {
+      productDetailCubit = context.read<ProductDetailCubit>();
+    }
+    if (EngineRequestMapper.needsCategoryCubit(widget.mappedRequests)) {
+      categoryCubit = context.read<CategoryCubit>();
+    }
+
+    try {
+      await EngineRequestMapper.dispatchRequests(
+        productCubit: productCubit,
+        productSearchCubit: productSearchCubit,
+        productAutocompleteCubit: productAutocompleteCubit,
+        productDetailCubit: productDetailCubit,
+        categoryCubit: categoryCubit,
+        tenantId: _resolveTenantIdForRequests(),
+        requests: toDispatch,
+        formValueFor: _formValueFor,
+      );
+    } finally {
+      if (isInitialLoad) {
+        _isDispatching = false;
+        _dispatchScheduled = false;
+      }
+    }
+  }
+
+  String? _resolveTenantIdForRequests() {
+    final sessionTenantId = getIt<TokenCubit>().tenantId;
+    if (getIt.isRegistered<NetworkConfig>()) {
+      return getIt<NetworkConfig>().effectiveTenantId(
+        sessionTenantId: sessionTenantId,
+      );
+    }
+
+    final appConfig = widget.mobileAppConfig;
+    return TenantResolver.resolve(
+      configTenantId: appConfig?.tenantId,
+      configTenantSlug: appConfig?.tenantSlug,
+      sessionTenantId: sessionTenantId,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocListener(
-      listeners: [
+    final listeners = <BlocListener<dynamic, dynamic>>[];
+
+    if (EngineRequestMapper.needsProductCubit(widget.mappedRequests)) {
+      listeners.add(
         BlocListener<ProductCubit, ProductState>(
           listener: (context, state) {
             if (state is ProductLoading) {
@@ -407,7 +803,156 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
             }
           },
         ),
-      ],
+      );
+    }
+
+    if (EngineRequestMapper.needsSearchCubit(widget.mappedRequests)) {
+      listeners.add(
+        BlocListener<ProductSearchCubit, ProductSearchState>(
+          listener: (context, state) {
+            if (state is ProductSearchLoading) {
+              setState(() {
+                if (state.isLoadMore) {
+                  _loadingMoreRequestKeys.add(state.requestKey);
+                  widget.renderContext['loadingMoreRequests'] = {
+                    for (final key in _loadingMoreRequestKeys) key: true,
+                  };
+                } else {
+                  _loadingRequestKeys.add(state.requestKey);
+                }
+              });
+            } else if (state is ProductSearchSuccess) {
+              setState(() {
+                _loadingRequestKeys.remove(state.requestKey);
+                _loadingMoreRequestKeys.remove(state.requestKey);
+                widget.renderContext['loadingMoreRequests'] = {
+                  for (final key in _loadingMoreRequestKeys) key: true,
+                };
+              });
+              widget.onSearchSuccess(
+                state.requestKey,
+                state.searchResult,
+                state.isLoadMore,
+              );
+            } else if (state is ProductSearchFailure) {
+              setState(() {
+                _loadingRequestKeys.remove(state.requestKey);
+                _loadingMoreRequestKeys.remove(state.requestKey);
+                widget.renderContext['loadingMoreRequests'] = {
+                  for (final key in _loadingMoreRequestKeys) key: true,
+                };
+              });
+              widget.onSearchFailure(
+                state.requestKey,
+                state.errMessage,
+                state.isLoadMore,
+              );
+            }
+          },
+        ),
+      );
+    }
+
+    if (EngineRequestMapper.needsAutocompleteCubit(widget.mappedRequests)) {
+      listeners.add(
+        BlocListener<ProductAutocompleteCubit, ProductAutocompleteState>(
+          listener: (context, state) {
+            if (state is ProductAutocompleteLoading) {
+              setState(() {
+                _loadingRequestKeys.add(state.requestKey);
+              });
+            } else if (state is ProductAutocompleteSuccess) {
+              setState(() {
+                _loadingRequestKeys.remove(state.requestKey);
+              });
+              widget.onAutocompleteSuccess(
+                state.requestKey,
+                state.autocompleteResult,
+              );
+            } else if (state is ProductAutocompleteFailure) {
+              setState(() {
+                _loadingRequestKeys.remove(state.requestKey);
+              });
+              widget.onAutocompleteFailure(
+                state.requestKey,
+                state.errMessage,
+              );
+            }
+          },
+        ),
+      );
+    }
+
+    if (EngineRequestMapper.needsProductDetailCubit(widget.mappedRequests)) {
+      listeners.add(
+        BlocListener<ProductDetailCubit, ProductDetailState>(
+          listener: (context, state) {
+            if (state is ProductDetailLoading) {
+              setState(() {
+                _loadingRequestKeys.add(state.requestKey);
+              });
+            } else if (state is ProductDetailSuccess) {
+              setState(() {
+                _loadingRequestKeys.remove(state.requestKey);
+              });
+              widget.onProductDetailSuccess(
+                state.requestKey,
+                state.detail,
+              );
+            } else if (state is ProductDetailFailure) {
+              setState(() {
+                _loadingRequestKeys.remove(state.requestKey);
+              });
+              widget.onProductDetailFailure(
+                state.requestKey,
+                state.errMessage,
+              );
+            }
+          },
+        ),
+      );
+    }
+
+    if (EngineRequestMapper.needsCategoryCubit(widget.mappedRequests)) {
+      listeners.add(
+        BlocListener<CategoryCubit, CategoryState>(
+          listener: (context, state) {
+            if (state is CategoryLoading) {
+              setState(() {
+                _loadingRequestKeys.add(state.requestKey);
+              });
+            } else if (state is CategoryTreeSuccess) {
+              setState(() {
+                _loadingRequestKeys.remove(state.requestKey);
+              });
+              widget.onCategoryTreeSuccess(
+                state.requestKey,
+                state.categories,
+              );
+            } else if (state is CategorySuccess) {
+              setState(() {
+                _loadingRequestKeys.remove(state.requestKey);
+              });
+              widget.onCategorySuccess(
+                state.requestKey,
+                state.category,
+              );
+            } else if (state is CategoryFailure) {
+              setState(() {
+                _loadingRequestKeys.remove(state.requestKey);
+              });
+              widget.onCategoryFailure(
+                state.requestKey,
+                state.errMessage,
+              );
+            }
+          },
+        ),
+      );
+    }
+
+    return MultiBlocListener(
+      listeners: listeners,
       child: Stack(
         children: [
           ScreenRenderer.withPrimitives().render(

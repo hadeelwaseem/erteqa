@@ -18,18 +18,52 @@ class ProductListResponse extends Equatable {
   });
 
   factory ProductListResponse.fromJson(Map<String, dynamic> json) {
-    final rawData = json['data'] ?? json['content'] ?? const [];
+    final rawData = json['data'] ?? json['content'];
+    final List<Product> products;
+    final ProductMeta meta;
+
+    if (rawData is Map<String, dynamic>) {
+      products = _productsFromListLike(
+        rawData['products'] ?? rawData['content'] ?? rawData['items'],
+      );
+      meta = ProductMeta.fromJson(
+        (rawData['meta'] as Map<String, dynamic>?) ??
+            json['meta'] as Map<String, dynamic>? ??
+            {},
+      );
+    } else if (rawData is Map) {
+      final nested = Map<String, dynamic>.from(rawData);
+      products = _productsFromListLike(
+        nested['products'] ?? nested['content'] ?? nested['items'],
+      );
+      meta = ProductMeta.fromJson(
+        (nested['meta'] as Map<String, dynamic>?) ??
+            json['meta'] as Map<String, dynamic>? ??
+            {},
+      );
+    } else {
+      products = _productsFromListLike(rawData);
+      meta = ProductMeta.fromJson(json['meta'] as Map<String, dynamic>? ?? {});
+    }
+
     return ProductListResponse(
       success: json['success'] as bool? ?? false,
       message: json['message'] as String?,
-      data:
-          (rawData as List<dynamic>?)
-              ?.map((item) => Product.fromJson(item as Map<String, dynamic>))
-              .toList() ??
-          [],
-      meta: ProductMeta.fromJson(json['meta'] as Map<String, dynamic>? ?? {}),
+      data: products,
+      meta: meta,
       timestamp: json['timestamp'] as int? ?? 0,
     );
+  }
+
+  static List<Product> _productsFromListLike(dynamic raw) {
+    if (raw is! List) {
+      return const [];
+    }
+
+    return raw
+        .whereType<Map>()
+        .map((item) => Product.fromJson(Map<String, dynamic>.from(item)))
+        .toList();
   }
 
   Map<String, dynamic> toJson() {

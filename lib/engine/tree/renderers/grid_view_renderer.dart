@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../../config/component_config.dart';
 import '../../component_renderer/component_renderer.dart';
+import '../parsers/data_context_path.dart';
 import '../parsers/property_parsers.dart';
 
 class GridViewRenderer implements ComponentRenderer {
@@ -123,8 +124,7 @@ class GridViewRenderer implements ComponentRenderer {
     if (source == 'props') return config.properties;
 
     if (source.startsWith('dataContext.')) {
-      final path = source.substring('dataContext.'.length);
-      return _readPath(dataContext, path);
+      return resolveDataContextPath(dataContext, source);
     }
     if (source.startsWith('props.')) {
       final path = source.substring('props.'.length);

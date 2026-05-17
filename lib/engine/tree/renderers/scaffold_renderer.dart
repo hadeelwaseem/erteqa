@@ -88,8 +88,8 @@ class _ScrollableScaffoldBodyState extends State<_ScrollableScaffoldBody> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.config != widget.config) {
       _refreshRequests();
+      _scheduleCheck();
     }
-    _scheduleCheck();
   }
 
   @override
@@ -135,8 +135,13 @@ class _ScrollableScaffoldBodyState extends State<_ScrollableScaffoldBody> {
     if (requestsByKey is! Map<String, dynamic>) return;
 
     for (final request in _requests) {
+      if (!EngineRequestMapper.supportsProductListLoadMore(request)) {
+        continue;
+      }
+
       final rawResponse = requestsByKey[request.key];
       if (rawResponse is! Map<String, dynamic>) continue;
+      if (rawResponse['success'] == false) continue;
 
       final response = ProductListResponse.fromJson(rawResponse);
       if (_pendingLoadMoreKeys.contains(request.key) &&

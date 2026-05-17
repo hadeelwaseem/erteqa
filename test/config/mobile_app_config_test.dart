@@ -11,6 +11,7 @@ void main() {
           'name': 'Test App',
           'bundleId': 'com.test.app',
           'apiBaseUrl': 'https://api.example.com',
+          'tenantId': 'tenant-uuid-1',
           'tenantSlug': 'store-a',
         },
         'navigation': {
@@ -24,13 +25,17 @@ void main() {
     );
 
     expect(config.apiBaseUrl, 'https://api.example.com');
+    expect(config.tenantId, 'tenant-uuid-1');
     expect(config.tenantSlug, 'store-a');
 
     final network = NetworkConfig.fromAppConfig(
       apiBaseUrl: config.apiBaseUrl,
+      tenantId: config.tenantId,
       tenantSlug: config.tenantSlug,
     );
     expect(network.baseUrl, 'https://api.example.com');
+    expect(network.tenantId, 'tenant-uuid-1');
     expect(network.tenantSlug, 'store-a');
+    expect(network.effectiveTenantId(), 'tenant-uuid-1');
   });
 }

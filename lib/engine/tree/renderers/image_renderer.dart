@@ -5,6 +5,7 @@ import '../../../core/utils/constants.dart';
 import '../../../core/utils/service_locator.dart';
 import '../../../config/component_config.dart';
 import '../../component_renderer/component_renderer.dart';
+import '../parsers/data_context_path.dart';
 import '../parsers/property_parsers.dart';
 
 /// Renders an Image component.
@@ -40,7 +41,7 @@ class ImageRenderer implements ComponentRenderer {
       config.properties['source'] as String?,
     );
     final urlPath = config.properties['urlPath'] as String?;
-    final boundUrl = _resolvePath(dataContext, urlPath);
+    final boundUrl = resolveDataContextPath(dataContext, urlPath);
     final url = (boundUrl?.toString().trim().isNotEmpty ?? false)
         ? boundUrl.toString()
         : (config.properties['url'] as String? ?? '');
@@ -90,20 +91,6 @@ class ImageRenderer implements ComponentRenderer {
       return '$assetBase$value';
     }
     return value;
-  }
-
-  dynamic _resolvePath(Map<String, dynamic>? root, String? path) {
-    if (root == null || path == null || path.isEmpty) return null;
-
-    dynamic current = root;
-    for (final segment in path.split('.')) {
-      if (current is Map<String, dynamic> && current.containsKey(segment)) {
-        current = current[segment];
-      } else {
-        return null;
-      }
-    }
-    return current;
   }
 
   /// Converts a fit string to BoxFit enum.

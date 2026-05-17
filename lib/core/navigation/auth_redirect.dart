@@ -22,8 +22,36 @@ class AuthRedirect {
     ...guestIntroRoutes,
   };
 
+  /// Storefront routes reachable without login (browse, search, detail).
+  static const Set<String> publicStorefrontRoutes = {
+    homeRoute,
+    '/products',
+    '/search',
+    '/categories',
+    '/cart',
+    '/wishlist',
+  };
+
   static bool isLoggedIn(String? token) =>
       token != null && token.trim().isNotEmpty;
+
+  /// Whether a logged-out user may open [location] without being sent to login.
+  static bool isPublicGuestRoute(String location) {
+    final path = _normalize(location);
+    if (publicGuestRoutes.contains(path)) {
+      return true;
+    }
+    if (publicStorefrontRoutes.contains(path)) {
+      return true;
+    }
+    if (path.startsWith('/product/details/')) {
+      return true;
+    }
+    if (RegExp(r'^/categories/[^/]+/products$').hasMatch(path)) {
+      return true;
+    }
+    return false;
+  }
 
   static String initialLocation({
     required String? token,
@@ -50,7 +78,7 @@ class AuthRedirect {
       return null;
     }
 
-    if (publicGuestRoutes.contains(location)) {
+    if (isPublicGuestRoute(location)) {
       return null;
     }
 

@@ -4,6 +4,7 @@
     "name": "SOOQ Merchant Mobile",
     "bundleId": "com.sooq.merchant.mobile",
     "apiBaseUrl": "https://sooq.up.railway.app",
+    "tenantId": "3fc183e8-ac80-4b2a-8bf1-4cd6ac6ffcb1",
     "tenantSlug": "anasgoldenmer"
   },
   "theme": {
@@ -90,6 +91,7 @@
       "/order/success",
       "/order/failure",
       "/product/details/:productId",
+      "/categories/:categorySlug/products",
       "/state/empty",
       "/state/error",
       "/state/loading"
@@ -821,7 +823,14 @@
             "crossAxisCount": 2,
             "mainAxisSpacing": 8,
             "crossAxisSpacing": 8,
-            "enableInnerScroll": false
+            "childAspectRatio": 1.1,
+            "enableInnerScroll": false,
+            "data": {
+              "source": "collection",
+              "id": "home-categories",
+              "requestKey": "home-categories",
+              "requestUrl": "/api/v1/public/categories"
+            }
           },
           "style": {
             "padding": {
@@ -830,204 +839,55 @@
               "bottom": 12
             }
           },
-          "children": [
-            {
-              "id": "home-cat-1",
+          "itemBuilder": {
+            "type": "repeat",
+            "source": "dataContext.requests.home-categories.data",
+            "item": {
+              "id": "home-cat-item",
               "type": "card",
               "props": {
                 "color": "#F8FAFC",
                 "borderRadius": 12
               },
               "child": {
-                "id": "home-cat-1-content",
-                "type": "container",
-                "props": {},
-                "style": {
-                  "padding": 12
+                "id": "home-cat-item-content",
+                "type": "column",
+                "props": {
+                  "crossAxis": "center",
+                  "gap": 8
                 },
-                "child": {
-                  "id": "home-cat-1-col",
-                  "type": "column",
-                  "props": {
-                    "crossAxis": "center",
-                    "gap": 8
-                  },
-                  "children": [
-                    {
-                      "id": "home-cat-1-icon",
-                      "type": "icon",
-                      "props": {
-                        "name": "phone_android",
-                        "size": 24,
-                        "color": "#0B57D0"
-                      }
-                    },
-                    {
-                      "id": "home-cat-1-text",
-                      "type": "text",
-                      "props": {
-                        "value": "إلكترونيات",
-                        "fontSize": 14,
-                        "fontWeight": "medium",
-                        "textAlign": "center"
-                      }
+                "children": [
+                  {
+                    "id": "home-cat-item-image",
+                    "type": "image",
+                    "props": {
+                      "source": "network",
+                      "urlPath": "item.imageUrl",
+                      "url": "",
+                      "height": 64,
+                      "width": 64,
+                      "fit": "cover"
                     }
-                  ]
-                }
+                  },
+                  {
+                    "id": "home-cat-item-text",
+                    "type": "text",
+                    "props": {
+                      "valuePath": "item.name",
+                      "value": "",
+                      "fontSize": 14,
+                      "fontWeight": "medium",
+                      "textAlign": "center"
+                    }
+                  }
+                ]
               },
               "tap": {
                 "type": "navigate",
-                "route": "/products"
-              }
-            },
-            {
-              "id": "home-cat-2",
-              "type": "card",
-              "props": {
-                "color": "#F8FAFC",
-                "borderRadius": 12
-              },
-              "child": {
-                "id": "home-cat-2-content",
-                "type": "container",
-                "props": {},
-                "style": {
-                  "padding": 12
-                },
-                "child": {
-                  "id": "home-cat-2-col",
-                  "type": "column",
-                  "props": {
-                    "crossAxis": "center",
-                    "gap": 8
-                  },
-                  "children": [
-                    {
-                      "id": "home-cat-2-icon",
-                      "type": "icon",
-                      "props": {
-                        "name": "checkroom",
-                        "size": 24,
-                        "color": "#0B57D0"
-                      }
-                    },
-                    {
-                      "id": "home-cat-2-text",
-                      "type": "text",
-                      "props": {
-                        "value": "أزياء",
-                        "fontSize": 14,
-                        "fontWeight": "medium",
-                        "textAlign": "center"
-                      }
-                    }
-                  ]
-                }
-              },
-              "tap": {
-                "type": "navigate",
-                "route": "/products"
-              }
-            },
-            {
-              "id": "home-cat-3",
-              "type": "card",
-              "props": {
-                "color": "#F8FAFC",
-                "borderRadius": 12
-              },
-              "child": {
-                "id": "home-cat-3-content",
-                "type": "container",
-                "props": {},
-                "style": {
-                  "padding": 12
-                },
-                "child": {
-                  "id": "home-cat-3-col",
-                  "type": "column",
-                  "props": {
-                    "crossAxis": "center",
-                    "gap": 8
-                  },
-                  "children": [
-                    {
-                      "id": "home-cat-3-icon",
-                      "type": "icon",
-                      "props": {
-                        "name": "chair",
-                        "size": 24,
-                        "color": "#0B57D0"
-                      }
-                    },
-                    {
-                      "id": "home-cat-3-text",
-                      "type": "text",
-                      "props": {
-                        "value": "المنزل",
-                        "fontSize": 14,
-                        "fontWeight": "medium",
-                        "textAlign": "center"
-                      }
-                    }
-                  ]
-                }
-              },
-              "tap": {
-                "type": "navigate",
-                "route": "/products"
-              }
-            },
-            {
-              "id": "home-cat-4",
-              "type": "card",
-              "props": {
-                "color": "#F8FAFC",
-                "borderRadius": 12
-              },
-              "child": {
-                "id": "home-cat-4-content",
-                "type": "container",
-                "props": {},
-                "style": {
-                  "padding": 12
-                },
-                "child": {
-                  "id": "home-cat-4-col",
-                  "type": "column",
-                  "props": {
-                    "crossAxis": "center",
-                    "gap": 8
-                  },
-                  "children": [
-                    {
-                      "id": "home-cat-4-icon",
-                      "type": "icon",
-                      "props": {
-                        "name": "sports_soccer",
-                        "size": 24,
-                        "color": "#0B57D0"
-                      }
-                    },
-                    {
-                      "id": "home-cat-4-text",
-                      "type": "text",
-                      "props": {
-                        "value": "رياضة",
-                        "fontSize": 14,
-                        "fontWeight": "medium",
-                        "textAlign": "center"
-                      }
-                    }
-                  ]
-                }
-              },
-              "tap": {
-                "type": "navigate",
-                "route": "/products"
+                "route": "/categories/:categorySlug/products"
               }
             }
-          ]
+          }
         },
         {
           "id": "home-featured-products-title",
@@ -1165,205 +1025,7 @@
               "right": 16,
               "bottom": 16
             }
-          },
-          "children": [
-            {
-              "id": "home-product-1",
-              "type": "card",
-              "props": {
-                "semanticType": "ProductCard",
-                "color": "#FFFFFF",
-                "borderRadius": 12,
-                "elevation": 1
-              },
-              "child": {
-                "id": "home-product-1-content",
-                "type": "column",
-                "props": {
-                  "crossAxis": "stretch",
-                  "gap": 8
-                },
-                "children": [
-                  {
-                    "id": "home-product-1-image",
-                    "type": "image",
-                    "props": {
-                      "semanticType": "ProductImage",
-                      "source": "network",
-                      "url": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=900",
-                      "height": 120,
-                      "fit": "cover"
-                    }
-                  },
-                  {
-                    "id": "home-product-1-body",
-                    "type": "container",
-                    "props": {},
-                    "style": {
-                      "padding": {
-                        "left": 8,
-                        "right": 8,
-                        "bottom": 8
-                      }
-                    },
-                    "child": {
-                      "id": "home-product-1-col",
-                      "type": "column",
-                      "props": {
-                        "crossAxis": "start",
-                        "gap": 4
-                      },
-                      "children": [
-                        {
-                          "id": "home-product-1-title",
-                          "type": "text",
-                          "props": {
-                            "value": "هاتف ذكي X",
-                            "fontSize": 14,
-                            "fontWeight": "medium",
-                            "textAlign": "right"
-                          }
-                        },
-                        {
-                          "id": "home-product-1-price",
-                          "type": "text",
-                          "props": {
-                            "value": "2,699 ر.س",
-                            "fontSize": 15,
-                            "fontWeight": "bold",
-                            "textAlign": "right",
-                            "color": "#0B57D0"
-                          }
-                        },
-                        {
-                          "id": "home-product-1-add",
-                          "type": "button",
-                          "props": {
-                            "label": "أضف للسلة",
-                            "backgroundColor": "#0B57D0",
-                            "textColor": "#FFFFFF",
-                            "borderRadius": 8,
-                            "padding": {
-                              "left": 10,
-                              "right": 10,
-                              "top": 8,
-                              "bottom": 8
-                            }
-                          },
-                          "tap": {
-                            "type": "navigate",
-                            "route": "/cart"
-                          }
-                        }
-                      ]
-                    }
-                  }
-                ]
-              },
-              "tap": {
-                "type": "navigate",
-                "route": "/product/details/sku-1001"
-              }
-            },
-            {
-              "id": "home-product-2",
-              "type": "card",
-              "props": {
-                "semanticType": "ProductCard",
-                "color": "#FFFFFF",
-                "borderRadius": 12,
-                "elevation": 1
-              },
-              "child": {
-                "id": "home-product-2-content",
-                "type": "column",
-                "props": {
-                  "crossAxis": "stretch",
-                  "gap": 8
-                },
-                "children": [
-                  {
-                    "id": "home-product-2-image",
-                    "type": "image",
-                    "props": {
-                      "semanticType": "ProductImage",
-                      "source": "network",
-                      "url": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=900",
-                      "height": 120,
-                      "fit": "cover"
-                    }
-                  },
-                  {
-                    "id": "home-product-2-body",
-                    "type": "container",
-                    "props": {},
-                    "style": {
-                      "padding": {
-                        "left": 8,
-                        "right": 8,
-                        "bottom": 8
-                      }
-                    },
-                    "child": {
-                      "id": "home-product-2-col",
-                      "type": "column",
-                      "props": {
-                        "crossAxis": "start",
-                        "gap": 4
-                      },
-                      "children": [
-                        {
-                          "id": "home-product-2-title",
-                          "type": "text",
-                          "props": {
-                            "value": "حذاء رياضي Pro",
-                            "fontSize": 14,
-                            "fontWeight": "medium",
-                            "textAlign": "right"
-                          }
-                        },
-                        {
-                          "id": "home-product-2-price",
-                          "type": "text",
-                          "props": {
-                            "value": "499 ر.س",
-                            "fontSize": 15,
-                            "fontWeight": "bold",
-                            "textAlign": "right",
-                            "color": "#0B57D0"
-                          }
-                        },
-                        {
-                          "id": "home-product-2-add",
-                          "type": "button",
-                          "props": {
-                            "label": "أضف للسلة",
-                            "backgroundColor": "#0B57D0",
-                            "textColor": "#FFFFFF",
-                            "borderRadius": 8,
-                            "padding": {
-                              "left": 10,
-                              "right": 10,
-                              "top": 8,
-                              "bottom": 8
-                            }
-                          },
-                          "tap": {
-                            "type": "navigate",
-                            "route": "/cart"
-                          }
-                        }
-                      ]
-                    }
-                  }
-                ]
-              },
-              "tap": {
-                "type": "navigate",
-                "route": "/product/details/sku-1002"
-              }
-            }
-          ]
+          }
         },
         {
           "id": "home-view-all-products",
@@ -1415,22 +1077,32 @@
       "body": [
         {
           "id": "categories-list",
-          "type": "column",
+          "type": "listView",
           "props": {
-            "crossAxis": "stretch",
-            "gap": 10,
-            "semanticType": "CategoryList"
+            "semanticType": "CategoryList",
+            "enableInnerScroll": false,
+            "data": {
+              "source": "collection",
+              "id": "category-tree",
+              "requestKey": "category-tree",
+              "requestUrl": "/api/v1/public/categories"
+            }
           },
           "style": {
             "padding": 16
           },
-          "children": [
-            {
-              "id": "cat-item-1",
+          "itemBuilder": {
+            "type": "repeat",
+            "source": "dataContext.requests.category-tree.data",
+            "item": {
+              "id": "cat-item",
               "type": "container",
               "props": {},
               "style": {
                 "padding": 14,
+                "margin": {
+                  "bottom": 8
+                },
                 "background": "#F8FAFC",
                 "borderRadius": 12,
                 "border": {
@@ -1439,7 +1111,7 @@
                 }
               },
               "child": {
-                "id": "cat-item-1-row",
+                "id": "cat-item-row",
                 "type": "row",
                 "props": {
                   "mainAxis": "spaceBetween",
@@ -1447,36 +1119,18 @@
                 },
                 "children": [
                   {
-                    "id": "cat-item-1-left",
-                    "type": "row",
+                    "id": "cat-item-text",
+                    "type": "text",
                     "props": {
-                      "gap": 10,
-                      "crossAxis": "center"
-                    },
-                    "children": [
-                      {
-                        "id": "cat-item-1-icon",
-                        "type": "icon",
-                        "props": {
-                          "name": "phone_iphone",
-                          "size": 22,
-                          "color": "#0B57D0"
-                        }
-                      },
-                      {
-                        "id": "cat-item-1-text",
-                        "type": "text",
-                        "props": {
-                          "value": "إلكترونيات وجوالات",
-                          "fontSize": 15,
-                          "fontWeight": "medium",
-                          "textAlign": "right"
-                        }
-                      }
-                    ]
+                      "valuePath": "item.name",
+                      "value": "قسم",
+                      "fontSize": 15,
+                      "fontWeight": "medium",
+                      "textAlign": "right"
+                    }
                   },
                   {
-                    "id": "cat-item-1-arrow",
+                    "id": "cat-item-arrow",
                     "type": "icon",
                     "props": {
                       "name": "chevron_right",
@@ -1488,76 +1142,10 @@
               },
               "tap": {
                 "type": "navigate",
-                "route": "/products"
-              }
-            },
-            {
-              "id": "cat-item-2",
-              "type": "container",
-              "props": {},
-              "style": {
-                "padding": 14,
-                "background": "#F8FAFC",
-                "borderRadius": 12,
-                "border": {
-                  "width": 1,
-                  "color": "#E2E8F0"
-                }
-              },
-              "child": {
-                "id": "cat-item-2-row",
-                "type": "row",
-                "props": {
-                  "mainAxis": "spaceBetween",
-                  "crossAxis": "center"
-                },
-                "children": [
-                  {
-                    "id": "cat-item-2-left",
-                    "type": "row",
-                    "props": {
-                      "gap": 10,
-                      "crossAxis": "center"
-                    },
-                    "children": [
-                      {
-                        "id": "cat-item-2-icon",
-                        "type": "icon",
-                        "props": {
-                          "name": "checkroom",
-                          "size": 22,
-                          "color": "#0B57D0"
-                        }
-                      },
-                      {
-                        "id": "cat-item-2-text",
-                        "type": "text",
-                        "props": {
-                          "value": "أزياء وموضة",
-                          "fontSize": 15,
-                          "fontWeight": "medium",
-                          "textAlign": "right"
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "id": "cat-item-2-arrow",
-                    "type": "icon",
-                    "props": {
-                      "name": "chevron_right",
-                      "size": 20,
-                      "color": "#64748B"
-                    }
-                  }
-                ]
-              },
-              "tap": {
-                "type": "navigate",
-                "route": "/products"
+                "route": "/categories/:categorySlug/products"
               }
             }
-          ]
+          }
         }
       ]
     },
@@ -1661,7 +1249,7 @@
           },
           "itemBuilder": {
             "type": "repeat",
-            "source": "dataContext.products",
+            "source": "dataContext.requests.product-list.data",
             "item": {
               "id": "products-grid-item",
               "type": "card",
@@ -1773,7 +1361,12 @@
           "id": "product-gallery",
           "type": "container",
           "props": {
-            "semanticType": "ImageGallery"
+            "semanticType": "ImageGallery",
+            "data": {
+              "requestKey": "product-detail",
+              "requestUrl": "/api/v1/public/products/:productId",
+              "include": "PRICING,IMAGES,VARIANTS,CATEGORIES,TAGS"
+            }
           },
           "style": {
             "padding": {
@@ -1796,43 +1389,12 @@
                 "type": "image",
                 "props": {
                   "source": "network",
-                  "url": "https://images.unsplash.com/photo-1498049794561-7780e7231661?w=1200",
+                  "urlPath": "dataContext.requests.product-detail.data.primaryImageUrl",
+                  "url": "",
                   "height": 240,
                   "fit": "cover"
                 }
-              },
-              {
-                "id": "product-thumb-row",
-                "type": "row",
-                "props": {
-                  "gap": 8,
-                  "crossAxis": "center"
-                },
-                "children": [
-                  {
-                    "id": "product-thumb-1",
-                    "type": "image",
-                    "props": {
-                      "source": "network",
-                      "url": "https://images.unsplash.com/photo-1498049794561-7780e7231661?w=200",
-                      "width": 72,
-                      "height": 72,
-                      "fit": "cover"
-                    }
-                  },
-                  {
-                    "id": "product-thumb-2",
-                    "type": "image",
-                    "props": {
-                      "source": "network",
-                      "url": "https://images.unsplash.com/photo-1517336714739-489689fd1ca8?w=200",
-                      "width": 72,
-                      "height": 72,
-                      "fit": "cover"
-                    }
-                  }
-                ]
-              }
+            }
             ]
           }
         },
@@ -1861,7 +1423,8 @@
                 "id": "product-info-name",
                 "type": "text",
                 "props": {
-                  "value": "لابتوب UltraBook 14",
+                  "valuePath": "dataContext.requests.product-detail.data.name",
+                  "value": "",
                   "fontSize": 22,
                   "fontWeight": "bold",
                   "textAlign": "right",
@@ -1869,10 +1432,11 @@
                 }
               },
               {
-                "id": "product-info-rating",
+                "id": "product-info-stock",
                 "type": "text",
                 "props": {
-                  "value": "4.8 (1,250 تقييم)",
+                  "valuePath": "dataContext.requests.product-detail.data.inventory.stockStatus",
+                  "value": "",
                   "fontSize": 14,
                   "textAlign": "right",
                   "color": "#64748B"
@@ -1882,7 +1446,8 @@
                 "id": "product-info-price",
                 "type": "text",
                 "props": {
-                  "value": "4,599 ر.س",
+                  "valuePath": "dataContext.requests.product-detail.data.displayPrice",
+                  "value": "",
                   "fontSize": 22,
                   "fontWeight": "bold",
                   "textAlign": "right",
@@ -1891,13 +1456,13 @@
               },
               {
                 "id": "product-info-description",
-                "type": "richtext",
+                "type": "text",
                 "props": {
-                  "value": "<p>أداء قوي، شاشة مبهرة، وبطارية تدوم طوال اليوم للاستخدام المهني اليومي.</p>",
+                  "valuePath": "dataContext.requests.product-detail.data.description",
+                  "value": "",
                   "color": "#334155",
                   "fontSize": 14,
-                  "textAlign": "right",
-                  "height": 1.45
+                  "textAlign": "right"
                 }
               }
             ]
@@ -1969,7 +1534,8 @@
               }
             ]
           }
-        },
+        }
+        ,
         {
           "id": "product-video-demo",
           "type": "container",
@@ -2017,6 +1583,141 @@
                 }
               }
             ]
+          }
+        
+        }
+      ]
+    },
+    {
+      "id": "page-category-products",
+      "route": "/categories/:categorySlug/products",
+      "title": "منتجات القسم",
+      "background": "#F1F5F9",
+      "scroll": "vertical",
+      "appBar": {
+        "id": "category-products-appbar",
+        "type": "appBar",
+        "props": {
+          "title": "منتجات القسم"
+        }
+      },
+      "body": [
+        {
+          "id": "category-detail-header",
+          "type": "container",
+          "props": {
+            "data": {
+              "requestKey": "category-detail",
+              "requestUrl": "/api/v1/public/categories/:categorySlug"
+            }
+          },
+          "style": {
+            "padding": {
+              "left": 16,
+              "right": 16,
+              "top": 12,
+              "bottom": 4
+            }
+          },
+          "child": {
+            "id": "category-detail-title",
+            "type": "text",
+            "props": {
+              "valuePath": "dataContext.requests.category-detail.data.name",
+              "value": "",
+              "fontSize": 20,
+              "fontWeight": "bold",
+              "textAlign": "right"
+            }
+          }
+        },
+        {
+          "id": "category-products-grid",
+          "type": "gridView",
+          "props": {
+            "semanticType": "ProductList",
+            "crossAxisCount": 2,
+            "mainAxisSpacing": 10,
+            "crossAxisSpacing": 10,
+            "childAspectRatio": 0.66,
+            "enableInnerScroll": false,
+            "data": {
+              "source": "collection",
+              "id": "category-products",
+              "requestKey": "category-products",
+              "requestUrl": "/api/v1/public/categories/:categorySlug/products?page=0&size=20",
+              "page": 0,
+              "size": 20
+            }
+          },
+          "itemBuilder": {
+            "type": "repeat",
+            "source": "dataContext.requests.category-products.data",
+            "item": {
+              "id": "category-products-item",
+              "type": "card",
+              "props": {
+                "semanticType": "ProductCard",
+                "color": "#FFFFFF",
+                "borderRadius": 12,
+                "elevation": 1
+              },
+              "child": {
+                "id": "category-products-item-content",
+                "type": "column",
+                "props": {
+                  "crossAxis": "stretch",
+                  "gap": 8
+                },
+                "children": [
+                  {
+                    "id": "category-products-item-image",
+                    "type": "image",
+                    "props": {
+                      "source": "network",
+                      "urlPath": "item.image",
+                      "url": "",
+                      "height": 120,
+                      "fit": "cover"
+                    }
+                  },
+                  {
+                    "id": "category-products-item-name",
+                    "type": "text",
+                    "props": {
+                      "valuePath": "item.name",
+                      "value": "",
+                      "fontSize": 14,
+                      "fontWeight": "medium",
+                      "textAlign": "right"
+                    }
+                  },
+                  {
+                    "id": "category-products-item-price",
+                    "type": "text",
+                    "props": {
+                      "valuePath": "item.price",
+                      "value": "",
+                      "fontSize": 15,
+                      "fontWeight": "bold",
+                      "textAlign": "right",
+                      "color": "#0B57D0"
+                    }
+                  }
+                ]
+              },
+              "tap": {
+                "type": "navigate",
+                "route": "/product/details/:productId"
+              }
+            }
+          },
+          "style": {
+            "padding": {
+              "left": 16,
+              "right": 16,
+              "bottom": 24
+            }
           }
         }
       ]
@@ -2074,6 +1775,148 @@
           }
         },
         {
+          "id": "search-autocomplete-list",
+          "type": "listView",
+          "props": {
+            "enableInnerScroll": false,
+            "data": {
+              "source": "collection",
+              "id": "search-autocomplete",
+              "requestKey": "search-autocomplete",
+              "requestUrl": "/api/v1/public/products/autocomplete",
+              "qField": "searchQuery"
+            }
+          },
+          "style": {
+            "padding": {
+              "left": 16,
+              "right": 16,
+              "bottom": 8
+            }
+          },
+          "itemBuilder": {
+            "type": "repeat",
+            "source": "dataContext.requests.search-autocomplete.data.products",
+            "item": {
+              "id": "search-autocomplete-item",
+              "type": "container",
+              "props": {},
+              "style": {
+                "padding": 10,
+                "margin": {
+                  "bottom": 6
+                },
+                "background": "#FFFFFF",
+                "borderRadius": 8
+              },
+              "child": {
+                "id": "search-autocomplete-item-text",
+                "type": "text",
+                "props": {
+                  "valuePath": "item.name",
+                  "value": "",
+                  "fontSize": 14,
+                  "textAlign": "right"
+                }
+              },
+              "tap": {
+                "type": "navigate",
+                "route": "/product/details/:productId"
+              }
+            }
+          }
+        },
+        {
+          "id": "search-results-grid",
+          "type": "gridView",
+          "props": {
+            "semanticType": "ProductList",
+            "crossAxisCount": 2,
+            "mainAxisSpacing": 10,
+            "crossAxisSpacing": 10,
+            "childAspectRatio": 0.66,
+            "enableInnerScroll": false,
+            "data": {
+              "source": "collection",
+              "id": "search-results",
+              "requestKey": "search-results",
+              "requestUrl": "/api/v1/public/products/search?page=0&size=20",
+              "qField": "searchQuery",
+              "page": 0,
+              "size": 20
+            }
+          },
+          "itemBuilder": {
+            "type": "repeat",
+            "source": "dataContext.requests.search-results.data.products",
+            "item": {
+              "id": "search-results-item",
+              "type": "card",
+              "props": {
+                "semanticType": "ProductCard",
+                "color": "#FFFFFF",
+                "borderRadius": 12,
+                "elevation": 1
+              },
+              "child": {
+                "id": "search-results-item-content",
+                "type": "column",
+                "props": {
+                  "crossAxis": "stretch",
+                  "gap": 8
+                },
+                "children": [
+                  {
+                    "id": "search-results-item-image",
+                    "type": "image",
+                    "props": {
+                      "source": "network",
+                      "urlPath": "item.image",
+                      "url": "",
+                      "height": 120,
+                      "fit": "cover"
+                    }
+                  },
+                  {
+                    "id": "search-results-item-name",
+                    "type": "text",
+                    "props": {
+                      "valuePath": "item.name",
+                      "value": "",
+                      "fontSize": 14,
+                      "fontWeight": "medium",
+                      "textAlign": "right"
+                    }
+                  },
+                  {
+                    "id": "search-results-item-price",
+                    "type": "text",
+                    "props": {
+                      "valuePath": "item.price",
+                      "value": "",
+                      "fontSize": 15,
+                      "fontWeight": "bold",
+                      "textAlign": "right",
+                      "color": "#0B57D0"
+                    }
+                  }
+                ]
+              },
+              "tap": {
+                "type": "navigate",
+                "route": "/product/details/:productId"
+              }
+            }
+          },
+          "style": {
+            "padding": {
+              "left": 16,
+              "right": 16,
+              "bottom": 16
+            }
+          }
+        },
+        {
           "id": "search-history-title",
           "type": "container",
           "props": {
@@ -2090,7 +1933,7 @@
             "id": "search-history-text",
             "type": "text",
             "props": {
-              "value": "عمليات البحث الأخيرة",
+              "value": "اقتراحات البحث",
               "fontSize": 16,
               "fontWeight": "bold",
               "textAlign": "right"
@@ -2098,7 +1941,7 @@
           }
         },
         {
-          "id": "search-history-list",
+          "id": "search-suggestions-list",
           "type": "listView",
           "props": {
             "enableInnerScroll": false
@@ -2107,12 +1950,14 @@
             "padding": {
               "left": 16,
               "right": 16,
-              "bottom": 24
+              "bottom": 8
             }
           },
-          "children": [
-            {
-              "id": "search-history-item-1",
+          "itemBuilder": {
+            "type": "repeat",
+            "source": "dataContext.requests.search-autocomplete.data.suggestions",
+            "item": {
+              "id": "search-suggestion-item",
               "type": "container",
               "props": {},
               "style": {
@@ -2124,84 +1969,17 @@
                 "borderRadius": 10
               },
               "child": {
-                "id": "search-history-item-1-row",
-                "type": "row",
+                "id": "search-suggestion-item-text",
+                "type": "text",
                 "props": {
-                  "mainAxis": "spaceBetween",
-                  "crossAxis": "center"
-                },
-                "children": [
-                  {
-                    "id": "search-history-item-1-text",
-                    "type": "text",
-                    "props": {
-                      "value": "سماعات بلوتوث",
-                      "fontSize": 14,
-                      "textAlign": "right"
-                    }
-                  },
-                  {
-                    "id": "search-history-item-1-icon",
-                    "type": "icon",
-                    "props": {
-                      "name": "history",
-                      "size": 18,
-                      "color": "#64748B"
-                    }
-                  }
-                ]
-              },
-              "tap": {
-                "type": "navigate",
-                "route": "/products"
-              }
-            },
-            {
-              "id": "search-history-item-2",
-              "type": "container",
-              "props": {},
-              "style": {
-                "padding": 12,
-                "margin": {
-                  "bottom": 8
-                },
-                "background": "#F8FAFC",
-                "borderRadius": 10
-              },
-              "child": {
-                "id": "search-history-item-2-row",
-                "type": "row",
-                "props": {
-                  "mainAxis": "spaceBetween",
-                  "crossAxis": "center"
-                },
-                "children": [
-                  {
-                    "id": "search-history-item-2-text",
-                    "type": "text",
-                    "props": {
-                      "value": "ساعة ذكية",
-                      "fontSize": 14,
-                      "textAlign": "right"
-                    }
-                  },
-                  {
-                    "id": "search-history-item-2-icon",
-                    "type": "icon",
-                    "props": {
-                      "name": "history",
-                      "size": 18,
-                      "color": "#64748B"
-                    }
-                  }
-                ]
-              },
-              "tap": {
-                "type": "navigate",
-                "route": "/products"
+                  "valuePath": "item",
+                  "value": "",
+                  "fontSize": 14,
+                  "textAlign": "right"
+                }
               }
             }
-          ]
+          }
         }
       ]
     },
