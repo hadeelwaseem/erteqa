@@ -1,12 +1,19 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../config/component_config.dart';
 import '../../actions/action_dispatcher.dart';
 import '../../component_renderer/component_renderer.dart';
 import '../../form/form_state_store.dart';
+import '../../theme/engine_theme.dart';
 import '../parsers/property_parsers.dart';
 
+/// Default required-field message when JSON omits [requiredMessage].
+const _kDefaultRequiredMessage = 'هذا الحقل مطلوب';
+
 class TextFormFieldRenderer implements ComponentRenderer {
+  static const _minTapTarget = 48.0;
+
   @override
   Widget render(
     ComponentConfig config, {
@@ -68,7 +75,7 @@ class TextFormFieldRenderer implements ComponentRenderer {
     final validatePattern = properties['validatePattern'] as String?;
     final validationMessage = properties['validationMessage'] as String?;
     final requiredMessage =
-        properties['requiredMessage'] as String? ?? 'Required';
+        properties['requiredMessage'] as String? ?? _kDefaultRequiredMessage;
 
     final onChangedAction = properties['onChanged'] as Map<String, dynamic>?;
     final onSubmittedAction =
@@ -82,14 +89,29 @@ class TextFormFieldRenderer implements ComponentRenderer {
     );
     final width = PropertyParsers.parseDouble(properties['width']);
     final height = PropertyParsers.parseDouble(properties['height']);
-    final border = _parseBorder(properties['border']);
+    final border = _parseBorder(properties['border'], dataContext);
     final shadow = _parseShadow(properties['shadow']);
 
-    final controllerKey = controllerId ?? fieldId;
-    final formState = _resolveFormState(dataContext);
-    final controller = formState.controllerFor(
-      controllerKey.isEmpty ? 'field_${config.hashCode}' : controllerKey,
-      initialValue: initialValue,
+    final theme = EngineTheme.fromDataContext(dataContext);
+    final hasValidation = _hasValidation(
+      requiredField,
+      validateEmail,
+      validatePhone,
+      validatePassword,
+      validateMinLength,
+      validateMaxLength,
+      validatePattern,
+    );
+    final validator = _buildValidator(
+      requiredField: requiredField,
+      requiredMessage: requiredMessage,
+      validateEmail: validateEmail,
+      validatePhone: validatePhone,
+      validatePassword: validatePassword,
+      validateMinLength: validateMinLength,
+      validateMaxLength: validateMaxLength,
+      validatePattern: validatePattern,
+      validationMessage: validationMessage,
     );
 
     final hasBoxDecoration =
@@ -98,9 +120,51 @@ class TextFormFieldRenderer implements ComponentRenderer {
         border != null ||
         shadow != null;
 
+    final controllerKey = controllerId ?? fieldId;
+    final formState = _formStateFrom(dataContext);
+    assert(
+      () {
+        if (formState == null) {
+          debugPrint(
+            '[TextFormFieldRenderer] FormStateStore missing in dataContext '
+            'for field "$fieldId". Wire VariantScreen or parent form.',
+          );
+        }
+        return formState != null;
+      }(),
+    );
+
+    final effectiveKey =
+        controllerKey.isEmpty ? 'field_${config.hashCode}' : controllerKey;
+    final TextEditingController controller;
+    if (formState != null) {
+      controller = formState.controllerFor(
+        effectiveKey,
+        initialValue: initialValue,
+      );
+    } else {
+      controller = TextEditingController(text: initialValue ?? '');
+    }
+
     return Builder(
       builder: (context) {
         final dispatcher = _resolveDispatcher(dataContext, context);
+
+        final decoration = _buildDecoration(
+          theme: theme,
+          label: label,
+          hint: hint,
+          helper: helper,
+          error: validator == null ? error : null,
+          prefixText: prefixText,
+          suffixText: suffixText,
+          prefixIconName: prefixIconName,
+          suffixIconName: suffixIconName,
+          hasBoxDecoration: hasBoxDecoration,
+          borderRadius: borderRadius,
+          fillColor: color ?? theme?.surfaceColor,
+        );
+
         final field = TextFormField(
           controller: controller,
           autofocus: autofocus,
@@ -118,46 +182,13 @@ class TextFormFieldRenderer implements ComponentRenderer {
           maxLines: expands ? null : (maxLines ?? 1),
           minLines: expands ? null : minLines,
           maxLength: maxLength,
-          autovalidateMode:
-              _hasValidation(
-                requiredField,
-                validateEmail,
-                validatePhone,
-                validatePassword,
-                validateMinLength,
-                validateMaxLength,
-                validatePattern,
-              )
+          autovalidateMode: hasValidation
               ? AutovalidateMode.onUserInteraction
               : AutovalidateMode.disabled,
-          decoration: InputDecoration(
-            labelText: label,
-            hintText: hint,
-            helperText: helper,
-            errorText: error,
-            prefixText: prefixText,
-            suffixText: suffixText,
-            prefixIcon: prefixIconName != null
-                ? Icon(PropertyParsers.parseIconData(prefixIconName))
-                : null,
-            suffixIcon: suffixIconName != null
-                ? Icon(PropertyParsers.parseIconData(suffixIconName))
-                : null,
-            border: hasBoxDecoration ? InputBorder.none : null,
-          ),
-          validator: _buildValidator(
-            requiredField: requiredField,
-            requiredMessage: requiredMessage,
-            validateEmail: validateEmail,
-            validatePhone: validatePhone,
-            validatePassword: validatePassword,
-            validateMinLength: validateMinLength,
-            validateMaxLength: validateMaxLength,
-            validatePattern: validatePattern,
-            validationMessage: validationMessage,
-          ),
+          decoration: decoration,
+          validator: validator,
           onChanged: (value) {
-            if (controllerKey.isNotEmpty) {
+            if (formState != null && controllerKey.isNotEmpty) {
               formState.updateValue(controllerKey, value);
             }
             if (onChangedAction != null && dispatcher != null) {
@@ -169,7 +200,7 @@ class TextFormFieldRenderer implements ComponentRenderer {
             }
           },
           onFieldSubmitted: (value) {
-            if (controllerKey.isNotEmpty) {
+            if (formState != null && controllerKey.isNotEmpty) {
               formState.updateValue(controllerKey, value);
             }
             if (onSubmittedAction != null && dispatcher != null) {
@@ -211,13 +242,67 @@ class TextFormFieldRenderer implements ComponentRenderer {
     );
   }
 
-  FormStateStore _resolveFormState(Map<String, dynamic>? dataContext) {
-    if (dataContext == null) return FormStateStore();
-    final existing = dataContext[FormStateStore.contextKey];
-    if (existing is FormStateStore) return existing;
-    final store = FormStateStore();
-    dataContext[FormStateStore.contextKey] = store;
-    return store;
+  InputDecoration _buildDecoration({
+    required EngineTheme? theme,
+    required String? label,
+    required String? hint,
+    required String? helper,
+    required String? error,
+    required String? prefixText,
+    required String? suffixText,
+    required String? prefixIconName,
+    required String? suffixIconName,
+    required bool hasBoxDecoration,
+    required BorderRadius? borderRadius,
+    required Color? fillColor,
+  }) {
+    final prefixIcon = _tapTargetIcon(prefixIconName);
+    final suffixIcon = _tapTargetIcon(suffixIconName);
+
+    if (theme != null) {
+      return theme.inputDecoration(
+        labelText: label,
+        hintText: hint,
+        helperText: helper,
+        errorText: error,
+        prefixText: prefixText,
+        suffixText: suffixText,
+        prefixIcon: prefixIcon,
+        suffixIcon: suffixIcon,
+        borderRadius: borderRadius,
+        fillColor: fillColor,
+        hideBorders: hasBoxDecoration,
+      );
+    }
+
+    return InputDecoration(
+      labelText: label,
+      hintText: hint,
+      helperText: helper,
+      errorText: error,
+      prefixText: prefixText,
+      suffixText: suffixText,
+      prefixIcon: prefixIcon,
+      suffixIcon: suffixIcon,
+      border: hasBoxDecoration ? InputBorder.none : null,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+    );
+  }
+
+  Widget? _tapTargetIcon(String? iconName) {
+    if (iconName == null) return null;
+    return SizedBox(
+      width: _minTapTarget,
+      height: _minTapTarget,
+      child: Center(
+        child: Icon(PropertyParsers.parseIconData(iconName)),
+      ),
+    );
+  }
+
+  FormStateStore? _formStateFrom(Map<String, dynamic>? dataContext) {
+    final existing = dataContext?[FormStateStore.contextKey];
+    return existing is FormStateStore ? existing : null;
   }
 
   EngineActionDispatcher? _resolveDispatcher(
@@ -288,27 +373,27 @@ class TextFormFieldRenderer implements ComponentRenderer {
       }
       if (text.isEmpty) return null;
       if (validateEmail && !_isEmail(text)) {
-        return validationMessage ?? 'Enter a valid email';
+        return validationMessage ?? 'أدخل بريداً إلكترونياً صالحاً';
       }
       if (validatePhone && !_isPhone(text)) {
-        return validationMessage ?? 'Enter a valid phone number';
+        return validationMessage ?? 'أدخل رقم جوال صالحاً';
       }
       if (validatePassword && !_isPassword(text)) {
         return validationMessage ??
-            'Password must be at least 8 characters and include a number';
+            'كلمة المرور 8 أحرف على الأقل وتتضمن رقماً';
       }
       if (validateMinLength != null && text.length < validateMinLength) {
         return validationMessage ??
-            'Must be at least $validateMinLength characters';
+            'يجب أن يكون $validateMinLength أحرف على الأقل';
       }
       if (validateMaxLength != null && text.length > validateMaxLength) {
         return validationMessage ??
-            'Must be at most $validateMaxLength characters';
+            'يجب ألا يتجاوز $validateMaxLength حرفاً';
       }
       if (validatePattern != null && validatePattern.isNotEmpty) {
         final regex = RegExp(validatePattern);
         if (!regex.hasMatch(text)) {
-          return validationMessage ?? 'Invalid format';
+          return validationMessage ?? 'صيغة غير صالحة';
         }
       }
       return null;
@@ -362,11 +447,13 @@ class TextFormFieldRenderer implements ComponentRenderer {
     }
   }
 
-  Border? _parseBorder(dynamic v) {
+  Border? _parseBorder(dynamic v, Map<String, dynamic>? dataContext) {
     if (v is! Map) return null;
     final width = (v['width'] as num?)?.toDouble() ?? 1.0;
+    final theme = EngineTheme.fromDataContext(dataContext);
     final color =
         PropertyParsers.parseColor(v['color'] as String?) ??
+        theme?.inputBorderColor ??
         const Color(0xFFE2E8F0);
     return Border.all(width: width, color: color);
   }

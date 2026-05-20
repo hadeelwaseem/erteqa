@@ -465,7 +465,7 @@ Implement Phase 6 from docs/engine/RENDERER_AUDIT_IMPLEMENTATION_PLAN.md.
 Read audit: form, textFormField. Theme-aware inputs; JSON messages for auth pages only.
 ```
 
-**Checklist:** [ ] Phase 6 complete
+**Checklist:** [x] Phase 6 complete
 
 ---
 

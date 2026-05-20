@@ -44,7 +44,76 @@ class EngineTheme {
 
   double get radiusMd => config.radiusValue('md');
 
+  double spacing(String key) =>
+      config.spacing[key] ?? config.spacing['md'] ?? 16;
+
   double typographyScale(String key) => config.typographyScale(key);
+
+  /// Muted border for inputs — matches prod auth field borders (#E2E8F0).
+  Color get inputBorderColor {
+    final muted = mutedColor;
+    return Color.fromRGBO(muted.red, muted.green, muted.blue, 0.35);
+  }
+
+  /// Theme-aware [InputDecoration] when JSON omits field styling.
+  InputDecoration inputDecoration({
+    String? labelText,
+    String? hintText,
+    String? helperText,
+    String? errorText,
+    String? prefixText,
+    String? suffixText,
+    Widget? prefixIcon,
+    Widget? suffixIcon,
+    BorderRadius? borderRadius,
+    Color? fillColor,
+    bool hideBorders = false,
+  }) {
+    final radius = borderRadius ?? BorderRadius.circular(radiusMd);
+    final fill = fillColor ?? surfaceColor;
+    final outline = hideBorders
+        ? InputBorder.none
+        : OutlineInputBorder(
+            borderRadius: radius,
+            borderSide: BorderSide(color: inputBorderColor),
+          );
+
+    return InputDecoration(
+      labelText: labelText,
+      hintText: hintText,
+      helperText: helperText,
+      errorText: errorText,
+      prefixText: prefixText,
+      suffixText: suffixText,
+      prefixIcon: prefixIcon,
+      suffixIcon: suffixIcon,
+      filled: !hideBorders,
+      fillColor: hideBorders ? null : fill,
+      labelStyle: TextStyle(color: textColor),
+      hintStyle: TextStyle(color: mutedColor),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      border: outline,
+      enabledBorder: outline,
+      focusedBorder: hideBorders
+          ? InputBorder.none
+          : OutlineInputBorder(
+              borderRadius: radius,
+              borderSide: BorderSide(color: primaryColor, width: 2),
+            ),
+      errorBorder: hideBorders
+          ? InputBorder.none
+          : OutlineInputBorder(
+              borderRadius: radius,
+              borderSide: BorderSide(color: errorColor),
+            ),
+      focusedErrorBorder: hideBorders
+          ? InputBorder.none
+          : OutlineInputBorder(
+              borderRadius: radius,
+              borderSide: BorderSide(color: errorColor, width: 2),
+            ),
+    );
+  }
 
   /// Builds [ThemeData] for [MaterialApp] from parsed JSON theme.
   static ThemeData toThemeData(MobileThemeConfig config) {

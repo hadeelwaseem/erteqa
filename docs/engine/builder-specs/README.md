@@ -59,6 +59,7 @@ Copy structure from [`_TEMPLATE.md`](_TEMPLATE.md).
 |------|-------|--------|---------|
 | [02-list-grid-request-ui.md](02-list-grid-request-ui.md) | 2 | ready-for-builder | `emptyMessage`, `errorMessage`, `requestKey` loading/empty/error on list/grid |
 | [05-high-traffic-renderers.md](05-high-traffic-renderers.md) | 5 | ready-for-builder | `button.enabled`, `appBar.foregroundColor` / `titleColor`, optional text truncation props |
+| [06-form-autovalidate.md](06-form-autovalidate.md) | 6 | ready-for-builder | `form.props.autovalidateMode` (`onUserInteraction` \| `disabled`) |
 
 Update this table when adding a spec.
 

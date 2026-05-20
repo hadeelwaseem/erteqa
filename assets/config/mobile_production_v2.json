@@ -399,6 +399,7 @@
                   "keyboardType": "phone",
                   "textAlign": "right",
                   "validateRequired": true,
+                  "validatePhone": true,
                   "requiredMessage": "هذا الحقل مطلوب"
                 },
                 "style": {
