@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../config/component_config.dart';
+import '../../theme/engine_theme.dart';
 
 import '../../component_renderer/component_renderer.dart';
 import '../parsers/property_parsers.dart';
@@ -23,10 +24,12 @@ class ContainerRenderer implements ComponentRenderer {
     required ComponentWidgetBuilder buildChild,
     Map<String, dynamic>? dataContext,
   }) {
-    final padding = PropertyParsers.parseEdgeInsets(
+    final padding = PropertyParsers.parseEdgeInsetsDirectional(
       config.properties['padding'],
     );
-    final margin = PropertyParsers.parseEdgeInsets(config.properties['margin']);
+    final margin = PropertyParsers.parseEdgeInsetsDirectional(
+      config.properties['margin'],
+    );
     final color = PropertyParsers.parseColor(
       config.properties['color'] as String?,
     );
@@ -36,7 +39,7 @@ class ContainerRenderer implements ComponentRenderer {
     final width = PropertyParsers.parseDouble(config.properties['width']);
     final height = PropertyParsers.parseDouble(config.properties['height']);
     final shadow = _parseShadow(config.properties['shadow']);
-    final border = _parseBorder(config.properties['border']);
+    final border = _parseBorder(config.properties['border'], dataContext);
     final child = config.child != null ? buildChild(config.child!) : null;
 
     final hasDecoration =
@@ -94,11 +97,13 @@ class ContainerRenderer implements ComponentRenderer {
     }
   }
 
-  Border? _parseBorder(dynamic v) {
+  Border? _parseBorder(dynamic v, Map<String, dynamic>? dataContext) {
     if (v is! Map) return null;
     final width = (v['width'] as num?)?.toDouble() ?? 1.0;
+    final theme = EngineTheme.fromDataContext(dataContext);
     final color =
         PropertyParsers.parseColor(v['color'] as String?) ??
+        theme?.inputBorderColor ??
         const Color(0xFFE2E8F0);
     return Border.all(width: width, color: color);
   }

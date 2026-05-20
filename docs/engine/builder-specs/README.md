@@ -57,9 +57,10 @@ Copy structure from [`_TEMPLATE.md`](_TEMPLATE.md).
 
 | Spec | Phase | Status | Summary |
 |------|-------|--------|---------|
-| [02-list-grid-request-ui.md](02-list-grid-request-ui.md) | 2 | ready-for-builder | `emptyMessage`, `errorMessage`, `requestKey` loading/empty/error on list/grid |
+| [02-list-grid-request-ui.md](02-list-grid-request-ui.md) | 2, 7 | implemented-in-json | `emptyMessage`, `errorMessage`, `requestKey` loading/empty/error on list/grid |
 | [05-high-traffic-renderers.md](05-high-traffic-renderers.md) | 5 | ready-for-builder | `button.enabled`, `appBar.foregroundColor` / `titleColor`, optional text truncation props |
 | [06-form-autovalidate.md](06-form-autovalidate.md) | 6 | ready-for-builder | `form.props.autovalidateMode` (`onUserInteraction` \| `disabled`) |
+| [08-page-scroll.md](08-page-scroll.md) | 8 | ready-for-builder | `pages[].scroll: "none"` — outer scaffold scroll off |
 
 Update this table when adding a spec.
 

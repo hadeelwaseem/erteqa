@@ -859,7 +859,9 @@
               "id": "home-categories",
               "requestKey": "home-categories",
               "requestUrl": "/api/v1/public/categories"
-            }
+            },
+            "emptyMessage": "لا توجد أقسام",
+            "errorMessage": "تعذر تحميل الأقسام"
           },
           "style": {
             "padding": {
@@ -962,7 +964,9 @@
               "requestUrl": "/api/v1/public/products?page=0&size=6",
               "page": 0,
               "size": 6
-            }
+            },
+            "emptyMessage": "لا توجد منتجات",
+            "errorMessage": "تعذر تحميل المنتجات"
           },
           "itemBuilder": {
             "type": "repeat",
@@ -1117,7 +1121,9 @@
               "id": "category-tree",
               "requestKey": "category-tree",
               "requestUrl": "/api/v1/public/categories"
-            }
+            },
+            "emptyMessage": "لا توجد أقسام",
+            "errorMessage": "تعذر تحميل الأقسام"
           },
           "style": {
             "padding": 16
@@ -1276,7 +1282,9 @@
               "requestUrl": "/api/v1/public/products?page=0&size=20",
               "page": 0,
               "size": 20
-            }
+            },
+            "emptyMessage": "لا توجد منتجات",
+            "errorMessage": "تعذر تحميل المنتجات"
           },
           "itemBuilder": {
             "type": "repeat",
@@ -1678,7 +1686,9 @@
               "requestUrl": "/api/v1/public/categories/:categorySlug/products?page=0&size=20",
               "page": 0,
               "size": 20
-            }
+            },
+            "emptyMessage": "لا توجد منتجات",
+            "errorMessage": "تعذر تحميل المنتجات"
           },
           "itemBuilder": {
             "type": "repeat",
@@ -1816,7 +1826,9 @@
               "requestKey": "search-autocomplete",
               "requestUrl": "/api/v1/public/products/autocomplete",
               "qField": "searchQuery"
-            }
+            },
+            "emptyMessage": "لا توجد اقتراحات",
+            "errorMessage": "تعذر تحميل الاقتراحات"
           },
           "style": {
             "padding": {
@@ -1875,7 +1887,9 @@
               "qField": "searchQuery",
               "page": 0,
               "size": 20
-            }
+            },
+            "emptyMessage": "لا توجد نتائج",
+            "errorMessage": "تعذر تحميل نتائج البحث"
           },
           "itemBuilder": {
             "type": "repeat",
@@ -3203,7 +3217,9 @@
               "requestUrl": "/api/v1/public/products?page=0&size=20",
               "page": 0,
               "size": 20
-            }
+            },
+            "emptyMessage": "لا توجد عناصر في المفضلة",
+            "errorMessage": "تعذر تحميل المفضلة"
           },
           "itemBuilder": {
             "type": "repeat",

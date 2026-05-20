@@ -61,5 +61,55 @@ void main() {
 
     expect(tester.widget<Text>(find.byType(Text)).maxLines, 2);
   });
+
+  testWidgets('valuePath resolves from dataContext item.name', (tester) async {
+    final renderer = TextRenderer();
+    final config = ComponentConfig(
+      type: GenericComponentType.text,
+      properties: {'valuePath': 'item.name'},
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: renderer.render(
+            config,
+            buildChild: (_) => const SizedBox.shrink(),
+            dataContext: {
+              ...rendererDataContext(),
+              'item': {'name': 'Resolved Name'},
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Resolved Name'), findsOneWidget);
+  });
+
+  testWidgets('theme default text color when props.color omitted', (
+    tester,
+  ) async {
+    final renderer = TextRenderer();
+    final config = ComponentConfig(
+      type: GenericComponentType.text,
+      properties: {'value': 'Themed'},
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: renderer.render(
+            config,
+            buildChild: (_) => const SizedBox.shrink(),
+            dataContext: rendererDataContext(),
+          ),
+        ),
+      ),
+    );
+
+    final text = tester.widget<Text>(find.text('Themed'));
+    expect(text.style?.color, const Color(0xFF0F172A));
+  });
 }
 

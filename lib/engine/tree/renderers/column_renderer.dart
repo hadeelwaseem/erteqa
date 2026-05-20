@@ -18,6 +18,13 @@ class ColumnRenderer implements ComponentRenderer {
     final crossAxisAlignment = PropertyParsers.parseCrossAxisAlignment(
       config.properties['crossAxisAlignment'] as String?,
     );
+    final mainAxisSize = PropertyParsers.parseMainAxisSize(
+      config.properties['mainAxisSize'] as String?,
+      defaultValue: MainAxisSize.min,
+    );
+    final textDirection = PropertyParsers.parseTextDirection(
+      config.properties['textDirection'] as String?,
+    );
     final children = config.children ?? [];
     final gap = PropertyParsers.parseDouble(config.properties['gap']) ?? 0;
     final childWidgets = _withGap(
@@ -26,9 +33,10 @@ class ColumnRenderer implements ComponentRenderer {
     );
 
     return Column(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: mainAxisSize,
       mainAxisAlignment: mainAxisAlignment,
       crossAxisAlignment: crossAxisAlignment,
+      textDirection: textDirection,
       children: childWidgets,
     );
   }

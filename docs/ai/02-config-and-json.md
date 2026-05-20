@@ -36,9 +36,16 @@ Parsed by `MobileAppConfig.fromJson` in `lib/config/mobile_app_config.dart`.
 
 The `theme` object is parsed into `MobileThemeConfig` on `MobileAppConfig.theme`. At startup, `main.dart` builds `MaterialApp` `ThemeData` via `EngineTheme.toThemeData` (Tajawal via `google_fonts` when `typography.fontFamily` is `Tajawal`). Dynamic pages inject `EngineTheme` into renderer `dataContext` under `EngineTheme.contextKey` (`'_engineTheme'`) from `VariantScreen._buildRenderContext`. Renderers read theme defaults from that key when component props omit colors or sizes (e.g. `text` without `color`, `button` without `borderRadius`).
 
-### Page `scroll` (not yet implemented)
+### Page `scroll`
 
-Production pages often set `"scroll": "vertical"` or `"horizontal"` on the page object. **`VariantRepository` does not apply page-level `scroll` today** — layout scrolling comes from the component tree (e.g. `singleChildScrollView`, `listView` / `gridView` with `enableInnerScroll`). Honoring page `scroll` is tracked on the renderer roadmap (engine/parser work).
+Each page in `pages[]` may set `"scroll"`:
+
+| Value | Behavior |
+|-------|----------|
+| `vertical` (default) | `VariantRepository` passes `pageScroll: vertical` on the synthetic scaffold root. `ScaffoldRenderer` wraps the page body in an outer `SingleChildScrollView` (min-height + load-more footer when applicable). |
+| `none` | `pageScroll: none` — no outer page scroll. Nested `listView` / `gridView` must use inner scrolling (`enableInnerScroll: true`) if the page should scroll. |
+
+The page field is mapped to scaffold `properties.pageScroll` (engine-only bridge; not a builder component prop). Production config uses `vertical` on all pages today.
 
 ## Page body nodes
 

@@ -166,11 +166,15 @@ class AssetVariantRepository implements VariantRepository {
         : null;
     final children = <ComponentConfig>[if (appBar != null) appBar, ...body];
 
+    // pages[].scroll → scaffold.properties.pageScroll (engine bridge; not a component prop)
+    final pageScroll = selectedPage['scroll'] as String? ?? 'vertical';
+
     final root = ComponentConfig(
       type: GenericComponentType.scaffold,
       properties: {
         if (selectedPage['background'] is String)
           'backgroundColor': selectedPage['background'],
+        'pageScroll': pageScroll,
       },
       child: ComponentConfig(
         type: GenericComponentType.column,

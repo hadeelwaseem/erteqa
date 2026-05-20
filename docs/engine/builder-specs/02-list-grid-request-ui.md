@@ -1,7 +1,7 @@
 # Builder spec: List/grid request loading, empty, and error UI
 
 > **Phase:** 2 — Request loading / empty / error contract  
-> **Status:** `ready-for-builder`  
+> **Status:** `implemented-in-json`  
 > **Active config:** `mobile_production_v2`  
 > **Created:** 2026-05-20  
 
@@ -9,7 +9,7 @@
 
 ## Summary
 
-The mobile engine now shows **loading**, **error**, and **empty** placeholders on `listView` and `gridView` when bound to an API `requestKey`. Copy is driven by optional `emptyMessage` and `errorMessage` props. The website builder must support authoring these fields; wiring Arabic copy into production JSON is planned for **Phase 7**.
+The mobile engine shows **loading**, **error**, and **empty** placeholders on `listView` and `gridView` when bound to an API `requestKey`. Copy is driven by optional `emptyMessage` and `errorMessage` props. **Phase 7** wired Arabic messages on all eight catalog list/grid nodes in `mobile_production_v2.json`. The website builder should still support authoring these fields for new exports.
 
 ---
 
@@ -21,8 +21,8 @@ The mobile engine now shows **loading**, **error**, and **empty** placeholders o
 |------|----------------------|----------|
 | `props.data.requestKey` on catalog list/grid | Yes | e.g. L831 `home-categories`, L931 `home-featured-products`, L1087 `category-tree`, L1244 `product-list` |
 | Top-level `props.requestKey` | No | Engine accepts either; prod uses `data.requestKey` only |
-| `props.emptyMessage` | No | `Select-String -Pattern "emptyMessage"` — 0 matches |
-| `props.errorMessage` | No | `Select-String -Pattern "errorMessage"` — 0 matches |
+| `props.emptyMessage` | Yes | 8 catalog list/grid nodes (Phase 7) |
+| `props.errorMessage` | Yes | 8 catalog list/grid nodes (Phase 7) |
 
 ---
 
@@ -139,7 +139,7 @@ The mobile engine now shows **loading**, **error**, and **empty** placeholders o
 
 - [ ] Builder can set `emptyMessage` and `errorMessage` on `listView` and `gridView`
 - [ ] Builder continues to set `data.requestKey` aligned with `itemBuilder.source`
-- [ ] Exported `mobile_production_v2.json` includes messages on agreed catalog routes (Phase 7)
+- [x] Exported `mobile_production_v2.json` includes messages on agreed catalog routes (Phase 7)
 - [ ] Mobile app shows correct empty/error copy without code changes
 
 ---
@@ -149,3 +149,4 @@ The mobile engine now shows **loading**, **error**, and **empty** placeholders o
 | Date | Author | Note |
 |------|--------|------|
 | 2026-05-20 | Engine Phase 2 | Initial spec; engine implemented, prod JSON unchanged |
+| 2026-05-21 | Engine Phase 7 | Arabic `emptyMessage` / `errorMessage` on 8 catalog list/grid nodes in prod JSON |

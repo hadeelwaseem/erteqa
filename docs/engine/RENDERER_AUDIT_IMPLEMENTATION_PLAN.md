@@ -501,7 +501,7 @@ Wire requestKey, emptyMessage, errorMessage on catalog listView/gridView in mobi
 Read audit listView and gridView sections.
 ```
 
-**Checklist:** [ ] Phase 7 complete
+**Checklist:** [x] Phase 7 complete
 
 ---
 
@@ -529,8 +529,8 @@ Read audit listView and gridView sections.
 
 **Acceptance criteria**
 
-- [ ] Full-width grids on `/home` after Phase 1 + this phase.
-- [ ] RTL padding mirrors correctly on asymmetric containers.
+- [x] Full-width grids on `/home` after Phase 1 + this phase.
+- [x] RTL padding mirrors correctly on asymmetric containers.
 
 **AI prompt template**
 
@@ -539,7 +539,7 @@ Implement Phase 8 from docs/engine/RENDERER_AUDIT_IMPLEMENTATION_PLAN.md.
 Read audit: column, row, container, scaffold. Honor mainAxisSize and page scroll in repository.
 ```
 
-**Checklist:** [ ] Phase 8 complete
+**Checklist:** [x] Phase 8 complete
 
 ---
 
@@ -564,8 +564,8 @@ Read audit: column, row, container, scaffold. Honor mainAxisSize and page scroll
 
 **Acceptance criteria**
 
-- [ ] `flutter test test/engine/renderers` passes in CI.
-- [ ] At least 2 tests per renderer file.
+- [x] `flutter test test/engine/renderers` passes in CI.
+- [x] At least 2 tests per renderer file.
 
 **AI prompt template**
 
@@ -575,7 +575,7 @@ Add widget tests for text, card, gridView, button, image, scaffold renderers.
 Use minimal ComponentConfig fixtures; no full mobile_production_v2.json in tests.
 ```
 
-**Checklist:** [ ] Phase 9 complete
+**Checklist:** [x] Phase 9 complete
 
 ---
 
@@ -668,7 +668,7 @@ Read audit P2 items. Add Semantics to button, image, card tap targets, textFormF
 - [ ] `flutter test` green
 - [ ] Renderer tests (phase 9) cover main contracts, not implementation details
 - [ ] Builder-specs index matches files in `docs/engine/builder-specs/`
-- [ ] Prod JSON: Phase 7 wired `emptyMessage` / `errorMessage` where engine expects them (or documented as pending)
+- [x] Prod JSON: Phase 7 wired `emptyMessage` / `errorMessage` where engine expects them (or documented as pending)
 
 #### Manual smoke (15 min)
 

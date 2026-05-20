@@ -67,6 +67,49 @@ class PropertyParsers {
     return null;
   }
 
+  /// Maps JSON `left`/`right` to `start`/`end` for RTL-aware layout.
+  static EdgeInsetsDirectional? parseEdgeInsetsDirectional(dynamic v) {
+    if (v == null) return null;
+    if (v is num) {
+      final n = v.toDouble();
+      return EdgeInsetsDirectional.all(n);
+    }
+    if (v is Map) {
+      return EdgeInsetsDirectional.only(
+        start: (v['left'] as num?)?.toDouble() ?? 0,
+        top: (v['top'] as num?)?.toDouble() ?? 0,
+        end: (v['right'] as num?)?.toDouble() ?? 0,
+        bottom: (v['bottom'] as num?)?.toDouble() ?? 0,
+      );
+    }
+    return null;
+  }
+
+  static MainAxisSize parseMainAxisSize(
+    String? v, {
+    required MainAxisSize defaultValue,
+  }) {
+    switch (v) {
+      case 'min':
+        return MainAxisSize.min;
+      case 'max':
+        return MainAxisSize.max;
+      default:
+        return defaultValue;
+    }
+  }
+
+  static TextDirection? parseTextDirection(String? v) {
+    switch (v) {
+      case 'ltr':
+        return TextDirection.ltr;
+      case 'rtl':
+        return TextDirection.rtl;
+      default:
+        return null;
+    }
+  }
+
   static BorderRadius? parseBorderRadius(dynamic v) {
     if (v == null) return null;
     if (v is num) {
