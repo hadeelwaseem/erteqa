@@ -1,3 +1,4 @@
+import 'models/mobile_theme_config.dart';
 import 'navigation_config.dart';
 
 /// Top-level parsed model of the mobile JSON file.
@@ -17,6 +18,7 @@ class MobileAppConfig {
   final String? tenantId;
   final String? tenantSlug;
   final NavigationConfig navigation;
+  final MobileThemeConfig theme;
 
   /// All page routes defined in `pages[]`, e.g. ['/', '/products', '/product/1', '/checkout'].
   final List<String> pageRoutes;
@@ -30,6 +32,7 @@ class MobileAppConfig {
     this.tenantId,
     this.tenantSlug,
     required this.navigation,
+    required this.theme,
     required this.pageRoutes,
   });
 
@@ -55,6 +58,9 @@ class MobileAppConfig {
       tenantId: app['tenantId'] as String?,
       tenantSlug: app['tenantSlug'] as String?,
       navigation: NavigationConfig.fromJson(navJson),
+      theme: MobileThemeConfig.fromJson(
+        json['theme'] as Map<String, dynamic>?,
+      ),
       pageRoutes: routes,
     );
   }

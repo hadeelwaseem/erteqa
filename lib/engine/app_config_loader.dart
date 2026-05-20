@@ -33,7 +33,8 @@ class AppConfigLoader {
       debugPrint(
         '[AppConfigLoader] ✅ Loaded config: ${config.appName} '
         '(${config.navigation.tabs.length} tabs, '
-        '${config.pageRoutes.length} pages)',
+        '${config.pageRoutes.length} pages, '
+        'font=${config.theme.typography.fontFamily})',
       );
       return config;
     } catch (e, st) {

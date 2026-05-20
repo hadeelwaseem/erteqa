@@ -14,7 +14,9 @@ import 'package:sooq_merchant/core/utils/app_bloc_observer.dart';
 import 'package:sooq_merchant/core/utils/app_router.dart';
 import 'package:sooq_merchant/core/utils/service_locator.dart';
 import 'package:sooq_merchant/core/utils/size_config.dart';
+import 'package:sooq_merchant/config/mobile_app_config.dart';
 import 'package:sooq_merchant/engine/app_config_loader.dart';
+import 'package:sooq_merchant/engine/theme/engine_theme.dart';
 
 /// The JSON file that drives the app.
 /// Change this to switch to a different config at any time.
@@ -79,6 +81,7 @@ void main() async {
         router: router,
         tokenCubit: tokenCubit,
         sharedPreferencesCubit: sharedPreferencesCubit,
+        mobileAppConfig: mobileConfig,
       ),
     ),
   );
@@ -88,12 +91,14 @@ class SOOQApp extends StatelessWidget {
   final GoRouter router;
   final TokenCubit tokenCubit;
   final SharedPreferencesCubit sharedPreferencesCubit;
+  final MobileAppConfig? mobileAppConfig;
 
   const SOOQApp({
     super.key,
     required this.router,
     required this.tokenCubit,
     required this.sharedPreferencesCubit,
+    this.mobileAppConfig,
   });
 
   @override
@@ -107,11 +112,9 @@ class SOOQApp extends StatelessWidget {
         builder: (context) {
           SizeConfig.init(context);
           return MaterialApp.router(
-            theme: ThemeData(
-              useMaterial3: false,
-              fontFamily: 'inter',
-              scaffoldBackgroundColor: const Color(0xFFF4F6FA),
-            ),
+            theme: mobileAppConfig != null
+                ? EngineTheme.toThemeData(mobileAppConfig!.theme)
+                : ThemeData(useMaterial3: true),
             localizationsDelegates: context.localizationDelegates,
             supportedLocales: context.supportedLocales,
             locale: context.locale,

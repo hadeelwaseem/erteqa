@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-//TODO
+// Legacy widget-only theme shape — not wired from JSON.
+// Canonical app theme: [MobileThemeConfig] + runtime [EngineTheme].
 /// Theme model parsed from configuration (colors + typography).
 /// App-level theme; not tied to any specific feature.
 class AppThemeModel {

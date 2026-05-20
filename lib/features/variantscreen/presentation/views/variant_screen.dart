@@ -13,6 +13,7 @@ import 'package:sooq_merchant/core/utils/service_locator.dart';
 import 'package:sooq_merchant/engine/actions/action_dispatcher.dart';
 import 'package:sooq_merchant/engine/form/form_state_store.dart';
 import 'package:sooq_merchant/engine/requests/request_mapper.dart';
+import 'package:sooq_merchant/engine/theme/engine_theme.dart';
 import 'package:sooq_merchant/engine/tree/tree_engine.dart';
 import 'package:sooq_merchant/features/auth/presentation/manager/auth_cubit/auth_cubit.dart';
 import 'package:sooq_merchant/features/product/data/models/category.dart';
@@ -420,6 +421,7 @@ class _VariantScreenState extends State<VariantScreen> {
         'tenantSlug': config.tenantSlug,
         'bundleId': config.bundleId,
       };
+      merged[EngineTheme.contextKey] = EngineTheme.fromConfig(config.theme);
     }
     merged['loadingRequestKeys'] = const <String, bool>{};
     if (_requestResults.isNotEmpty) {

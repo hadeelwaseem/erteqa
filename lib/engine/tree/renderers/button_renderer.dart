@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../config/component_config.dart';
 import '../../component_renderer/component_renderer.dart';
+import '../../theme/engine_theme.dart';
 import '../parsers/property_parsers.dart';
 
 class ButtonRenderer implements ComponentRenderer {
@@ -23,9 +24,13 @@ class ButtonRenderer implements ComponentRenderer {
     final foregroundColor = PropertyParsers.parseColor(
       config.properties['foregroundColor'] as String?,
     );
+    final theme = EngineTheme.fromDataContext(dataContext);
     final borderRadius = PropertyParsers.parseBorderRadius(
-      config.properties['borderRadius'],
-    );
+          config.properties['borderRadius'],
+        ) ??
+        (theme != null
+            ? BorderRadius.circular(theme.buttonMd.radius)
+            : const BorderRadius.all(Radius.circular(8)));
     final padding = PropertyParsers.parseEdgeInsets(
       config.properties['padding'],
     );
@@ -35,9 +40,7 @@ class ButtonRenderer implements ComponentRenderer {
     final onTap = config.properties['onTap'] as VoidCallback?;
     final maxWidth = PropertyParsers.parseDouble(config.properties['maxWidth']);
 
-    final shape = RoundedRectangleBorder(
-      borderRadius: borderRadius ?? BorderRadius.circular(8),
-    );
+    final shape = RoundedRectangleBorder(borderRadius: borderRadius);
 
     late final Widget button;
     switch (variant) {

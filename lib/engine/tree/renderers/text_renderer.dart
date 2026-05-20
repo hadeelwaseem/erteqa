@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../config/component_config.dart';
 
 import '../../component_renderer/component_renderer.dart';
+import '../../theme/engine_theme.dart';
 import '../parsers/data_context_path.dart';
 import '../parsers/property_parsers.dart';
 
@@ -19,14 +20,17 @@ class TextRenderer implements ComponentRenderer {
         (boundValue?.toString().trim().isNotEmpty ?? false)
         ? boundValue.toString()
         : (config.properties['value'] as String? ?? '');
-    final fontSize =
-        (config.properties['fontSize'] as num?)?.toDouble() ?? 16.0;
+    final theme = EngineTheme.fromDataContext(dataContext);
+    final fontSize = (config.properties['fontSize'] as num?)?.toDouble() ??
+        theme?.typographyScale('md') ??
+        16.0;
     final fontWeight = PropertyParsers.parseFontWeight(
       config.properties['fontWeight'] as String?,
     );
     final color = PropertyParsers.parseColor(
-      config.properties['color'] as String?,
-    );
+          config.properties['color'] as String?,
+        ) ??
+        theme?.textColor;
     final textAlign = PropertyParsers.parseTextAlign(
       config.properties['textAlign'] as String?,
     );

@@ -78,6 +78,7 @@ The table below is a **lookup** (“if you need X, it lives at Y”) — **not**
 | **8** | `### column`, `### row`, `### container`, `### scaffold`; Cross-cutting RTL (line 71) | Auth, videoPlayer |
 | **9** | Cross-cutting **§4** Tests (lines 103–107); inventory table (lines 23–47) | Full per-component body |
 | **10** | P2 roadmap rows 445–450; only the `###` types named in the batch (e.g. richtext, icon) | Executive summary unless needed |
+| **11** | Full plan checklists; `RENDERER_PRODUCTION_AUDIT.md` Executive summary; git diff of branch | Per-component deep dives unless fixing a specific renderer |
 
 ### Suggested division of the audit (reference index)
 
@@ -143,6 +144,7 @@ flowchart LR
 | **8** | Layout & scroll | engine + parser | 1, 4 | M |
 | **9** | Renderer tests (top 6) | test | 1, 2, 5 | M |
 | **10** | P2 polish & a11y | engine | 5, 6, 8 | M |
+| **11** | Post-implementation review | review only | 0–10 complete | S–M |
 
 **S** ≈ half day · **M** ≈ 1–2 days · **L** ≈ 2–3 days
 
@@ -335,7 +337,7 @@ Edit mobile_production_v2.json only. Apply card/button/text style tokens from th
 Do not change Dart files.
 ```
 
-**Checklist:** [ ] Phase 3 complete
+**Checklist:** [x] Phase 3 complete
 
 ---
 
@@ -375,13 +377,9 @@ Do not change Dart files.
 
 **AI prompt template**
 
-```text
-Implement Phase 4 from docs/engine/RENDERER_AUDIT_IMPLEMENTATION_PLAN.md.
-Parse theme from mobile JSON into MobileAppConfig; apply ThemeData in main.dart; inject theme into render dataContext.
-Update text_renderer and button_renderer defaults only. No feature logic in engine.
-```
+See **Phase 4 prompt** in chat / copy full block from latest plan revision (theme parse, ThemeData, EngineTheme in dataContext, text + button proof only).
 
-**Checklist:** [ ] Phase 4 complete
+**Checklist:** [x] Phase 4 complete
 
 ---
 
@@ -615,6 +613,101 @@ Read audit P2 items. Add Semantics to button, image, card tap targets, textFormF
 
 ---
 
+## Phase 11 — Post-implementation review (after phases 0–10)
+
+**Goal:** Verify all audit work is **correct**, **minimal**, and **aligned with SOOQ architecture** — not a new feature phase. Fix only clear bugs, layer violations, or dead code found in review; defer nice-to-haves to a short follow-up list.
+
+**When to run:** All phase checklists **0–10** marked complete (or explicitly skipped with reason). Phases **1, 2, 4** are mandatory before sign-off if engine work was done.
+
+**Prerequisite:** `flutter test` passes on the branch under review.
+
+**Allowed actions**
+
+- Read-only audit of changed files across phases
+- Small targeted fixes (≤ ~50 lines per issue) for: layer violations, duplicate logic, broken contracts, failing tests
+- Remove dead code, unused imports, over-abstracted helpers introduced during phases
+- Update docs/checklists if drift found (implementation plan, builder-specs index, `docs/ai/12-production-status.md` one paragraph)
+
+**Forbidden**
+
+- New features, new component types, or `semanticType` renderers
+- Large refactors “while we’re here”
+- New dependencies without strong justification
+- Rewriting `mobile_production_v2.json` structure (style-only consistency OK if ≤20 lines)
+
+### Review checklist
+
+#### Architecture & layers
+
+- [ ] No `lib/features/*` imports inside `lib/engine/tree/renderers/` (especially `scaffold_renderer`, `image_renderer`)
+- [ ] No product/auth/catalog logic in renderers; cubits only in `VariantScreen` / features
+- [ ] JSON-first: no new hardcoded merchant screens
+- [ ] No `if (tenantSlug == …)` UI branches
+
+#### Phase deliverables (grep / spot-check)
+
+| Phase | Verify |
+|-------|--------|
+| 0 | `component_schemas.dart` matches prod JSON props (`valuePath`, `gap`, …) |
+| 1 | `scaffold_renderer` — no `ProductCubit`; no `Center` breaking stretch |
+| 2 | `request_ui_state.dart` used; list/grid loading/empty/error; builder spec `02-list-grid-request-ui.md` |
+| 3 | JSON tokens applied on `/home`, `/auth/login` (spot-check) |
+| 4 | `theme` parsed; `main.dart` font/colors from JSON; `EngineTheme` in `dataContext`; text/button defaults |
+| 5–10 | Per phase checklist in this doc |
+
+#### Code quality (anti–over-engineering)
+
+- [ ] No duplicate pagination / request loading in both `scaffold` and `VariantScreen`
+- [ ] No parallel theme systems (`AppThemeModel` stale vs `EngineTheme`) — single source from JSON
+- [ ] Helpers used by ≥2 call sites (otherwise inline)
+- [ ] No speculative props/renderers “for future use”
+- [ ] `EngineTheme` / `request_ui_state` APIs are small and readable
+
+#### Tests & config
+
+- [ ] `flutter test` green
+- [ ] Renderer tests (phase 9) cover main contracts, not implementation details
+- [ ] Builder-specs index matches files in `docs/engine/builder-specs/`
+- [ ] Prod JSON: Phase 7 wired `emptyMessage` / `errorMessage` where engine expects them (or documented as pending)
+
+#### Manual smoke (15 min)
+
+- [ ] `/home` — grid load, load-more, card tap → detail
+- [ ] `/search` — list/grid states
+- [ ] `/auth/login` — form validate + submit
+- [ ] RTL Arabic — layout not clipped; back button usable
+- [ ] Invalid video URL (if used) — error, not infinite spinner
+- [ ] Release/profile: unsupported type does not show amber banner
+
+### Output
+
+1. **Review summary** (markdown in PR or `docs/engine/PHASE_REVIEW_<date>.md` optional): Pass / Pass with fixes / Blocked
+2. **Fix list** — only items fixed in this pass; remaining → backlog table
+3. Mark **Phase 11** checklist complete in this file
+
+**AI prompt template**
+
+```text
+Run Phase 11 from docs/engine/RENDERER_AUDIT_IMPLEMENTATION_PLAN.md (Post-implementation review).
+
+Do NOT add features. Review all work from phases 0–10 against AGENTS.md and RENDERER_PRODUCTION_AUDIT.md.
+
+Steps:
+1. git diff main...HEAD (or list files changed per phase) — inventory scope
+2. Run flutter test
+3. Grep lib/engine/tree/renderers for lib/features imports
+4. Walk Phase 11 review checklist; note Pass/Fail per row
+5. Fix only: layer violations, test failures, duplicate logic, clear over-engineering (remove dead helpers)
+6. Write short review summary: what was correct, what was fixed, what is deferred (max 15 bullets)
+
+Forbidden: new component types, semanticType renderers, large refactors, new packages unless critical bug.
+Mark Phase 11 checklist when done.
+```
+
+**Checklist:** [ ] Phase 11 complete
+
+---
+
 ## Running one phase per AI chat (recommended workflow)
 
 1. Open **this plan** → pick next unchecked phase.
@@ -632,8 +725,11 @@ Read audit P2 items. Add Semantics to button, image, card tap targets, textFormF
 | **JSON-only** | 3 → 7 | Can run after 1; 7 needs 2 |
 | **Layout** | 8 | After 1 and preferably 4 |
 | **Polish** | 10 | Last |
+| **Sign-off** | 11 | After all desired phases |
 
 **Avoid parallelizing** two phases that edit the same renderer file (e.g. 1 and 8 both touch `scaffold_renderer.dart`).
+
+**Final step:** Run **Phase 11** once before merge to main — review for correctness, cleanliness, and over-engineering.
 
 ---
 

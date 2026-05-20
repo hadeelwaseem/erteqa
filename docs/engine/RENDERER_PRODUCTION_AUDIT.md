@@ -432,6 +432,7 @@ flowchart TB
 | **P0** | Configurable empty message; localize via JSON | `listView`, `gridView` | engine + JSON | S |
 | **P0** | Video init failure UI (not infinite spinner) | `videoPlayer` | engine | S |
 | **P0** | Align production card/button radii in JSON to design tokens | `card`, `button` | JSON | S |
+
 | **P1** | Theme bridge: JSON `theme` → `ThemeData` + renderer defaults | all | engine + config | L |
 | **P1** | Update `component_schemas.dart` (`valuePath`, `urlPath`, `gap`, etc.) | all | schema | S |
 | **P1** | `listView` use `resolveDataContextPath`; match `gridView` | `listView` | engine | S |
