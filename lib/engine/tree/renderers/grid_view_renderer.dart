@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../../config/component_config.dart';
 import '../../component_renderer/component_renderer.dart';
+import '../../request_ui_state.dart';
 import '../parsers/data_context_path.dart';
 import '../parsers/property_parsers.dart';
 
@@ -12,11 +13,42 @@ class GridViewRenderer implements ComponentRenderer {
     required ComponentWidgetBuilder buildChild,
     Map<String, dynamic>? dataContext,
   }) {
+    final props = config.properties;
+    final requestKey = resolveRequestKey(props);
+    final crossAxisCount =
+        config.crossAxisCount ?? _parseInt(config.properties['crossAxisCount']);
+    final items = _resolveItems(config, dataContext);
+    final phase = resolveRequestBoundListPhase(
+      requestKey: requestKey,
+      dataContext: dataContext,
+      itemsEmpty: items.isEmpty,
+    );
+
+    if (phase == RequestBoundListPhase.loading ||
+        phase == RequestBoundListPhase.error ||
+        phase == RequestBoundListPhase.empty) {
+      final requestMap = requestKey == null
+          ? null
+          : _requestMap(dataContext, requestKey);
+      final message = switch (phase) {
+        RequestBoundListPhase.error => resolveDisplayMessage(
+          prop: props['errorMessage'] as String?,
+          requestMap: requestMap,
+          fallback: kDefaultErrorMessage,
+        ),
+        RequestBoundListPhase.empty => resolveDisplayMessage(
+          prop: props['emptyMessage'] as String?,
+          requestMap: requestMap,
+          fallback: kDefaultEmptyMessage,
+        ),
+        _ => '',
+      };
+      return buildRequestPhasePlaceholder(phase: phase, message: message);
+    }
+
     final scrollDirection = _parseAxis(
       config.scrollDirection ?? config.properties['scrollDirection'] as String?,
     );
-    final crossAxisCount =
-        config.crossAxisCount ?? _parseInt(config.properties['crossAxisCount']);
     final mainAxisSpacing =
         config.mainAxisSpacing ??
         _parseDouble(config.properties['mainAxisSpacing']) ??
@@ -31,7 +63,6 @@ class GridViewRenderer implements ComponentRenderer {
 
     final itemTemplate = config.itemBuilder?.item ?? config.child;
     final children = config.children ?? const <ComponentConfig>[];
-    final items = _resolveItems(config, dataContext);
     final enableInnerScroll = config.properties['enableInnerScroll'] == true;
     final shrinkWrap = !enableInnerScroll;
     final physics = enableInnerScroll
@@ -39,11 +70,11 @@ class GridViewRenderer implements ComponentRenderer {
         : const NeverScrollableScrollPhysics();
 
     if (crossAxisCount == null || crossAxisCount <= 0) {
-      return _emptyState();
+      return _emptyState(props);
     }
 
     if (itemTemplate == null && children.isEmpty) {
-      return _emptyState();
+      return _emptyState(props);
     }
 
     final delegate = SliverGridDelegateWithFixedCrossAxisCount(
@@ -54,7 +85,7 @@ class GridViewRenderer implements ComponentRenderer {
     );
 
     if (itemTemplate != null) {
-      if (items.isEmpty) return _emptyState();
+      if (items.isEmpty) return _emptyState(props);
       return GridView.builder(
         scrollDirection: scrollDirection,
         gridDelegate: delegate,
@@ -91,6 +122,18 @@ class GridViewRenderer implements ComponentRenderer {
         return buildChild(scoped);
       },
     );
+  }
+
+  Map<String, dynamic>? _requestMap(
+    Map<String, dynamic>? dataContext,
+    String requestKey,
+  ) {
+    final requests = dataContext?['requests'];
+    if (requests is! Map) return null;
+    final entry = requests[requestKey];
+    if (entry is Map<String, dynamic>) return entry;
+    if (entry is Map) return Map<String, dynamic>.from(entry);
+    return null;
   }
 
   Axis _parseAxis(String? axis) {
@@ -197,9 +240,14 @@ class GridViewRenderer implements ComponentRenderer {
     );
   }
 
-  Widget _emptyState() {
-    return const Center(
-      child: Text('No items available', textAlign: TextAlign.center),
+  Widget _emptyState(Map<String, dynamic> props) {
+    final message = resolveDisplayMessage(
+      prop: props['emptyMessage'] as String?,
+      requestMap: null,
+      fallback: kDefaultEmptyMessage,
+    );
+    return Center(
+      child: Text(message, textAlign: TextAlign.center),
     );
   }
 }

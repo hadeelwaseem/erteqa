@@ -115,11 +115,16 @@ Details: [`docs/ai/03-engine.md`](docs/ai/03-engine.md)
 
 ---
 
+## Renderer audit phases (engine work)
+
+When implementing [docs/engine/RENDERER_AUDIT_IMPLEMENTATION_PLAN.md](docs/engine/RENDERER_AUDIT_IMPLEMENTATION_PLAN.md): if the phase adds JSON props or page/theme fields that **do not exist** in `assets/config/mobile_production_v2.json`, create a handoff spec under [docs/engine/builder-specs/](docs/engine/builder-specs/README.md) for the **website builder** — do not assume the config tool already supports them.
+
 ## Do / Don't for AI
 
 | Do | Don't |
 |----|-------|
 | Edit JSON for UI changes | Create new `StatelessWidget` screens for merchant flows |
+| Document new JSON contracts in `docs/engine/builder-specs/` when not in prod config | Invent undeclared `props` keys only in Dart without builder spec |
 | Use existing repos/cubits | Call `Dio` from renderers |
 | Register new types in `ScreenRenderer` | Add parallel widget registry strings |
 | Return `Either<Failure, T>` from repos | Parse API JSON in widgets |

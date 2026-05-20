@@ -32,6 +32,10 @@
 
 Parsed by `MobileAppConfig.fromJson` in `lib/config/mobile_app_config.dart`.
 
+### Page `scroll` (not yet implemented)
+
+Production pages often set `"scroll": "vertical"` or `"horizontal"` on the page object. **`VariantRepository` does not apply page-level `scroll` today** — layout scrolling comes from the component tree (e.g. `singleChildScrollView`, `listView` / `gridView` with `enableInnerScroll`). Honoring page `scroll` is tracked on the renderer roadmap (engine/parser work).
+
 ## Page body nodes
 
 Each node in `body[]`:

@@ -65,7 +65,7 @@ File: `lib/features/variantscreen/data/repos/variant_repository.dart`.
 ## Validation
 
 - `component_schema.dart` — per-type required/optional props
-- `component_schemas.dart` — catalog; warns on unknown keys, does not block render
+- `component_schemas.dart` — catalog aligned with `mobile_production_v2` (e.g. `valuePath`, `urlPath`, `gap`, `shadow`, `border`, `aspectRatio`, `variant`, `id`). Warns on unknown keys; does not block render. Button `onTap` is **runtime-injected** by `ScreenRenderer` from JSON `tap` — do not author `onTap` in JSON.
 
 ## Registry note
 

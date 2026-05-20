@@ -1,0 +1,83 @@
+# Builder specs — JSON gaps for the website builder
+
+When implementing [renderer audit phases](../RENDERER_AUDIT_IMPLEMENTATION_PLAN.md), the mobile engine may support **props, page fields, or `theme` keys** that are **not yet present** in the active production config:
+
+[`assets/config/mobile_production_v2.json`](../../../assets/config/mobile_production_v2.json)
+
+Those gaps must **not** be left implicit. Document them here so the **website builder** (config authoring tool / team) can implement the same shape on their side and publish updated JSON.
+
+---
+
+## When to create a builder spec
+
+Create or update a file in this folder if **any** of the following is true during a phase:
+
+| Situation | Example |
+|-----------|---------|
+| New optional/required **component `props`** supported in Dart but **0 usages** in `mobile_production_v2.json` | `emptyMessage` on `gridView` |
+| New **page-level** field parsed in app but missing from all `pages[]` entries | `scroll: "none"` |
+| New **`theme`** subsection consumed by `ThemeData` but absent or incomplete in JSON | `theme.buttons.lg` used as default |
+| **Renamed or corrected** JSON key (builder must migrate) | `color` vs `foregroundColor` on `appBar` |
+| **`data` / `tap` / `itemBuilder`** shape extension | `requestKey` + loading flags documented for lists |
+
+**Do not** create a spec when the prop **already exists** in production JSON (verify with search).
+
+**Do not** use specs for Dart-only internals (`dataContext`, cubits, `FormStateStore`) unless the builder must emit a related JSON field.
+
+---
+
+## When to edit production JSON instead
+
+| Phase type | Who updates `mobile_production_v2.json` |
+|------------|----------------------------------------|
+| Phase **3**, **7**, or explicit “JSON-only” tasks | **This repo** — apply tokens and wire new props on real pages |
+| Engine-only phases (1, 2, 4, 5, …) | **Builder team** via spec — unless the phase checklist says to patch JSON |
+
+If the phase **allows** JSON edits, you may **both** update `mobile_production_v2.json **and** add a short spec noting “now implemented in repo as reference”.
+
+---
+
+## File naming
+
+```
+docs/engine/builder-specs/<phase>-<short-slug>.md
+```
+
+Examples:
+
+- `02-list-grid-request-ui.md` — `emptyMessage`, `requestKey`, loading props
+- `04-theme-tokens.md` — theme keys the app reads vs what JSON currently defines
+- `08-page-scroll.md` — page `scroll` field behavior
+
+Copy structure from [`_TEMPLATE.md`](_TEMPLATE.md).
+
+---
+
+## Index
+
+| Spec | Phase | Status | Summary |
+|------|-------|--------|---------|
+| [02-list-grid-request-ui.md](02-list-grid-request-ui.md) | 2 | ready-for-builder | `emptyMessage`, `errorMessage`, `requestKey` loading/empty/error on list/grid |
+
+Update this table when adding a spec.
+
+---
+
+## Verification command
+
+Before marking a phase done, confirm prod JSON coverage:
+
+```powershell
+# Example: check if emptyMessage exists in production config
+Select-String -Path assets\config\mobile_production_v2.json -Pattern "emptyMessage"
+```
+
+If engine code references a prop and search returns **no matches**, a builder spec is **required** (unless this phase added it to JSON).
+
+---
+
+## Related
+
+- Config schema: [`docs/ai/02-config-and-json.md`](../../ai/02-config-and-json.md)
+- Audit: [`RENDERER_PRODUCTION_AUDIT.md`](../RENDERER_PRODUCTION_AUDIT.md)
+- Phase plan: [`RENDERER_AUDIT_IMPLEMENTATION_PLAN.md`](../RENDERER_AUDIT_IMPLEMENTATION_PLAN.md)

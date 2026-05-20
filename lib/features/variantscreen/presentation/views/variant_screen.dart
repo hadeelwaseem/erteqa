@@ -398,6 +398,11 @@ class _VariantScreenState extends State<VariantScreen> {
     });
   }
 
+  /// [dataContext] contract for request-bound list/grid renderers:
+  /// - `requests.{requestKey}` — payload (`success`, `message`, `data`, …)
+  /// - `loadingRequestKeys` — `Map<String, bool>` initial load per key
+  /// - `initialRequestKeys` — keys auto-dispatched on page load (no `qField`)
+  /// - `loadingMoreRequests` — load-more in progress (scaffold footer)
   Map<String, dynamic> _buildRenderContext() {
     final merged = <String, dynamic>{..._dataContext};
     if (widget.routeParams.isNotEmpty) {
@@ -415,6 +420,7 @@ class _VariantScreenState extends State<VariantScreen> {
         'bundleId': config.bundleId,
       };
     }
+    merged['loadingRequestKeys'] = const <String, bool>{};
     if (_requestResults.isNotEmpty) {
       merged['requests'] = _requestResults;
       merged['loadingMoreRequests'] = {
@@ -573,10 +579,23 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
   late String _routeSignature;
   Timer? _queryDebounce;
 
+  void _syncLoadingFlagsToContext() {
+    widget.renderContext['loadingRequestKeys'] = {
+      for (final key in _loadingRequestKeys) key: true,
+    };
+    widget.renderContext['loadingMoreRequests'] = {
+      for (final key in _loadingMoreRequestKeys) key: true,
+    };
+  }
+
   @override
   void initState() {
     super.initState();
     _routeSignature = _buildRouteSignature(widget.routeParams);
+    widget.renderContext['initialRequestKeys'] = {
+      for (final request in widget.mappedRequests)
+        if (request.qField == null) request.key: true,
+    };
     _bindFormQueryListeners();
     _scheduleDispatch();
   }
@@ -638,6 +657,10 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
     if (oldWidget.config != widget.config || routeParamsChanged) {
       _dispatchedRequestKeys.clear();
       _dispatchScheduled = false;
+      widget.renderContext['initialRequestKeys'] = {
+        for (final request in widget.mappedRequests)
+          if (request.qField == null) request.key: true,
+      };
       _scheduleDispatch();
     }
   }
@@ -767,20 +790,16 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
               setState(() {
                 if (state.isLoadMore) {
                   _loadingMoreRequestKeys.add(state.requestKey);
-                  widget.renderContext['loadingMoreRequests'] = {
-                    for (final key in _loadingMoreRequestKeys) key: true,
-                  };
                 } else {
                   _loadingRequestKeys.add(state.requestKey);
                 }
+                _syncLoadingFlagsToContext();
               });
             } else if (state is ProductSuccess) {
               setState(() {
                 _loadingRequestKeys.remove(state.requestKey);
                 _loadingMoreRequestKeys.remove(state.requestKey);
-                widget.renderContext['loadingMoreRequests'] = {
-                  for (final key in _loadingMoreRequestKeys) key: true,
-                };
+                _syncLoadingFlagsToContext();
               });
               widget.onProductSuccess(
                 state.requestKey,
@@ -791,9 +810,7 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
               setState(() {
                 _loadingRequestKeys.remove(state.requestKey);
                 _loadingMoreRequestKeys.remove(state.requestKey);
-                widget.renderContext['loadingMoreRequests'] = {
-                  for (final key in _loadingMoreRequestKeys) key: true,
-                };
+                _syncLoadingFlagsToContext();
               });
               widget.onProductFailure(
                 state.requestKey,
@@ -814,20 +831,16 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
               setState(() {
                 if (state.isLoadMore) {
                   _loadingMoreRequestKeys.add(state.requestKey);
-                  widget.renderContext['loadingMoreRequests'] = {
-                    for (final key in _loadingMoreRequestKeys) key: true,
-                  };
                 } else {
                   _loadingRequestKeys.add(state.requestKey);
                 }
+                _syncLoadingFlagsToContext();
               });
             } else if (state is ProductSearchSuccess) {
               setState(() {
                 _loadingRequestKeys.remove(state.requestKey);
                 _loadingMoreRequestKeys.remove(state.requestKey);
-                widget.renderContext['loadingMoreRequests'] = {
-                  for (final key in _loadingMoreRequestKeys) key: true,
-                };
+                _syncLoadingFlagsToContext();
               });
               widget.onSearchSuccess(
                 state.requestKey,
@@ -838,9 +851,7 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
               setState(() {
                 _loadingRequestKeys.remove(state.requestKey);
                 _loadingMoreRequestKeys.remove(state.requestKey);
-                widget.renderContext['loadingMoreRequests'] = {
-                  for (final key in _loadingMoreRequestKeys) key: true,
-                };
+                _syncLoadingFlagsToContext();
               });
               widget.onSearchFailure(
                 state.requestKey,
@@ -860,10 +871,12 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
             if (state is ProductAutocompleteLoading) {
               setState(() {
                 _loadingRequestKeys.add(state.requestKey);
+                _syncLoadingFlagsToContext();
               });
             } else if (state is ProductAutocompleteSuccess) {
               setState(() {
                 _loadingRequestKeys.remove(state.requestKey);
+                _syncLoadingFlagsToContext();
               });
               widget.onAutocompleteSuccess(
                 state.requestKey,
@@ -872,6 +885,7 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
             } else if (state is ProductAutocompleteFailure) {
               setState(() {
                 _loadingRequestKeys.remove(state.requestKey);
+                _syncLoadingFlagsToContext();
               });
               widget.onAutocompleteFailure(
                 state.requestKey,
@@ -890,10 +904,12 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
             if (state is ProductDetailLoading) {
               setState(() {
                 _loadingRequestKeys.add(state.requestKey);
+                _syncLoadingFlagsToContext();
               });
             } else if (state is ProductDetailSuccess) {
               setState(() {
                 _loadingRequestKeys.remove(state.requestKey);
+                _syncLoadingFlagsToContext();
               });
               widget.onProductDetailSuccess(
                 state.requestKey,
@@ -902,6 +918,7 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
             } else if (state is ProductDetailFailure) {
               setState(() {
                 _loadingRequestKeys.remove(state.requestKey);
+                _syncLoadingFlagsToContext();
               });
               widget.onProductDetailFailure(
                 state.requestKey,
@@ -920,10 +937,12 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
             if (state is CategoryLoading) {
               setState(() {
                 _loadingRequestKeys.add(state.requestKey);
+                _syncLoadingFlagsToContext();
               });
             } else if (state is CategoryTreeSuccess) {
               setState(() {
                 _loadingRequestKeys.remove(state.requestKey);
+                _syncLoadingFlagsToContext();
               });
               widget.onCategoryTreeSuccess(
                 state.requestKey,
@@ -932,6 +951,7 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
             } else if (state is CategorySuccess) {
               setState(() {
                 _loadingRequestKeys.remove(state.requestKey);
+                _syncLoadingFlagsToContext();
               });
               widget.onCategorySuccess(
                 state.requestKey,
@@ -940,6 +960,7 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
             } else if (state is CategoryFailure) {
               setState(() {
                 _loadingRequestKeys.remove(state.requestKey);
+                _syncLoadingFlagsToContext();
               });
               widget.onCategoryFailure(
                 state.requestKey,
@@ -953,21 +974,10 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
 
     return MultiBlocListener(
       listeners: listeners,
-      child: Stack(
-        children: [
-          ScreenRenderer.withPrimitives().render(
-            widget.config,
-            context: context,
-            dataContext: widget.renderContext,
-          ),
-          if (_loadingRequestKeys.isNotEmpty)
-            const Positioned.fill(
-              child: ColoredBox(
-                color: Color(0x14FFFFFF),
-                child: Center(child: CircularProgressIndicator()),
-              ),
-            ),
-        ],
+      child: ScreenRenderer.withPrimitives().render(
+        widget.config,
+        context: context,
+        dataContext: widget.renderContext,
       ),
     );
   }

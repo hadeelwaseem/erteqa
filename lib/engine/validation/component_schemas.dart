@@ -29,6 +29,8 @@ class ComponentSchemas {
       'borderRadius',
       'width',
       'height',
+      'shadow',
+      'border',
       'child', // Not in properties map, but allowed in ComponentConfig
     },
     propertyTypes: {
@@ -38,6 +40,8 @@ class ComponentSchemas {
       'borderRadius': 'number',
       'width': 'number',
       'height': 'number',
+      'shadow': 'string (sm|md|lg|xl|none)',
+      'border': 'object {width, color}',
     },
   );
 
@@ -70,12 +74,14 @@ class ComponentSchemas {
       'mainAxisSize',
       'verticalDirection',
       'textDirection',
+      'gap',
       'children', // Not in properties, but in ComponentConfig
     },
     propertyTypes: {
       'mainAxisAlignment':
           'string (start|center|end|spaceBetween|spaceAround|spaceEvenly)',
       'crossAxisAlignment': 'string (start|center|end|stretch|baseline)',
+      'gap': 'number',
     },
   );
 
@@ -89,12 +95,14 @@ class ComponentSchemas {
       'mainAxisSize',
       'verticalDirection',
       'textDirection',
+      'gap',
       'children', // Not in properties, but in ComponentConfig
     },
     propertyTypes: {
       'mainAxisAlignment':
           'string (start|center|end|spaceBetween|spaceAround|spaceEvenly)',
       'crossAxisAlignment': 'string (start|center|end|stretch|baseline)',
+      'gap': 'number',
     },
   );
 
@@ -139,10 +147,15 @@ class ComponentSchemas {
   );
 
   /// Schema: Text - leaf widget displaying static or dynamic text.
+  ///
+  /// Runtime expects at least one of [value] or [valuePath]; validation does
+  /// not enforce XOR (lenient for production JSON that uses valuePath only).
   static const text = ComponentSchema(
     type: 'text',
-    requiredProperties: {'value'},
+    requiredProperties: {},
     optionalProperties: {
+      'value',
+      'valuePath',
       'fontSize',
       'fontWeight',
       'color',
@@ -155,6 +168,7 @@ class ComponentSchemas {
     },
     propertyTypes: {
       'value': 'string',
+      'valuePath': 'string (dataContext path)',
       'fontSize': 'number',
       'fontWeight': 'string (w100|w200|...|w900|bold|normal)',
       'color': 'string (hex)',
@@ -163,6 +177,9 @@ class ComponentSchemas {
   );
 
   /// Schema: Button - interactive element with label and optional styling.
+  ///
+  /// [onTap] is injected at render time by [ScreenRenderer] from JSON [tap];
+  /// do not author onTap in JSON. Use node-level tap instead.
   static const button = ComponentSchema(
     type: 'button',
     requiredProperties: {}, // 'label' recommended but not enforced
@@ -176,14 +193,16 @@ class ComponentSchemas {
       'borderRadius',
       'padding',
       'alignment',
-      'onPressed', // For future event binding
+      'onTap', // Runtime-injected from tap; not authored in JSON
     },
     propertyTypes: {
       'label': 'string',
+      'variant': 'string (elevated|filled|outlined|text)',
       'backgroundColor': 'string (hex)',
       'textColor': 'string (hex)',
       'borderRadius': 'number',
       'padding': 'number | object',
+      'onTap': 'VoidCallback (runtime-injected)',
     },
   );
 
@@ -212,8 +231,12 @@ class ComponentSchemas {
   static const spacer = ComponentSchema(
     type: 'spacer',
     requiredProperties: {},
-    optionalProperties: {'flex'},
-    propertyTypes: {'flex': 'number (integer)'},
+    optionalProperties: {'flex', 'width', 'height'},
+    propertyTypes: {
+      'flex': 'number (integer)',
+      'width': 'number',
+      'height': 'number',
+    },
   );
 
   /// Schema: Image - displays images from network, asset, or file sources.
@@ -222,17 +245,21 @@ class ComponentSchemas {
     requiredProperties: {'url'},
     optionalProperties: {
       'source', // 'network', 'asset', 'file'
+      'urlPath',
       'width',
       'height',
+      'aspectRatio',
       'fit', // How to fit the image
       'errorPlaceholder',
       'loadingPlaceholder',
     },
     propertyTypes: {
       'url': 'string',
+      'urlPath': 'string (dataContext path)',
       'source': 'string (network|asset|file)',
       'width': 'number',
       'height': 'number',
+      'aspectRatio': 'number',
       'fit': 'string (fill|contain|cover|fitWidth|fitHeight|scaleDown)',
     },
   );
@@ -272,6 +299,7 @@ class ComponentSchemas {
     type: 'textFormField',
     requiredProperties: {},
     optionalProperties: {
+      'id',
       'label',
       'hint',
       'helper',
@@ -320,6 +348,7 @@ class ComponentSchemas {
       'shadow',
     },
     propertyTypes: {
+      'id': 'string',
       'label': 'string',
       'hint': 'string',
       'helper': 'string',
@@ -372,8 +401,9 @@ class ComponentSchemas {
   static const form = ComponentSchema(
     type: 'form',
     requiredProperties: {},
-    optionalProperties: {'formId', 'child', 'children'},
+    optionalProperties: {'id', 'formId', 'child', 'children'},
     propertyTypes: {
+      'id': 'string',
       'formId': 'string',
     },
   );

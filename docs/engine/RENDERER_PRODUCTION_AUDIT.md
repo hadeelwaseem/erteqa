@@ -453,6 +453,8 @@ flowchart TB
 
 ## References
 
+- Phase implementation: [`RENDERER_AUDIT_IMPLEMENTATION_PLAN.md`](RENDERER_AUDIT_IMPLEMENTATION_PLAN.md)
+- Builder JSON handoffs: [`builder-specs/README.md`](builder-specs/README.md)
 - Engine overview: [`docs/ai/03-engine.md`](../ai/03-engine.md)
 - Actions & requests: [`docs/ai/04-actions-and-requests.md`](../ai/04-actions-and-requests.md)
 - Production status: [`docs/ai/12-production-status.md`](../ai/12-production-status.md)
