@@ -268,6 +268,9 @@ class AssetVariantRepository implements VariantRepository {
       if (style.containsKey('borderRadius')) {
         properties['borderRadius'] = style['borderRadius'];
       }
+      if (style.containsKey('border')) {
+        properties['border'] = style['border'];
+      }
       if (style.containsKey('shadow')) {
         properties['shadow'] = style['shadow'];
       }

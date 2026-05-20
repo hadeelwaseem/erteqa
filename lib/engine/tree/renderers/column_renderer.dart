@@ -32,13 +32,21 @@ class ColumnRenderer implements ComponentRenderer {
       gap,
     );
 
-    return Column(
+    final padding = PropertyParsers.parseEdgeInsetsDirectional(
+      config.properties['padding'],
+    );
+
+    Widget column = Column(
       mainAxisSize: mainAxisSize,
       mainAxisAlignment: mainAxisAlignment,
       crossAxisAlignment: crossAxisAlignment,
       textDirection: textDirection,
       children: childWidgets,
     );
+    if (padding != null) {
+      column = Padding(padding: padding, child: column);
+    }
+    return column;
   }
 
   List<Widget> _withGap(List<Widget> children, double gap) {

@@ -141,7 +141,8 @@
           "id": "splash-root",
           "type": "container",
           "props": {
-            "semanticType": "SplashStartup"
+            "semanticType": "SplashStartup",
+            "expand": true
           },
           "style": {
             "padding": 24
@@ -152,6 +153,7 @@
             "props": {
               "crossAxis": "center",
               "mainAxis": "center",
+              "mainAxisSize": "max",
               "gap": 16
             },
             "children": [

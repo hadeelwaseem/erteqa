@@ -81,7 +81,6 @@ class TextFormFieldRenderer implements ComponentRenderer {
     final onSubmittedAction =
         properties['onSubmitted'] as Map<String, dynamic>?;
 
-    final padding = PropertyParsers.parseEdgeInsets(properties['padding']);
     final margin = PropertyParsers.parseEdgeInsets(properties['margin']);
     final color = PropertyParsers.parseColor(properties['color'] as String?);
     final borderRadius = PropertyParsers.parseBorderRadius(
@@ -114,11 +113,7 @@ class TextFormFieldRenderer implements ComponentRenderer {
       validationMessage: validationMessage,
     );
 
-    final hasBoxDecoration =
-        color != null ||
-        borderRadius != null ||
-        border != null ||
-        shadow != null;
+    final contentPadding = PropertyParsers.parseEdgeInsets(properties['padding']);
 
     final controllerKey = controllerId ?? fieldId;
     final formState = _formStateFrom(dataContext);
@@ -160,9 +155,10 @@ class TextFormFieldRenderer implements ComponentRenderer {
           suffixText: suffixText,
           prefixIconName: prefixIconName,
           suffixIconName: suffixIconName,
-          hasBoxDecoration: hasBoxDecoration,
           borderRadius: borderRadius,
-          fillColor: color ?? theme?.surfaceColor,
+          fillColor: color,
+          border: border,
+          contentPadding: contentPadding,
         );
 
         final field = TextFormField(
@@ -219,24 +215,24 @@ class TextFormFieldRenderer implements ComponentRenderer {
             ? Material(type: MaterialType.transparency, child: field)
             : field;
 
-        Widget result;
-        if (!hasBoxDecoration && padding == null && margin == null) {
-          result = fieldWidget;
-        } else {
+        Widget result = fieldWidget;
+        if (shadow != null) {
+          final radius =
+              borderRadius ?? BorderRadius.circular(theme?.radiusMd ?? 12);
+          result = DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: radius,
+              boxShadow: [shadow],
+            ),
+            child: result,
+          );
+        }
+        if (margin != null || width != null || height != null) {
           result = Container(
             width: width,
             height: height,
-            padding: padding,
             margin: margin,
-            decoration: hasBoxDecoration
-                ? BoxDecoration(
-                    color: color,
-                    borderRadius: borderRadius,
-                    border: border,
-                    boxShadow: shadow != null ? [shadow] : null,
-                  )
-                : null,
-            child: fieldWidget,
+            child: result,
           );
         }
 
@@ -261,28 +257,51 @@ class TextFormFieldRenderer implements ComponentRenderer {
     required String? suffixText,
     required String? prefixIconName,
     required String? suffixIconName,
-    required bool hasBoxDecoration,
     required BorderRadius? borderRadius,
     required Color? fillColor,
+    required Border? border,
+    required EdgeInsets? contentPadding,
   }) {
     final prefixIcon = _tapTargetIcon(prefixIconName);
     final suffixIcon = _tapTargetIcon(suffixIconName);
 
-    if (theme != null) {
-      return theme.inputDecoration(
-        labelText: label,
-        hintText: hint,
-        helperText: helper,
-        errorText: error,
-        prefixText: prefixText,
-        suffixText: suffixText,
-        prefixIcon: prefixIcon,
-        suffixIcon: suffixIcon,
-        borderRadius: borderRadius,
-        fillColor: fillColor,
-        hideBorders: hasBoxDecoration,
-      );
-    }
+    final radius =
+        borderRadius ?? BorderRadius.circular(theme?.radiusMd ?? 12);
+    final fill = fillColor ?? theme?.surfaceColor ?? const Color(0xFFF8FAFC);
+    final defaultPadding =
+        contentPadding ?? const EdgeInsets.symmetric(horizontal: 12, vertical: 14);
+
+    final borderSide = border != null
+        ? BorderSide(color: border.top.color, width: border.top.width)
+        : BorderSide(color: theme?.inputBorderColor ?? const Color(0xFFE2E8F0));
+
+    final enabledOutline = OutlineInputBorder(
+      borderRadius: radius,
+      borderSide: borderSide,
+    );
+    final focusedOutline = OutlineInputBorder(
+      borderRadius: radius,
+      borderSide: BorderSide(
+        color: theme?.primaryColor ?? const Color(0xFF1D4ED8),
+        width: 2,
+      ),
+    );
+    final errorColor = theme?.errorColor ?? const Color(0xFFDC2626);
+    final errorOutline = OutlineInputBorder(
+      borderRadius: radius,
+      borderSide: BorderSide(color: errorColor),
+    );
+    final focusedErrorOutline = OutlineInputBorder(
+      borderRadius: radius,
+      borderSide: BorderSide(color: errorColor, width: 2),
+    );
+
+    final labelStyle = TextStyle(
+      color: theme?.textColor ?? const Color(0xFF0F172A),
+    );
+    final hintStyle = TextStyle(
+      color: theme?.mutedColor ?? const Color(0xFF475569),
+    );
 
     return InputDecoration(
       labelText: label,
@@ -293,8 +312,17 @@ class TextFormFieldRenderer implements ComponentRenderer {
       suffixText: suffixText,
       prefixIcon: prefixIcon,
       suffixIcon: suffixIcon,
-      border: hasBoxDecoration ? InputBorder.none : null,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      filled: true,
+      fillColor: fill,
+      labelStyle: labelStyle,
+      hintStyle: hintStyle,
+      contentPadding: defaultPadding,
+      border: enabledOutline,
+      enabledBorder: enabledOutline,
+      focusedBorder: focusedOutline,
+      errorBorder: errorOutline,
+      focusedErrorBorder: focusedErrorOutline,
+      disabledBorder: enabledOutline,
     );
   }
 

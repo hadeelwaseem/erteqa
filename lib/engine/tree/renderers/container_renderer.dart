@@ -15,6 +15,8 @@ import '../parsers/property_parsers.dart';
 /// - `margin` — {top,right,bottom,left}
 /// - `borderRadius` — numeric
 /// - `width` / `height` — numeric px
+/// - `expand` (bool) — fill parent width/height when width/height omitted; inside
+///   scroll views uses [BoxConstraints.minHeight] or viewport (not infinite expand)
 /// - `shadow` — "sm" | "md" | "lg" | "xl" | "none"
 /// - `border` — {width, color}
 class ContainerRenderer implements ComponentRenderer {
@@ -40,7 +42,21 @@ class ContainerRenderer implements ComponentRenderer {
     final height = PropertyParsers.parseDouble(config.properties['height']);
     final shadow = _parseShadow(config.properties['shadow']);
     final border = _parseBorder(config.properties['border'], dataContext);
-    final child = config.child != null ? buildChild(config.child!) : null;
+    Widget? child = config.child != null ? buildChild(config.child!) : null;
+    final expand = config.properties['expand'] == true;
+    if (expand && child != null && width == null && height == null) {
+      final expandedChild = child;
+      child = LayoutBuilder(
+        builder: (context, constraints) {
+          final height = _expandHeight(context, constraints);
+          return SizedBox(
+            width: double.infinity,
+            height: height,
+            child: expandedChild,
+          );
+        },
+      );
+    }
 
     final hasDecoration =
         color != null ||
@@ -63,6 +79,19 @@ class ContainerRenderer implements ComponentRenderer {
           : null,
       child: child,
     );
+  }
+
+  /// Height for [expand] when parent max height is unbounded (e.g. [SingleChildScrollView]).
+  static double _expandHeight(BuildContext context, BoxConstraints constraints) {
+    if (constraints.maxHeight.isFinite) {
+      return constraints.maxHeight;
+    }
+    if (constraints.minHeight > 0 && constraints.minHeight.isFinite) {
+      return constraints.minHeight;
+    }
+    final media = MediaQuery.sizeOf(context);
+    final padding = MediaQuery.paddingOf(context).vertical;
+    return (media.height - padding).clamp(0.0, double.infinity);
   }
 
   BoxShadow? _parseShadow(dynamic v) {

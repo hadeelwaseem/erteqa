@@ -29,6 +29,7 @@ class ComponentSchemas {
       'borderRadius',
       'width',
       'height',
+      'expand',
       'shadow',
       'border',
       'child', // Not in properties map, but allowed in ComponentConfig
@@ -40,6 +41,7 @@ class ComponentSchemas {
       'borderRadius': 'number',
       'width': 'number',
       'height': 'number',
+      'expand': 'bool (fill width/height; scroll-safe via minHeight/viewport)',
       'shadow': 'string (sm|md|lg|xl|none)',
       'border': 'object {width, color}',
     },

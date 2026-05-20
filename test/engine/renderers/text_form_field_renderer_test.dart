@@ -189,6 +189,56 @@ void main() {
     expect(semantics.hasFlag(SemanticsFlag.isTextField), isTrue);
   });
 
+  testWidgets('auth login style renders outline border and fill', (tester) async {
+    final renderer = TextFormFieldRenderer();
+    final store = FormStateStore();
+    final config = ComponentConfig(
+      type: GenericComponentType.textFormField,
+      properties: {
+        'id': 'phone',
+        'label': 'رقم الجوال',
+        'hint': '+963911000111',
+        'keyboardType': 'phone',
+        'textAlign': 'right',
+        'validateRequired': true,
+        'validatePhone': true,
+        'requiredMessage': 'هذا الحقل مطلوب',
+        'padding': {'left': 12, 'right': 12, 'top': 6, 'bottom': 6},
+        'color': '#F8FAFC',
+        'borderRadius': 10,
+        'border': {'width': 1, 'color': '#E2E8F0'},
+      },
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Form(
+            key: store.formKeyFor('f'),
+            child: renderer.render(
+              config,
+              buildChild: (_) => const SizedBox.shrink(),
+              dataContext: {
+                ...formRendererDataContext(),
+                FormStateStore.contextKey: store,
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final decorator = tester.widget<InputDecorator>(find.byType(InputDecorator));
+    expect(decorator.decoration.filled, isTrue);
+    expect(decorator.decoration.fillColor, const Color(0xFFF8FAFC));
+    final enabled = decorator.decoration.enabledBorder! as OutlineInputBorder;
+    expect(enabled.borderRadius, BorderRadius.circular(10));
+    expect(enabled.borderSide.color, const Color(0xFFE2E8F0));
+    expect(enabled.borderSide.width, 1);
+    expect(decorator.decoration.contentPadding, const EdgeInsets.fromLTRB(12, 6, 12, 6));
+    expect(find.text('رقم الجوال'), findsOneWidget);
+  });
+
   testWidgets('validation error text shown after validate', (tester) async {
     final renderer = TextFormFieldRenderer();
     final store = FormStateStore();
