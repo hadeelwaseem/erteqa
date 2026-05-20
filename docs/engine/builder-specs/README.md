@@ -58,6 +58,7 @@ Copy structure from [`_TEMPLATE.md`](_TEMPLATE.md).
 | Spec | Phase | Status | Summary |
 |------|-------|--------|---------|
 | [02-list-grid-request-ui.md](02-list-grid-request-ui.md) | 2 | ready-for-builder | `emptyMessage`, `errorMessage`, `requestKey` loading/empty/error on list/grid |
+| [05-high-traffic-renderers.md](05-high-traffic-renderers.md) | 5 | ready-for-builder | `button.enabled`, `appBar.foregroundColor` / `titleColor`, optional text truncation props |
 
 Update this table when adding a spec.
 

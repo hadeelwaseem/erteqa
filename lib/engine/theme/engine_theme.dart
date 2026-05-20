@@ -39,6 +39,11 @@ class EngineTheme {
   Color get errorColor =>
       _colorFromHex(config.colors.error) ?? const Color(0xFFDC2626);
 
+  Color get mutedColor =>
+      _colorFromHex(config.colors.muted) ?? const Color(0xFF475569);
+
+  double get radiusMd => config.radiusValue('md');
+
   double typographyScale(String key) => config.typographyScale(key);
 
   /// Builds [ThemeData] for [MaterialApp] from parsed JSON theme.

@@ -39,6 +39,25 @@ class ButtonRenderer implements ComponentRenderer {
     );
     final onTap = config.properties['onTap'] as VoidCallback?;
     final maxWidth = PropertyParsers.parseDouble(config.properties['maxWidth']);
+    final enabled = PropertyParsers.parseBool(
+      config.properties['enabled'],
+      defaultValue: true,
+    );
+    final onPressed = enabled ? onTap : null;
+
+    final resolvedBackground = backgroundColor ?? theme?.primaryColor;
+    final resolvedForeground = foregroundColor ?? textColor;
+    final buttonMd = theme?.buttonMd;
+    final defaultPadding = buttonMd != null
+        ? EdgeInsets.symmetric(
+            horizontal: buttonMd.padX,
+            vertical: ((buttonMd.height - buttonMd.fontSize) / 2)
+                .clamp(8.0, 24.0),
+          )
+        : const EdgeInsets.symmetric(horizontal: 16, vertical: 12);
+    final minimumSize = buttonMd != null
+        ? Size(0, buttonMd.height)
+        : const Size(64, 48);
 
     final shape = RoundedRectangleBorder(borderRadius: borderRadius);
 
@@ -46,11 +65,11 @@ class ButtonRenderer implements ComponentRenderer {
     switch (variant) {
       case 'text':
         button = TextButton(
-          onPressed: onTap ?? () {},
+          onPressed: onPressed,
           style: TextButton.styleFrom(
-            foregroundColor: foregroundColor ?? textColor,
-            padding:
-                padding ?? const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            foregroundColor: resolvedForeground,
+            padding: padding ?? defaultPadding,
+            minimumSize: minimumSize,
             shape: shape,
           ),
           child: Text(
@@ -64,14 +83,14 @@ class ButtonRenderer implements ComponentRenderer {
       case 'outlined':
       case 'secondary':
         button = OutlinedButton(
-          onPressed: onTap ?? () {},
+          onPressed: onPressed,
           style: OutlinedButton.styleFrom(
-            foregroundColor: foregroundColor ?? textColor,
-            padding:
-                padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            foregroundColor: resolvedForeground,
+            padding: padding ?? defaultPadding,
+            minimumSize: minimumSize,
             shape: shape,
             side: BorderSide(
-              color: textColor ?? const Color(0xFF1D4ED8),
+              color: textColor ?? theme?.primaryColor ?? const Color(0xFF1D4ED8),
             ),
           ),
           child: Text(
@@ -82,15 +101,16 @@ class ButtonRenderer implements ComponentRenderer {
           ),
         );
         break;
+      case 'filled':
       case 'elevated':
       default:
-        button = ElevatedButton(
-          onPressed: onTap ?? () {},
-          style: ElevatedButton.styleFrom(
-            backgroundColor: backgroundColor,
-            foregroundColor: foregroundColor ?? textColor,
-            padding:
-                padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        button = FilledButton(
+          onPressed: onPressed,
+          style: FilledButton.styleFrom(
+            backgroundColor: resolvedBackground,
+            foregroundColor: resolvedForeground,
+            padding: padding ?? defaultPadding,
+            minimumSize: minimumSize,
             shape: shape,
           ),
           child: Text(

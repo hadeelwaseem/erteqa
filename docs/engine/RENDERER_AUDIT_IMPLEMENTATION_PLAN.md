@@ -429,7 +429,7 @@ Read audit sections: text, card, image, button, appBar. Use EngineTheme defaults
 One PR: only these five renderer files + property_parsers if needed.
 ```
 
-**Checklist:** [ ] Phase 5 complete
+**Checklist:** [x] Phase 5 complete
 
 ---
 

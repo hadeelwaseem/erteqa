@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 
 import '../../../config/component_config.dart';
 import '../../component_renderer/component_renderer.dart';
+import '../../theme/engine_theme.dart';
 import '../parsers/property_parsers.dart';
 
 /// Renders an app bar row with optional back button.
 ///
 /// JSON props:
 /// - `title` (string) — bar title text
-/// - `color` (hex string) — foreground/text color
-/// - `backgroundColor` / `color` from style — background color
+/// - `backgroundColor` (hex) — bar background
+/// - `color` (hex) — legacy background from `style.background` merge
+/// - `foregroundColor` / `titleColor` (hex) — title and back icon color
 ///
 /// Back button appears automatically when [Navigator.canPop] is true.
 class AppBarRenderer implements ComponentRenderer {
@@ -20,17 +22,29 @@ class AppBarRenderer implements ComponentRenderer {
     Map<String, dynamic>? dataContext,
   }) {
     final title = config.properties['title'] as String? ?? '';
+    final theme = EngineTheme.fromDataContext(dataContext);
+
     final backgroundColorHex =
         config.properties['backgroundColor'] as String? ??
         config.properties['color'] as String?;
-    final backgroundColor = PropertyParsers.parseColor(backgroundColorHex);
+    final backgroundColor = PropertyParsers.parseColor(backgroundColorHex) ??
+        theme?.surfaceColor ??
+        Colors.white;
+
+    final foregroundHex =
+        config.properties['foregroundColor'] as String? ??
+        config.properties['titleColor'] as String?;
+    final foregroundColor =
+        PropertyParsers.parseColor(foregroundHex) ?? theme?.textColor;
+
+    final titleFontSize = theme?.typographyScale('lg') ?? 18.0;
 
     return Builder(
       builder: (context) {
         final canPop = Navigator.canPop(context);
 
         return Material(
-          color: backgroundColor ?? Colors.white,
+          color: backgroundColor,
           elevation: 1,
           child: SafeArea(
             bottom: false,
@@ -40,18 +54,21 @@ class AppBarRenderer implements ComponentRenderer {
                 children: [
                   if (canPop)
                     IconButton(
-                      icon: const Icon(Icons.arrow_back),
+                      icon: Icon(Icons.arrow_back, color: foregroundColor),
                       onPressed: () => Navigator.pop(context),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
+                      constraints: const BoxConstraints(
+                        minWidth: 48,
+                        minHeight: 48,
+                      ),
+                      padding: const EdgeInsets.all(12),
                     ),
                   if (!canPop) const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       title,
-                      style: const TextStyle(
-                        color: Colors.black87,
-                        fontSize: 18,
+                      style: TextStyle(
+                        color: foregroundColor,
+                        fontSize: titleFontSize,
                         fontWeight: FontWeight.w600,
                       ),
                     ),

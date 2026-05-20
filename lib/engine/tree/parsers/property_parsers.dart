@@ -102,6 +102,51 @@ class PropertyParsers {
     }
   }
 
+  static int? parseInt(dynamic v) {
+    if (v is int) return v;
+    if (v is num) return v.toInt();
+    if (v is String) return int.tryParse(v.trim());
+    return null;
+  }
+
+  static bool parseBool(dynamic v, {bool defaultValue = true}) {
+    if (v == null) return defaultValue;
+    if (v is bool) return v;
+    if (v is String) {
+      final lower = v.toLowerCase();
+      if (lower == 'true' || lower == '1') return true;
+      if (lower == 'false' || lower == '0') return false;
+    }
+    if (v is num) return v != 0;
+    return defaultValue;
+  }
+
+  static TextOverflow? parseTextOverflow(String? v) {
+    switch (v) {
+      case 'ellipsis':
+        return TextOverflow.ellipsis;
+      case 'fade':
+        return TextOverflow.fade;
+      case 'clip':
+        return TextOverflow.clip;
+      case 'visible':
+        return TextOverflow.visible;
+      default:
+        return null;
+    }
+  }
+
+  static FontStyle? parseFontStyle(String? v) {
+    switch (v) {
+      case 'italic':
+        return FontStyle.italic;
+      case 'normal':
+        return FontStyle.normal;
+      default:
+        return null;
+    }
+  }
+
   static TextAlign parseTextAlign(String? v) {
     switch (v) {
       case 'left':

@@ -5,31 +5,13 @@ import '../../../core/utils/constants.dart';
 import '../../../core/utils/service_locator.dart';
 import '../../../config/component_config.dart';
 import '../../component_renderer/component_renderer.dart';
+import '../../theme/engine_theme.dart';
 import '../parsers/data_context_path.dart';
 import '../parsers/property_parsers.dart';
 
 /// Renders an Image component.
 ///
 /// Currently supports network images. Asset and file support can be added later.
-///
-/// JSON Properties:
-/// - `source` (string, optional): 'network', 'asset', or 'file'. Default: 'network'
-/// - `url` (string, required): URL or path to the image
-/// - `width` (number, optional): Width constraint in logical pixels
-/// - `height` (number, optional): Height constraint in logical pixels
-/// - `fit` (string, optional): How to fit the image. Values: 'fill', 'contain', 'cover', 'fitWidth', 'fitHeight', 'scaleDown'. Default: 'cover'
-///
-/// Example JSON:
-/// ```json
-/// {
-///   "type": "image",
-///   "source": "network",
-///   "url": "https://example.com/image.jpg",
-///   "width": 200,
-///   "height": 150,
-///   "fit": "cover"
-/// }
-/// ```
 class ImageRenderer implements ComponentRenderer {
   @override
   Widget render(
@@ -37,6 +19,7 @@ class ImageRenderer implements ComponentRenderer {
     required ComponentWidgetBuilder buildChild,
     Map<String, dynamic>? dataContext,
   }) {
+    final theme = EngineTheme.fromDataContext(dataContext);
     final source = PropertyParsers.parseImageSource(
       config.properties['source'] as String?,
     );
@@ -56,21 +39,21 @@ class ImageRenderer implements ComponentRenderer {
       config.properties['aspectRatio'],
     );
 
-    // For network images, use Image.network
     Widget image;
     if (source == 'network') {
-      image = _buildNetworkImage(resolvedUrl, width, height, fit);
-    } else if (source == 'asset') {
-      image = _buildAssetImage(url, width, height, fit);
-    } else if (source == 'file') {
-      image = _buildFileImage(url, width, height, fit);
-    } else {
-      image = Container(
-        width: width,
-        height: height,
-        color: Colors.grey[300],
-        child: const Center(child: Text('Unsupported image source')),
+      image = _buildNetworkImage(
+        resolvedUrl,
+        width,
+        height,
+        fit,
+        theme: theme,
       );
+    } else if (source == 'asset') {
+      image = _buildAssetImage(url, width, height, fit, theme: theme);
+    } else if (source == 'file') {
+      image = _buildFileImage(url, width, height, fit, theme: theme);
+    } else {
+      image = _placeholderBox(width, height, theme: theme);
     }
 
     if (aspectRatio != null && aspectRatio > 0) {
@@ -85,6 +68,7 @@ class ImageRenderer implements ComponentRenderer {
       return value;
     }
     if (value.startsWith('/')) {
+      // Follow-up: inject assetBaseUrl via dataContext instead of getIt.
       final assetBase = getIt.isRegistered<NetworkConfig>()
           ? getIt<NetworkConfig>().assetBaseUrl
           : kBaseUrlAsset;
@@ -93,7 +77,6 @@ class ImageRenderer implements ComponentRenderer {
     return value;
   }
 
-  /// Converts a fit string to BoxFit enum.
   static BoxFit _stringToBoxFit(String fit) {
     switch (fit) {
       case 'fill':
@@ -113,29 +96,39 @@ class ImageRenderer implements ComponentRenderer {
     }
   }
 
-  /// Builds a network image widget.
   Widget _buildNetworkImage(
     String url,
     double? width,
     double? height,
-    BoxFit fit,
-  ) {
+    BoxFit fit, {
+    EngineTheme? theme,
+  }) {
+    if (url.trim().isEmpty) {
+      return _placeholderBox(width, height, theme: theme);
+    }
+
     final image = Image.network(
       url,
       width: width,
       height: height,
       fit: fit,
-      errorBuilder: (context, error, stackTrace) {
-        return Container(
-          width: width,
-          height: height,
-          color: Colors.grey[300],
-          child: const Center(child: Icon(Icons.broken_image)),
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return _loadingBox(
+          width,
+          height,
+          theme: theme,
+          progress: loadingProgress.expectedTotalBytes != null
+              ? loadingProgress.cumulativeBytesLoaded /
+                  loadingProgress.expectedTotalBytes!
+              : null,
         );
+      },
+      errorBuilder: (context, error, stackTrace) {
+        return _errorBox(width, height, theme: theme);
       },
     );
 
-    // Wrap in SizedBox if dimensions are specified
     if (width != null || height != null) {
       return SizedBox(width: width, height: height, child: image);
     }
@@ -143,25 +136,20 @@ class ImageRenderer implements ComponentRenderer {
     return image;
   }
 
-  /// Builds an asset image widget.
   Widget _buildAssetImage(
     String path,
     double? width,
     double? height,
-    BoxFit fit,
-  ) {
+    BoxFit fit, {
+    EngineTheme? theme,
+  }) {
     final image = Image.asset(
       path,
       width: width,
       height: height,
       fit: fit,
       errorBuilder: (context, error, stackTrace) {
-        return Container(
-          width: width,
-          height: height,
-          color: Colors.grey[300],
-          child: const Center(child: Icon(Icons.broken_image)),
-        );
+        return _errorBox(width, height, theme: theme);
       },
     );
 
@@ -172,18 +160,76 @@ class ImageRenderer implements ComponentRenderer {
     return image;
   }
 
-  /// Placeholder for file-based images (not implemented yet).
   Widget _buildFileImage(
     String path,
     double? width,
     double? height,
-    BoxFit fit,
-  ) {
+    BoxFit fit, {
+    EngineTheme? theme,
+  }) {
+    return _placeholderBox(
+      width,
+      height,
+      theme: theme,
+      child: const Center(child: Text('File images not yet supported')),
+    );
+  }
+
+  Widget _placeholderBox(
+    double? width,
+    double? height, {
+    EngineTheme? theme,
+    Widget? child,
+  }) {
     return Container(
       width: width,
       height: height,
-      color: Colors.grey[300],
-      child: const Center(child: Text('File images not yet supported')),
+      color: theme?.surfaceColor ?? const Color(0xFFF8FAFC),
+      child: child ??
+          Center(
+            child: Icon(
+              Icons.image_outlined,
+              color: theme?.mutedColor ?? const Color(0xFF475569),
+            ),
+          ),
+    );
+  }
+
+  Widget _loadingBox(
+    double? width,
+    double? height, {
+    EngineTheme? theme,
+    double? progress,
+  }) {
+    return Container(
+      width: width,
+      height: height,
+      color: theme?.surfaceColor ?? const Color(0xFFF8FAFC),
+      child: Center(
+        child: CircularProgressIndicator(
+          value: progress,
+          color: theme?.primaryColor ?? const Color(0xFF1D4ED8),
+          strokeWidth: 2,
+        ),
+      ),
+    );
+  }
+
+  Widget _errorBox(
+    double? width,
+    double? height, {
+    EngineTheme? theme,
+  }) {
+    return Container(
+      width: width,
+      height: height,
+      color: theme?.surfaceColor ?? const Color(0xFFF8FAFC),
+      child: Center(
+        child: Icon(
+          Icons.broken_image,
+          color: theme?.mutedColor ?? const Color(0xFF475569),
+        ),
+      ),
     );
   }
 }

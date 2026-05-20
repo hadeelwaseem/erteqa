@@ -28,6 +28,12 @@ void main() {
     expect(engine.buttonMd.radius, 12);
   });
 
+  test('radiusMd and mutedColor use theme config', () {
+    final engine = EngineTheme.fromConfig(MobileThemeConfig.defaults());
+    expect(engine.radiusMd, 10);
+    expect(engine.mutedColor, const Color(0xFF475569));
+  });
+
   test('toThemeData uses Material 3 and primary color', () {
     final themeData = EngineTheme.toThemeData(
       MobileThemeConfig.fromJson({
