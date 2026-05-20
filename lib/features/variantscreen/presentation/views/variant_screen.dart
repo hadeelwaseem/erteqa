@@ -18,6 +18,7 @@ import 'package:sooq_merchant/features/auth/presentation/manager/auth_cubit/auth
 import 'package:sooq_merchant/features/product/data/models/category.dart';
 import 'package:sooq_merchant/features/product/data/models/product_autocomplete_result.dart';
 import 'package:sooq_merchant/features/product/data/models/product_detail.dart';
+import 'package:sooq_merchant/features/product/data/models/product_list_response.dart';
 import 'package:sooq_merchant/features/product/data/models/product_search_result.dart';
 import 'package:sooq_merchant/features/product/presentation/manager/category_cubit/category_cubit.dart';
 import 'package:sooq_merchant/features/product/presentation/manager/product_autocomplete_cubit/product_autocomplete_cubit.dart';
@@ -570,9 +571,12 @@ class _ProductRequestHost extends StatefulWidget {
 }
 
 class _ProductRequestHostState extends State<_ProductRequestHost> {
+  static const double _prefetchExtentAfter = 240.0;
+
   final Set<String> _dispatchedRequestKeys = <String>{};
   final Set<String> _loadingRequestKeys = <String>{};
   final Set<String> _loadingMoreRequestKeys = <String>{};
+  final Set<String> _pendingLoadMoreKeys = <String>{};
   final Map<String, VoidCallback> _queryListenerRemovers = {};
   bool _dispatchScheduled = false;
   bool _isDispatching = false;
@@ -598,6 +602,7 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
     };
     _bindFormQueryListeners();
     _scheduleDispatch();
+    _scheduleLoadMoreCheck();
   }
 
   @override
@@ -662,6 +667,91 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
           if (request.qField == null) request.key: true,
       };
       _scheduleDispatch();
+      _scheduleLoadMoreCheck();
+    }
+  }
+
+  void _scheduleLoadMoreCheck() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      final metrics = _lastScrollMetrics;
+      if (metrics != null) {
+        _maybeLoadMore(metrics);
+      }
+    });
+  }
+
+  ScrollMetrics? _lastScrollMetrics;
+
+  bool _onScrollNotification(ScrollNotification notification) {
+    if (notification is ScrollUpdateNotification ||
+        notification is ScrollEndNotification ||
+        notification is ScrollMetricsNotification) {
+      _lastScrollMetrics = notification.metrics;
+      _maybeLoadMore(notification.metrics);
+    }
+    return false;
+  }
+
+  void _maybeLoadMore(ScrollMetrics metrics) {
+    final shouldPrefetch =
+        metrics.extentAfter <= _prefetchExtentAfter ||
+        metrics.maxScrollExtent == 0.0;
+    if (!shouldPrefetch) {
+      return;
+    }
+    _tryLoadMoreForEligibleRequests();
+  }
+
+  void _tryLoadMoreForEligibleRequests() {
+    if (!EngineRequestMapper.needsProductCubit(widget.mappedRequests)) {
+      return;
+    }
+
+    final requestsByKey = widget.renderContext['requests'];
+    final loadingMoreByKey = widget.renderContext['loadingMoreRequests'];
+    if (requestsByKey is! Map<String, dynamic>) {
+      return;
+    }
+
+    for (final request in widget.mappedRequests) {
+      if (!EngineRequestMapper.supportsProductListLoadMore(request)) {
+        continue;
+      }
+
+      final rawResponse = requestsByKey[request.key];
+      if (rawResponse is! Map<String, dynamic>) {
+        continue;
+      }
+      if (rawResponse['success'] == false) {
+        continue;
+      }
+
+      final response = ProductListResponse.fromJson(rawResponse);
+      if (_pendingLoadMoreKeys.contains(request.key) &&
+          (loadingMoreByKey is! Map<String, dynamic> ||
+              loadingMoreByKey[request.key] != true)) {
+        _pendingLoadMoreKeys.remove(request.key);
+      }
+
+      if (!response.meta.hasNext || response.meta.last) {
+        continue;
+      }
+      if (loadingMoreByKey is Map<String, dynamic> &&
+          loadingMoreByKey[request.key] == true) {
+        continue;
+      }
+      if (_pendingLoadMoreKeys.contains(request.key)) {
+        continue;
+      }
+
+      _pendingLoadMoreKeys.add(request.key);
+      context.read<ProductCubit>().loadNextPage(
+        response,
+        requestKey: request.key,
+      );
     }
   }
 
@@ -806,6 +896,7 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
                 state.productListResponse,
                 state.isLoadMore,
               );
+              _scheduleLoadMoreCheck();
             } else if (state is ProductFailure) {
               setState(() {
                 _loadingRequestKeys.remove(state.requestKey);
@@ -974,10 +1065,13 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
 
     return MultiBlocListener(
       listeners: listeners,
-      child: ScreenRenderer.withPrimitives().render(
-        widget.config,
-        context: context,
-        dataContext: widget.renderContext,
+      child: NotificationListener<ScrollNotification>(
+        onNotification: _onScrollNotification,
+        child: ScreenRenderer.withPrimitives().render(
+          widget.config,
+          context: context,
+          dataContext: widget.renderContext,
+        ),
       ),
     );
   }

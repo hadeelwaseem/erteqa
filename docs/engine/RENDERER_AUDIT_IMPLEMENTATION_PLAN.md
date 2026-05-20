@@ -244,7 +244,7 @@ Read audit sections: scaffold, videoPlayer, unsupported. Follow AGENTS.md layer 
 Remove ProductCubit from scaffold_renderer; fix Center width; fix video error state; fix unsupported release behavior.
 ```
 
-**Checklist:** [ ] Phase 1 complete
+**Checklist:** [x] Phase 1 complete
 
 ---
 

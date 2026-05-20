@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../config/component_config.dart';
@@ -6,8 +7,8 @@ import '../../component_renderer/component_renderer.dart';
 /// Renders a placeholder for any component type that does not have a
 /// registered renderer.
 ///
-/// In debug mode: logs to console AND shows a visible grey box.
-/// In release mode: logs only (no visual noise).
+/// In debug mode: logs to console AND shows a visible amber box.
+/// In release/profile mode: logs only (no visual noise).
 class UnsupportedComponentRenderer implements ComponentRenderer {
   @override
   Widget render(
@@ -24,7 +25,11 @@ class UnsupportedComponentRenderer implements ComponentRenderer {
         ? 'type="$rawType" id="$id"'
         : 'type="$rawType" id="$id" source="$source"';
 
-    debugPrint('[Engine] ❌ Unsupported component: $details');
+    debugPrint('[Engine] Unsupported component: $details');
+
+    if (!kDebugMode) {
+      return const SizedBox.shrink();
+    }
 
     return Container(
       width: double.infinity,
@@ -36,7 +41,7 @@ class UnsupportedComponentRenderer implements ComponentRenderer {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
-        '⚠️ Unsupported: $rawType${source != null ? ' ($source)' : ''}',
+        'Unsupported: $rawType${source != null ? ' ($source)' : ''}',
         style: TextStyle(
           color: Colors.amber.shade900,
           fontSize: 12,

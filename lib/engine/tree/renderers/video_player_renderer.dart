@@ -65,99 +65,146 @@ class _EngineNetworkVideo extends StatefulWidget {
 }
 
 class _EngineNetworkVideoState extends State<_EngineNetworkVideo> {
-  late final VideoPlayerController _controller;
+  VideoPlayerController? _controller;
   Future<void>? _init;
+  bool _initFailed = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.networkUrl(Uri.parse(widget.url));
-    _init = _initVideo();
+    _startInit();
   }
 
-  Future<void> _initVideo() async {
+  void _startInit() {
+    final controller = VideoPlayerController.networkUrl(Uri.parse(widget.url));
+    _controller = controller;
+    _initFailed = false;
+    _init = _initVideo(controller);
+  }
+
+  Future<void> _initVideo(VideoPlayerController controller) async {
     try {
-      await _controller.initialize();
+      await controller.initialize();
       if (!mounted) return;
       if (widget.autoplay) {
-        await _controller.play();
+        await controller.play();
       }
       setState(() {});
     } catch (_) {
-      if (mounted) setState(() {});
+      if (mounted) {
+        setState(() => _initFailed = true);
+      }
     }
+  }
+
+  void _retry() {
+    _controller?.dispose();
+    setState(() => _startInit());
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
   void _togglePlay() {
-    if (!_controller.value.isInitialized) return;
-    if (_controller.value.isPlaying) {
-      _controller.pause();
+    final controller = _controller;
+    if (controller == null || !controller.value.isInitialized) return;
+    if (controller.value.isPlaying) {
+      controller.pause();
     } else {
-      _controller.play();
+      controller.play();
     }
     setState(() {});
+  }
+
+  Widget _buildErrorState() {
+    return ColoredBox(
+      color: const Color(0xFF0F172A),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Could not play video',
+              style: TextStyle(color: Colors.white70, fontSize: 14),
+            ),
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: _retry,
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final radius = widget.borderRadius ?? BorderRadius.zero;
+    final controller = _controller;
+    final init = _init;
+
     return ClipRRect(
       borderRadius: radius,
       child: SizedBox(
         height: widget.height,
         width: double.infinity,
-        child: FutureBuilder<void>(
-          future: _init,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done ||
-                !_controller.value.isInitialized) {
-              return const ColoredBox(
-                color: Color(0xFF0F172A),
-                child: Center(
-                  child: CircularProgressIndicator(color: Colors.white54),
-                ),
-              );
-            }
-
-            final size = _controller.value.size;
-            final video = FittedBox(
-              fit: BoxFit.cover,
-              child: SizedBox(
-                width: size.width,
-                height: size.height,
-                child: VideoPlayer(_controller),
-              ),
-            );
-
-            if (!widget.showControls) {
-              return ColoredBox(color: Colors.black, child: video);
-            }
-
-            return GestureDetector(
-              onTap: _togglePlay,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  ColoredBox(color: Colors.black, child: video),
-                  if (!_controller.value.isPlaying)
-                    const Center(
-                      child: Icon(
-                        Icons.play_circle_fill,
-                        size: 56,
-                        color: Colors.white70,
+        child: init == null || controller == null
+            ? _buildErrorState()
+            : FutureBuilder<void>(
+                future: init,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState != ConnectionState.done) {
+                    return const ColoredBox(
+                      color: Color(0xFF0F172A),
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: Colors.white54,
+                        ),
                       ),
+                    );
+                  }
+
+                  if (_initFailed || !controller.value.isInitialized) {
+                    return _buildErrorState();
+                  }
+
+                  final size = controller.value.size;
+                  final video = FittedBox(
+                    fit: BoxFit.cover,
+                    child: SizedBox(
+                      width: size.width,
+                      height: size.height,
+                      child: VideoPlayer(controller),
                     ),
-                ],
+                  );
+
+                  if (!widget.showControls) {
+                    return ColoredBox(color: Colors.black, child: video);
+                  }
+
+                  return GestureDetector(
+                    onTap: _togglePlay,
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        ColoredBox(color: Colors.black, child: video),
+                        if (!controller.value.isPlaying)
+                          const Center(
+                            child: Icon(
+                              Icons.play_circle_fill,
+                              size: 56,
+                              color: Colors.white70,
+                            ),
+                          ),
+                      ],
+                    ),
+                  );
+                },
               ),
-            );
-          },
-        ),
       ),
     );
   }
