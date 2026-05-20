@@ -1,7 +1,9 @@
+// Not rich spans — HTML strip + entity decode only.
 import 'package:flutter/material.dart';
 
 import '../../../config/component_config.dart';
 import '../../component_renderer/component_renderer.dart';
+import '../parsers/data_context_path.dart';
 import '../parsers/property_parsers.dart';
 
 class RichTextRenderer implements ComponentRenderer {
@@ -11,7 +13,12 @@ class RichTextRenderer implements ComponentRenderer {
     required ComponentWidgetBuilder buildChild,
     Map<String, dynamic>? dataContext,
   }) {
-    final value = config.properties['value'] as String? ?? '';
+    final valuePath = config.properties['valuePath'] as String?;
+    final boundValue = resolveDataContextPath(dataContext, valuePath);
+    final value =
+        (boundValue?.toString().trim().isNotEmpty ?? false)
+        ? boundValue.toString()
+        : (config.properties['value'] as String? ?? '');
     final color = PropertyParsers.parseColor(
       config.properties['color'] as String?,
     );
@@ -38,6 +45,13 @@ class RichTextRenderer implements ComponentRenderer {
   }
 
   String _stripHtml(String value) {
-    return value.replaceAll(RegExp(r'<[^>]*>'), '');
+    var text = value.replaceAll(RegExp(r'<[^>]*>'), '');
+    text = text.replaceAll('&nbsp;', ' ');
+    text = text.replaceAll('&amp;', '&');
+    text = text.replaceAll('&lt;', '<');
+    text = text.replaceAll('&gt;', '>');
+    text = text.replaceAll('&quot;', '"');
+    text = text.replaceAll('&#39;', "'");
+    return text;
   }
 }

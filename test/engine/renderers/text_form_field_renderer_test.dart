@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sooq_merchant/config/component_config.dart';
 import 'package:sooq_merchant/core/enums/generic_component_type.dart';
@@ -151,5 +152,76 @@ void main() {
     );
     expect(sizedBox.width, 48);
     expect(sizedBox.height, 48);
+  });
+
+  testWidgets('Semantics exposes label and hint', (tester) async {
+    final renderer = TextFormFieldRenderer();
+    final store = FormStateStore();
+    final config = ComponentConfig(
+      type: GenericComponentType.textFormField,
+      properties: {
+        'id': 'phone',
+        'label': 'رقم الجوال',
+        'hint': '05xxxxxxxx',
+      },
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Form(
+            key: store.formKeyFor('f'),
+            child: renderer.render(
+              config,
+              buildChild: (_) => const SizedBox.shrink(),
+              dataContext: {
+                ...formRendererDataContext(),
+                FormStateStore.contextKey: store,
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final semantics = tester.getSemantics(find.byType(TextFormField));
+    expect(semantics.label, 'رقم الجوال');
+    expect(semantics.hasFlag(SemanticsFlag.isTextField), isTrue);
+  });
+
+  testWidgets('validation error text shown after validate', (tester) async {
+    final renderer = TextFormFieldRenderer();
+    final store = FormStateStore();
+    final config = ComponentConfig(
+      type: GenericComponentType.textFormField,
+      properties: {
+        'id': 'phone',
+        'label': 'رقم الجوال',
+        'validateRequired': true,
+      },
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Form(
+            key: store.formKeyFor('f'),
+            child: renderer.render(
+              config,
+              buildChild: (_) => const SizedBox.shrink(),
+              dataContext: {
+                ...formRendererDataContext(),
+                FormStateStore.contextKey: store,
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    store.formKeyFor('f').currentState!.validate();
+    await tester.pump();
+
+    expect(find.text('هذا الحقل مطلوب'), findsOneWidget);
   });
 }

@@ -73,4 +73,62 @@ void main() {
 
     expect(find.byIcon(Icons.broken_image), findsOneWidget);
   });
+
+  testWidgets('alt prop sets semantics label', (tester) async {
+    final renderer = ImageRenderer();
+    final config = ComponentConfig(
+      type: GenericComponentType.image,
+      properties: {
+        'source': 'network',
+        'url': 'https://example.com/photo.png',
+        'alt': 'Product photo',
+        'width': 48,
+        'height': 48,
+      },
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: renderer.render(
+            config,
+            buildChild: (_) => const SizedBox.shrink(),
+            dataContext: rendererDataContext(),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.bySemanticsLabel('Product photo'), findsOneWidget);
+  });
+
+  testWidgets('semanticsLabel takes priority over alt', (tester) async {
+    final renderer = ImageRenderer();
+    final config = ComponentConfig(
+      type: GenericComponentType.image,
+      properties: {
+        'source': 'network',
+        'url': 'https://example.com/photo.png',
+        'semanticsLabel': 'Primary label',
+        'alt': 'Alt text',
+        'width': 48,
+        'height': 48,
+      },
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: renderer.render(
+            config,
+            buildChild: (_) => const SizedBox.shrink(),
+            dataContext: rendererDataContext(),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.bySemanticsLabel('Primary label'), findsOneWidget);
+    expect(find.bySemanticsLabel('Alt text'), findsNothing);
+  });
 }

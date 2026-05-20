@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sooq_merchant/config/component_config.dart';
 import 'package:sooq_merchant/core/enums/generic_component_type.dart';
@@ -117,5 +118,62 @@ void main() {
     await tester.tap(find.byType(FilledButton));
     await tester.pump();
     expect(tapped, isTrue);
+  });
+
+  testWidgets('Semantics exposes button label', (tester) async {
+    final renderer = ButtonRenderer();
+    final config = ComponentConfig(
+      type: GenericComponentType.button,
+      properties: {
+        'label': 'Submit',
+        'variant': 'elevated',
+        'onTap': () {},
+      },
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: renderer.render(
+            config,
+            buildChild: (_) => const SizedBox.shrink(),
+            dataContext: rendererDataContext(),
+          ),
+        ),
+      ),
+    );
+
+    final semantics = tester.getSemantics(find.byType(FilledButton));
+    expect(semantics.label, 'Submit');
+    expect(semantics.hasFlag(SemanticsFlag.isButton), isTrue);
+  });
+
+  testWidgets('Semantics enabled false when button disabled', (tester) async {
+    final renderer = ButtonRenderer();
+    final config = ComponentConfig(
+      type: GenericComponentType.button,
+      properties: {
+        'label': 'Submit',
+        'variant': 'elevated',
+        'enabled': false,
+      },
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: renderer.render(
+            config,
+            buildChild: (_) => const SizedBox.shrink(),
+            dataContext: rendererDataContext(),
+          ),
+        ),
+      ),
+    );
+
+    final semantics = tester.getSemantics(find.byType(FilledButton));
+    expect(semantics.label, 'Submit');
+    expect(semantics.hasFlag(SemanticsFlag.isButton), isTrue);
+    expect(semantics.hasFlag(SemanticsFlag.isEnabled), isFalse);
   });
 }

@@ -352,6 +352,28 @@ class PropertyParsers {
         return Icons.lock;
       case 'phone':
         return Icons.phone;
+      case 'shopping_bag':
+        return Icons.shopping_bag;
+      case 'chevron_right':
+        return Icons.chevron_right;
+      case 'credit_card':
+        return Icons.credit_card;
+      case 'payments':
+        return Icons.payments;
+      case 'check_circle':
+        return Icons.check_circle;
+      case 'error':
+        return Icons.error;
+      case 'account_circle':
+        return Icons.account_circle;
+      case 'local_offer':
+        return Icons.local_offer;
+      case 'local_shipping':
+        return Icons.local_shipping;
+      case 'inventory_2':
+        return Icons.inventory_2;
+      case 'error_outline':
+        return Icons.error_outline;
       default:
         return Icons.circle;
     }

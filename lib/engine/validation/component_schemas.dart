@@ -51,9 +51,13 @@ class ComponentSchemas {
     requiredProperties: {},
     optionalProperties: {
       'backgroundColor',
+      'pageScroll', // Injected from pages[].scroll via VariantRepository
       'child', // Not in properties, but in ComponentConfig
     },
-    propertyTypes: {'backgroundColor': 'string (hex)'},
+    propertyTypes: {
+      'backgroundColor': 'string (hex)',
+      'pageScroll': 'string (vertical|none)',
+    },
   );
 
   /// Schema: SingleChildScrollView - scrollable wrapper with a single child.
@@ -115,10 +119,16 @@ class ComponentSchemas {
       'itemBuilder',
       'items',
       'enableInnerScroll',
+      'requestKey',
+      'emptyMessage',
+      'errorMessage',
     },
     propertyTypes: {
       'scrollDirection': 'string (vertical|horizontal)',
       'itemBuilder': 'object (type=repeat, source=string|array, item=object)',
+      'requestKey': 'string (matches VariantScreen request key)',
+      'emptyMessage': 'string (localized empty state)',
+      'errorMessage': 'string (localized error state)',
     },
   );
 
@@ -135,6 +145,9 @@ class ComponentSchemas {
       'children',
       'enableInnerScroll',
       'childAspectRatio',
+      'requestKey',
+      'emptyMessage',
+      'errorMessage',
     },
     propertyTypes: {
       'crossAxisCount': 'number (integer)',
@@ -143,6 +156,9 @@ class ComponentSchemas {
       'childAspectRatio': 'number',
       'scrollDirection': 'string (vertical|horizontal)',
       'itemBuilder': 'object (type=repeat, source=string|array, item=object)',
+      'requestKey': 'string (matches VariantScreen request key)',
+      'emptyMessage': 'string (localized empty state)',
+      'errorMessage': 'string (localized error state)',
     },
   );
 

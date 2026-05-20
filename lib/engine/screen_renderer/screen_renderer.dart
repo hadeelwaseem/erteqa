@@ -167,11 +167,30 @@ class ScreenRenderer {
     if (onTap == null || config.type == GenericComponentType.button) {
       return widget;
     }
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: widget,
+    return Semantics(
+      button: true,
+      label: _resolveAccessibilityLabel(config),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: widget,
+      ),
     );
+  }
+
+  String? _resolveAccessibilityLabel(ComponentConfig config) {
+    final tap = config.properties['tap'];
+    if (tap is Map) {
+      final fromTap = tap['semanticLabel'];
+      if (fromTap is String && fromTap.trim().isNotEmpty) {
+        return fromTap.trim();
+      }
+    }
+    final fromProps = config.properties['accessibilityLabel'];
+    if (fromProps is String && fromProps.trim().isNotEmpty) {
+      return fromProps.trim();
+    }
+    return null;
   }
 
   VoidCallback? _resolveTapAction(

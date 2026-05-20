@@ -128,8 +128,14 @@ class ButtonRenderer implements ComponentRenderer {
     }
 
     if (alignment != null) {
-      return Align(alignment: alignment, child: wrapped);
+      wrapped = Align(alignment: alignment, child: wrapped);
     }
-    return wrapped;
+
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      label: label.isNotEmpty ? label : null,
+      child: wrapped,
+    );
   }
 }

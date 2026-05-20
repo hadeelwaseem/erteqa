@@ -5,7 +5,8 @@
 - **Implemented:** Full mobile JSON app, 19 renderers, actions, request mapper, product/auth APIs, tab shell.
 - **Not implemented:** Dedicated renderers per `semanticType` (ProductList, Hero, etc.) — built from primitives instead.
 - **Stale docs warning:** Old `docs/PRODUCTION_PROGRESS.md` listed missing ActionDispatcher — **outdated**; dispatcher and mapper exist.
-- **Theme tokens** from JSON `theme` are parsed but not fully applied to all renderers.
+- **Renderer audit (phases 0–11):** Signed off 2026-05-21 — see [`docs/engine/PHASE_REVIEW_2026-05-21.md`](../engine/PHASE_REVIEW_2026-05-21.md). P2 backlog: builder-only props, `image_renderer` DI, image cache.
+- **Theme tokens** from JSON `theme` are parsed via `EngineTheme`; some legacy widgets still use `AppThemeModel`.
 
 ## Implemented (verified in code)
 
@@ -34,14 +35,14 @@
 
 ### Tests
 
-- [x] 24+ unit tests across config, engine, auth, product, core
+- [x] 88+ engine/config renderer tests; full suite minus stale `widget_test.dart`
 
 ## Gaps / limitations
 
 | Area | Status |
 |------|--------|
 | semanticType-specific renderers | Not separate — use gridView/listView + data binding |
-| Theme from JSON (`theme.colors`, typography) | Partial — constants still used in places |
+| Theme from JSON (`theme.colors`, typography) | Mostly via `EngineTheme`; legacy `AppThemeModel` widgets remain |
 | `gap` in row/column | Supported in parser normalization; verify per layout |
 | CI schema validation on JSON | Not enforced in repo |
 | Dedicated commerce widgets (cart, checkout forms) | Composed from primitives in JSON only |

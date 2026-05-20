@@ -56,10 +56,43 @@ class ImageRenderer implements ComponentRenderer {
       image = _placeholderBox(width, height, theme: theme);
     }
 
+    final semanticsLabel = _resolveSemanticsLabel(
+      config.properties,
+      resolvedUrl: resolvedUrl,
+    );
+
+    image = Semantics(
+      image: true,
+      label: semanticsLabel,
+      child: image,
+    );
+
     if (aspectRatio != null && aspectRatio > 0) {
       return AspectRatio(aspectRatio: aspectRatio, child: image);
     }
     return image;
+  }
+
+  String? _resolveSemanticsLabel(
+    Map<String, dynamic> properties, {
+    required String resolvedUrl,
+  }) {
+    final explicit = properties['semanticsLabel'] as String?;
+    if (explicit != null && explicit.trim().isNotEmpty) {
+      return explicit.trim();
+    }
+    final alt = properties['alt'] as String?;
+    if (alt != null && alt.trim().isNotEmpty) {
+      return alt.trim();
+    }
+    final url = resolvedUrl.trim();
+    if (url.isEmpty) return null;
+    final uri = Uri.tryParse(url);
+    if (uri != null && uri.pathSegments.isNotEmpty) {
+      final last = uri.pathSegments.last;
+      if (last.isNotEmpty) return last;
+    }
+    return url;
   }
 
   String _resolveNetworkUrl(String url) {

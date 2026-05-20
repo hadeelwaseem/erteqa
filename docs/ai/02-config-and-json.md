@@ -82,6 +82,44 @@ Each node in `body[]`:
 - `urlPath`: `"item.image"` — image URL from item
 - Fallback `value` / `url` when path missing
 
+### `icon` — supported `name` values
+
+`props.name` maps to Material icons via `PropertyParsers.parseIconData`. Unknown names fall back to `Icons.circle`.
+
+| `name` | Material icon |
+|--------|----------------|
+| `home` | `Icons.home` |
+| `list` | `Icons.list` |
+| `grid_view` | `Icons.grid_view` |
+| `settings` | `Icons.settings` |
+| `search` | `Icons.search` |
+| `cart`, `shopping_cart` | `Icons.shopping_cart` |
+| `shopping_bag` | `Icons.shopping_bag` |
+| `favorite` | `Icons.favorite` |
+| `person` | `Icons.person` |
+| `account_circle` | `Icons.account_circle` |
+| `visibility` | `Icons.visibility` |
+| `visibility_off` | `Icons.visibility_off` |
+| `mail` | `Icons.mail` |
+| `lock` | `Icons.lock` |
+| `phone` | `Icons.phone` |
+| `chevron_right` | `Icons.chevron_right` |
+| `credit_card` | `Icons.credit_card` |
+| `payments` | `Icons.payments` |
+| `check_circle` | `Icons.check_circle` |
+| `error` | `Icons.error` |
+| `error_outline` | `Icons.error_outline` |
+| `local_offer` | `Icons.local_offer` |
+| `local_shipping` | `Icons.local_shipping` |
+| `inventory_2` | `Icons.inventory_2` |
+
+Optional accessibility on images: `semanticsLabel`, `alt` — see [builder-spec 10-accessibility-props](../engine/builder-specs/10-accessibility-props.md).
+
+### `divider` and `spacer`
+
+- **`divider`** — horizontal rule; `thickness`, `color`. Used rarely (e.g. form separators). Prefer theme-muted `color` from JSON.
+- **`spacer`** — flex gap inside `row`/`column` (`flex` prop). **Not used** in production config. Prefer `gap` on `column`/`row` or a fixed-height `container` instead of `spacer` under page roots with `MainAxisSize.min`.
+
 ## Navigation rules
 
 - **Tab routes** — shown in `TabShellWidget` bottom nav.

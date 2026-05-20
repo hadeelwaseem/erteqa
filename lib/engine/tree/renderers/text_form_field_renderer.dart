@@ -219,24 +219,33 @@ class TextFormFieldRenderer implements ComponentRenderer {
             ? Material(type: MaterialType.transparency, child: field)
             : field;
 
+        Widget result;
         if (!hasBoxDecoration && padding == null && margin == null) {
-          return fieldWidget;
+          result = fieldWidget;
+        } else {
+          result = Container(
+            width: width,
+            height: height,
+            padding: padding,
+            margin: margin,
+            decoration: hasBoxDecoration
+                ? BoxDecoration(
+                    color: color,
+                    borderRadius: borderRadius,
+                    border: border,
+                    boxShadow: shadow != null ? [shadow] : null,
+                  )
+                : null,
+            child: fieldWidget,
+          );
         }
 
-        return Container(
-          width: width,
-          height: height,
-          padding: padding,
-          margin: margin,
-          decoration: hasBoxDecoration
-              ? BoxDecoration(
-                  color: color,
-                  borderRadius: borderRadius,
-                  border: border,
-                  boxShadow: shadow != null ? [shadow] : null,
-                )
-              : null,
-          child: fieldWidget,
+        return Semantics(
+          textField: true,
+          enabled: enabled,
+          label: label,
+          hint: hint,
+          child: result,
         );
       },
     );

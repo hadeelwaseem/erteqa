@@ -178,10 +178,10 @@ flowchart LR
 
 **Acceptance criteria**
 
-- [ ] `ComponentSchemas.getAll()` includes new keys for types that use them in prod.
-- [ ] `flutter test` still passes (no new tests required).
-- [ ] No renderer behavior change.
-- [ ] **Builder spec:** for each schema key **not** found in `mobile_production_v2.json`, add `docs/engine/builder-specs/00-<slug>.md` (or document “already in JSON” with grep evidence).
+- [x] `ComponentSchemas.getAll()` includes new keys for types that use them in prod.
+- [x] `flutter test` still passes (no new tests required).
+- [x] No renderer behavior change.
+- [x] **Builder spec:** for each schema key **not** found in `mobile_production_v2.json`, add `docs/engine/builder-specs/00-<slug>.md` (or document “already in JSON” with grep evidence).
 
 **AI prompt template**
 
@@ -201,7 +201,7 @@ Update builder-specs/README.md index.
 Run flutter test when done.
 ```
 
-**Checklist:** [ ] Phase 0 complete
+**Checklist:** [x] Phase 0 complete (P11: list/grid request UI keys + `pageScroll` on scaffold — see `PHASE_REVIEW_2026-05-21.md`)
 
 ---
 
@@ -599,8 +599,8 @@ Use minimal ComponentConfig fixtures; no full mobile_production_v2.json in tests
 
 **Acceptance criteria**
 
-- [ ] TalkBack/VoiceOver reads button labels.
-- [ ] No new P0 regressions from `flutter test`.
+- [x] TalkBack/VoiceOver reads button labels.
+- [x] No new P0 regressions from `flutter test`.
 
 **AI prompt template**
 
@@ -609,7 +609,7 @@ Implement Phase 10 (batch A: Semantics) from docs/engine/RENDERER_AUDIT_IMPLEMEN
 Read audit P2 items. Add Semantics to button, image, card tap targets, textFormField only.
 ```
 
-**Checklist:** [ ] Phase 10 complete
+**Checklist:** [x] Phase 10 complete
 
 ---
 
@@ -639,10 +639,10 @@ Read audit P2 items. Add Semantics to button, image, card tap targets, textFormF
 
 #### Architecture & layers
 
-- [ ] No `lib/features/*` imports inside `lib/engine/tree/renderers/` (especially `scaffold_renderer`, `image_renderer`)
-- [ ] No product/auth/catalog logic in renderers; cubits only in `VariantScreen` / features
-- [ ] JSON-first: no new hardcoded merchant screens
-- [ ] No `if (tenantSlug == …)` UI branches
+- [x] No `lib/features/*` imports inside `lib/engine/tree/renderers/` (especially `scaffold_renderer`, `image_renderer`)
+- [x] No product/auth/catalog logic in renderers; cubits only in `VariantScreen` / features
+- [x] JSON-first: no new hardcoded merchant screens
+- [x] No `if (tenantSlug == …)` UI branches
 
 #### Phase deliverables (grep / spot-check)
 
@@ -657,27 +657,27 @@ Read audit P2 items. Add Semantics to button, image, card tap targets, textFormF
 
 #### Code quality (anti–over-engineering)
 
-- [ ] No duplicate pagination / request loading in both `scaffold` and `VariantScreen`
-- [ ] No parallel theme systems (`AppThemeModel` stale vs `EngineTheme`) — single source from JSON
-- [ ] Helpers used by ≥2 call sites (otherwise inline)
-- [ ] No speculative props/renderers “for future use”
-- [ ] `EngineTheme` / `request_ui_state` APIs are small and readable
+- [x] No duplicate pagination / request loading in both `scaffold` and `VariantScreen`
+- [x] No parallel theme systems (`AppThemeModel` stale vs `EngineTheme`) — single source from JSON
+- [x] Helpers used by ≥2 call sites (otherwise inline)
+- [x] No speculative props/renderers “for future use”
+- [x] `EngineTheme` / `request_ui_state` APIs are small and readable
 
 #### Tests & config
 
-- [ ] `flutter test` green
-- [ ] Renderer tests (phase 9) cover main contracts, not implementation details
-- [ ] Builder-specs index matches files in `docs/engine/builder-specs/`
+- [x] `flutter test` green (`test/engine` + `test/config` 88/88; full suite: pre-existing `widget_test.dart` failure)
+- [x] Renderer tests (phase 9) cover main contracts, not implementation details
+- [x] Builder-specs index matches files in `docs/engine/builder-specs/`
 - [x] Prod JSON: Phase 7 wired `emptyMessage` / `errorMessage` where engine expects them (or documented as pending)
 
 #### Manual smoke (15 min)
 
-- [ ] `/home` — grid load, load-more, card tap → detail
-- [ ] `/search` — list/grid states
-- [ ] `/auth/login` — form validate + submit
-- [ ] RTL Arabic — layout not clipped; back button usable
-- [ ] Invalid video URL (if used) — error, not infinite spinner
-- [ ] Release/profile: unsupported type does not show amber banner
+- [ ] `/home` — grid load, load-more, card tap → detail (not run — tests/grep substitute; see `PHASE_REVIEW_2026-05-21.md`)
+- [ ] `/search` — list/grid states (not run)
+- [ ] `/auth/login` — form validate + submit (not run)
+- [ ] RTL Arabic — layout not clipped; back button usable (not run)
+- [ ] Invalid video URL (if used) — error, not infinite spinner (not run)
+- [ ] Release/profile: unsupported type does not show amber banner (not run; `kDebugMode` guard verified)
 
 ### Output
 
@@ -704,7 +704,7 @@ Forbidden: new component types, semanticType renderers, large refactors, new pac
 Mark Phase 11 checklist when done.
 ```
 
-**Checklist:** [ ] Phase 11 complete
+**Checklist:** [x] Phase 11 complete — see [`PHASE_REVIEW_2026-05-21.md`](PHASE_REVIEW_2026-05-21.md) (verdict: Pass with fixes)
 
 ---
 

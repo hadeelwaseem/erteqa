@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../config/component_config.dart';
@@ -18,12 +17,13 @@ class SingleChildScrollViewRenderer implements ComponentRenderer {
     if (childConfig == null) return const SizedBox.shrink();
 
     if (_isScrollable(childConfig.type)) {
-      if (kDebugMode) {
-        return _nestedScrollWarning(
-          'singleChildScrollView',
-          childConfig.type.name,
+      assert(() {
+        debugPrint(
+          'Invalid nested scrollable: singleChildScrollView -> '
+          '${childConfig.type.name}',
         );
-      }
+        return true;
+      }());
       return buildChild(childConfig);
     }
 
@@ -44,12 +44,4 @@ class SingleChildScrollViewRenderer implements ComponentRenderer {
         type == GenericComponentType.gridView;
   }
 
-  Widget _nestedScrollWarning(String parent, String child) {
-    return Center(
-      child: Text(
-        'Invalid nested scrollable: $parent -> $child',
-        textAlign: TextAlign.center,
-      ),
-    );
-  }
 }
