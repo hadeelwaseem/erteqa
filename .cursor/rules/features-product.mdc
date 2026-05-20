@@ -1,0 +1,36 @@
+---
+description: Product feature — public catalog APIs
+globs: lib/features/product/**
+alwaysApply: false
+---
+
+# Product Feature Rules
+
+**Full detail:** [docs/ai/07-feature-product.md](../../docs/ai/07-feature-product.md)
+
+## Structure
+
+`data/models/` → `data/repos/product_repo_impl.dart` → `presentation/manager/*_cubit/`
+
+## Public API base
+
+`/api/v1/public/products`, `/categories`, `/search`, `/autocomplete`
+
+No `Authorization` header on these calls.
+
+## Must
+
+- Add endpoints to `ProductRepo` + impl with retry envelope
+- Expose via cubit; wire JSON through `EngineRequestMapper` + `VariantScreen`
+- Match `requestUrl` in JSON to repo path patterns
+- Register new cubits as factories in `service_locator.dart`
+
+## Must not
+
+- Fetch products inside engine renderers
+- Hardcode grids/lists in Dart when JSON `gridView` + `itemBuilder` suffices
+- Parse raw JSON in presentation widgets
+
+## Cubits
+
+`ProductCubit`, `ProductDetailCubit`, `ProductSearchCubit`, `ProductAutocompleteCubit`, `CategoryCubit`

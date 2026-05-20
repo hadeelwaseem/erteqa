@@ -1,0 +1,41 @@
+---
+description: Core infrastructure — DI, network, routing
+globs: lib/core/**
+alwaysApply: false
+---
+
+# Core Rules
+
+**Full detail:** [docs/ai/05-core.md](../../docs/ai/05-core.md)
+
+## Scope
+
+`lib/core/` — shared infrastructure, not feature domain logic.
+
+## DI
+
+Register types in `lib/core/utils/service_locator.dart` via `setupServiceLocator()`.
+
+- Singletons: `Dio`, `AuthRepo`, `ProductRepo`, `TokenCubit`, `VariantRepository`
+- Factories: product cubits (new per provider)
+
+Use `getIt<T>()`.
+
+## Network
+
+- Base URL + tenant from `MobileAppConfig.app`
+- `AuthInterceptor` on `Dio` for authenticated routes
+- Public catalog: `/api/v1/public/*` — no auth header
+
+## Routing
+
+`AppRouter.setupRouter` — all config routes → `VariantScreen`. Tab shell via `TabShellWidget`.
+
+## Must not
+
+- Parse page JSON or map component types here
+- Add product-specific API paths (belongs in features)
+
+## Auth
+
+`TokenCubit`, `AuthRedirect`, `AuthTokenStorage` — session lifecycle

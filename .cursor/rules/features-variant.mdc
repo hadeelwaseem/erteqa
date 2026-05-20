@@ -1,0 +1,37 @@
+---
+description: Variant screen and tab shell — dynamic page host
+globs: lib/features/variantscreen/**,lib/features/shell/**
+alwaysApply: false
+---
+
+# Variant & Shell Rules
+
+**Full detail:** [docs/ai/08-feature-variant-shell.md](../../docs/ai/08-feature-variant-shell.md)
+
+## Scope
+
+- `variantscreen` — loads JSON pages, orchestrates cubits + `ScreenRenderer`
+- `shell` — `TabShellWidget` bottom navigation
+
+## Must
+
+- Load pages via `AssetVariantRepository` (same variantId as `MobileAppConfig`)
+- Use `EngineRequestMapper.collectRequests` before cubit loads
+- Populate `dataContext.requests.{requestKey}` for itemBuilder sources
+- Keep domain fetches in cubits — this file only orchestrates
+
+## Key files
+
+- `variant_repository.dart` — parse builder JSON → `ScreenConfig`
+- `variant_screen.dart` — integration hub (~900 lines)
+- `variant_cubit.dart` — load states
+- `tab_shell_widget.dart` — tabs from `NavigationConfig`
+
+## Must not
+
+- Duplicate JSON parsing outside `variant_repository.dart`
+- Add standalone `GoRoute` to custom widgets for routes already in JSON
+
+## Debugging
+
+Blank UI: check route in `pages[]`, `requestUrl` pattern, cubit error state, renderer `unsupported` fallback

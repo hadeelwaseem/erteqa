@@ -1,48 +1,37 @@
 ---
+description: SOOQ core architecture constraints (always apply)
 alwaysApply: true
 ---
-# Overview
-PROJECT IDENTITY
-- This project is a Flutter-based dynamic mobile app generator.
-- It is NOT a traditional Flutter application.
 
-CORE MODEL
-- Applications, screens, components, and themes are defined as data.
-- Flutter is used only as a runtime rendering platform.
-- UI structure must never be hardcoded in Dart.
+# SOOQ Merchant — Core Rules
 
-ARCHITECTURAL LAYERS
-- Config Layer:
-  - Pure declarative data
-  - No logic, no Flutter, no rendering
-  - Single source of truth for app definition
+**Full guide:** [AGENTS.md](../../AGENTS.md) and [docs/ai/README.md](../../docs/ai/README.md)
 
-- Engine Layer:
-  - Interprets configuration into UI
-  - Resolves templates and component mappings
-  - Owns rendering orchestration
-  - Contains no business logic
+## Identity
 
-- Core Layer:
-  - Stateless, reusable UI primitives
-  - Configuration-agnostic
-  - No JSON parsing or template logic
+Flutter **dynamic app generator** — UI from `assets/config/*.json`, not hardcoded screens. Active config: `mobile_production_v2`.
 
-- Features Layer:
-  - Isolated business domains
-  - Independent from the Engine
-  - Must not affect UI generation logic
+## Layers (do not cross)
 
-STRICT CONSTRAINTS
-- Do NOT hardcode screens, flows, or layouts.
-- Do NOT embed business or domain logic in widgets or renderers.
-- Do NOT couple UI decisions to Flutter-specific constructs.
-- Do NOT treat this system as a template-based app.
+- **Config** (`lib/config/`) — data only
+- **Engine** (`lib/engine/`) — render + actions + request mapping, **no domain logic**
+- **Core** (`lib/core/`) — DI, network, router
+- **Features** (`lib/features/`) — repos/cubits/APIs, **no renderer changes**
 
-DESIGN INTENT
-- Any visual or structural change must be achievable via configuration.
-- Code changes are allowed only for engine capabilities or shared primitives.
+## Must
 
-VIOLATIONS
-- Any solution that mixes UI rendering with business logic is invalid.
-- Any per-merchant branching or duplicated UI code is rejected.
+- JSON-first UI changes
+- New `type` → enum + renderer + `ScreenRenderer` registry
+- New API → feature repo + cubit + optional mapper/VariantScreen wiring
+
+## Must not
+
+- Hardcoded merchant screens or per-tenant UI `if` branches
+- Business logic in `lib/engine/tree/renderers/`
+- `Dio`/repo calls inside renderers
+- Treat `semanticType` as a renderer key
+
+## Default paths
+
+- UI: `assets/config/mobile_production_v2.json`
+- Host: `VariantScreen` + `ScreenRenderer.withPrimitives()`

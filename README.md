@@ -1,16 +1,43 @@
-# sooq_merchant
+# SOOQ Merchant Mobile
 
-SOOQ Mobile application for merchant.
+Flutter-based **dynamic mobile app generator** for SOOQ merchants. UI, navigation, and theming are defined in JSON configuration; Dart provides the rendering engine and business features.
 
-## Getting Started
+## Quick start
 
-This project is a starting point for a Flutter application.
+1. Install Flutter SDK (^3.10.4 per `pubspec.yaml`)
+2. `flutter pub get`
+3. `flutter run`
 
-A few resources to get you started if this is your first Flutter project:
+Active config: `mobile_production_v2` in `lib/main.dart` → `assets/config/mobile_production_v2.json`
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## Documentation
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+| Audience | Start here |
+|----------|------------|
+| AI assistants / contributors | [AGENTS.md](AGENTS.md) |
+| Full reference | [docs/ai/README.md](docs/ai/README.md) |
+
+## Architecture (summary)
+
+```
+Config (JSON) → Engine (ScreenRenderer) → Flutter UI
+                     ↑
+              Features (auth, product APIs via VariantScreen)
+```
+
+- **Config** — `lib/config/`, `assets/config/`
+- **Engine** — `lib/engine/`
+- **Core** — `lib/core/` (DI, router, network)
+- **Features** — `lib/features/`
+
+## Tests
+
+```bash
+flutter test
+```
+
+See [docs/ai/11-testing.md](docs/ai/11-testing.md).
+
+## Cursor
+
+Project rules: `.cursor/rules/` (always-on `sooqrules.mdc` + file-scoped rules).

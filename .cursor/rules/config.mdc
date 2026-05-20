@@ -1,0 +1,41 @@
+---
+description: Config layer and JSON assets — declarative app definition
+globs: lib/config/**,assets/config/**
+alwaysApply: false
+---
+
+# Config Rules
+
+**Full detail:** [docs/ai/02-config-and-json.md](../../docs/ai/02-config-and-json.md)
+
+## Scope
+
+- `lib/config/` — Dart models (no Flutter widgets)
+- `assets/config/*.json` — app definition
+
+## Active file
+
+`assets/config/mobile_production_v2.json` — matches `main.dart` `_kActiveConfig`
+
+## JSON shape
+
+Top-level: `schemaVersion`, `app`, `theme`, `navigation`, `pages[]`
+
+Page nodes: `id`, `type`, `props`, optional `style`, `tap`, `child`/`children`, `itemBuilder`
+
+## Must
+
+- Put UI/layout/copy changes in JSON
+- Use flat `props` (nest only via `data`, `tap`, tree children)
+- Use `data.requestKey` + `requestUrl` for API-driven lists
+- Add new routes to `pages[]` and navigation/shellExcludeRoutes as needed
+
+## Must not
+
+- Add Flutter imports to `lib/config/`
+- Create per-merchant Dart screen forks
+- Reference obsolete configs (`classic.json`, `modern.json`) as active
+
+## Models
+
+`MobileAppConfig`, `ScreenConfig`, `ComponentConfig`, `NavigationConfig`

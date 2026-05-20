@@ -1,0 +1,38 @@
+---
+description: Engine layer — renderers, actions, no domain logic
+globs: lib/engine/**
+alwaysApply: false
+---
+
+# Engine Rules
+
+**Full detail:** [docs/ai/03-engine.md](../../docs/ai/03-engine.md), [docs/ai/04-actions-and-requests.md](../../docs/ai/04-actions-and-requests.md)
+
+## Scope
+
+`lib/engine/` — interpret `ComponentConfig` trees into widgets.
+
+## Must
+
+- Implement `ComponentRenderer` for new types
+- Register in `ScreenRenderer._createDefaultRenderers`
+- Add schema in `component_schemas.dart`
+- Keep renderers free of product/auth/catalog rules
+- Resolve display values via `dataContext` paths (`valuePath`, `urlPath`)
+
+## Must not
+
+- Import feature repos or call `ProductRepo` / `AuthRepo`
+- Encode merchant-specific layout decisions
+- Add API fetching in renderers (orchestration lives in `VariantScreen`)
+
+## Key files
+
+- `screen_renderer/screen_renderer.dart` — registry (19 types + unsupported)
+- `actions/action_dispatcher.dart` — `tap` handlers
+- `requests/request_mapper.dart` — collect `data.requestUrl`
+- `tree/renderers/*.dart` — implementations
+
+## Actions
+
+`tap.type`: `navigate` | `apiCall` | `cubitCall` — see action_dispatcher.dart

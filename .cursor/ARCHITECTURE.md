@@ -247,3 +247,7 @@ Any suggestion or change that contradicts these principles should be treated as 
 ---
 
 **End of Architecture Document**
+
+---
+
+> **Note:** Canonical AI documentation also lives in [docs/ai/01-architecture.md](../docs/ai/01-architecture.md) and [AGENTS.md](../AGENTS.md). Prefer those for day-to-day assistant context.
