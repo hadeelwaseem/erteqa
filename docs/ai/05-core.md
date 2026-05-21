@@ -71,6 +71,34 @@ Prefer JSON for new merchant-facing screens.
 
 - `lib/core/utils/constants.dart` — colors, keys used outside JSON theme
 
+## In-app user messages (`AppMessenger`)
+
+Centralized **top-of-screen** transient feedback (not Firebase push notifications).
+
+| Item | Detail |
+|------|--------|
+| File | `lib/core/feedback/app_messenger.dart` |
+| Entry | `AppMessenger.show(context, AppMessage(...))`, `showError`, `showSuccess`, … |
+| Kinds | `error`, `success`, `info`, `warning` |
+| UI | Single overlay card under status bar; slide-in; auto-dismiss; tap to dismiss |
+| Theme | `EngineTheme` / `Theme.of(context)` first; fallback `constants.dart` |
+
+**Call from:** feature `BlocListener`s, `VariantScreen` auth host, optional `EngineActionDispatcher` on invalid form — **never** from `lib/engine/tree/renderers/`.
+
+**Do not use:** `ScaffoldMessenger.showSnackBar`, bottom `SnackBar`.
+
+**Not for:** inline list/grid load errors — those use `requests.{requestKey}` + `request_ui_state.dart`.
+
+**Auth example** (`variant_screen.dart` → `_AuthRequestHost`):
+
+- `AuthFailureState` → `AppMessenger.showError`
+- `AuthOtpRequested` → `AppMessenger.showSuccess` or `showInfo`
+- Optional `AuthAuthenticated` welcome using `tokenResponse.username`
+
+**Future JSON:** `tap: { type: showMessage }` requires `docs/engine/builder-specs/` handoff per RULES §3.4.
+
+Authoritative rules: [RULES.md §3.10](../../RULES.md#310-in-app-user-messages-appmessenger).
+
 ## Related
 
 - [06-feature-auth.md](06-feature-auth.md)

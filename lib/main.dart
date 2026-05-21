@@ -49,7 +49,7 @@ void main() async {
   // 4. System UI
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
-      statusBarColor: primaryColor,
+      statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.light,
     ),
   );
@@ -121,8 +121,9 @@ class SOOQApp extends StatelessWidget {
             builder: (context, child) {
               final isRtl = context.locale.languageCode == 'ar';
               return Directionality(
-                textDirection:
-                    isRtl ? ui.TextDirection.rtl : ui.TextDirection.ltr,
+                textDirection: isRtl
+                    ? ui.TextDirection.rtl
+                    : ui.TextDirection.ltr,
                 child: child ?? const SizedBox.shrink(),
               );
             },

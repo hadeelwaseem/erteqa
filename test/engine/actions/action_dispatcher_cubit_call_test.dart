@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:sooq_merchant/core/cubits/token_cubit/token_cubit.dart';
 import 'package:sooq_merchant/core/errors/failures.dart';
 import 'package:sooq_merchant/core/network/auth_token_storage.dart';
+import 'package:sooq_merchant/core/feedback/app_messenger.dart';
 import 'package:sooq_merchant/engine/actions/action_dispatcher.dart';
 import 'package:sooq_merchant/engine/form/form_state_store.dart';
 import 'package:sooq_merchant/features/auth/data/models/auth_token_response.dart';
@@ -82,6 +83,7 @@ void main() {
   });
 
   tearDown(() {
+    AppMessenger.dismiss();
     if (locator.isRegistered<AuthCubit>()) {
       locator.unregister<AuthCubit>();
     }
@@ -142,5 +144,55 @@ void main() {
     expect(fakeRepo.lastOtpRequest?.fullName, 'Ali');
     expect(fakeRepo.lastOtpRequest?.tenantSlug, 'store-a');
     expect(locator<AuthCubit>().state, isA<AuthOtpRequested>());
+  });
+
+  testWidgets('requireValidForm failure shows validation messenger', (tester) async {
+    final formState = FormStateStore();
+    final formKey = formState.formKeyFor('login');
+
+    final router = GoRouter(
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, state) {
+            final dispatcher = EngineActionDispatcher(
+              context: context,
+              formState: formState,
+            );
+            return Scaffold(
+              body: Form(
+                key: formKey,
+                child: Column(
+                  children: [
+                    TextFormField(
+                      decoration: const InputDecoration(labelText: 'Phone'),
+                      validator: (value) =>
+                          (value == null || value.isEmpty) ? 'Required' : null,
+                    ),
+                    ElevatedButton(
+                      onPressed: () => dispatcher.dispatch({
+                        'type': 'navigate',
+                        'route': '/home',
+                        'requireValidForm': true,
+                        'formId': 'login',
+                      }),
+                      child: const Text('Submit'),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+    await tester.tap(find.text('Submit'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('يرجى تصحيح الحقول'), findsOneWidget);
+    AppMessenger.dismiss();
   });
 }

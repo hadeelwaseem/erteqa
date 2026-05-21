@@ -11,7 +11,7 @@ Canonical documentation for humans and AI assistants. **Read `AGENTS.md` at repo
 | [02-config-and-json.md](02-config-and-json.md) | JSON schema, pages, navigation, `data` blocks |
 | [03-engine.md](03-engine.md) | Renderers, parsing, validation |
 | [04-actions-and-requests.md](04-actions-and-requests.md) | `tap`, `EngineActionDispatcher`, `EngineRequestMapper` |
-| [05-core.md](05-core.md) | DI, router, network, auth tokens |
+| [05-core.md](05-core.md) | DI, router, network, auth tokens, `AppMessenger` |
 | [06-feature-auth.md](06-feature-auth.md) | OTP auth, cubits, endpoints |
 | [07-feature-product.md](07-feature-product.md) | Catalog, search, categories |
 | [08-feature-variant-shell.md](08-feature-variant-shell.md) | Dynamic pages, tab shell |

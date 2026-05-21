@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/feedback/app_messenger.dart';
 import '../../core/network/network_config.dart';
 import '../../core/utils/api_service.dart';
 import '../../core/utils/app_logger.dart';
@@ -42,6 +43,7 @@ class EngineActionDispatcher {
     if (requireValidForm && _formState != null) {
       final formId = action['formId'] as String? ?? '';
       if (!_formState.validate(formId)) {
+        AppMessenger.showError(_context, 'يرجى تصحيح الحقول');
         return;
       }
     }

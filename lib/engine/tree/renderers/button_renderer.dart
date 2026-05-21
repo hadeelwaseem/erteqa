@@ -39,11 +39,26 @@ class ButtonRenderer implements ComponentRenderer {
     );
     final onTap = config.properties['onTap'] as VoidCallback?;
     final maxWidth = PropertyParsers.parseDouble(config.properties['maxWidth']);
+    final fullWidth = PropertyParsers.parseBool(
+      config.properties['fullWidth'],
+      defaultValue: false,
+    );
     final enabled = PropertyParsers.parseBool(
       config.properties['enabled'],
       defaultValue: true,
     );
     final onPressed = enabled ? onTap : null;
+    final labelStyle = _buildLabelStyle(
+      textColor: textColor,
+      foregroundColor: foregroundColor,
+      fontSize: PropertyParsers.parseDouble(config.properties['fontSize']),
+      fontWeight: PropertyParsers.parseFontWeight(
+        config.properties['fontWeight'] as String?,
+      ),
+      letterSpacing: PropertyParsers.parseDouble(
+        config.properties['letterSpacing'],
+      ),
+    );
 
     final resolvedBackground = backgroundColor ?? theme?.primaryColor;
     final resolvedForeground = foregroundColor ?? textColor;
@@ -55,9 +70,14 @@ class ButtonRenderer implements ComponentRenderer {
                 .clamp(8.0, 24.0),
           )
         : const EdgeInsets.symmetric(horizontal: 16, vertical: 12);
-    final minimumSize = buttonMd != null
+    final baseMinimumSize = buttonMd != null
         ? Size(0, buttonMd.height)
         : const Size(64, 48);
+    final minimumSize = fullWidth
+        ? Size(double.infinity, baseMinimumSize.height)
+        : maxWidth != null && maxWidth > 0
+            ? Size(maxWidth, baseMinimumSize.height)
+            : baseMinimumSize;
 
     final shape = RoundedRectangleBorder(borderRadius: borderRadius);
 
@@ -72,12 +92,7 @@ class ButtonRenderer implements ComponentRenderer {
             minimumSize: minimumSize,
             shape: shape,
           ),
-          child: Text(
-            label,
-            style: textColor != null && foregroundColor == null
-                ? TextStyle(color: textColor)
-                : null,
-          ),
+          child: Text(label, style: labelStyle),
         );
         break;
       case 'outlined':
@@ -93,12 +108,7 @@ class ButtonRenderer implements ComponentRenderer {
               color: textColor ?? theme?.primaryColor ?? const Color(0xFF1D4ED8),
             ),
           ),
-          child: Text(
-            label,
-            style: textColor != null && foregroundColor == null
-                ? TextStyle(color: textColor)
-                : null,
-          ),
+          child: Text(label, style: labelStyle),
         );
         break;
       case 'filled':
@@ -113,17 +123,14 @@ class ButtonRenderer implements ComponentRenderer {
             minimumSize: minimumSize,
             shape: shape,
           ),
-          child: Text(
-            label,
-            style: textColor != null && foregroundColor == null
-                ? TextStyle(color: textColor)
-                : null,
-          ),
+          child: Text(label, style: labelStyle),
         );
     }
 
     Widget wrapped = button;
-    if (maxWidth != null && maxWidth > 0) {
+    if (fullWidth) {
+      wrapped = SizedBox(width: double.infinity, child: wrapped);
+    } else if (maxWidth != null && maxWidth > 0) {
       wrapped = SizedBox(width: maxWidth, child: wrapped);
     }
 
@@ -136,6 +143,27 @@ class ButtonRenderer implements ComponentRenderer {
       enabled: enabled,
       label: label.isNotEmpty ? label : null,
       child: wrapped,
+    );
+  }
+
+  TextStyle? _buildLabelStyle({
+    Color? textColor,
+    Color? foregroundColor,
+    double? fontSize,
+    FontWeight? fontWeight,
+    double? letterSpacing,
+  }) {
+    final hasStyle = textColor != null ||
+        foregroundColor != null ||
+        fontSize != null ||
+        fontWeight != null ||
+        letterSpacing != null;
+    if (!hasStyle) return null;
+    return TextStyle(
+      color: foregroundColor ?? textColor,
+      fontSize: fontSize,
+      fontWeight: fontWeight,
+      letterSpacing: letterSpacing,
     );
   }
 }

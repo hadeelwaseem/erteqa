@@ -7,15 +7,9 @@ class AuthRedirect {
   static const String homeRoute = '/home';
   static const String loginRoute = '/auth/login';
 
-  static const Set<String> authRoutes = {
-    '/auth/login',
-    '/auth/otp-reset',
-  };
+  static const Set<String> authRoutes = {'/auth/login', '/auth/otp-reset'};
 
-  static const Set<String> guestIntroRoutes = {
-    '/splash',
-    '/onboarding',
-  };
+  static const Set<String> guestIntroRoutes = {'/splash', '/splash-carousel'};
 
   static const Set<String> publicGuestRoutes = {
     ...authRoutes,
@@ -72,7 +66,8 @@ class AuthRedirect {
     final loggedIn = isLoggedIn(token);
 
     if (loggedIn) {
-      if (authRoutes.contains(location) || guestIntroRoutes.contains(location)) {
+      if (authRoutes.contains(location) ||
+          guestIntroRoutes.contains(location)) {
         return homeRoute;
       }
       return null;

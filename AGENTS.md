@@ -47,7 +47,7 @@ This is a **Flutter-based dynamic mobile app generator**, not a traditional Flut
 ```
 JSON (assets/config) → MobileAppConfig + page slice → ScreenConfig
   → EngineRequestMapper → Feature cubits → dataContext
-  → ScreenRenderer (20 component types) → Flutter UI
+  → ScreenRenderer (24 component types) → Flutter UI
 ```
 
 ---
@@ -96,11 +96,12 @@ Details: [`docs/ai/03-engine.md`](docs/ai/03-engine.md)
 | Router | `lib/core/utils/app_router.dart` |
 | Dynamic page host | `lib/features/variantscreen/presentation/views/variant_screen.dart` |
 | JSON page parser | `lib/features/variantscreen/data/repos/variant_repository.dart` |
-| Renderer (20 types) | `lib/engine/screen_renderer/screen_renderer.dart` |
+| Renderer (24 types) | `lib/engine/screen_renderer/screen_renderer.dart` |
 | Actions | `lib/engine/actions/action_dispatcher.dart` |
 | Requests | `lib/engine/requests/request_mapper.dart` |
 | Product API | `lib/features/product/data/repos/product_repo_impl.dart` |
 | Auth API | `lib/features/auth/data/repos/auth_repo_impl.dart` |
+| User messages | `lib/core/feedback/app_messenger.dart` |
 
 ---
 
@@ -138,6 +139,7 @@ When implementing [docs/engine/RENDERER_AUDIT_IMPLEMENTATION_PLAN.md](docs/engin
 | Register new types in `ScreenRenderer` | Add parallel widget registry strings |
 | Return `Either<Failure, T>` from repos | Parse API JSON in widgets |
 | Match `requestUrl` to repo paths | Invent `/api/v1/auth/otp` (use `customer/auth`) |
+| Use `AppMessenger` for toasts / validation / success copy | Bottom `SnackBar` / `ScaffoldMessenger.showSnackBar` |
 | Read `docs/ai/` for details | Trust archived `docs/_archive/` or stubbed feature guides |
 
 ---

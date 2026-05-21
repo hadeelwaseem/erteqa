@@ -168,6 +168,12 @@ class AssetVariantRepository implements VariantRepository {
 
     // pages[].scroll → scaffold.properties.pageScroll (engine bridge; not a component prop)
     final pageScroll = selectedPage['scroll'] as String? ?? 'vertical';
+    // scroll:none + SizedBox.expand scaffold body needs a max-height column so nested
+    // columns with expand/Expanded receive finite vertical constraints.
+    final rootColumnProps = <String, String>{
+      'crossAxisAlignment': 'stretch',
+      if (pageScroll == 'none') 'mainAxisSize': 'max',
+    };
 
     final root = ComponentConfig(
       type: GenericComponentType.scaffold,
@@ -178,7 +184,7 @@ class AssetVariantRepository implements VariantRepository {
       },
       child: ComponentConfig(
         type: GenericComponentType.column,
-        properties: const {'crossAxisAlignment': 'stretch'},
+        properties: rootColumnProps,
         children: children,
       ),
     );

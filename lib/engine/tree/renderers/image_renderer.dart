@@ -41,13 +41,7 @@ class ImageRenderer implements ComponentRenderer {
 
     Widget image;
     if (source == 'network') {
-      image = _buildNetworkImage(
-        resolvedUrl,
-        width,
-        height,
-        fit,
-        theme: theme,
-      );
+      image = _buildNetworkImage(resolvedUrl, width, height, fit, theme: theme);
     } else if (source == 'asset') {
       image = _buildAssetImage(url, width, height, fit, theme: theme);
     } else if (source == 'file') {
@@ -61,11 +55,7 @@ class ImageRenderer implements ComponentRenderer {
       resolvedUrl: resolvedUrl,
     );
 
-    image = Semantics(
-      image: true,
-      label: semanticsLabel,
-      child: image,
-    );
+    image = Semantics(image: true, label: semanticsLabel, child: image);
 
     if (aspectRatio != null && aspectRatio > 0) {
       return AspectRatio(aspectRatio: aspectRatio, child: image);
@@ -153,7 +143,7 @@ class ImageRenderer implements ComponentRenderer {
           theme: theme,
           progress: loadingProgress.expectedTotalBytes != null
               ? loadingProgress.cumulativeBytesLoaded /
-                  loadingProgress.expectedTotalBytes!
+                    loadingProgress.expectedTotalBytes!
               : null,
         );
       },
@@ -218,7 +208,8 @@ class ImageRenderer implements ComponentRenderer {
       width: width,
       height: height,
       color: theme?.surfaceColor ?? const Color(0xFFF8FAFC),
-      child: child ??
+      child:
+          child ??
           Center(
             child: Icon(
               Icons.image_outlined,
@@ -248,11 +239,7 @@ class ImageRenderer implements ComponentRenderer {
     );
   }
 
-  Widget _errorBox(
-    double? width,
-    double? height, {
-    EngineTheme? theme,
-  }) {
+  Widget _errorBox(double? width, double? height, {EngineTheme? theme}) {
     return Container(
       width: width,
       height: height,

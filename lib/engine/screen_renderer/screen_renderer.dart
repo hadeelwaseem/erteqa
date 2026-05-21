@@ -25,6 +25,10 @@ import '../tree/renderers/list_view_renderer.dart';
 import '../tree/renderers/grid_view_renderer.dart';
 import '../tree/renderers/rich_text_renderer.dart';
 import '../tree/renderers/video_player_renderer.dart';
+import '../tree/renderers/stack_renderer.dart';
+import '../tree/renderers/image_slider_renderer.dart';
+import '../tree/renderers/timer_renderer.dart';
+import '../tree/renderers/progress_indicator_renderer.dart';
 import '../tree/renderers/unsupported_component_renderer.dart';
 import '../actions/action_dispatcher.dart';
 import '../form/form_state_store.dart';
@@ -86,6 +90,10 @@ class ScreenRenderer {
       GenericComponentType.icon: IconRenderer(),
       GenericComponentType.richtext: RichTextRenderer(),
       GenericComponentType.videoPlayer: VideoPlayerRenderer(),
+      GenericComponentType.stack: StackRenderer(),
+      GenericComponentType.imageSlider: ImageSliderRenderer(),
+      GenericComponentType.timer: TimerRenderer(),
+      GenericComponentType.progressIndicator: ProgressIndicatorRenderer(),
       GenericComponentType.unsupported: UnsupportedComponentRenderer(),
     };
   }

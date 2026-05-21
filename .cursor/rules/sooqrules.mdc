@@ -54,6 +54,7 @@ Lists/grids: `requestUrl` + `data.requestKey` + `request_ui_state` (loading / em
 | List/grid data | JSON `requestUrl` + `EngineRequestMapper` + `VariantScreen` |
 | Button nav | `tap: { type: navigate, route }` in JSON |
 | Auth | `lib/features/auth/` + `TokenCubit` / `AuthInterceptor` |
+| User toast / validation / success message | `lib/core/feedback/app_messenger.dart` (`AppMessenger`) | See [RULES.md §3.10](../../RULES.md#310-in-app-user-messages-appmessenger) |
 
 **Default:** UI = JSON-only. Ask before new Dart screens.
 
@@ -64,6 +65,7 @@ Lists/grids: `requestUrl` + `data.requestKey` + `request_ui_state` (loading / em
 - Repos: `Either<Failure, T>`; APIs wired via features + `dataContext`
 - Register schema keys in `lib/engine/validation/component_schemas.dart` when adding props
 - Run `flutter test` before finishing engine/config work
+- Transient user messages: **`AppMessenger`** (top overlay) — [RULES.md §3.10](../../RULES.md#310-in-app-user-messages-appmessenger)
 - **End-of-task:** review all added/changed code per [RULES.md §5](../../RULES.md#5-final-validation-checklist-mandatory)
 - **Builder spec rule** (below)
 
@@ -86,6 +88,7 @@ Handoffs: `02-list-grid`, `05-high-traffic`, `06-form-autovalidate`, `08-page-sc
 - Business logic in `lib/engine/tree/renderers/`; API fetch in renderers
 - `semanticType` as renderer dispatch; parallel widget registries outside `ScreenRenderer`
 - Parse API JSON in widgets
+- `ScaffoldMessenger.showSnackBar` / bottom `SnackBar` for user feedback (use `AppMessenger`)
 - Wrong auth: use `/api/v1/customer/auth/otp/*` (not `/api/v1/auth/otp`)
 - Public catalog: `/api/v1/public/*` without auth headers
 - Drive-by refactors; speculative props “for later”
@@ -100,9 +103,9 @@ Handoffs: `02-list-grid`, `05-high-traffic`, `06-form-autovalidate`, `08-page-sc
 
 Match JSON `requestUrl` to repo paths.
 
-## Component types (20)
+## Component types (24)
 
-`scaffold`, `singleChildScrollView`, `column`, `row`, `container`, `listView`, `gridView`, `text`, `textFormField`, `form`, `button`, `card`, `spacer`, `image`, `appBar`, `divider`, `icon`, `richtext`, `videoPlayer`, `unsupported`
+`scaffold`, `singleChildScrollView`, `column`, `row`, `container`, `listView`, `gridView`, `text`, `textFormField`, `form`, `button`, `card`, `spacer`, `image`, `appBar`, `divider`, `icon`, `richtext`, `videoPlayer`, `stack`, `imageSlider`, `timer`, `progressIndicator`, `unsupported`
 
 → [docs/ai/03-engine.md](../../docs/ai/03-engine.md)
 
@@ -118,6 +121,7 @@ Match JSON `requestUrl` to repo paths.
 | Renderer registry | `lib/engine/screen_renderer/screen_renderer.dart` |
 | Actions | `lib/engine/actions/action_dispatcher.dart` |
 | Requests | `lib/engine/requests/request_mapper.dart` |
+| User messages | `lib/core/feedback/app_messenger.dart` |
 | Request UI phases | `lib/engine/request_ui_state.dart` |
 | Theme in context | `lib/engine/theme/engine_theme.dart` |
 | Schemas | `lib/engine/validation/component_schemas.dart` |

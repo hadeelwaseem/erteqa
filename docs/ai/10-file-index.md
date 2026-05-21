@@ -46,6 +46,7 @@ Use this map to locate code. Prefer extending existing files over creating paral
 | `lib/core/cubits/token_cubit/` | Session token state |
 | `lib/core/enums/generic_component_type.dart` | Component type enum |
 | `lib/core/widgets/` | Shared UI primitives |
+| `lib/core/feedback/app_messenger.dart` | Top overlay user messages (`AppMessenger`) |
 | `lib/core/errors/failures.dart` | Failure types |
 
 ## Features — auth

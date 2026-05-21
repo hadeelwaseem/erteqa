@@ -48,6 +48,14 @@ class ContainerRenderer implements ComponentRenderer {
       final expandedChild = child;
       child = LayoutBuilder(
         builder: (context, constraints) {
+          // Inside Expanded / bounded column: fill the slot, do not force full viewport.
+          if (constraints.maxHeight.isFinite) {
+            return SizedBox(
+              width: double.infinity,
+              height: constraints.maxHeight,
+              child: expandedChild,
+            );
+          }
           final height = _expandHeight(context, constraints);
           return SizedBox(
             width: double.infinity,
@@ -81,7 +89,8 @@ class ContainerRenderer implements ComponentRenderer {
     );
   }
 
-  /// Height for [expand] when parent max height is unbounded (e.g. [SingleChildScrollView]).
+  /// Height for [expand]. Prefer finite parent constraints (e.g. [Expanded] or
+  /// [Column] with [MainAxisSize.max]). Falls back to scroll min-height or viewport.
   static double _expandHeight(BuildContext context, BoxConstraints constraints) {
     if (constraints.maxHeight.isFinite) {
       return constraints.maxHeight;
@@ -90,8 +99,7 @@ class ContainerRenderer implements ComponentRenderer {
       return constraints.minHeight;
     }
     final media = MediaQuery.sizeOf(context);
-    final padding = MediaQuery.paddingOf(context).vertical;
-    return (media.height - padding).clamp(0.0, double.infinity);
+    return media.height.clamp(0.0, double.infinity);
   }
 
   BoxShadow? _parseShadow(dynamic v) {

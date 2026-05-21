@@ -12,6 +12,8 @@ alwaysApply: false
 
 `lib/core/` — shared infrastructure, not feature domain or engine rendering.
 
+**User messages:** `lib/core/feedback/app_messenger.dart` — not `SnackBar`.
+
 ## DI
 
 Register in `lib/core/utils/service_locator.dart` via `setupServiceLocator()`.
@@ -30,6 +32,16 @@ Use `getIt<T>()`. Verify registrations before adding types.
 ## Routing
 
 `AppRouter.setupRouter` — config routes → `VariantScreen`. Tab shell: `TabShellWidget`.
+
+## In-app user messages (`AppMessenger`)
+
+- **Path:** `lib/core/feedback/app_messenger.dart`
+- **Use for:** validation errors, auth/API feedback, success/info toasts (not Firebase push)
+- **Must:** top overlay via root `Overlay`; `AppMessageKind` (error / success / info / warning); theme from `EngineTheme` or `Theme.of(context)`
+- **Must not:** `ScaffoldMessenger.showSnackBar` / bottom `SnackBar`; calls from engine renderers
+- **Auth wiring:** `_AuthRequestHost` in `variant_screen.dart` replaces legacy SnackBars
+- **List/grid errors:** stay in `request_ui_state` / `dataContext` unless task says otherwise
+- Full spec: [RULES.md §3.10](../../RULES.md#310-in-app-user-messages-appmessenger), [docs/ai/05-core.md](../../docs/ai/05-core.md#in-app-user-messages-appmessenger)
 
 ## Must not
 

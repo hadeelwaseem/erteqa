@@ -29,12 +29,14 @@ Legacy views under `presentation/views/` — prefer JSON routes for new work.
 - Persist tokens via `AuthTokenStorage` on verify
 - Register repos/cubits in `service_locator.dart`
 - Session changes via `AuthCubit` / `TokenCubit` + `AuthInterceptor`
+- Surface `AuthFailureState` / `AuthOtpRequested` messages via **`AppMessenger`** in `_AuthRequestHost` (`variant_screen.dart`) — not `SnackBar`
 
 ## Must not
 
 - Put OTP/business rules only in widgets
 - Bypass token storage on verify
 - Trust `docs/_archive/` or stubbed feature READMEs for paths
+- `ScaffoldMessenger.showSnackBar` for auth feedback
 
 ## JSON routes
 

@@ -73,11 +73,7 @@ Widget _scaffoldBodyColumn({
   return Column(
     mainAxisSize: MainAxisSize.min,
     children: [
-      Align(
-        alignment: Alignment.topCenter,
-        widthFactor: 1.0,
-        child: child,
-      ),
+      Align(alignment: Alignment.topCenter, widthFactor: 1.0, child: child),
       if (hasLoadingMore) _buildLoadingFooter(),
     ],
   );
@@ -99,29 +95,38 @@ class _ScrollableScaffoldBody extends StatelessWidget {
     return SingleChildScrollView(
       child: ConstrainedBox(
         constraints: BoxConstraints(minHeight: minHeight),
-        child: _scaffoldBodyColumn(
-          child: child,
-          dataContext: dataContext,
-        ),
+        child: _scaffoldBodyColumn(child: child, dataContext: dataContext),
       ),
     );
   }
 }
 
 class _StaticScaffoldBody extends StatelessWidget {
-  const _StaticScaffoldBody({
-    required this.dataContext,
-    required this.child,
-  });
+  const _StaticScaffoldBody({required this.dataContext, required this.child});
 
   final Map<String, dynamic>? dataContext;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    return _scaffoldBodyColumn(
-      child: child,
-      dataContext: dataContext,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final height = constraints.maxHeight.isFinite
+            ? constraints.maxHeight
+            : MediaQuery.sizeOf(context).height;
+        final hasLoadingMore = _hasLoadingMore(dataContext);
+        return SizedBox(
+          width: double.infinity,
+          height: height,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(child: child),
+              if (hasLoadingMore) _buildLoadingFooter(),
+            ],
+          ),
+        );
+      },
     );
   }
 }

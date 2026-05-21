@@ -4,17 +4,11 @@ import 'package:sooq_merchant/core/navigation/auth_redirect.dart';
 void main() {
   group('AuthRedirect', () {
     test('initialLocation is home when token exists', () {
-      expect(
-        AuthRedirect.initialLocation(token: 'access-token'),
-        '/home',
-      );
+      expect(AuthRedirect.initialLocation(token: 'access-token'), '/home');
     });
 
     test('initialLocation is splash when logged out', () {
-      expect(
-        AuthRedirect.initialLocation(token: null),
-        '/splash',
-      );
+      expect(AuthRedirect.initialLocation(token: null), '/splash');
     });
 
     test('logged-in user on login route redirects to home', () {
@@ -50,20 +44,14 @@ void main() {
 
     test('logged-out user on protected route redirects to login', () {
       expect(
-        AuthRedirect.resolve(
-          token: null,
-          matchedLocation: '/checkout',
-        ),
+        AuthRedirect.resolve(token: null, matchedLocation: '/checkout'),
         '/auth/login',
       );
     });
 
     test('logged-out user may access auth routes', () {
       expect(
-        AuthRedirect.resolve(
-          token: null,
-          matchedLocation: '/auth/otp-reset',
-        ),
+        AuthRedirect.resolve(token: null, matchedLocation: '/auth/otp-reset'),
         isNull,
       );
     });

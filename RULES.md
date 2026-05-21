@@ -47,6 +47,7 @@ If scoped rules and `docs/ai` disagree with repo code, **code wins** — fix doc
 | New component `type` | Engine + `component_schemas.dart` + `docs/ai/03-engine.md` |
 | New API path | Feature repo + `service_locator.dart` + `docs/ai/06-*` / `07-*` |
 | Path-specific convention only | Relevant `.cursor/rules/*.mdc` |
+| In-app user messages (`AppMessenger`) | `RULES.md` §3.10, `core.mdc`, `docs/ai/05-core.md` |
 
 ---
 
@@ -255,8 +256,8 @@ lib/features/<domain>/
 **Component dispatch:** Use `type` + `props` + `data` / `valuePath` / `urlPath`.  
 **Never** use `semanticType` as a renderer registry key. `semanticType` is documentation/metadata (e.g. `ProductList` on a `gridView`).
 
-**20 component types:**  
-`scaffold`, `singleChildScrollView`, `column`, `row`, `container`, `listView`, `gridView`, `text`, `textFormField`, `form`, `button`, `card`, `spacer`, `image`, `appBar`, `divider`, `icon`, `richtext`, `videoPlayer`, `unsupported`
+**24 component types:**  
+`scaffold`, `singleChildScrollView`, `column`, `row`, `container`, `listView`, `gridView`, `text`, `textFormField`, `form`, `button`, `card`, `spacer`, `image`, `appBar`, `divider`, `icon`, `richtext`, `videoPlayer`, `stack`, `imageSlider`, `timer`, `progressIndicator`, `unsupported`
 
 Registry: `ScreenRenderer._createDefaultRenderers` in `lib/engine/screen_renderer/screen_renderer.dart`.
 
@@ -266,7 +267,7 @@ Registry: `ScreenRenderer._createDefaultRenderers` in `lib/engine/screen_rendere
 |-------|------|-----|----------|
 | **Config** | `lib/config/`, `assets/config/` | Data models, JSON assets | Flutter UI widgets, API calls |
 | **Engine** | `lib/engine/` | Render trees, `tap` actions, request mapping, parsers, validation warnings | Domain rules, `import` feature repos/cubits in renderers, HTTP fetch |
-| **Core** | `lib/core/` | DI (`service_locator.dart`), `Dio`, `AppRouter`, `TokenCubit`, shared widgets | Parse page JSON, register renderers, product-specific API |
+| **Core** | `lib/core/` | DI (`service_locator.dart`), `Dio`, `AppRouter`, `TokenCubit`, `AppMessenger`, shared widgets | Parse page JSON, register renderers, product-specific API |
 | **Features** | `lib/features/` | Repos, cubits, models, `VariantScreen` orchestration | Change renderer registry, hardcode merchant layouts |
 
 **Hard rule:** No `lib/features/*` imports inside `lib/engine/tree/renderers/`.
@@ -284,6 +285,7 @@ Registry: `ScreenRenderer._createDefaultRenderers` in `lib/engine/screen_rendere
 | Auth / session | `lib/features/auth/` + `TokenCubit` + `AuthInterceptor` | OTP paths below |
 | Theme tokens | JSON `theme` section | Consumed into `EngineTheme` |
 | Loading / empty / error for requests | JSON messages + `request_ui_state` + `VariantScreen` `dataContext` | See §3.6 |
+| Transient user message (validation, auth, success toast) | `AppMessenger` in `lib/core/feedback/app_messenger.dart` | See §3.10 — **not** `SnackBar` |
 
 **Examples**
 
@@ -383,6 +385,57 @@ Before changing auth, product, or variant code:
 | 13 | `onTap` authored in JSON props | Runtime-injected from `tap` — see schemas |
 | 14 | Drive-by refactors across `lib/features` when fixing engine bug | Review noise, regression risk |
 | 15 | Git commit without user request | User workflow preference |
+| 16 | `ScaffoldMessenger.showSnackBar` / bottom `SnackBar` for user feedback | Use `AppMessenger` (§3.10) — top overlay, single system |
+
+### 3.10 In-app user messages (`AppMessenger`)
+
+**Purpose:** One centralized API for **transient, top-of-screen** feedback — validation errors, API/cubit failures shown to the user, and success/info copy (e.g. OTP sent, login welcome, “order deleted”). This is **not** Firebase push notifications.
+
+**Canonical implementation:** `lib/core/feedback/app_messenger.dart` — overlay at the top (slide-in card, auto-dismiss, tap to dismiss, single active message). Features call it with a `BuildContext`; do **not** duplicate overlay logic per feature.
+
+**API shape (ground truth once implemented):**
+
+| Export | Role |
+|--------|------|
+| `AppMessageKind` | `error`, `success`, `info`, `warning` |
+| `AppMessage` | `kind`, `message`, optional `title`, `duration` |
+| `AppMessenger.show(context, …)` | Generic entry |
+| `AppMessenger.showError` / `showSuccess` / … | Convenience |
+| `AppMessenger.dismiss()` | Clear active overlay |
+
+**Styling:** Prefer `EngineTheme` from `dataContext` or `Theme.of(context)` (JSON `theme` — font family, `errorColor`, `surfaceColor`, `textColor`). Fallback: `lib/core/utils/constants.dart`. Do **not** hardcode fonts from other projects (e.g. Almarai).
+
+**Must**
+
+- Use `AppMessenger` for user-visible ephemeral messages from **features** (`BlocListener`, action handlers, cubit callbacks).
+- Show **validation errors** the same way as auth/API errors (top card), e.g. `AuthFailureState` from `AuthCubit`.
+- Keep implementation in **`lib/core/`** — no `lib/features/*` imports inside the messenger widget.
+- Use **root overlay** (`rootNavigator` / `rootOverlay`) so messages work on auth routes without a JSON `scaffold`.
+- `grep` before finishing: **zero** `ScaffoldMessenger.showSnackBar` / `SnackBar(` in `lib/`.
+
+**Must not**
+
+- Use Flutter **bottom** `SnackBar` or `ScaffoldMessenger.showSnackBar` for user messages.
+- Call `AppMessenger` from `lib/engine/tree/renderers/` (layer violation).
+- Duplicate list/grid **inline** request errors as top banners — those stay in `dataContext['requests.{key}']` + `request_ui_state.dart` unless the task explicitly wires global feedback for a user action.
+- Add JSON `tap: { type: showMessage, … }` without **builder-spec** or prod JSON grep per §3.4.
+
+**Integration points**
+
+| Area | Pattern |
+|------|---------|
+| Auth | `_AuthRequestHost` in `variant_screen.dart` — listen to `AuthFailureState`, `AuthOtpRequested` (and optional welcome on `AuthAuthenticated`) |
+| Form submit | `EngineActionDispatcher` — when `requireValidForm` fails, optional `AppMessenger.showError` (generic validation copy) |
+| Future JSON-driven copy | New `showMessage` action only after `docs/engine/builder-specs/` handoff |
+
+**Example**
+
+```dart
+AppMessenger.showError(context, errMessage, title: 'خطأ');
+AppMessenger.showSuccess(context, 'تم تسجيل الدخول بنجاح، مرحباً $name');
+```
+
+Deep reference: [`docs/ai/05-core.md`](docs/ai/05-core.md#in-app-user-messages-appmessenger).
 
 ---
 
@@ -419,6 +472,7 @@ When changing public contracts, update the smallest doc set:
 - New API → `docs/ai/06-feature-auth.md` or `07-feature-product.md`  
 - New JSON-only UI → optionally `02-config-and-json.md`  
 - Engine-read prop not in prod → builder-spec only  
+- User messages / `AppMessenger` → `docs/ai/05-core.md` + §3.10  
 
 ---
 
@@ -432,6 +486,7 @@ Complete this checklist at the end of **every** task before reporting done:
 - [ ] JSON-first respected (or explicit user approval for Dart UI)  
 - [ ] Builder spec rule satisfied for new JSON contracts  
 - [ ] Error / loading / empty states handled where applicable  
+- [ ] Transient user messages use `AppMessenger` (§3.10), not `SnackBar`  
 - [ ] Cubit lifecycle safe; no emit-after-dispose  
 - [ ] API paths match guardrails; `requestUrl` aligned with repos  
 - [ ] `semanticType` not used as renderer dispatch  
@@ -458,6 +513,7 @@ Complete this checklist at the end of **every** task before reporting done:
 | Actions | `lib/engine/actions/action_dispatcher.dart` |
 | Requests | `lib/engine/requests/request_mapper.dart` |
 | Schemas | `lib/engine/validation/component_schemas.dart` |
+| User messages | `lib/core/feedback/app_messenger.dart` |
 
 ## Appendix B — Tests
 

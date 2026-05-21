@@ -24,7 +24,8 @@ void main() {
     WidgetTester tester, {
     required String pageScroll,
     Map<String, dynamic>? dataContext,
-  }) async {    final renderer = ScaffoldRenderer();
+  }) async {
+    final renderer = ScaffoldRenderer();
     final config = ComponentConfig(
       type: GenericComponentType.scaffold,
       properties: {'pageScroll': pageScroll},
@@ -60,7 +61,7 @@ void main() {
   testWidgets('pageScroll none omits SingleChildScrollView', (tester) async {
     await pumpScaffold(tester, pageScroll: 'none');
     expect(find.byType(SingleChildScrollView), findsNothing);
-    expect(find.byType(Align), findsWidgets);
+    expect(find.byType(Expanded), findsOneWidget);
   });
 
   testWidgets('loadingMoreRequests shows footer progress indicator', (

@@ -206,6 +206,10 @@ class ComponentSchemas {
       'variant',
       'foregroundColor',
       'maxWidth',
+      'fullWidth',
+      'fontSize',
+      'fontWeight',
+      'letterSpacing',
       'backgroundColor',
       'textColor',
       'borderRadius',
@@ -220,6 +224,10 @@ class ComponentSchemas {
       'textColor': 'string (hex)',
       'borderRadius': 'number',
       'padding': 'number | object',
+      'fullWidth': 'bool',
+      'fontSize': 'number',
+      'fontWeight': 'string (bold|w600|...)',
+      'letterSpacing': 'number',
       'onTap': 'VoidCallback (runtime-injected)',
     },
   );
@@ -420,10 +428,7 @@ class ComponentSchemas {
     type: 'form',
     requiredProperties: {},
     optionalProperties: {'id', 'formId', 'child', 'children'},
-    propertyTypes: {
-      'id': 'string',
-      'formId': 'string',
-    },
+    propertyTypes: {'id': 'string', 'formId': 'string'},
   );
 
   static const videoPlayer = ComponentSchema(
@@ -435,6 +440,65 @@ class ComponentSchemas {
       'showControls',
       'height',
       'borderRadius',
+    },
+  );
+
+  static const stack = ComponentSchema(
+    type: 'stack',
+    requiredProperties: {},
+    optionalProperties: {'fit', 'children'},
+    propertyTypes: {'fit': 'string (expand|loose)'},
+  );
+
+  static const imageSlider = ComponentSchema(
+    type: 'imageSlider',
+    requiredProperties: {'images'},
+    optionalProperties: {
+      'fit',
+      'autoPlay',
+      'intervalMs',
+      'showIndicators',
+      'indicatorPosition',
+      'indicatorColor',
+      'indicatorInactiveColor',
+      'indicatorStyle',
+      'indicatorBottomPadding',
+      'animationDurationMs',
+    },
+    propertyTypes: {
+      'images': 'string[] | object[] {url, alt?}',
+      'fit': 'string (cover|contain|fill|...)',
+      'autoPlay': 'bool',
+      'intervalMs': 'number',
+      'showIndicators': 'bool',
+      'indicatorPosition': 'string (top|bottom)',
+      'indicatorColor': 'string (hex)',
+      'indicatorInactiveColor': 'string (hex)',
+      'indicatorStyle': 'string (dot|pill)',
+      'indicatorBottomPadding': 'number',
+      'animationDurationMs': 'number',
+    },
+  );
+
+  static const progressIndicator = ComponentSchema(
+    type: 'progressIndicator',
+    requiredProperties: {},
+    optionalProperties: {'color', 'strokeWidth', 'size'},
+    propertyTypes: {
+      'color': 'string (hex)',
+      'strokeWidth': 'number',
+      'size': 'number',
+    },
+  );
+
+  static const timer = ComponentSchema(
+    type: 'timer',
+    requiredProperties: {'durationMs'},
+    optionalProperties: {'route', 'tap'},
+    propertyTypes: {
+      'durationMs': 'number',
+      'route': 'string',
+      'tap': 'action object',
     },
   );
 
@@ -487,6 +551,14 @@ class ComponentSchemas {
         return form;
       case 'videoPlayer':
         return videoPlayer;
+      case 'stack':
+        return stack;
+      case 'imageSlider':
+        return imageSlider;
+      case 'timer':
+        return timer;
+      case 'progressIndicator':
+        return progressIndicator;
       case 'unsupported':
         return unsupported;
       default:
@@ -516,6 +588,10 @@ class ComponentSchemas {
       'textFormField': textFormField,
       'form': form,
       'videoPlayer': videoPlayer,
+      'stack': stack,
+      'imageSlider': imageSlider,
+      'timer': timer,
+      'progressIndicator': progressIndicator,
       'unsupported': unsupported,
     };
   }

@@ -2,7 +2,7 @@
 
 ## AI must know
 
-- **20 component types** — all mapped in `ScreenRenderer._createDefaultRenderers` (including `unsupported` fallback).
+- **24 component types** — all mapped in `ScreenRenderer._createDefaultRenderers` (including `unsupported` fallback).
 - **Entry:** `ScreenRenderer.withPrimitives().render(screenConfig, context:, dataContext:)`.
 - **No domain logic** in renderers — only layout, styling, path resolution from `dataContext`.
 - New component type = enum + renderer + schema + register in `screen_renderer.dart`.
@@ -30,6 +30,10 @@
 | `icon` | `icon_renderer.dart` | Material icons |
 | `richtext` | `rich_text_renderer.dart` | Rich text |
 | `videoPlayer` | `video_player_renderer.dart` | Video embed |
+| `stack` | `stack_renderer.dart` | Layered overlays |
+| `imageSlider` | `image_slider_renderer.dart` | Full-screen carousel |
+| `timer` | `timer_renderer.dart` | Delayed navigate |
+| `progressIndicator` | `progress_indicator_renderer.dart` | Loading spinner |
 | `unsupported` | `unsupported_component_renderer.dart` | Unknown types |
 
 Enum: `lib/core/enums/generic_component_type.dart`.

@@ -82,7 +82,7 @@
     "initialRoute": "/splash",
     "shellExcludeRoutes": [
       "/splash",
-      "/onboarding",
+      "/splash-carousel",
       "/auth/login",
       "/auth/otp-reset",
       "/checkout",
@@ -133,200 +133,212 @@
     {
       "id": "page-splash",
       "route": "/splash",
-      "title": "Splash",
-      "background": "#FFFFFF",
-      "scroll": "vertical",
+      "title": "Splash Intro",
+      "background": "#4A4BB3",
+      "scroll": "none",
       "body": [
         {
-          "id": "splash-root",
+          "id": "splash-intro-expand",
           "type": "container",
           "props": {
-            "semanticType": "SplashStartup",
             "expand": true
           },
-          "style": {
-            "padding": 24
-          },
           "child": {
-            "id": "splash-content",
-            "type": "column",
-            "props": {
-              "crossAxis": "center",
-              "mainAxis": "center",
-              "mainAxisSize": "max",
-              "gap": 16
-            },
+            "id": "splash-intro-root",
+            "type": "stack",
             "children": [
-              {
-                "id": "splash-logo",
-                "type": "icon",
-                "props": {
-                  "name": "shopping_bag",
-                  "size": 64,
-                  "color": "#1D4ED8"
-                }
+            {
+              "id": "splash-intro-logo-wrap",
+              "type": "container",
+              "props": {
+                "stackLayer": "positioned",
+                "stackAlign": "center"
               },
-              {
-                "id": "splash-title",
-                "type": "text",
+              "child": {
+                "id": "splash-intro-logo",
+                "type": "image",
                 "props": {
-                  "value": "SOOQ Merchant",
-                  "fontSize": 28,
-                  "fontWeight": "bold",
-                  "textAlign": "center",
-                  "color": "#0F172A"
-                }
-              },
-              {
-                "id": "splash-subtitle",
-                "type": "text",
-                "props": {
-                  "value": "تجهيز تجربة تسوق حديثة",
-                  "fontSize": 16,
-                  "textAlign": "center",
-                  "color": "#475569"
-                }
-              },
-              {
-                "id": "splash-loading-text",
-                "type": "text",
-                "props": {
-                  "value": "Loading...",
-                  "fontSize": 14,
-                  "textAlign": "center",
-                  "color": "#475569"
-                }
-              },
-              {
-                "id": "splash-continue",
-                "type": "button",
-                "props": {
-                  "label": "ابدأ",
-                  "backgroundColor": "#1D4ED8",
-                  "textColor": "#FFFFFF",
-                  "borderRadius": 12,
-                  "padding": {
-                    "left": 18,
-                    "right": 18,
-                    "top": 12,
-                    "bottom": 12
-                  }
-                },
-                "tap": {
-                  "type": "navigate",
-                  "route": "/onboarding"
+                  "source": "asset",
+                  "url": "assets/icons/app_logo.png",
+                  "width": 140,
+                  "height": 140,
+                  "fit": "contain"
                 }
               }
+            },
+            {
+              "id": "splash-intro-loading-wrap",
+              "type": "container",
+              "props": {
+                "stackLayer": "positioned",
+                "stackAlign": "bottomCenter"
+              },
+              "style": {
+                "padding": {
+                  "bottom": 72
+                }
+              },
+              "child": {
+                "id": "splash-intro-loading-row",
+                "type": "row",
+                "props": {
+                  "mainAxisAlignment": "center",
+                  "crossAxisAlignment": "center",
+                  "gap": 12
+                },
+                "children": [
+                  {
+                    "id": "splash-intro-loading-text",
+                    "type": "text",
+                    "props": {
+                      "value": "يتم تحميل البيانات",
+                      "fontSize": 14,
+                      "color": "#FFFFFF",
+                      "textAlign": "center"
+                    }
+                  },
+                  {
+                    "id": "splash-intro-spinner",
+                    "type": "progressIndicator",
+                    "props": {
+                      "color": "#FFFFFF",
+                      "strokeWidth": 2,
+                      "size": 22
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "id": "splash-intro-version-wrap",
+              "type": "container",
+              "props": {
+                "stackLayer": "positioned",
+                "stackAlign": "bottomCenter"
+              },
+              "style": {
+                "padding": {
+                  "bottom": 32
+                }
+              },
+              "child": {
+                "id": "splash-intro-version",
+                "type": "text",
+                "props": {
+                  "value": "Version 1.0.0",
+                  "fontSize": 12,
+                  "color": "#FFFFFF",
+                  "textAlign": "center"
+                }
+              }
+            },
+            {
+              "id": "splash-intro-timer",
+              "type": "timer",
+              "props": {
+                "durationMs": 3000,
+                "route": "/splash-carousel"
+              }
+            }
             ]
           }
         }
       ]
     },
     {
-      "id": "page-onboarding",
-      "route": "/onboarding",
-      "title": "Onboarding",
-      "background": "#FFFFFF",
-      "scroll": "vertical",
-      "appBar": {
-        "id": "onboarding-appbar",
-        "type": "appBar",
-        "props": {
-          "title": "مرحباً بك"
-        },
-        "style": {
-          "background": "#FFFFFF"
-        }
-      },
+      "id": "page-splash-carousel",
+      "route": "/splash-carousel",
+      "title": "Splash",
+      "background": "#000000",
+      "scroll": "none",
       "body": [
         {
-          "id": "onboarding-hero",
+          "id": "splash-carousel-expand",
           "type": "container",
           "props": {
-            "semanticType": "Hero"
-          },
-          "style": {
-            "margin": {
-              "left": 16,
-              "right": 16,
-              "top": 16,
-              "bottom": 12
-            },
-            "padding": 20,
-            "background": "#F8FAFC",
-            "borderRadius": 16
+            "expand": true
           },
           "child": {
-            "id": "onboarding-hero-column",
-            "type": "column",
-            "props": {
-              "crossAxis": "start",
-              "gap": 12
-            },
+            "id": "splash-carousel-root",
+            "type": "stack",
             "children": [
               {
-                "id": "onboarding-title",
-                "type": "text",
+                "id": "splash-carousel-bg",
+                "type": "imageSlider",
                 "props": {
-                  "value": "متجرك في جيبك",
-                  "fontSize": 24,
-                  "fontWeight": "bold",
-                  "textAlign": "right",
-                  "color": "#0F172A"
+                  "images": [
+                    "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200&q=80",
+                    "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=1200&q=80",
+                    "https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=1200&q=80"
+                  ],
+                  "fit": "cover",
+                  "autoPlay": true,
+                  "intervalMs": 1000,
+                  "showIndicators": true,
+                  "indicatorPosition": "bottom",
+                  "indicatorColor": "#4A4BB3",
+                  "indicatorInactiveColor": "#CBD5E1",
+                  "indicatorStyle": "pill",
+                  "indicatorBottomPadding": 44
                 }
               },
               {
-                "id": "onboarding-text",
-                "type": "richtext",
+                "id": "splash-carousel-version-wrap",
+                "type": "container",
                 "props": {
-                  "value": "<p>اكتشف المنتجات، أكمل طلبك بسرعة، وتابع كل خطوة من تطبيق واحد.</p>",
-                  "color": "#475569"
-                }
-              },
-              {
-                "id": "onboarding-actions",
-                "type": "row",
-                "props": {
-                  "gap": 8,
-                  "mainAxis": "start",
-                  "crossAxis": "center"
+                  "stackLayer": "positioned",
+                  "stackInsetBottom": 24,
+                  "stackWidthFactor": 1
                 },
-                "children": [
-                  {
-                    "id": "onboarding-login",
-                    "type": "button",
-                    "props": {
-                      "label": "تسجيل الدخول",
-                      "backgroundColor": "#1D4ED8",
-                      "textColor": "#FFFFFF",
-                      "borderRadius": 12
-                    },
-                    "tap": {
-                      "type": "navigate",
-                      "route": "/auth/login"
+                "child": {
+                  "id": "splash-carousel-version",
+                  "type": "text",
+                  "props": {
+                    "value": "Version 1.0.0",
+                    "fontSize": 12,
+                    "color": "#94A3B8",
+                    "textAlign": "center"
+                  }
+                }
+              },
+              {
+                "id": "splash-carousel-cta-wrap",
+                "type": "container",
+                "props": {
+                  "stackLayer": "positioned",
+                  "stackInsetBottom": 72,
+                  "stackWidthFactor": 1
+                },
+                "style": {
+                  "padding": {
+                    "left": 24,
+                    "right": 24
+                  }
+                },
+                "child": {
+                  "id": "splash-carousel-start",
+                  "type": "button",
+                  "props": {
+                    "label": "لنبدأ ...",
+                    "variant": "filled",
+                    "backgroundColor": "#4A4BB3",
+                    "textColor": "#FFFFFF",
+                    "fontSize": 18,
+                    "fontWeight": "bold",
+                    "borderRadius": 28,
+                    "maxWidth": 320,
+                    "padding": {
+                      "left": 24,
+                      "right": 24,
+                      "top": 11,
+                      "bottom": 11
                     }
                   },
-                  {
-                    "id": "onboarding-register",
-                    "type": "button",
-                    "props": {
-                      "label": "إنشاء حساب",
-                      "backgroundColor": "#FFFFFF",
-                      "textColor": "#1D4ED8",
-                      "borderRadius": 12,
-                      "padding": {
-                        "left": 18,
-                        "right": 18,
-                        "top": 12,
-                        "bottom": 12
-                      }
-                    },
-                    "tap": {
-                      "type": "navigate",
-                      "route": "/auth/login"
-                    }
+                  "tap": {
+                    "type": "navigate",
+                    "route": "/auth/login"
                   }
-                ]
+                }
               }
             ]
           }

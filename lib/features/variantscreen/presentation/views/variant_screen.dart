@@ -1,11 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sooq_merchant/core/cubits/token_cubit/token_cubit.dart';
 import 'package:sooq_merchant/core/network/network_config.dart';
 import 'package:sooq_merchant/core/network/tenant_resolver.dart';
+import 'package:sooq_merchant/core/feedback/app_messenger.dart';
 import 'package:sooq_merchant/core/navigation/auth_redirect.dart';
 
 import 'package:sooq_merchant/config/mobile_app_config.dart';
@@ -60,8 +62,13 @@ class _VariantScreenState extends State<VariantScreen> {
 
   static const _authRoutes = {'/auth/login', '/auth/otp-reset'};
 
+  static const _splashRoutes = {'/splash', '/splash-carousel'};
+
   bool get _isAuthRoute =>
       widget.pageRoute != null && _authRoutes.contains(widget.pageRoute);
+
+  bool get _isSplashRoute =>
+      widget.pageRoute != null && _splashRoutes.contains(widget.pageRoute);
 
   @override
   void initState() {
@@ -190,6 +197,13 @@ class _VariantScreenState extends State<VariantScreen> {
           renderContext: renderContext,
           child: content,
         ),
+      );
+    }
+
+    if (_isSplashRoute) {
+      return _SplashSystemUiOverlay(
+        pageRoute: widget.pageRoute,
+        child: content,
       );
     }
 
@@ -451,7 +465,8 @@ class _AuthRequestHost extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Auth routes are shell-excluded and the JSON scaffold renderer does not
-    // create a Material Scaffold, so we need one here for SnackBars/overlays.
+    // create a Material Scaffold; we need one here for the loading overlay.
+    // User messages use root [AppMessenger], not SnackBar.
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: BlocListener<AuthCubit, AuthState>(
@@ -466,12 +481,16 @@ class _AuthRequestHost extends StatelessWidget {
             }
 
             if (state is AuthAuthenticated) {
+              final name = state.tokenResponse.username?.trim();
+              final welcome = (name != null && name.isNotEmpty)
+                  ? 'تم تسجيل الدخول بنجاح، مرحباً $name'
+                  : 'تم تسجيل الدخول بنجاح';
+              AppMessenger.showSuccess(
+                context,
+                welcome,
+                dataContext: renderContext,
+              );
               context.go(AuthRedirect.homeRoute);
-              return;
-            }
-
-            final messenger = ScaffoldMessenger.maybeOf(context);
-            if (messenger == null) {
               return;
             }
 
@@ -480,9 +499,17 @@ class _AuthRequestHost extends StatelessWidget {
               if (state is AuthRateLimited && state.retryAfterSeconds != null) {
                 message = '$message (${state.retryAfterSeconds}s)';
               }
-              messenger.showSnackBar(SnackBar(content: Text(message)));
+              AppMessenger.showError(
+                context,
+                message,
+                dataContext: renderContext,
+              );
             } else if (state is AuthOtpRequested) {
-              messenger.showSnackBar(SnackBar(content: Text(state.message)));
+              AppMessenger.showInfo(
+                context,
+                state.message,
+                dataContext: renderContext,
+              );
             }
           });
         },
@@ -1075,6 +1102,30 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
           dataContext: widget.renderContext,
         ),
       ),
+    );
+  }
+}
+
+/// Transparent status bar on splash routes (purple stays on in-app UI only).
+class _SplashSystemUiOverlay extends StatelessWidget {
+  const _SplashSystemUiOverlay({
+    required this.pageRoute,
+    required this.child,
+  });
+
+  final String? pageRoute;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        systemNavigationBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
+      child: child,
     );
   }
 }

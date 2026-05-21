@@ -62,6 +62,7 @@ Copy structure from [`_TEMPLATE.md`](_TEMPLATE.md).
 | [06-form-autovalidate.md](06-form-autovalidate.md) | 6 | ready-for-builder | `form.props.autovalidateMode` (`onUserInteraction` \| `disabled`) |
 | [08-page-scroll.md](08-page-scroll.md) | 8 | ready-for-builder | `pages[].scroll: "none"` — outer scaffold scroll off |
 | [10-accessibility-props.md](10-accessibility-props.md) | 10 | ready-for-builder | `image` `semanticsLabel`/`alt`; `card` `accessibilityLabel`; `tap.semanticLabel` |
+| [12-splash-screen-primitives.md](12-splash-screen-primitives.md) | 12 | implemented-in-json | Two-page flow `/splash` → `/splash-carousel` → auth; `progressIndicator`, pill indicators, button typography |
 
 Update this table when adding a spec.
 

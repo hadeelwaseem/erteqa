@@ -29,9 +29,15 @@ alwaysApply: false
 | `variant_cubit.dart` | Page load states |
 | `tab_shell_widget.dart` | Tabs from config |
 
+## User messages (auth host)
+
+- `_AuthRequestHost` in `variant_screen.dart` — auth feedback via **`AppMessenger`** (not `SnackBar`)
+- See [RULES.md §3.10](../../RULES.md#310-in-app-user-messages-appmessenger)
+
 ## Must not
 
 - Duplicate JSON parsing outside `variant_repository.dart`
+- `ScaffoldMessenger.showSnackBar` for user-facing messages in this feature
 - Add standalone `GoRoute` to custom widgets for routes already in JSON
 - Change `requestKey` wiring without checking mapper + cubit map
 

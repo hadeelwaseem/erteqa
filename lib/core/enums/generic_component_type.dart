@@ -19,5 +19,9 @@ enum GenericComponentType {
   textFormField,
   form,
   videoPlayer,
+  stack,
+  imageSlider,
+  timer,
+  progressIndicator,
   unsupported,
 }
