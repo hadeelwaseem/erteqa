@@ -6,33 +6,36 @@ alwaysApply: false
 
 # Auth Feature Rules
 
-**Full detail:** [docs/ai/06-feature-auth.md](../../docs/ai/06-feature-auth.md)
+**Entry:** [AGENTS.md](../../AGENTS.md) · **Standards:** [RULES.md](../../RULES.md) §3.3, §3.5 · **Deep dive:** [docs/ai/06-feature-auth.md](../../docs/ai/06-feature-auth.md)
 
 ## Structure
 
-`data/models/` → `data/repos/` → `presentation/manager/*_cubit/`
+`data/models/` → `data/repos/auth_repo_impl.dart` → `presentation/manager/*_cubit/`
 
-Legacy views exist under `presentation/views/` — prefer JSON routes for new work.
+Legacy views under `presentation/views/` — prefer JSON routes for new work.
 
-## Endpoints (implemented)
+## Endpoints (ground truth)
 
-- `POST /api/v1/customer/auth/otp/request`
-- `POST /api/v1/customer/auth/otp/verify`
+| Method | Path |
+|--------|------|
+| POST | `/api/v1/customer/auth/otp/request` |
+| POST | `/api/v1/customer/auth/otp/verify` |
 
-Implementation: `auth_repo_impl.dart`
+**Wrong:** `/api/v1/auth/otp/*` — do not use.
 
 ## Must
 
 - Return `Either<Failure, T>` from repo
 - Persist tokens via `AuthTokenStorage` on verify
-- Register cubits/repos in `service_locator.dart`
+- Register repos/cubits in `service_locator.dart`
+- Session changes via `AuthCubit` / `TokenCubit` + `AuthInterceptor`
 
 ## Must not
 
-- Use deprecated `/api/v1/auth/otp/*` paths
-- Put OTP validation only in widgets (use model `validate()`)
-- Bypass `AuthCubit`/`TokenCubit` for session changes
+- Put OTP/business rules only in widgets
+- Bypass token storage on verify
+- Trust `docs/_archive/` or stubbed feature READMEs for paths
 
 ## JSON routes
 
-`/auth/login`, `/auth/otp-reset` in `shellExcludeRoutes`
+`/auth/login`, `/auth/otp-reset` — typically in `shellExcludeRoutes` in prod config.

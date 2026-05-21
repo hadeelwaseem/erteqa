@@ -6,7 +6,7 @@ alwaysApply: false
 
 # Config Rules
 
-**Full detail:** [docs/ai/02-config-and-json.md](../../docs/ai/02-config-and-json.md)
+**Entry:** [AGENTS.md](../../AGENTS.md) · **Standards:** [RULES.md](../../RULES.md) §3.1–3.4 · **Deep dive:** [docs/ai/02-config-and-json.md](../../docs/ai/02-config-and-json.md)
 
 ## Scope
 
@@ -15,7 +15,7 @@ alwaysApply: false
 
 ## Active file
 
-`assets/config/mobile_production_v2.json` — matches `main.dart` `_kActiveConfig`
+`assets/config/mobile_production_v2.json` — matches `main.dart` → `_kActiveConfig`
 
 ## JSON shape
 
@@ -25,16 +25,18 @@ Page nodes: `id`, `type`, `props`, optional `style`, `tap`, `child`/`children`, 
 
 ## Must
 
-- Put UI/layout/copy changes in JSON
+- Put UI/layout/copy changes in JSON (default UI change = JSON only)
 - Use flat `props` (nest only via `data`, `tap`, tree children)
 - Use `data.requestKey` + `requestUrl` for API-driven lists
-- Add new routes to `pages[]` and navigation/shellExcludeRoutes as needed
+- Add new routes to `pages[]` and `navigation` / `shellExcludeRoutes` as needed
+- Match `requestUrl` paths to feature repos (see [RULES.md §3.5](../../RULES.md))
 
 ## Must not
 
 - Add Flutter imports to `lib/config/`
 - Create per-merchant Dart screen forks
 - Reference obsolete configs (`classic.json`, `modern.json`) as active
+- Patch prod JSON with new engine props unless the task allows — else [builder-specs](../../docs/engine/builder-specs/README.md)
 
 ## Models
 

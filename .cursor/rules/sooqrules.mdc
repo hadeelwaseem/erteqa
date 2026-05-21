@@ -1,37 +1,147 @@
 ---
-description: SOOQ core architecture constraints (always apply)
+description: SOOQ Merchant — core architecture, JSON-first, builder handoffs (always apply)
 alwaysApply: true
 ---
 
 # SOOQ Merchant — Core Rules
 
-**Full guide:** [AGENTS.md](../../AGENTS.md) and [docs/ai/README.md](../../docs/ai/README.md)
+**Read first:** [AGENTS.md](../../AGENTS.md) · [RULES.md](../../RULES.md) · [docs/ai/README.md](../../docs/ai/README.md)
+
+**Precedence:** task instructions → [RULES.md](../../RULES.md) → this file → scoped `.mdc` → `docs/ai/*` (code wins over stale docs).
+
+**Do not trust for API truth:** `docs/_archive/`, stubbed `lib/features/*/README.md` guides.
 
 ## Identity
 
-Flutter **dynamic app generator** — UI from `assets/config/*.json`, not hardcoded screens. Active config: `mobile_production_v2`.
+Flutter **dynamic app generator** — screens and UI from `assets/config/*.json`, not hardcoded merchant widgets.
+
+| Item | Value |
+|------|--------|
+| Active config | `mobile_production_v2` (`lib/main.dart` → `_kActiveConfig`) |
+| Prod JSON | `assets/config/mobile_production_v2.json` |
+| Page host | `VariantScreen` + `ScreenRenderer.withPrimitives()` |
+
+No per-merchant or `tenantSlug` UI branches in Dart.
 
 ## Layers (do not cross)
 
-- **Config** (`lib/config/`) — data only
-- **Engine** (`lib/engine/`) — render + actions + request mapping, **no domain logic**
-- **Core** (`lib/core/`) — DI, network, router
-- **Features** (`lib/features/`) — repos/cubits/APIs, **no renderer changes**
+| Layer | Path | May | Must not |
+|-------|------|-----|----------|
+| **Config** | `lib/config/`, `assets/config/` | Data models, JSON | Flutter UI, API calls |
+| **Engine** | `lib/engine/` | Render, `tap`, request mapping | Domain logic, feature imports in renderers |
+| **Core** | `lib/core/` | DI, network, router | JSON parsing, template logic |
+| **Features** | `lib/features/` | Repos, cubits, APIs | Renderer registry / UI generation |
+
+**Never:** `lib/features/*` imports inside `lib/engine/tree/renderers/` · `Dio`/repos/cubits in renderers.
+
+## Runtime flow
+
+```
+main → AppConfigLoader → MobileAppConfig → setupServiceLocator → AppRouter
+     → VariantScreen → EngineRequestMapper → cubits → dataContext → ScreenRenderer
+```
+
+Lists/grids: `requestUrl` + `data.requestKey` + `request_ui_state` (loading / empty / error).
+
+## Where to change what
+
+| Task | Where |
+|------|--------|
+| Layout, copy, colors, navigation | `mobile_production_v2.json` |
+| New route | `pages[]` + `navigation` in JSON |
+| New `type` | `GenericComponentType` + renderer + `ScreenRenderer` + `component_schemas.dart` |
+| New API | `lib/features/<domain>/` + `service_locator.dart` + mapper/`VariantScreen` |
+| List/grid data | JSON `requestUrl` + `EngineRequestMapper` + `VariantScreen` |
+| Button nav | `tap: { type: navigate, route }` in JSON |
+| Auth | `lib/features/auth/` + `TokenCubit` / `AuthInterceptor` |
+
+**Default:** UI = JSON-only. Ask before new Dart screens.
 
 ## Must
 
-- JSON-first UI changes
-- New `type` → enum + renderer + `ScreenRenderer` registry
-- New API → feature repo + cubit + optional mapper/VariantScreen wiring
+- JSON-first UI; register new types in `ScreenRenderer._createDefaultRenderers`
+- `type` + `props` + `data`/`valuePath`/`urlPath` — **not** `semanticType` as renderer key
+- Repos: `Either<Failure, T>`; APIs wired via features + `dataContext`
+- Register schema keys in `lib/engine/validation/component_schemas.dart` when adding props
+- Run `flutter test` before finishing engine/config work
+- **End-of-task:** review all added/changed code per [RULES.md §5](../../RULES.md#5-final-validation-checklist-mandatory)
+- **Builder spec rule** (below)
+
+## Builder spec rule (website builder)
+
+When adding JSON props, page fields, or `theme` keys the engine reads:
+
+1. **Grep** `assets/config/mobile_production_v2.json` for each new field.
+2. **If absent:** create `docs/engine/builder-specs/<phase>-<slug>.md` from [`_TEMPLATE.md`](../../docs/engine/builder-specs/_TEMPLATE.md).
+3. **Update** [`builder-specs/README.md`](../../docs/engine/builder-specs/README.md) index.
+4. **Blocked** if contract is neither in prod JSON nor documented in `builder-specs/`.
+5. Do **not** add undeclared props only in Dart. Patch prod JSON in-repo only when the task explicitly allows JSON edits.
+
+Handoffs: `02-list-grid`, `05-high-traffic`, `06-form-autovalidate`, `08-page-scroll`, `10-accessibility-props`.
 
 ## Must not
 
-- Hardcoded merchant screens or per-tenant UI `if` branches
-- Business logic in `lib/engine/tree/renderers/`
-- `Dio`/repo calls inside renderers
-- Treat `semanticType` as a renderer key
+- Hardcoded merchant screens, flows, or layouts in Dart
+- `if (tenantSlug == '…')` or per-merchant UI branches
+- Business logic in `lib/engine/tree/renderers/`; API fetch in renderers
+- `semanticType` as renderer dispatch; parallel widget registries outside `ScreenRenderer`
+- Parse API JSON in widgets
+- Wrong auth: use `/api/v1/customer/auth/otp/*` (not `/api/v1/auth/otp`)
+- Public catalog: `/api/v1/public/*` without auth headers
+- Drive-by refactors; speculative props “for later”
+- Git commits unless the user explicitly asks
 
-## Default paths
+## APIs (guardrails)
 
-- UI: `assets/config/mobile_production_v2.json`
-- Host: `VariantScreen` + `ScreenRenderer.withPrimitives()`
+| Area | Paths |
+|------|--------|
+| Auth OTP | `POST /api/v1/customer/auth/otp/request`, `.../verify` → `auth_repo_impl.dart` |
+| Catalog | `/api/v1/public/products`, categories, search, autocomplete → `product_repo_impl.dart` |
+
+Match JSON `requestUrl` to repo paths.
+
+## Component types (20)
+
+`scaffold`, `singleChildScrollView`, `column`, `row`, `container`, `listView`, `gridView`, `text`, `textFormField`, `form`, `button`, `card`, `spacer`, `image`, `appBar`, `divider`, `icon`, `richtext`, `videoPlayer`, `unsupported`
+
+→ [docs/ai/03-engine.md](../../docs/ai/03-engine.md)
+
+## Key paths
+
+| Purpose | Path |
+|---------|------|
+| App entry | `lib/main.dart` |
+| DI | `lib/core/utils/service_locator.dart` |
+| Router | `lib/core/utils/app_router.dart` |
+| Dynamic host | `lib/features/variantscreen/presentation/views/variant_screen.dart` |
+| Page JSON slice | `lib/features/variantscreen/data/repos/variant_repository.dart` |
+| Renderer registry | `lib/engine/screen_renderer/screen_renderer.dart` |
+| Actions | `lib/engine/actions/action_dispatcher.dart` |
+| Requests | `lib/engine/requests/request_mapper.dart` |
+| Request UI phases | `lib/engine/request_ui_state.dart` |
+| Theme in context | `lib/engine/theme/engine_theme.dart` |
+| Schemas | `lib/engine/validation/component_schemas.dart` |
+| Builder handoffs | `docs/engine/builder-specs/README.md` |
+| Engine audit | `docs/engine/RENDERER_AUDIT_IMPLEMENTATION_PLAN.md` |
+
+## Engine work
+
+- Follow [RENDERER_AUDIT_IMPLEMENTATION_PLAN.md](../../docs/engine/RENDERER_AUDIT_IMPLEMENTATION_PLAN.md); attach only phase-relevant audit slices
+- Tests: `test/engine/renderers/`, `flutter test` (minimal `ComponentConfig`, not full prod JSON)
+- Scoped detail: `.cursor/rules/engine.mdc` when editing `lib/engine/**`
+- Phase 11: sign-off review only — no new features
+
+## Theme & loading
+
+- JSON `theme` → `MobileThemeConfig` → `EngineTheme` in `dataContext`; avoid a second hardcoded theme in `main.dart`
+- `loadingRequestKeys`, `requests.{key}` — list/grid use `request_ui_state.dart`
+
+## Tests
+
+```bash
+flutter test
+```
+
+## Scoped Cursor rules
+
+Path-specific detail (do not duplicate here): `config.mdc`, `engine.mdc`, `core.mdc`, `features-auth.mdc`, `features-product.mdc`, `features-variant.mdc`.

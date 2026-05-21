@@ -1,6 +1,15 @@
 # AGENTS.md — SOOQ Merchant Mobile
 
-Instructions for AI assistants working in this repository. **Read this file first.** Deep reference: [`docs/ai/README.md`](docs/ai/README.md).
+**Start here.** This is the onboarding entry for humans and AI. It routes you to all other rule and reference files.
+
+| Need | File |
+|------|------|
+| Full engineering standards + end-of-task checklist | [`RULES.md`](RULES.md) |
+| Topic-by-topic deep reference | [`docs/ai/README.md`](docs/ai/README.md) |
+| Cursor always-on short contract | [`.cursor/rules/sooqrules.mdc`](.cursor/rules/sooqrules.mdc) |
+| Cursor path rules (auto when editing matching folders) | `.cursor/rules/*.mdc` — see [Cursor rules](#cursor-rules) below |
+
+**Precedence:** task instructions → `RULES.md` → `sooqrules.mdc` → scoped `.mdc` → `docs/ai/*` (repo code wins over stale docs).
 
 ---
 
@@ -145,4 +154,13 @@ Patterns: [`docs/ai/11-testing.md`](docs/ai/11-testing.md)
 
 ## Cursor rules
 
-Scoped rules in `.cursor/rules/` auto-attach by file path. Always-on: `sooqrules.mdc`.
+| File | When it applies |
+|------|-----------------|
+| [`sooqrules.mdc`](.cursor/rules/sooqrules.mdc) | **Always** — JSON-first, layers, APIs, builder-specs |
+| [`RULES.md`](RULES.md) | Read for full standards; [§5 checklist](RULES.md#5-final-validation-checklist-mandatory) before done |
+| [`config.mdc`](.cursor/rules/config.mdc) | Editing `lib/config/**` or `assets/config/**` |
+| [`engine.mdc`](.cursor/rules/engine.mdc) | Editing `lib/engine/**` |
+| [`core.mdc`](.cursor/rules/core.mdc) | Editing `lib/core/**` |
+| [`features-auth.mdc`](.cursor/rules/features-auth.mdc) | Editing `lib/features/auth/**` |
+| [`features-product.mdc`](.cursor/rules/features-product.mdc) | Editing `lib/features/product/**` |
+| [`features-variant.mdc`](.cursor/rules/features-variant.mdc) | Editing `lib/features/variantscreen/**` or `lib/features/shell/**` |

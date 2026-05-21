@@ -6,32 +6,37 @@ alwaysApply: false
 
 # Variant & Shell Rules
 
-**Full detail:** [docs/ai/08-feature-variant-shell.md](../../docs/ai/08-feature-variant-shell.md)
+**Entry:** [AGENTS.md](../../AGENTS.md) · **Standards:** [RULES.md](../../RULES.md) §3.3, §3.6, §3.8 · **Deep dive:** [docs/ai/08-feature-variant-shell.md](../../docs/ai/08-feature-variant-shell.md)
 
 ## Scope
 
 - `variantscreen` — loads JSON pages, orchestrates cubits + `ScreenRenderer`
-- `shell` — `TabShellWidget` bottom navigation
+- `shell` — `TabShellWidget` bottom navigation from `NavigationConfig`
 
 ## Must
 
-- Load pages via `AssetVariantRepository` (same variantId as `MobileAppConfig`)
-- Use `EngineRequestMapper.collectRequests` before cubit loads
-- Populate `dataContext.requests.{requestKey}` for itemBuilder sources
-- Keep domain fetches in cubits — this file only orchestrates
+- Load pages via `AssetVariantRepository` / `variant_repository.dart` (same `variantId` as `MobileAppConfig`)
+- `EngineRequestMapper.collectRequests` before cubit loads
+- Populate `dataContext`: `requests.{requestKey}`, `loadingRequestKeys`, `routeParams`
+- Keep HTTP in cubits/repos — this layer only orchestrates
 
 ## Key files
 
-- `variant_repository.dart` — parse builder JSON → `ScreenConfig`
-- `variant_screen.dart` — integration hub (~900 lines)
-- `variant_cubit.dart` — load states
-- `tab_shell_widget.dart` — tabs from `NavigationConfig`
+| File | Role |
+|------|------|
+| `variant_repository.dart` | Builder JSON → `ScreenConfig` |
+| `variant_screen.dart` | Integration hub (requests + render) |
+| `variant_cubit.dart` | Page load states |
+| `tab_shell_widget.dart` | Tabs from config |
 
 ## Must not
 
 - Duplicate JSON parsing outside `variant_repository.dart`
 - Add standalone `GoRoute` to custom widgets for routes already in JSON
+- Change `requestKey` wiring without checking mapper + cubit map
 
 ## Debugging
 
-Blank UI: check route in `pages[]`, `requestUrl` pattern, cubit error state, renderer `unsupported` fallback
+Blank UI: `pages[]` route, `requestUrl` pattern, cubit error state, renderer `unsupported` fallback.
+
+Request UI phases: `lib/engine/request_ui_state.dart`

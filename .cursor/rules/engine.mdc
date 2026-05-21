@@ -6,33 +6,38 @@ alwaysApply: false
 
 # Engine Rules
 
-**Full detail:** [docs/ai/03-engine.md](../../docs/ai/03-engine.md), [docs/ai/04-actions-and-requests.md](../../docs/ai/04-actions-and-requests.md)
+**Entry:** [AGENTS.md](../../AGENTS.md) · **Standards:** [RULES.md](../../RULES.md) §3.2–3.7 · **Deep dive:** [docs/ai/03-engine.md](../../docs/ai/03-engine.md), [04-actions-and-requests.md](../../docs/ai/04-actions-and-requests.md)
 
 ## Scope
 
-`lib/engine/` — interpret `ComponentConfig` trees into widgets.
+`lib/engine/` — interpret `ComponentConfig` trees into widgets; `tap` actions; request mapping.
 
 ## Must
 
-- Implement `ComponentRenderer` for new types
-- Register in `ScreenRenderer._createDefaultRenderers`
-- Add schema in `component_schemas.dart`
-- Keep renderers free of product/auth/catalog rules
-- Resolve display values via `dataContext` paths (`valuePath`, `urlPath`)
+- Dispatch by `type` + `props` + `data` — **not** `semanticType` as renderer key
+- Implement `ComponentRenderer` for new types; register in `ScreenRenderer._createDefaultRenderers`
+- Add schema keys in `component_schemas.dart`
+- Resolve display via `dataContext` (`valuePath`, `urlPath`)
+- New JSON props: [builder-spec rule](../../RULES.md) §3.4 — grep prod JSON or add `docs/engine/builder-specs/`
+- Run `flutter test` before finishing (`test/engine/`)
 
 ## Must not
 
-- Import feature repos or call `ProductRepo` / `AuthRepo`
-- Encode merchant-specific layout decisions
-- Add API fetching in renderers (orchestration lives in `VariantScreen`)
+- Import `lib/features/*` in `lib/engine/tree/renderers/`
+- Call `ProductRepo` / `AuthRepo` / `Dio` or cubits from renderers
+- Fetch list/grid data in renderers — orchestration in `VariantScreen`
+- Encode merchant-specific layout or `tenantSlug` branches
 
 ## Key files
 
-- `screen_renderer/screen_renderer.dart` — registry (19 types + unsupported)
-- `actions/action_dispatcher.dart` — `tap` handlers
-- `requests/request_mapper.dart` — collect `data.requestUrl`
-- `tree/renderers/*.dart` — implementations
+| File | Role |
+|------|------|
+| `screen_renderer/screen_renderer.dart` | Registry (20 types incl. `unsupported`) |
+| `actions/action_dispatcher.dart` | `tap`: navigate \| apiCall \| cubitCall |
+| `requests/request_mapper.dart` | Collect `data.requestUrl` |
+| `request_ui_state.dart` | List/grid loading / empty / error |
+| `tree/renderers/*.dart` | Per-type implementations |
 
-## Actions
+## Audit work
 
-`tap.type`: `navigate` | `apiCall` | `cubitCall` — see action_dispatcher.dart
+Phased plan: [RENDERER_AUDIT_IMPLEMENTATION_PLAN.md](../../docs/engine/RENDERER_AUDIT_IMPLEMENTATION_PLAN.md) — Phase 11 sign-off only, no new features.

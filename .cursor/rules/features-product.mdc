@@ -6,31 +6,33 @@ alwaysApply: false
 
 # Product Feature Rules
 
-**Full detail:** [docs/ai/07-feature-product.md](../../docs/ai/07-feature-product.md)
+**Entry:** [AGENTS.md](../../AGENTS.md) · **Standards:** [RULES.md](../../RULES.md) §3.3, §3.5 · **Deep dive:** [docs/ai/07-feature-product.md](../../docs/ai/07-feature-product.md)
 
 ## Structure
 
 `data/models/` → `data/repos/product_repo_impl.dart` → `presentation/manager/*_cubit/`
 
-## Public API base
+## Public API (ground truth: `product_repo_impl.dart`)
 
-`/api/v1/public/products`, `/categories`, `/search`, `/autocomplete`
+`/api/v1/public/products`, `.../search`, `.../autocomplete`, `.../categories`, `.../categories/{slug}/products`, `.../products/{slug}`
 
 No `Authorization` header on these calls.
 
 ## Must
 
-- Add endpoints to `ProductRepo` + impl with retry envelope
-- Expose via cubit; wire JSON through `EngineRequestMapper` + `VariantScreen`
-- Match `requestUrl` in JSON to repo path patterns
+- Add endpoints on `ProductRepo` + impl; return `Either<Failure, T>`
+- Wire JSON via `EngineRequestMapper` + `VariantScreen` → `dataContext.requests.{requestKey}`
+- Match JSON `requestUrl` to repo path patterns
 - Register new cubits as factories in `service_locator.dart`
 
 ## Must not
 
 - Fetch products inside engine renderers
 - Hardcode grids/lists in Dart when JSON `gridView` + `itemBuilder` suffices
-- Parse raw JSON in presentation widgets
+- Parse raw API JSON in presentation widgets
 
 ## Cubits
 
 `ProductCubit`, `ProductDetailCubit`, `ProductSearchCubit`, `ProductAutocompleteCubit`, `CategoryCubit`
+
+Mapper routing: [docs/ai/04-actions-and-requests.md](../../docs/ai/04-actions-and-requests.md)

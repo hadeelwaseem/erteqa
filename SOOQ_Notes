@@ -1,0 +1,7 @@
+- Add Validation Error Messages as a snackBar on the Top of the screen, like Errors returned in Auth (should this be a Centerlized Approach that can be used any time with any request, and this same widget can be used as the notifications in the apps and i don't mean the Notifications like from firebase only, like when you want to display a message for example: "your order hase been deleted successfully", or "you logged in successfully, hello Anas (User name if exist)"), Now there is a default snackBar displayed in the bottom of the screen but this is should be deleted and don't use again it's so bad.
+
+- The current splash screen is not good for what we need, we should have a new splash screen with the following: have an image(or multi images with moving dots to the last image and sliding time is dynamic according to the user input) in the background, and button in the bottom of the screen for "start", we can type like "لنبدأ", 
+so the splash screen will have two cases,
+1- one image or multi images with dots and this images is siding in a dynamic time (1 second by default), the image/images should cover all the screen(no app bar here).
+2- have timer instead of a button that when the time is end it navigate to the next screen OR have a button (anywhere user want to place it, but for my example we said in the bottom) and this button is doing the navigation logic.
+

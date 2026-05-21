@@ -1,6 +1,6 @@
 # SOOQ Merchant — AI Documentation Index
 
-Canonical documentation for humans and AI assistants. **Read `AGENTS.md` at repo root first.**
+Canonical documentation for humans and AI assistants. **Read `AGENTS.md` at repo root first.** Mandatory standards: [`RULES.md`](../../RULES.md).
 
 ## Quick navigation
 
@@ -22,7 +22,7 @@ Canonical documentation for humans and AI assistants. **Read `AGENTS.md` at repo
 
 ## Cursor integration
 
-- **Always on:** `AGENTS.md` + `.cursor/rules/sooqrules.mdc`
+- **Always on:** `AGENTS.md` + `RULES.md` + `.cursor/rules/sooqrules.mdc`
 - **Auto by path:** `engine.mdc`, `config.mdc`, `core.mdc`, `features-*.mdc`
 
 ## Active runtime
