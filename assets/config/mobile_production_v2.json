@@ -848,7 +848,7 @@
                   "label": "عرض الكل",
                   "backgroundColor": "#FFFFFF",
                   "textColor": "#1D4ED8",
-                  "borderRadius": 12
+                  "borderRadius": 15
                 },
                 "tap": {
                   "type": "navigate",

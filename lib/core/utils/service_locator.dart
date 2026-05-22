@@ -8,6 +8,8 @@ import 'package:sooq_merchant/core/network/auth_token_storage.dart';
 import 'package:sooq_merchant/core/network/network_config.dart';
 import 'package:sooq_merchant/core/utils/api_service.dart';
 import 'package:sooq_merchant/core/utils/app_logger.dart';
+import 'package:sooq_merchant/dev/auth_mock/auth_mock_config.dart';
+import 'package:sooq_merchant/dev/auth_mock/mock_auth_repo.dart';
 import 'package:sooq_merchant/features/auth/data/repos/auth_repo.dart';
 import 'package:sooq_merchant/features/auth/data/repos/auth_repo_impl.dart';
 import 'package:sooq_merchant/features/auth/presentation/manager/auth_cubit/auth_cubit.dart';
@@ -88,9 +90,15 @@ void setupServiceLocator({
   });
 
   getIt.registerLazySingleton<ApiService>(() => ApiService(getIt<Dio>()));
-  getIt.registerLazySingleton<AuthRepo>(
-    () => AuthRepoImpl(getIt<Dio>(), getIt<AuthTokenStorage>()),
-  );
+  getIt.registerLazySingleton<AuthRepo>(() {
+    if (AuthMockConfig.enabled) {
+      AppLogger.auth(
+        'AuthMockConfig.enabled=true — using MockAuthRepo (no OTP HTTP)',
+      );
+      return MockAuthRepo(getIt<AuthTokenStorage>());
+    }
+    return AuthRepoImpl(getIt<Dio>(), getIt<AuthTokenStorage>());
+  });
   getIt.registerLazySingleton<AuthCubit>(
     () => AuthCubit(getIt<AuthRepo>(), getIt<TokenCubit>()),
   );

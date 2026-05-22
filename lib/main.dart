@@ -10,7 +10,9 @@ import 'package:sooq_merchant/core/network/network_config.dart';
 import 'package:sooq_merchant/core/utils/constants.dart';
 import 'package:sooq_merchant/core/cubits/shared_preferences_cubit/shared_preferences_cubit.dart';
 import 'package:sooq_merchant/core/cubits/token_cubit/token_cubit.dart';
+import 'package:sooq_merchant/core/utils/app_logger.dart';
 import 'package:sooq_merchant/core/utils/app_bloc_observer.dart';
+import 'package:sooq_merchant/dev/auth_mock/auth_mock_config.dart';
 import 'package:sooq_merchant/core/utils/app_router.dart';
 import 'package:sooq_merchant/core/utils/service_locator.dart';
 import 'package:sooq_merchant/core/utils/size_config.dart';
@@ -37,6 +39,11 @@ void main() async {
   final mobileConfig = await AppConfigLoader.load(_kActiveConfig);
 
   // 3. Setup Dependency Injection
+  if (AuthMockConfig.enabled) {
+    AppLogger.auth(
+      'TEMPORARY: Auth mock enabled — see lib/dev/auth_mock/README.md',
+    );
+  }
   setupServiceLocator(
     networkConfig: NetworkConfig.fromAppConfig(
       apiBaseUrl: mobileConfig?.apiBaseUrl,
