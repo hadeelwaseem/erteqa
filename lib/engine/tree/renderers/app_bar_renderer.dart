@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../config/component_config.dart';
 import '../../component_renderer/component_renderer.dart';
@@ -13,7 +14,7 @@ import '../parsers/property_parsers.dart';
 /// - `color` (hex) — legacy background from `style.background` merge
 /// - `foregroundColor` / `titleColor` (hex) — title and back icon color
 ///
-/// Back button appears automatically when [Navigator.canPop] is true.
+/// Back button appears automatically when `context.canPop()` (GoRouter) is true.
 class AppBarRenderer implements ComponentRenderer {
   @override
   Widget render(
@@ -41,7 +42,7 @@ class AppBarRenderer implements ComponentRenderer {
 
     return Builder(
       builder: (context) {
-        final canPop = Navigator.canPop(context);
+        final canPop = context.canPop();
 
         return Material(
           color: backgroundColor,
@@ -55,7 +56,7 @@ class AppBarRenderer implements ComponentRenderer {
                   if (canPop)
                     IconButton(
                       icon: Icon(Icons.arrow_back, color: foregroundColor),
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () => context.pop(),
                       constraints: const BoxConstraints(
                         minWidth: 48,
                         minHeight: 48,
