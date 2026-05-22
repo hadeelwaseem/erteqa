@@ -14,7 +14,8 @@
 
 - [x] Tree rendering via `ScreenRenderer` (19 types + unsupported)
 - [x] Builder JSON `pages[]` parsing in `AssetVariantRepository`
-- [x] `EngineActionDispatcher` — navigate, apiCall, cubitCall
+- [x] `EngineActionDispatcher` — navigate, apiCall, cubitCall (`requestOtp`, `verifyOtp`, `logout`)
+- [x] Navigate actions support optional `navigation_type` (`push` vs `go` via `AppNavigation`)
 - [x] `EngineRequestMapper` + `VariantScreen` cubit orchestration
 - [x] `FormStateStore` + form/textFormField renderers
 - [x] `itemBuilder` repeat + `valuePath` / `urlPath`
@@ -46,6 +47,7 @@
 | `gap` in row/column | Supported in parser normalization; verify per layout |
 | CI schema validation on JSON | Not enforced in repo |
 | Dedicated commerce widgets (cart, checkout forms) | Composed from primitives in JSON only |
+| `navigation_type` on high-traffic taps | Partial — logout `onSuccess` only in prod JSON; product detail `push` pending Phase 7 — see [builder-spec 13](../engine/builder-specs/13-navigation-type.md) |
 | Web-to-mobile transform layer | Documented in old `Rules.md` — not in this app's runtime |
 
 ## JSON configs

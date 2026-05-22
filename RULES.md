@@ -154,6 +154,7 @@ Traditional Flutter guidance, adapted for a JSON-driven runtime.
 - Dynamic pages: `VariantScreen(variantId, pageRoute, routeParams)`.
 - Path params (`:productId`, `:slug`) live in `dataContext['routeParams']` for actions and mappers.
 - `shellExcludeRoutes` in JSON lists routes outside tab shell (auth, splash, checkout, detail).
+- Navigate actions (`tap`, `cubitCall` `onSuccess`/`onFailure`, timer `tap`) may include optional **`navigation_type`**: `push` / `stack` → `context.push`; `clear_stack` / `go` / omitted → `context.go` via [`AppNavigation`](lib/core/navigation/app_navigation.dart) in `EngineActionDispatcher`. Use **`push`** for drill-down with AppBar back; use **`clear_stack`** (or omit) for auth reset and post-login home. Builder contract: [`docs/engine/builder-specs/13-navigation-type.md`](docs/engine/builder-specs/13-navigation-type.md).
 
 **Anti-pattern:** `Navigator.push` to a hardcoded `MaterialPageRoute` for a route that exists in JSON.
 

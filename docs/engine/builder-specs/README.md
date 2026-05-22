@@ -63,6 +63,7 @@ Copy structure from [`_TEMPLATE.md`](_TEMPLATE.md).
 | [08-page-scroll.md](08-page-scroll.md) | 8 | ready-for-builder | `pages[].scroll: "none"` — outer scaffold scroll off |
 | [10-accessibility-props.md](10-accessibility-props.md) | 10 | ready-for-builder | `image` `semanticsLabel`/`alt`; `card` `accessibilityLabel`; `tap.semanticLabel` |
 | [12-splash-screen-primitives.md](12-splash-screen-primitives.md) | 12 | implemented-in-json | Two-page flow `/splash` → `/splash-carousel` → auth; `progressIndicator`, pill indicators, button typography |
+| [13-navigation-type.md](13-navigation-type.md) | Nav 2–5 | ready-for-builder | `navigation_type` on navigate actions (`push` vs `clear_stack`); logout `onSuccess` in prod |
 
 Update this table when adding a spec.
 

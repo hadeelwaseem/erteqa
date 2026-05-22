@@ -13,21 +13,41 @@
 ```json
 "tap": {
   "type": "navigate",
-  "route": "/product/details/:productId"
+  "route": "/product/details/:productId",
+  "navigation_type": "push"
 }
 ```
+
+Omit `navigation_type` for default **clear stack** (`context.go`).
 
 ### Supported types
 
 | type | Behavior |
 |------|----------|
-| `navigate` | `context.go(resolvedRoute)` — `:param` from `routeParams`, `dataContext`, or `item` |
+| `navigate` | [`AppNavigation`](../../lib/core/navigation/app_navigation.dart) — `push` or `go` per `navigation_type`; `:param` from `routeParams`, `dataContext`, or `item` |
 | `apiCall` | HTTP via `ApiService` (auth headers when needed) |
-| `cubitCall` | Invokes registered cubit methods (e.g. auth logout) |
+| `cubitCall` | Auth cubit: `requestOtp`, `verifyOtp`, `logout` — runs `onSuccess` / `onFailure` action maps when applicable |
 
-Optional: `requireValidForm`, `formId` — validates `FormStateStore` before dispatch.
+Optional on navigate: `requireValidForm`, `formId` — validates `FormStateStore` before dispatch.
 
 File: `lib/engine/actions/action_dispatcher.dart`.
+
+### `navigation_type` (navigate only)
+
+| Value | Aliases | API |
+|-------|---------|-----|
+| _(omit)_ / unknown | — | `context.go` (default) |
+| `clear_stack` | `clearstack`, `reset`, `go` | `context.go` |
+| `push` | `stack` | `context.push` |
+
+Use **`push`** for drill-down (e.g. product detail) so AppBar back (`context.pop`) returns. Use **`clear_stack`** or omit for auth success, splash, logout landing.
+
+Builder handoff: [`docs/engine/builder-specs/13-navigation-type.md`](../engine/builder-specs/13-navigation-type.md).
+
+### Auth navigation notes
+
+- Post-login home: JSON `verifyOtp` → `onSuccess.navigate` to `/home` only — `_AuthRequestHost` shows success toast, **does not** call `context.go`.
+- Logout: `cubitCall` `logout` clears token; `onSuccess.navigate` to `/auth/login` with `navigation_type: clear_stack` (see settings in prod JSON).
 
 ### Route resolution
 
@@ -94,7 +114,8 @@ Results stored in `dataContext` under `requests.{requestKey}` for renderers/item
 ## Anti-patterns
 
 - Calling `ProductRepo` from `TextRenderer`
-- Hardcoding navigation in feature views for JSON-driven routes
+- Hardcoding navigation in feature views for JSON-driven routes (e.g. duplicate `context.go` on `AuthAuthenticated` when JSON already has `onSuccess.navigate`)
+- Navigate-only logout without `cubitCall` `logout` (token remains; redirect sends user back to home)
 - Duplicate request parsing outside `EngineRequestMapper`
 
 ## Related
