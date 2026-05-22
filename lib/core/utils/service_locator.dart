@@ -15,6 +15,8 @@ import 'package:sooq_merchant/features/auth/data/repos/auth_repo_impl.dart';
 import 'package:sooq_merchant/features/auth/presentation/manager/auth_cubit/auth_cubit.dart';
 import 'package:sooq_merchant/features/product/data/repos/product_repo.dart';
 import 'package:sooq_merchant/features/product/data/repos/product_repo_impl.dart';
+import 'package:sooq_merchant/dev/product_mock/product_mock_config.dart';
+import 'package:sooq_merchant/dev/product_mock/mock_product_repo.dart';
 import 'package:sooq_merchant/features/product/presentation/manager/category_cubit/category_cubit.dart';
 import 'package:sooq_merchant/features/product/presentation/manager/product_autocomplete_cubit/product_autocomplete_cubit.dart';
 import 'package:sooq_merchant/features/product/presentation/manager/product_cubit/product_cubit.dart';
@@ -50,7 +52,8 @@ void setupServiceLocator({
 
   _registeredMobileAppConfig = mobileAppConfig;
 
-  final resolvedNetworkConfig = networkConfig ??
+  final resolvedNetworkConfig =
+      networkConfig ??
       NetworkConfig.fromAppConfig(
         apiBaseUrl: mobileAppConfig?.apiBaseUrl,
         tenantId: mobileAppConfig?.tenantId,
@@ -58,7 +61,9 @@ void setupServiceLocator({
       );
 
   getIt.registerLazySingleton<NetworkConfig>(() => resolvedNetworkConfig);
-  getIt.registerLazySingleton<AuthTokenStorage>(() => const FlutterAuthTokenStorage());
+  getIt.registerLazySingleton<AuthTokenStorage>(
+    () => const FlutterAuthTokenStorage(),
+  );
   getIt.registerLazySingleton<TokenCubit>(
     () => TokenCubit(getIt<AuthTokenStorage>()),
   );
@@ -81,7 +86,9 @@ void setupServiceLocator({
         mainDio: dio,
         tokenStorage: getIt<AuthTokenStorage>(),
         onAuthLost: () async {
-          AppLogger.auth('session lost — clearing tokens and returning to login');
+          AppLogger.auth(
+            'session lost — clearing tokens and returning to login',
+          );
           await getIt<AuthCubit>().logout();
         },
       ),
@@ -103,13 +110,17 @@ void setupServiceLocator({
     () => AuthCubit(getIt<AuthRepo>(), getIt<TokenCubit>()),
   );
 
-  getIt.registerLazySingleton<ProductRepo>(
-    () => ProductRepoImpl(getIt<Dio>()),
-  );
+  getIt.registerLazySingleton<ProductRepo>(() {
+    if (ProductMockConfig.enabled) {
+      AppLogger.network(
+        'ProductMockConfig.enabled=true — using MockProductRepo (no HTTP)',
+      );
+      return MockProductRepo();
+    }
+    return ProductRepoImpl(getIt<Dio>());
+  });
 
-  getIt.registerFactory<ProductCubit>(
-    () => ProductCubit(getIt<ProductRepo>()),
-  );
+  getIt.registerFactory<ProductCubit>(() => ProductCubit(getIt<ProductRepo>()));
 
   getIt.registerFactory<ProductSearchCubit>(
     () => ProductSearchCubit(getIt<ProductRepo>()),

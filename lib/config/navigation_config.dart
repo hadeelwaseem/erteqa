@@ -7,11 +7,18 @@ class NavigationConfig {
   final List<TabConfig> tabs;
   final List<String> shellExcludeRoutes;
 
+  /// Full-screen drill-down paths that reuse another page's JSON (`pages[].route`).
+  ///
+  /// Keys are registered routes (usually in [shellExcludeRoutes]); values are
+  /// the canonical page route to load from `pages[]`.
+  final Map<String, String> routeAliases;
+
   const NavigationConfig({
     required this.type,
     required this.initialRoute,
     required this.tabs,
     required this.shellExcludeRoutes,
+    this.routeAliases = const {},
   });
 
   factory NavigationConfig.fromJson(Map<String, dynamic> json) {
@@ -25,11 +32,24 @@ class NavigationConfig {
             .where((route) => route.isNotEmpty)
             .toList() ??
         [];
+    final aliasesRaw = json['routeAliases'] as Map<String, dynamic>?;
+    final routeAliases = <String, String>{};
+    if (aliasesRaw != null) {
+      for (final entry in aliasesRaw.entries) {
+        final target = entry.value;
+        if (entry.key.isNotEmpty &&
+            target is String &&
+            target.isNotEmpty) {
+          routeAliases[entry.key] = target;
+        }
+      }
+    }
     return NavigationConfig(
       type: json['type'] as String? ?? 'stack',
       initialRoute: json['initialRoute'] as String? ?? '/',
       tabs: tabList,
       shellExcludeRoutes: excludeRoutes,
+      routeAliases: routeAliases,
     );
   }
 

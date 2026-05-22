@@ -20,6 +20,7 @@ class TabShellWidget extends StatelessWidget {
     required this.navigationConfig,
     required this.currentLocation,
     required this.child,
+    this.shellStackCanPop = false,
   });
 
   final NavigationConfig navigationConfig;
@@ -27,49 +28,60 @@ class TabShellWidget extends StatelessWidget {
   /// The currently matched location from go_router state.
   final String currentLocation;
 
+  /// Whether the [ShellRoute] nested navigator has more than one page.
+  ///
+  /// Passed from [ShellRoute.navigatorKey] in [AppRouter] — not
+  /// [GoRouter.canPop], which does not reflect the shell stack.
+  final bool shellStackCanPop;
+
   /// The active page widget from go_router (current route content).
   final Widget child;
 
-  int _activeIndex() {
+  /// Index of the tab whose route exactly matches [currentLocation], or -1.
+  int _tabIndexForLocation() {
     final tabs = navigationConfig.tabs;
-    // Exact match first
     for (var i = 0; i < tabs.length; i++) {
       if (tabs[i].route == currentLocation) return i;
     }
-    // Prefix match (for sub-routes that still belong to a tab section)
-    for (var i = 0; i < tabs.length; i++) {
-      final tabRoute = tabs[i].route;
-      if (tabRoute != '/' && currentLocation.startsWith(tabRoute)) return i;
-    }
-    return 0;
+    return -1;
+  }
+
+  /// Bottom bar only on tab roots (exact tab route, not a stacked drill-down).
+  bool _shouldShowBottomNav() {
+    if (_tabIndexForLocation() < 0) return false;
+    return !shellStackCanPop;
   }
 
   @override
   Widget build(BuildContext context) {
     final tabs = navigationConfig.tabs;
-    final activeIndex = _activeIndex();
+    final tabIndex = _tabIndexForLocation();
+    final showBottomNav = _shouldShowBottomNav();
+    final activeIndex = tabIndex >= 0 ? tabIndex : 0;
 
     return Scaffold(
       body: child,
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: activeIndex,
-        onTap: (index) {
-          if (index < tabs.length) {
-            context.go(tabs[index].route);
-          }
-        },
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Theme.of(context).primaryColor,
-        unselectedItemColor: Colors.grey,
-        items: tabs
-            .map(
-              (tab) => BottomNavigationBarItem(
-                icon: Icon(IconRegistry.resolve(tab.icon)),
-                label: tab.label,
-              ),
+      bottomNavigationBar: showBottomNav
+          ? BottomNavigationBar(
+              currentIndex: activeIndex,
+              onTap: (index) {
+                if (index < tabs.length) {
+                  context.go(tabs[index].route);
+                }
+              },
+              type: BottomNavigationBarType.fixed,
+              selectedItemColor: Theme.of(context).primaryColor,
+              unselectedItemColor: Colors.grey,
+              items: tabs
+                  .map(
+                    (tab) => BottomNavigationBarItem(
+                      icon: Icon(IconRegistry.resolve(tab.icon)),
+                      label: tab.label,
+                    ),
+                  )
+                  .toList(),
             )
-            .toList(),
-      ),
+          : null,
     );
   }
 }

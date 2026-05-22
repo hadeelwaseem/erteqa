@@ -92,10 +92,21 @@
       "/order/failure",
       "/product/details/:productId",
       "/categories/:categorySlug/products",
+      "/products",
+      "/orders",
+      "/settings",
+      "/wishlist",
+      "/notifications",
+      "/support",
       "/state/empty",
       "/state/error",
-      "/state/loading"
+      "/state/loading",
+      "/component-coverage",
+      "/categories/browse"
     ],
+    "routeAliases": {
+      "/categories/browse": "/categories"
+    },
     "tabs": [
       {
         "id": "tab-home",
@@ -237,7 +248,11 @@
               "type": "timer",
               "props": {
                 "durationMs": 3000,
-                "route": "/splash-carousel"
+                "tap": {
+                  "type": "navigate",
+                  "route": "/splash-carousel",
+                  "navigation_type": "clear_stack"
+                }
               }
             }
             ]
@@ -336,7 +351,8 @@
                   },
                   "tap": {
                     "type": "navigate",
-                    "route": "/auth/login"
+                    "route": "/auth/login",
+                    "navigation_type": "clear_stack"
                   }
                 }
               }
@@ -488,7 +504,8 @@
                   },
                   "onSuccess": {
                     "type": "navigate",
-                    "route": "/auth/otp-reset"
+                    "route": "/auth/otp-reset",
+                    "navigation_type": "clear_stack"
                   }
                 }
               }
@@ -593,7 +610,8 @@
                   },
                   "onSuccess": {
                     "type": "navigate",
-                    "route": "/home"
+                    "route": "/home",
+                    "navigation_type": "clear_stack"
                   }
                 }
               },
@@ -852,7 +870,8 @@
                 },
                 "tap": {
                   "type": "navigate",
-                  "route": "/categories"
+                  "route": "/categories/browse",
+                  "navigation_type": "push"
                 }
               }
             ]
@@ -1064,7 +1083,8 @@
               },
               "tap": {
                 "type": "navigate",
-                "route": "/product/details/:productId"
+                "route": "/product/details/:productId",
+                "navigation_type": "push"
               }
             }
           },
@@ -1104,7 +1124,8 @@
             },
             "tap": {
               "type": "navigate",
-              "route": "/products"
+              "route": "/products",
+              "navigation_type": "push"
             }
           }
         }
@@ -1383,7 +1404,8 @@
               },
               "tap": {
                 "type": "navigate",
-                "route": "/product/details/:productId"
+                "route": "/product/details/:productId",
+                "navigation_type": "push"
               }
             }
           },
@@ -1763,7 +1785,8 @@
               },
               "tap": {
                 "type": "navigate",
-                "route": "/product/details/:productId"
+                "route": "/product/details/:productId",
+                "navigation_type": "push"
               }
             }
           },
@@ -1878,7 +1901,8 @@
               },
               "tap": {
                 "type": "navigate",
-                "route": "/product/details/:productId"
+                "route": "/product/details/:productId",
+                "navigation_type": "push"
               }
             }
           }
@@ -1964,7 +1988,8 @@
               },
               "tap": {
                 "type": "navigate",
-                "route": "/product/details/:productId"
+                "route": "/product/details/:productId",
+                "navigation_type": "push"
               }
             }
           },
@@ -2441,7 +2466,8 @@
                 },
                 "tap": {
                   "type": "navigate",
-                  "route": "/order/success"
+                  "route": "/order/success",
+                  "navigation_type": "clear_stack"
                 }
               },
               {
@@ -2455,7 +2481,8 @@
                 },
                 "tap": {
                   "type": "navigate",
-                  "route": "/order/failure"
+                  "route": "/order/failure",
+                  "navigation_type": "clear_stack"
                 }
               }
             ]
@@ -2724,7 +2751,8 @@
               },
               "tap": {
                 "type": "navigate",
-                "route": "/order/success"
+                "route": "/order/success",
+                "navigation_type": "clear_stack"
               }
             }
           ]
@@ -2794,7 +2822,8 @@
                 },
                 "tap": {
                   "type": "navigate",
-                  "route": "/home"
+                  "route": "/home",
+                  "navigation_type": "clear_stack"
                 }
               },
               {
@@ -2808,7 +2837,8 @@
                 },
                 "tap": {
                   "type": "navigate",
-                  "route": "/orders"
+                  "route": "/orders",
+                  "navigation_type": "push"
                 }
               }
             ]
@@ -3292,7 +3322,8 @@
               },
               "tap": {
                 "type": "navigate",
-                "route": "/product/details/:productId"
+                "route": "/product/details/:productId",
+                "navigation_type": "push"
               }
             }
           },
@@ -3340,7 +3371,8 @@
               },
               "tap": {
                 "type": "navigate",
-                "route": "/product/details/sku-3001"
+                "route": "/product/details/sku-3001",
+                "navigation_type": "push"
               }
             },
             {
@@ -3383,7 +3415,8 @@
               },
               "tap": {
                 "type": "navigate",
-                "route": "/product/details/sku-3002"
+                "route": "/product/details/sku-3002",
+                "navigation_type": "push"
               }
             }
           ]

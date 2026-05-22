@@ -15,9 +15,13 @@ Follow the correct layer for each change type. When unsure, use the decision tre
 ## Add a new page/route
 
 1. Add entry to `pages[]` with unique `id`, `route`, `title`, `body`.
-2. If tab-visible: add to `navigation.tabs` OR ensure route is in shell child routes.
-3. If full-screen (auth/checkout): add route to `shellExcludeRoutes`.
-4. `AppRouter` picks up new route automatically from `MobileAppConfig.pageRoutes`.
+2. **Tab root** (bottom bar always on that screen): add to `navigation.tabs` — route stays inside `ShellRoute`.
+3. **Any other page** (profile links, catalog lists, checkout, auth, drill-down): add the same `route` to `navigation.shellExcludeRoutes` so it renders **outside** the tab shell (no bottom bar). `AppRouter` registers excluded routes as top-level `GoRoute`s.
+4. `AppRouter` picks up new routes from `MobileAppConfig.pageRoutes` automatically.
+
+**Do not rely on `navigation_type: push` alone to hide the bottom bar** — `push` vs `go` only affects stack/back (`AppNavigation`). Bottom bar visibility is controlled by `shellExcludeRoutes` + `TabShellWidget` (tab roots only).
+
+Guardrail: `test/config/shell_route_coverage_test.dart` fails if a non-tab `pages[].route` is missing from `shellExcludeRoutes`.
 
 ## Add a new component type (engine)
 

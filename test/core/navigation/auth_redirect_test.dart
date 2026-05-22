@@ -55,5 +55,39 @@ void main() {
         isNull,
       );
     });
+
+    group('logout and protected routes', () {
+      test('settings is not a public guest route', () {
+        expect(AuthRedirect.isPublicGuestRoute('/settings'), isFalse);
+      });
+
+      test('logged-out user on settings redirects to login', () {
+        expect(
+          AuthRedirect.resolve(token: null, matchedLocation: '/settings'),
+          AuthRedirect.loginRoute,
+        );
+      });
+
+      test('logged-in user on settings stays', () {
+        expect(
+          AuthRedirect.resolve(token: 'access-token', matchedLocation: '/settings'),
+          isNull,
+        );
+      });
+
+      test('logged-out user on login route stays', () {
+        expect(
+          AuthRedirect.resolve(token: null, matchedLocation: '/auth/login'),
+          isNull,
+        );
+      });
+
+      test('logged-in user on splash redirects to home', () {
+        expect(
+          AuthRedirect.resolve(token: 'access-token', matchedLocation: '/splash'),
+          AuthRedirect.homeRoute,
+        );
+      });
+    });
   });
 }

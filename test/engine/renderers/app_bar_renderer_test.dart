@@ -91,4 +91,32 @@ void main() {
     expect(router.state.uri.path, '/start');
     expect(find.text('push'), findsOneWidget);
   });
+
+  testWidgets('back IconButton hidden when GoRouter cannot pop', (tester) async {
+    final renderer = AppBarRenderer();
+    final config = ComponentConfig(
+      type: GenericComponentType.appBar,
+      properties: {'title': 'Root'},
+    );
+
+    final router = GoRouter(
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, state) => Scaffold(
+            body: renderer.render(
+              config,
+              buildChild: (_) => const SizedBox.shrink(),
+              dataContext: rendererDataContext(),
+            ),
+          ),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+
+    expect(find.byIcon(Icons.arrow_back), findsNothing);
+    expect(find.text('Root'), findsOneWidget);
+  });
 }

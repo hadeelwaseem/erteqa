@@ -24,7 +24,8 @@
 ### App shell
 
 - [x] `mobile_production_v2` config
-- [x] Tab navigation + `shellExcludeRoutes`
+- [x] Tab navigation + `shellExcludeRoutes` (non-tab pages full-screen; `shell_route_coverage_test` enforces JSON)
+- [x] `TabShellWidget` hides bottom bar on non-tab shell locations and when shell stack can pop
 - [x] Dynamic routes with `:productId`, `:categorySlug`
 - [x] Auth redirect + token storage
 
@@ -47,7 +48,7 @@
 | `gap` in row/column | Supported in parser normalization; verify per layout |
 | CI schema validation on JSON | Not enforced in repo |
 | Dedicated commerce widgets (cart, checkout forms) | Composed from primitives in JSON only |
-| `navigation_type` on high-traffic taps | Partial — logout `onSuccess` only in prod JSON; product detail `push` pending Phase 7 — see [builder-spec 13](../engine/builder-specs/13-navigation-type.md) |
+| `navigation_type` on lateral navigates | Optional explicit `clear_stack` on ~29 tab-shell taps (default `go` is sufficient) — see [builder-spec 13](../engine/builder-specs/13-navigation-type.md) |
 | Web-to-mobile transform layer | Documented in old `Rules.md` — not in this app's runtime |
 
 ## JSON configs

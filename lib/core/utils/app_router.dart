@@ -73,11 +73,15 @@ abstract class AppRouter {
         );
       }
 
+      final shellNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'tabShell');
+
       routes.add(
         ShellRoute(
+          navigatorKey: shellNavigatorKey,
           builder: (context, state, child) => TabShellWidget(
             navigationConfig: mobileConfig.navigation,
             currentLocation: state.matchedLocation,
+            shellStackCanPop: shellNavigatorKey.currentState?.canPop() ?? false,
             child: child,
           ),
           routes: shellRoutes,

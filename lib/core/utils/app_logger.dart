@@ -16,4 +16,11 @@ class AppLogger {
       debugPrint('[Auth] $message');
     }
   }
+
+  /// Network / API related logs.
+  static void network(String message) {
+    if (kDebugMode) {
+      debugPrint('[Network] $message');
+    }
+  }
 }

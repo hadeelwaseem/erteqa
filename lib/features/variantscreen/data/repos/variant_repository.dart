@@ -108,10 +108,25 @@ class AssetVariantRepository implements VariantRepository {
       throw ArgumentError('Builder config has no pages.');
     }
 
-    final initialRoute =
-        (json['navigation'] as Map<String, dynamic>?)?['initialRoute']
-            as String?;
-    final routeToLoad = pageRoute ?? initialRoute;
+    final navigation =
+        json['navigation'] as Map<String, dynamic>? ?? {};
+    final initialRoute = navigation['initialRoute'] as String?;
+    final aliasesRaw = navigation['routeAliases'] as Map<String, dynamic>?;
+    final routeAliases = <String, String>{};
+    if (aliasesRaw != null) {
+      for (final entry in aliasesRaw.entries) {
+        final target = entry.value;
+        if (entry.key.isNotEmpty &&
+            target is String &&
+            target.isNotEmpty) {
+          routeAliases[entry.key] = target;
+        }
+      }
+    }
+    final requestedRoute = pageRoute ?? initialRoute;
+    final routeToLoad = requestedRoute != null
+        ? (routeAliases[requestedRoute] ?? requestedRoute)
+        : null;
     final selectedPage = pages.firstWhere(
       (page) => page['route'] == routeToLoad || page['id'] == routeToLoad,
       orElse: () => pages.first,

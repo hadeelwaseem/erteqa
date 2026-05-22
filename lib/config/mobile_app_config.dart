@@ -43,11 +43,17 @@ class MobileAppConfig {
     final app = json['app'] as Map<String, dynamic>? ?? {};
     final navJson = json['navigation'] as Map<String, dynamic>? ?? {};
     final pages = (json['pages'] as List?)?.whereType<Map<String, dynamic>>() ?? [];
+    final navigation = NavigationConfig.fromJson(navJson);
     final routes = pages
         .map((p) => p['route'] as String?)
         .whereType<String>()
         .where((r) => r.isNotEmpty)
         .toList();
+    for (final aliasRoute in navigation.routeAliases.keys) {
+      if (!routes.contains(aliasRoute)) {
+        routes.add(aliasRoute);
+      }
+    }
 
     return MobileAppConfig(
       variantId: variantId,
@@ -57,7 +63,7 @@ class MobileAppConfig {
       apiBaseUrl: app['apiBaseUrl'] as String? ?? '',
       tenantId: app['tenantId'] as String?,
       tenantSlug: app['tenantSlug'] as String?,
-      navigation: NavigationConfig.fromJson(navJson),
+      navigation: navigation,
       theme: MobileThemeConfig.fromJson(
         json['theme'] as Map<String, dynamic>?,
       ),
