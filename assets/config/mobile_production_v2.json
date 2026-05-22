@@ -820,7 +820,8 @@
                 },
                 "tap": {
                   "type": "navigate",
-                  "route": "/products"
+                  "route": "/products",
+                  "navigation_type": "push"
                 }
               }
             ]
@@ -864,9 +865,8 @@
                 "type": "button",
                 "props": {
                   "label": "عرض الكل",
-                  "backgroundColor": "#FFFFFF",
-                  "textColor": "#1D4ED8",
-                  "borderRadius": 15
+                  "variant": "text",
+                  "textColor": "#1D4ED8"
                 },
                 "tap": {
                   "type": "navigate",
@@ -949,7 +949,8 @@
               },
               "tap": {
                 "type": "navigate",
-                "route": "/categories/:categorySlug/products"
+                "route": "/categories/:categorySlug/products",
+                "navigation_type": "push"
               }
             }
           }
@@ -969,15 +970,39 @@
             }
           },
           "child": {
-            "id": "home-featured-products-text",
-            "type": "text",
+            "id": "home-featured-products-header-row",
+            "type": "row",
             "props": {
-              "value": "منتجات مميزة",
-              "fontSize": 20,
-              "fontWeight": "bold",
-              "textAlign": "right",
-              "color": "#0F172A"
-            }
+              "mainAxis": "spaceBetween",
+              "crossAxis": "center"
+            },
+            "children": [
+              {
+                "id": "home-featured-products-text",
+                "type": "text",
+                "props": {
+                  "value": "منتجات مميزة",
+                  "fontSize": 20,
+                  "fontWeight": "bold",
+                  "textAlign": "right",
+                  "color": "#0F172A"
+                }
+              },
+              {
+                "id": "home-view-all-products-button",
+                "type": "button",
+                "props": {
+                  "label": "عرض كل المنتجات",
+                  "variant": "text",
+                  "textColor": "#1D4ED8"
+                },
+                "tap": {
+                  "type": "navigate",
+                  "route": "/products",
+                  "navigation_type": "push"
+                }
+              }
+            ]
           }
         },
         {
@@ -1095,39 +1120,6 @@
               "bottom": 16
             }
           }
-        },
-        {
-          "id": "home-view-all-products",
-          "type": "container",
-          "props": {},
-          "style": {
-            "padding": {
-              "left": 16,
-              "right": 16,
-              "bottom": 24
-            }
-          },
-          "child": {
-            "id": "home-view-all-products-button",
-            "type": "button",
-            "props": {
-              "label": "عرض كل المنتجات",
-              "backgroundColor": "#FFFFFF",
-              "textColor": "#1D4ED8",
-              "borderRadius": 12,
-              "padding": {
-                "left": 16,
-                "right": 16,
-                "top": 12,
-                "bottom": 12
-              }
-            },
-            "tap": {
-              "type": "navigate",
-              "route": "/products",
-              "navigation_type": "push"
-            }
-          }
         }
       ]
     },
@@ -1214,7 +1206,8 @@
               },
               "tap": {
                 "type": "navigate",
-                "route": "/categories/:categorySlug/products"
+                "route": "/categories/:categorySlug/products",
+                "navigation_type": "push"
               }
             }
           }
@@ -1577,7 +1570,8 @@
                 },
                 "tap": {
                   "type": "navigate",
-                  "route": "/cart"
+                  "route": "/cart",
+                  "navigation_type": "push"
                 }
               },
               {
@@ -1591,7 +1585,8 @@
                 },
                 "tap": {
                   "type": "navigate",
-                  "route": "/wishlist"
+                  "route": "/wishlist",
+                  "navigation_type": "push"
                 }
               },
               {
@@ -1606,55 +1601,6 @@
                 "tap": {
                   "type": "share",
                   "url": "https://sooq.app/product/{params.productId}"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "id": "product-video-demo",
-          "type": "container",
-          "props": {
-            "semanticType": "VideoEmbed"
-          },
-          "style": {
-            "margin": {
-              "left": 16,
-              "right": 16,
-              "bottom": 24
-            },
-            "padding": 14,
-            "background": "#F8FAFC",
-            "borderRadius": 12
-          },
-          "child": {
-            "id": "product-video-col",
-            "type": "column",
-            "props": {
-              "gap": 8,
-              "crossAxis": "start"
-            },
-            "children": [
-              {
-                "id": "product-video-title",
-                "type": "text",
-                "props": {
-                  "value": "فيديو المنتج",
-                  "fontSize": 16,
-                  "fontWeight": "bold",
-                  "textAlign": "right"
-                }
-              },
-              {
-                "id": "product-video-player",
-                "type": "videoPlayer",
-                "props": {
-                  "semanticType": "VideoEmbed",
-                  "url": "https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4",
-                  "autoplay": false,
-                  "showControls": true,
-                  "height": 200,
-                  "borderRadius": 10
                 }
               }
             ]
@@ -1833,7 +1779,8 @@
               "textAlign": "right",
               "onSubmitted": {
                 "type": "navigate",
-                "route": "/products"
+                "route": "/products",
+                "navigation_type": "push"
               }
             },
             "style": {
@@ -2388,7 +2335,8 @@
                 },
                 "tap": {
                   "type": "navigate",
-                  "route": "/checkout"
+                  "route": "/checkout",
+                  "navigation_type": "push"
                 }
               }
             ]
@@ -2438,7 +2386,8 @@
                 },
                 "tap": {
                   "type": "navigate",
-                  "route": "/checkout/address"
+                  "route": "/checkout/address",
+                  "navigation_type": "push"
                 }
               },
               {
@@ -2452,7 +2401,8 @@
                 },
                 "tap": {
                   "type": "navigate",
-                  "route": "/checkout/payment"
+                  "route": "/checkout/payment",
+                  "navigation_type": "push"
                 }
               },
               {
@@ -2618,7 +2568,8 @@
               },
               "tap": {
                 "type": "navigate",
-                "route": "/checkout/payment"
+                "route": "/checkout/payment",
+                "navigation_type": "push"
               }
             }
           ]
@@ -2909,7 +2860,8 @@
                 },
                 "tap": {
                   "type": "navigate",
-                  "route": "/checkout/payment"
+                  "route": "/checkout/payment",
+                  "navigation_type": "push"
                 }
               }
             ]
@@ -3020,7 +2972,8 @@
               },
               "tap": {
                 "type": "navigate",
-                "route": "/orders"
+                "route": "/orders",
+                "navigation_type": "push"
               }
             },
             {
@@ -3034,7 +2987,8 @@
               },
               "tap": {
                 "type": "navigate",
-                "route": "/wishlist"
+                "route": "/wishlist",
+                "navigation_type": "push"
               }
             },
             {
@@ -3048,7 +3002,8 @@
               },
               "tap": {
                 "type": "navigate",
-                "route": "/notifications"
+                "route": "/notifications",
+                "navigation_type": "push"
               }
             },
             {
@@ -3062,7 +3017,8 @@
               },
               "tap": {
                 "type": "navigate",
-                "route": "/settings"
+                "route": "/settings",
+                "navigation_type": "push"
               }
             },
             {
@@ -3076,7 +3032,8 @@
               },
               "tap": {
                 "type": "navigate",
-                "route": "/support"
+                "route": "/support",
+                "navigation_type": "push"
               }
             }
           ]
@@ -3747,7 +3704,8 @@
                 },
                 "tap": {
                   "type": "navigate",
-                  "route": "/home"
+                  "route": "/home",
+                  "navigation_type": "push"
                 }
               }
             ]
@@ -4427,22 +4385,7 @@
                 }
               }
             },
-            {
-              "id": "cov-video-embed",
-              "type": "card",
-              "props": {
-                "semanticType": "VideoEmbed",
-                "borderRadius": 10
-              },
-              "child": {
-                "id": "cov-video-embed-text",
-                "type": "text",
-                "props": {
-                  "value": "VideoEmbed",
-                  "textAlign": "center"
-                }
-              }
-            },
+            
             {
               "id": "cov-logos",
               "type": "card",

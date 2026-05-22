@@ -2,10 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 /// How a route transition affects the navigation stack.
-enum NavigationType {
-  push,
-  clearStack,
-}
+enum NavigationType { push, clearStack }
 
 /// Parses JSON / action `navigation_type` strings into [NavigationType].
 NavigationType parseNavigationType(String? raw) {
