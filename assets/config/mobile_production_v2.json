@@ -3565,8 +3565,14 @@
                 "borderRadius": 12
               },
               "tap": {
-                "type": "navigate",
-                "route": "/auth/login"
+                "type": "cubitCall",
+                "cubit": "auth",
+                "method": "logout",
+                "onSuccess": {
+                  "type": "navigate",
+                  "route": "/auth/login",
+                  "navigation_type": "clear_stack"
+                }
               }
             }
           ]

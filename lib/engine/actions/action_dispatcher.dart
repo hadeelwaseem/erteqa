@@ -209,6 +209,9 @@ class EngineActionDispatcher {
             backupCode: params['backupCode'] as String?,
           );
           break;
+        case 'logout':
+          await authCubit.logout();
+          break;
         default:
           AppLogger.debug('[ActionDispatcher] Unsupported auth method: $method');
           return;
@@ -238,6 +241,7 @@ class EngineActionDispatcher {
     return switch (method) {
       'requestOtp' => state is AuthOtpRequested,
       'verifyOtp' => state is AuthAuthenticated,
+      'logout' => state is AuthInitial,
       _ => false,
     };
   }

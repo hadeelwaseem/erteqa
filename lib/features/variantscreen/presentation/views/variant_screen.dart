@@ -3,12 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:sooq_merchant/core/cubits/token_cubit/token_cubit.dart';
 import 'package:sooq_merchant/core/network/network_config.dart';
 import 'package:sooq_merchant/core/network/tenant_resolver.dart';
 import 'package:sooq_merchant/core/feedback/app_messenger.dart';
-import 'package:sooq_merchant/core/navigation/auth_redirect.dart';
 
 import 'package:sooq_merchant/config/mobile_app_config.dart';
 import 'package:sooq_merchant/core/utils/service_locator.dart';
@@ -490,8 +488,6 @@ class _AuthRequestHost extends StatelessWidget {
                 welcome,
                 dataContext: renderContext,
               );
-              context.go(AuthRedirect.homeRoute);
-              return;
             }
 
             if (state is AuthFailureState) {

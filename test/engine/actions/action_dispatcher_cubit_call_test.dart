@@ -33,23 +33,38 @@ class _FakeAuthRepo implements AuthRepo {
 }
 
 class _MemoryTokenStorage implements AuthTokenStorage {
-  @override
-  Future<void> clearTokens() async {}
+  String? _accessToken;
+  String? _refreshToken;
+  DateTime? _expiresAt;
+  String? _tenantId;
 
   @override
-  Future<String?> readAccessToken() async => null;
+  Future<void> clearTokens() async {
+    _accessToken = null;
+    _refreshToken = null;
+    _expiresAt = null;
+    _tenantId = null;
+  }
 
   @override
-  Future<String?> readRefreshToken() async => null;
+  Future<String?> readAccessToken() async => _accessToken;
 
   @override
-  Future<DateTime?> readExpiresAt() async => null;
+  Future<String?> readRefreshToken() async => _refreshToken;
 
   @override
-  Future<String?> readTenantId() async => null;
+  Future<DateTime?> readExpiresAt() async => _expiresAt;
 
   @override
-  Future<AuthTokenBundle> readTokenBundle() async => const AuthTokenBundle();
+  Future<String?> readTenantId() async => _tenantId;
+
+  @override
+  Future<AuthTokenBundle> readTokenBundle() async => AuthTokenBundle(
+        accessToken: _accessToken,
+        refreshToken: _refreshToken,
+        expiresAt: _expiresAt,
+        tenantId: _tenantId,
+      );
 
   @override
   Future<void> saveTokens({
@@ -57,7 +72,12 @@ class _MemoryTokenStorage implements AuthTokenStorage {
     required String refreshToken,
     DateTime? expiresAt,
     String? tenantId,
-  }) async {}
+  }) async {
+    _accessToken = accessToken;
+    _refreshToken = refreshToken;
+    _expiresAt = expiresAt;
+    _tenantId = tenantId;
+  }
 }
 
 void main() {
@@ -194,5 +214,52 @@ void main() {
 
     expect(find.text('يرجى تصحيح الحقول'), findsOneWidget);
     AppMessenger.dismiss();
+  });
+
+  testWidgets('cubitCall logout clears token and navigates to login', (tester) async {
+    await locator<TokenCubit>().storeToken('seed-access-token');
+
+    late GoRouter router;
+
+    router = GoRouter(
+      initialLocation: '/settings',
+      routes: [
+        GoRoute(
+          path: '/settings',
+          builder: (context, state) {
+            final dispatcher = EngineActionDispatcher(context: context);
+            return Scaffold(
+              body: ElevatedButton(
+                onPressed: () => dispatcher.dispatch({
+                  'type': 'cubitCall',
+                  'cubit': 'auth',
+                  'method': 'logout',
+                  'onSuccess': {
+                    'type': 'navigate',
+                    'route': '/auth/login',
+                    'navigation_type': 'clear_stack',
+                  },
+                }),
+                child: const Text('Logout'),
+              ),
+            );
+          },
+        ),
+        GoRoute(
+          path: '/auth/login',
+          builder: (context, state) => const Scaffold(body: Text('Login')),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+    await tester.tap(find.text('Logout'));
+    await tester.pumpAndSettle();
+
+    expect(locator<TokenCubit>().state, isNull);
+    expect(locator<AuthCubit>().state, isA<AuthInitial>());
+    expect(router.state.uri.path, '/auth/login');
+    expect(router.canPop(), isFalse);
+    expect(find.text('Login'), findsOneWidget);
   });
 }
