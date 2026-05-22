@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../core/feedback/app_messenger.dart';
+import '../../core/navigation/app_navigation.dart';
 import '../../core/network/network_config.dart';
 import '../../core/utils/api_service.dart';
 import '../../core/utils/app_logger.dart';
@@ -71,8 +71,9 @@ class EngineActionDispatcher {
     final route = action['route'] as String?;
     if (route == null || route.isEmpty) return;
     final resolvedRoute = _resolveRoute(route, dataContext);
+    final navType = parseNavigationType(action['navigation_type'] as String?);
     AppLogger.debug('[ActionDispatcher] navigate to $resolvedRoute');
-    _context.go(resolvedRoute);
+    AppNavigation.navigate(_context, route: resolvedRoute, type: navType);
   }
 
   String _resolveRoute(String route, Map<String, dynamic>? dataContext) {

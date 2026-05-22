@@ -18,6 +18,22 @@ import 'component_schema.dart';
 class ComponentSchemas {
   ComponentSchemas._();
 
+  /// Documented fields for JSON actions with `type: navigate` (node `tap`,
+  /// timer `tap`, cubitCall `onSuccess` / `onFailure`).
+  ///
+  /// `navigation_type` aliases (see [parseNavigationType]):
+  /// - push: `push`, `stack`
+  /// - clear stack: `clear_stack`, `clearstack`, `reset`, `go`
+  /// - omitted / unknown: `clear_stack` (default, `context.go`)
+  static const Map<String, String> navigateActionPropertyTypes = {
+    'type': 'string (navigate)',
+    'route': 'string (required)',
+    'navigation_type':
+        'string? push|stack|clear_stack|clearstack|reset|go — default clear_stack',
+    'requireValidForm': 'bool?',
+    'formId': 'string?',
+  };
+
   /// Schema: Layout container with padding/margin and a single child.
   static const container = ComponentSchema(
     type: 'container',
@@ -498,7 +514,7 @@ class ComponentSchemas {
     propertyTypes: {
       'durationMs': 'number',
       'route': 'string',
-      'tap': 'action object',
+      'tap': 'action object (navigate: see navigateActionPropertyTypes)',
     },
   );
 
