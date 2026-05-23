@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../../config/component_config.dart';
 import '../../../core/enums/generic_component_type.dart';
+import '../../../core/utils/app_logger.dart';
 import '../../component_renderer/component_renderer.dart';
 
 class SingleChildScrollViewRenderer implements ComponentRenderer {
@@ -17,13 +18,10 @@ class SingleChildScrollViewRenderer implements ComponentRenderer {
     if (childConfig == null) return const SizedBox.shrink();
 
     if (_isScrollable(childConfig.type)) {
-      assert(() {
-        debugPrint(
-          'Invalid nested scrollable: singleChildScrollView -> '
-          '${childConfig.type.name}',
-        );
-        return true;
-      }());
+      AppLogger.debug(
+        '[SingleChildScrollViewRenderer] nested scroll skipped: '
+        'singleChildScrollView -> ${childConfig.type.name}',
+      );
       return buildChild(childConfig);
     }
 
@@ -43,5 +41,4 @@ class SingleChildScrollViewRenderer implements ComponentRenderer {
         type == GenericComponentType.listView ||
         type == GenericComponentType.gridView;
   }
-
 }

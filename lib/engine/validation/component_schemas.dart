@@ -46,6 +46,7 @@ class ComponentSchemas {
       'width',
       'height',
       'expand',
+      'expandAxis',
       'shadow',
       'border',
       'child', // Not in properties map, but allowed in ComponentConfig
@@ -58,12 +59,13 @@ class ComponentSchemas {
       'width': 'number',
       'height': 'number',
       'expand': 'bool (fill width/height; scroll-safe via minHeight/viewport)',
+      'expandAxis': 'string (horizontal|vertical|both)',
       'shadow': 'string (sm|md|lg|xl|none)',
       'border': 'object {width, color}',
     },
   );
 
-  /// Schema: Scaffold - top-level page wrapper with SafeArea.
+  /// Schema: Engine page shell — not Flutter [Scaffold]; SafeArea is on [appBar].
   static const scaffold = ComponentSchema(
     type: 'scaffold',
     requiredProperties: {},
@@ -78,12 +80,15 @@ class ComponentSchemas {
     },
   );
 
-  /// Schema: SingleChildScrollView - scrollable wrapper with a single child.
+  /// Schema: SingleChildScrollView — legacy; prefer pages[].scroll + list/grid.
+  /// Nested scrollables are unwrapped at runtime.
   static const singleChildScrollView = ComponentSchema(
     type: 'singleChildScrollView',
     requiredProperties: {},
     optionalProperties: {'axis', 'child'},
-    propertyTypes: {'axis': 'string (vertical|horizontal)'},
+    propertyTypes: {
+      'axis': 'string (vertical|horizontal) — deprecated: use page scroll',
+    },
   );
 
   /// Schema: Column - vertical layout with multiple children.
@@ -94,9 +99,9 @@ class ComponentSchemas {
       'mainAxisAlignment',
       'crossAxisAlignment',
       'mainAxisSize',
-      'verticalDirection',
       'textDirection',
       'gap',
+      'padding',
       'children', // Not in properties, but in ComponentConfig
     },
     propertyTypes: {
@@ -104,6 +109,7 @@ class ComponentSchemas {
           'string (start|center|end|spaceBetween|spaceAround|spaceEvenly)',
       'crossAxisAlignment': 'string (start|center|end|stretch|baseline)',
       'gap': 'number',
+      'padding': 'number | object',
     },
   );
 
@@ -115,7 +121,6 @@ class ComponentSchemas {
       'mainAxisAlignment',
       'crossAxisAlignment',
       'mainAxisSize',
-      'verticalDirection',
       'textDirection',
       'gap',
       'children', // Not in properties, but in ComponentConfig
@@ -269,15 +274,15 @@ class ComponentSchemas {
     },
   );
 
-  /// Schema: Spacer - flexible spacing element.
+  /// Schema: Spacer — legacy; prefer [gap] on column/row. Safe renderer fallback at runtime.
   static const spacer = ComponentSchema(
     type: 'spacer',
     requiredProperties: {},
     optionalProperties: {'flex', 'width', 'height'},
     propertyTypes: {
-      'flex': 'number (integer)',
-      'width': 'number',
-      'height': 'number',
+      'flex': 'number (integer) — deprecated: use gap',
+      'width': 'number (fixed size bypasses flex)',
+      'height': 'number (fixed size bypasses flex)',
     },
   );
 
@@ -465,7 +470,13 @@ class ComponentSchemas {
     type: 'stack',
     requiredProperties: {},
     optionalProperties: {'fit', 'children'},
-    propertyTypes: {'fit': 'string (expand|loose)'},
+    propertyTypes: {
+      'fit': 'string (expand|loose)',
+      'stackLayer': 'on child: fill|positioned',
+      'stackAlign': 'on child: alignment string',
+      'stackInsetBottom': 'on child: number (px)',
+      'stackWidthFactor': 'on child: number (0-1)',
+    },
   );
 
   static const imageSlider = ComponentSchema(

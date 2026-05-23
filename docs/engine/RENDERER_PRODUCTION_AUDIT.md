@@ -5,6 +5,8 @@
 > **Renderers:** 20 (19 primitives + `unsupported`)  
 > **Registry:** [`lib/engine/screen_renderer/screen_renderer.dart`](../lib/engine/screen_renderer/screen_renderer.dart)
 
+> **Layout / scroll / constraints:** Superseded for accuracy by **[`LAYOUT_CONSTRAINT_AUDIT.md`](LAYOUT_CONSTRAINT_AUDIT.md)** (2026-05-23). That document reflects current `scaffold_renderer` (`pageScroll`, no `Center`), `column` `mainAxisSize`, expand contracts, and layout tests. Keep this file for theme, loading UX, and per-renderer product findings not covered there.
+
 ---
 
 ## Executive summary

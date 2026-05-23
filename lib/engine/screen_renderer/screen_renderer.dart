@@ -32,6 +32,7 @@ import '../tree/renderers/progress_indicator_renderer.dart';
 import '../tree/renderers/unsupported_component_renderer.dart';
 import '../actions/action_dispatcher.dart';
 import '../form/form_state_store.dart';
+import '../validation/layout_constraint_validator.dart';
 
 /// Recursively renders a tree-based [ScreenConfig] into a widget tree.
 ///
@@ -109,6 +110,16 @@ class ScreenRenderer {
     if (context != null) {
       _ensureActionDispatcher(rootContext, context);
     }
+    assert(() {
+      final rootProps = config.root.properties;
+      LayoutConstraintValidator.reportIfNeeded(
+        config.root,
+        pageScroll: rootProps['pageScroll'] as String?,
+        pageLayout: rootProps['pageLayout'] as String?,
+        pageRoute: rootProps['pageRoute'] as String?,
+      );
+      return true;
+    }());
     return _buildComponent(
       config.root,
       dataContext: rootContext,

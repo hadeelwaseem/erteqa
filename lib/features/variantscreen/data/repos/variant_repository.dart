@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../config/component_config.dart';
@@ -7,6 +8,7 @@ import '../../../../config/screen_config.dart';
 import '../../../../core/enums/generic_component_type.dart';
 import '../../../../core/utils/app_logger.dart';
 import '../../../../engine/validation/component_schemas.dart';
+import '../../../../engine/validation/layout_constraint_validator.dart';
 
 /// Abstract repository for loading dynamic screen configurations.
 ///
@@ -179,15 +181,36 @@ class AssetVariantRepository implements VariantRepository {
             );
           }()
         : null;
-    final children = <ComponentConfig>[if (appBar != null) appBar, ...body];
+    final selectedPageRoute = selectedPage['route'] as String?;
+    final pageLayout = selectedPage['layout'] as String?;
+    final isCenteredLayout = pageLayout == 'centered';
 
     // pages[].scroll → scaffold.properties.pageScroll (engine bridge; not a component prop)
-    final pageScroll = selectedPage['scroll'] as String? ?? 'vertical';
-    // scroll:none + SizedBox.expand scaffold body needs a max-height column so nested
-    // columns with expand/Expanded receive finite vertical constraints.
+    var pageScroll = selectedPage['scroll'] as String? ?? 'vertical';
+    if (isCenteredLayout) {
+      pageScroll = 'none';
+    }
+
+    var bodyNodes = body;
+    if (isCenteredLayout &&
+        body.isNotEmpty &&
+        !layoutSubtreeHasExpandContainer(body)) {
+      bodyNodes = [
+        ComponentConfig(
+          type: GenericComponentType.container,
+          properties: const {'expand': true},
+          child: body.first,
+        ),
+        ...body.skip(1),
+      ];
+    }
+
+    final children = <ComponentConfig>[if (appBar != null) appBar, ...bodyNodes];
+
+    // scroll:none / layout:centered need max-height root column for expand/flex children.
     final rootColumnProps = <String, String>{
       'crossAxisAlignment': 'stretch',
-      if (pageScroll == 'none') 'mainAxisSize': 'max',
+      if (pageScroll == 'none' || isCenteredLayout) 'mainAxisSize': 'max',
     };
 
     final root = ComponentConfig(
@@ -196,12 +219,26 @@ class AssetVariantRepository implements VariantRepository {
         if (selectedPage['background'] is String)
           'backgroundColor': selectedPage['background'],
         'pageScroll': pageScroll,
+        if (pageLayout != null) 'pageLayout': pageLayout,
+        if (selectedPageRoute != null) 'pageRoute': selectedPageRoute,
       },
       child: ComponentConfig(
         type: GenericComponentType.column,
         properties: rootColumnProps,
         children: children,
       ),
+    );
+
+    final violations = const LayoutConstraintValidator().validate(
+      root,
+      pageScroll: pageScroll,
+      pageLayout: pageLayout,
+      pageRoute: selectedPageRoute,
+    );
+    // Release: log only. Debug: throw on error-severity layout violations.
+    LayoutConstraintValidator.reportViolations(
+      violations,
+      throwOnError: kDebugMode,
     );
 
     final pageId = selectedPage['id'] as String? ?? variantId;

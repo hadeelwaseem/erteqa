@@ -146,7 +146,7 @@
       "route": "/splash",
       "title": "Splash Intro",
       "background": "#4A4BB3",
-      "scroll": "none",
+      "layout": "centered",
       "body": [
         {
           "id": "splash-intro-expand",
@@ -265,7 +265,7 @@
       "route": "/splash-carousel",
       "title": "Splash",
       "background": "#000000",
-      "scroll": "none",
+      "layout": "centered",
       "body": [
         {
           "id": "splash-carousel-expand",

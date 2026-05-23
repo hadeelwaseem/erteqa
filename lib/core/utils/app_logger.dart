@@ -10,6 +10,13 @@ class AppLogger {
     }
   }
 
+  /// Non-fatal issues (e.g. layout validator warnings).
+  static void warning(String message) {
+    if (kDebugMode) {
+      debugPrint('[Warning] $message');
+    }
+  }
+
   /// Auth-flow logs (request params, API errors). Never logs OTP codes or tokens.
   static void auth(String message) {
     if (kDebugMode) {

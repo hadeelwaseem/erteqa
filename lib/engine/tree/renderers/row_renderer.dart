@@ -53,24 +53,29 @@ class RowRenderer implements ComponentRenderer {
         final safeCrossAxisAlignment =
             isUnboundedHeight &&
                 resolvedCrossAxisAlignment == CrossAxisAlignment.stretch
-            ? CrossAxisAlignment.center
+            ? CrossAxisAlignment.start
             : resolvedCrossAxisAlignment;
 
         if (isUnboundedHeight &&
             resolvedCrossAxisAlignment == CrossAxisAlignment.stretch) {
           AppLogger.debug(
             '[RowRenderer] unbounded height at $path; '
-            'fallback stretch -> center',
+            'fallback stretch -> start',
           );
         }
 
-        return Row(
+        final row = Row(
           mainAxisSize: mainAxisSize,
           mainAxisAlignment: resolvedMainAxisAlignment,
           crossAxisAlignment: safeCrossAxisAlignment,
           textDirection: textDirection,
           children: childWidgets,
         );
+
+        if (constraints.hasBoundedWidth) {
+          return SizedBox(width: double.infinity, child: row);
+        }
+        return row;
       },
     );
   }

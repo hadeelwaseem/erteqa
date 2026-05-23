@@ -49,7 +49,8 @@ Enum: `lib/core/enums/generic_component_type.dart`.
 2. Selects page from `pages[]` by `route` or `id`.
 3. Normalizes builder nodes → `ComponentConfig` (merges `props` + `style`, maps axis names).
 4. Validates structure (strict) + `ComponentSchemas` (lenient warnings).
-5. Returns `ScreenConfig(pageId, pageName, root)`.
+5. Runs `LayoutConstraintValidator` on the synthetic scaffold (errors throw in debug; warnings logged).
+6. Returns `ScreenConfig(pageId, pageName, root)`.
 
 File: `lib/features/variantscreen/data/repos/variant_repository.dart`.
 
@@ -70,6 +71,7 @@ File: `lib/features/variantscreen/data/repos/variant_repository.dart`.
 
 - `component_schema.dart` — per-type required/optional props
 - `component_schemas.dart` — catalog aligned with `mobile_production_v2` (e.g. `valuePath`, `urlPath`, `gap`, `shadow`, `border`, `aspectRatio`, `variant`, `id`). Warns on unknown keys; does not block render. Button `onTap` is **runtime-injected** by `ScreenRenderer` from JSON `tap` — do not author `onTap` in JSON.
+- `layout_constraint_validator.dart` — parse-time layout rules on every `AssetVariantRepository.loadVariant`; CI via `test/engine/validation/prod_layout_validator_test.dart` (0 errors on prod pages).
 
 ## Registry note
 
@@ -83,6 +85,18 @@ File: `lib/features/variantscreen/data/repos/variant_repository.dart`.
 4. Add schema in `component_schemas.dart`.
 5. Document JSON shape in [09-workflows.md](09-workflows.md).
 6. Add unit/widget test under `test/engine/`.
+
+## Layout & constraints
+
+- **Audit:** [LAYOUT_CONSTRAINT_AUDIT.md](../engine/LAYOUT_CONSTRAINT_AUDIT.md) — constraint flow, PASS/FAIL matrix, canonical JSON patterns.
+- **Improvement plan:** [LAYOUT_IMPROVEMENT_PLAN.md](../engine/LAYOUT_IMPROVEMENT_PLAN.md) — how we reduce layout risk (presets, parse gates, safe renderers).
+- **Parse-time validation:** `LayoutConstraintValidator` in `VariantRepository` (debug throws on errors) + secondary debug assert in `ScreenRenderer`.
+- **Canonical patterns:**
+  - **Splash / full-screen center:** `pages[].layout: "centered"` (engine forces `scroll: none`, root column max + stretch, injects `expand` if missing). See [15-page-layout-preset.md](../engine/builder-specs/15-page-layout-preset.md).
+  - **Catalog:** `scroll: "vertical"` + `gridView`/`listView` with `enableInnerScroll: false` (outer page scroll only).
+  - **Search toolbar:** `row` + `container` with `expand: true`, `expandAxis: "horizontal"`.
+  - **Auth forms:** `scroll: "none"` on short static pages (validator whitelist).
+- **Avoid:** `spacer` (legacy — use `gap` on column/row); nested `singleChildScrollView` (unwrapped at runtime); viewport centering under `scroll: vertical` without `expand` or `layout: centered`.
 
 ## Related
 

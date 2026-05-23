@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sooq_merchant/config/component_config.dart';
 import 'package:sooq_merchant/core/enums/generic_component_type.dart';
+import 'package:sooq_merchant/engine/tree/renderers/column_renderer.dart';
 import 'package:sooq_merchant/engine/tree/renderers/container_renderer.dart';
 import 'package:sooq_merchant/engine/tree/renderers/row_renderer.dart';
 import 'package:sooq_merchant/engine/tree/renderers/text_renderer.dart';
@@ -154,5 +155,80 @@ void main() {
     );
 
     expect(find.byType(Expanded), findsOneWidget);
+  });
+
+  testWidgets('stretch under unbounded height falls back to start', (
+    tester,
+  ) async {
+    final columnRenderer = ColumnRenderer();
+    final rowRenderer = RowRenderer();
+
+    Widget buildChild(ComponentConfig child) {
+      if (child.type == GenericComponentType.row) {
+        return rowRenderer.render(
+          child,
+          buildChild: buildChild,
+          dataContext: rendererDataContext(),
+        );
+      }
+      return TextRenderer().render(
+        child,
+        buildChild: (_) => const SizedBox.shrink(),
+        dataContext: rendererDataContext(),
+      );
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 300,
+            child: columnRenderer.render(
+              ComponentConfig(
+                type: GenericComponentType.column,
+                properties: const {'mainAxisSize': 'min'},
+                children: [
+                  ComponentConfig(
+                    type: GenericComponentType.row,
+                    properties: const {'crossAxisAlignment': 'stretch'},
+                    children: [
+                      ComponentConfig(
+                        type: GenericComponentType.text,
+                        properties: {'value': 'line'},
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              buildChild: buildChild,
+              dataContext: rendererDataContext(),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final row = tester.widget<Row>(find.byType(Row));
+    expect(row.crossAxisAlignment, CrossAxisAlignment.start);
+  });
+
+  testWidgets('row fills finite parent width', (tester) async {
+    await pumpRow(
+      tester,
+      properties: const {'mainAxisAlignment': 'start'},
+      children: [
+        ComponentConfig(
+          type: GenericComponentType.text,
+          properties: {'value': 'A'},
+        ),
+        ComponentConfig(
+          type: GenericComponentType.text,
+          properties: {'value': 'B'},
+        ),
+      ],
+    );
+
+    final rowSize = tester.getSize(find.byType(Row));
+    expect(rowSize.width, closeTo(300, 1));
   });
 }
