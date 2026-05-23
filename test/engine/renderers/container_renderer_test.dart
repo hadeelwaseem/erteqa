@@ -4,6 +4,7 @@ import 'package:sooq_merchant/config/component_config.dart';
 import 'package:sooq_merchant/core/enums/generic_component_type.dart';
 import 'package:sooq_merchant/engine/tree/renderers/column_renderer.dart';
 import 'package:sooq_merchant/engine/tree/renderers/container_renderer.dart';
+import 'package:sooq_merchant/engine/tree/renderers/row_renderer.dart';
 import 'package:sooq_merchant/engine/tree/renderers/text_renderer.dart';
 
 import 'renderer_test_utils.dart';
@@ -170,5 +171,118 @@ void main() {
     final offset = tester.getTopLeft(find.text('centered'));
     expect(offset.dy, greaterThan(100));
     expect(offset.dy, lessThan(300));
+  });
+
+  testWidgets('expand in row Expanded does not use viewport height', (
+    tester,
+  ) async {
+    final containerRenderer = ContainerRenderer();
+    final rowRenderer = RowRenderer();
+    final textRenderer = TextRenderer();
+
+    Widget buildChild(ComponentConfig child) {
+      switch (child.type) {
+        case GenericComponentType.row:
+          return rowRenderer.render(
+            child,
+            buildChild: buildChild,
+            dataContext: rendererDataContext(),
+          );
+        case GenericComponentType.container:
+          return containerRenderer.render(
+            child,
+            buildChild: buildChild,
+            dataContext: rendererDataContext(),
+          );
+        default:
+          return textRenderer.render(
+            child,
+            buildChild: (_) => const SizedBox.shrink(),
+            dataContext: rendererDataContext(),
+          );
+      }
+    }
+
+    final config = ComponentConfig(
+      type: GenericComponentType.row,
+      properties: const {'mainAxisAlignment': 'start'},
+      children: [
+        ComponentConfig(
+          type: GenericComponentType.text,
+          properties: {'value': 'icon'},
+        ),
+        ComponentConfig(
+          type: GenericComponentType.container,
+          properties: const {'expand': true, 'expandAxis': 'horizontal'},
+          child: ComponentConfig(
+            type: GenericComponentType.text,
+            properties: {'value': 'hint'},
+          ),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 300,
+            child: rowRenderer.render(
+              config,
+              buildChild: buildChild,
+              dataContext: rendererDataContext(),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final rowHeight = tester.getSize(find.byType(Row)).height;
+    expect(rowHeight, lessThan(80));
+    expect(find.text('hint'), findsOneWidget);
+  });
+
+  testWidgets('requestKey on container shows loading until data arrives', (
+    tester,
+  ) async {
+    final renderer = ContainerRenderer();
+    const requestKey = 'product-detail';
+    final config = ComponentConfig(
+      type: GenericComponentType.container,
+      properties: {
+        'data': {'requestKey': requestKey},
+        'errorMessage': 'خطأ',
+        'emptyMessage': 'فارغ',
+      },
+      child: ComponentConfig(
+        type: GenericComponentType.text,
+        properties: {'value': 'يجب ألا يظهر'},
+      ),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: renderer.render(
+            config,
+            buildChild: (c) => TextRenderer().render(
+              c,
+              buildChild: (_) => const SizedBox.shrink(),
+              dataContext: {
+                'initialRequestKeys': {requestKey: true},
+                'loadingRequestKeys': {requestKey: true},
+              },
+            ),
+            dataContext: {
+              'initialRequestKeys': {requestKey: true},
+              'loadingRequestKeys': {requestKey: true},
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.text('يجب ألا يظهر'), findsNothing);
   });
 }

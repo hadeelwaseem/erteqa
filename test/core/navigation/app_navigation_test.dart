@@ -2,30 +2,51 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sooq_merchant/core/navigation/app_navigation.dart';
 
 void main() {
-  group('parseNavigationType', () {
-    test('defaults to clearStack for null and empty', () {
-      expect(parseNavigationType(null), NavigationType.clearStack);
-      expect(parseNavigationType(''), NavigationType.clearStack);
-      expect(parseNavigationType('   '), NavigationType.clearStack);
+  group('AppNavigation.resolveForRoute', () {
+    const tabRoutes = {'/home', '/cart', '/profile'};
+
+    test('keeps push for non-tab routes', () {
+      expect(
+        AppNavigation.resolveForRoute(
+          route: '/product/details/foo',
+          requested: NavigationType.push,
+          tabRoutes: tabRoutes,
+        ),
+        NavigationType.push,
+      );
     });
 
-    test('recognizes push aliases', () {
-      expect(parseNavigationType('push'), NavigationType.push);
-      expect(parseNavigationType('stack'), NavigationType.push);
-      expect(parseNavigationType(' PUSH '), NavigationType.push);
+    test('downgrades push to clearStack for tab routes', () {
+      expect(
+        AppNavigation.resolveForRoute(
+          route: '/cart',
+          requested: NavigationType.push,
+          tabRoutes: tabRoutes,
+        ),
+        NavigationType.clearStack,
+      );
     });
 
-    test('recognizes clearStack aliases', () {
-      expect(parseNavigationType('clear_stack'), NavigationType.clearStack);
-      expect(parseNavigationType('clearstack'), NavigationType.clearStack);
-      expect(parseNavigationType('reset'), NavigationType.clearStack);
-      expect(parseNavigationType('go'), NavigationType.clearStack);
-      expect(parseNavigationType('Clear_Stack'), NavigationType.clearStack);
+    test('ignores query on tab route path', () {
+      expect(
+        AppNavigation.resolveForRoute(
+          route: '/cart?ref=pdp',
+          requested: NavigationType.push,
+          tabRoutes: tabRoutes,
+        ),
+        NavigationType.clearStack,
+      );
     });
 
-    test('unknown values default to clearStack', () {
-      expect(parseNavigationType('replace'), NavigationType.clearStack);
-      expect(parseNavigationType('pop'), NavigationType.clearStack);
+    test('leaves clearStack unchanged for tab routes', () {
+      expect(
+        AppNavigation.resolveForRoute(
+          route: '/cart',
+          requested: NavigationType.clearStack,
+          tabRoutes: tabRoutes,
+        ),
+        NavigationType.clearStack,
+      );
     });
   });
 }

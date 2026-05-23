@@ -20,11 +20,53 @@ dynamic resolveDataContextPath(
     if (segment.isEmpty) {
       continue;
     }
-    if (current is Map<String, dynamic> && current.containsKey(segment)) {
+    if (current is Map && current.containsKey(segment)) {
       current = current[segment];
     } else {
       return null;
     }
   }
   return current;
+}
+
+/// Resolves a network image URL from [urlPath], with item-level aliases when empty.
+///
+/// Grids bind `item.image`; APIs may expose `imageUrl`, `primaryImageUrl`, etc.
+String? resolveBoundImageUrl(
+  Map<String, dynamic>? dataContext,
+  String? urlPath,
+) {
+  final direct = resolveDataContextPath(dataContext, urlPath);
+  final directText = direct?.toString().trim() ?? '';
+  if (directText.isNotEmpty) {
+    return directText;
+  }
+
+  final normalized = urlPath?.trim() ?? '';
+  if (!normalized.startsWith('item.')) {
+    return null;
+  }
+
+  final item = resolveDataContextPath(dataContext, 'item');
+  if (item is! Map) {
+    return null;
+  }
+
+  const keys = <String>[
+    'image',
+    'imageUrl',
+    'primaryImageUrl',
+    'primaryThumbnailUrl',
+    'thumbnailUrl',
+    'publicUrl',
+  ];
+
+  for (final key in keys) {
+    final value = item[key]?.toString().trim() ?? '';
+    if (value.isNotEmpty) {
+      return value;
+    }
+  }
+
+  return null;
 }

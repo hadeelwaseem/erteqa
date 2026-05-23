@@ -35,6 +35,8 @@ flowchart LR
 
 `navigation.initialRoute` remains `/splash`. `shellExcludeRoutes` includes `/splash` and `/splash-carousel` (not `/onboarding`).
 
+**Auth (runtime, not JSON):** `/splash` intro shows on **every** cold start. `/splash-carousel` is **guest-only** — when a session token exists, the engine timer on `/splash` navigates to `/home` instead of the carousel, and direct visits to `/splash-carousel` redirect to `/home`.
+
 ---
 
 ## Gap vs production JSON

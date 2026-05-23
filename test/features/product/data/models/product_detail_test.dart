@@ -27,5 +27,18 @@ void main() {
       expect(detail.pricing, isNotNull);
       expect(detail.variants, isEmpty);
     });
+
+    test('fromEnvelopeData resolves primaryImageUrl from images[].url alias', () {
+      final detail = ProductDetail.fromEnvelopeData({
+        'productId': 'p-1',
+        'titleAr': 'منتج',
+        'slug': 'sample',
+        'images': [
+          {'url': 'https://example.com/photo.jpg', 'isPrimary': true},
+        ],
+      });
+
+      expect(detail.toJson()['primaryImageUrl'], 'https://example.com/photo.jpg');
+    });
   });
 }

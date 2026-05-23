@@ -1,9 +1,9 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../config/component_config.dart';
-import '../../theme/engine_theme.dart';
-
 import '../../component_renderer/component_renderer.dart';
+import '../../request_ui_state.dart';
+import '../../theme/engine_theme.dart';
 import '../parsers/property_parsers.dart';
 
 /// Renders a container node with optional background, padding, margin,
@@ -15,8 +15,10 @@ import '../parsers/property_parsers.dart';
 /// - `margin` — {top,right,bottom,left}
 /// - `borderRadius` — numeric
 /// - `width` / `height` — numeric px
-/// - `expand` (bool) — fill parent width/height when width/height omitted; inside
-///   scroll views uses [BoxConstraints.minHeight] or viewport (not infinite expand)
+/// - `expand` (bool) — fill parent when width/height omitted
+/// - `expandAxis` (string, optional) — `horizontal` | `vertical` | `both` (default
+///   `both`). Use `horizontal` for row flex children (search bar text) so height
+///   stays intrinsic.
 /// - `shadow` — "sm" | "md" | "lg" | "xl" | "none"
 /// - `border` — {width, color}
 class ContainerRenderer implements ComponentRenderer {
@@ -42,20 +44,71 @@ class ContainerRenderer implements ComponentRenderer {
     final height = PropertyParsers.parseDouble(config.properties['height']);
     final shadow = _parseShadow(config.properties['shadow']);
     final border = _parseBorder(config.properties['border'], dataContext);
+
+    final requestKey = resolveRequestKey(config.properties);
+    if (requestKey != null) {
+      final requestMap = requestMapForKey(dataContext, requestKey);
+      final phase = resolveRequestBoundListPhase(
+        requestKey: requestKey,
+        dataContext: dataContext,
+        itemsEmpty: isRequestPayloadEmpty(requestMap),
+      );
+      if (phase == RequestBoundListPhase.loading ||
+          phase == RequestBoundListPhase.error ||
+          phase == RequestBoundListPhase.empty) {
+        final message = switch (phase) {
+          RequestBoundListPhase.error => resolveDisplayMessage(
+            prop: config.properties['errorMessage'] as String?,
+            requestMap: requestMap,
+            fallback: kDefaultErrorMessage,
+          ),
+          RequestBoundListPhase.empty => resolveDisplayMessage(
+            prop: config.properties['emptyMessage'] as String?,
+            requestMap: requestMap,
+            fallback: kDefaultEmptyMessage,
+          ),
+          _ => '',
+        };
+        return buildRequestPhasePlaceholder(phase: phase, message: message);
+      }
+    }
+
     Widget? child = config.child != null ? buildChild(config.child!) : null;
     final expand = config.properties['expand'] == true;
     if (expand && child != null && width == null && height == null) {
       final expandedChild = child;
+      final expandAxis = (config.properties['expandAxis'] as String? ?? 'both')
+          .toLowerCase();
       child = LayoutBuilder(
         builder: (context, constraints) {
-          // Inside Expanded / bounded column: fill the slot, do not force full viewport.
-          if (constraints.maxHeight.isFinite) {
+          final canWidth =
+              constraints.maxWidth.isFinite && expandAxis != 'vertical';
+          final canHeight =
+              constraints.maxHeight.isFinite && expandAxis != 'horizontal';
+
+          if (canWidth && canHeight) {
             return SizedBox(
               width: double.infinity,
               height: constraints.maxHeight,
               child: expandedChild,
             );
           }
+          if (canWidth) {
+            return SizedBox(
+              width: double.infinity,
+              child: expandedChild,
+            );
+          }
+          if (canHeight) {
+            return SizedBox(
+              height: constraints.maxHeight,
+              width: constraints.maxWidth.isFinite
+                  ? constraints.maxWidth
+                  : double.infinity,
+              child: expandedChild,
+            );
+          }
+          // Both unbounded (e.g. scroll column) — viewport fill for splash.
           final height = _expandHeight(context, constraints);
           return SizedBox(
             width: double.infinity,

@@ -79,11 +79,11 @@ class AutocompleteProductItem extends Equatable {
 
   @override
   List<Object?> get props => [
-        productId,
-        titleAr,
-        titleEn,
-        slug,
-        basePrice,
-        thumbnailUrl,
-      ];
+    productId,
+    titleAr,
+    titleEn,
+    slug,
+    basePrice,
+    thumbnailUrl,
+  ];
 }

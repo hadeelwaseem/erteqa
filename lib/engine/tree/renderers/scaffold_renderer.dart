@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../config/component_config.dart';
+import '../../../core/enums/generic_component_type.dart';
 import '../../component_renderer/component_renderer.dart';
 import '../parsers/property_parsers.dart';
 
@@ -26,6 +27,8 @@ class ScaffoldRenderer implements ComponentRenderer {
     );
     final pageScroll = config.properties['pageScroll'] as String? ?? 'vertical';
     final child = config.child != null ? buildChild(config.child!) : null;
+    final bodyHasExpand =
+        config.child != null && _treeHasExpandContainer(config.child!);
 
     return ColoredBox(
       color: backgroundColor ?? const Color(0xFFF8FAFC),
@@ -38,11 +41,12 @@ class ScaffoldRenderer implements ComponentRenderer {
                 if (pageScroll == 'none') {
                   return _StaticScaffoldBody(
                     dataContext: dataContext,
+                    fillViewport: bodyHasExpand,
                     child: child,
                   );
                 }
                 return _ScrollableScaffoldBody(
-                  minHeight: minHeight,
+                  minHeight: bodyHasExpand ? minHeight : null,
                   dataContext: dataContext,
                   child: child,
                 );
@@ -50,6 +54,21 @@ class ScaffoldRenderer implements ComponentRenderer {
             )
           : const SizedBox.expand(),
     );
+  }
+
+  /// True when any [container] node in the subtree has `expand: true`.
+  static bool _treeHasExpandContainer(ComponentConfig config) {
+    if (config.type == GenericComponentType.container &&
+        config.properties['expand'] == true) {
+      return true;
+    }
+    if (config.child != null && _treeHasExpandContainer(config.child!)) {
+      return true;
+    }
+    for (final c in config.children ?? const <ComponentConfig>[]) {
+      if (_treeHasExpandContainer(c)) return true;
+    }
+    return false;
   }
 }
 
@@ -86,25 +105,35 @@ class _ScrollableScaffoldBody extends StatelessWidget {
     required this.child,
   });
 
-  final double minHeight;
+  final double? minHeight;
   final Map<String, dynamic>? dataContext;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: ConstrainedBox(
-        constraints: BoxConstraints(minHeight: minHeight),
-        child: _scaffoldBodyColumn(child: child, dataContext: dataContext),
-      ),
+    Widget scrollChild = _scaffoldBodyColumn(
+      child: child,
+      dataContext: dataContext,
     );
+    if (minHeight != null) {
+      scrollChild = ConstrainedBox(
+        constraints: BoxConstraints(minHeight: minHeight!),
+        child: scrollChild,
+      );
+    }
+    return SingleChildScrollView(child: scrollChild);
   }
 }
 
 class _StaticScaffoldBody extends StatelessWidget {
-  const _StaticScaffoldBody({required this.dataContext, required this.child});
+  const _StaticScaffoldBody({
+    required this.dataContext,
+    required this.fillViewport,
+    required this.child,
+  });
 
   final Map<String, dynamic>? dataContext;
+  final bool fillViewport;
   final Widget child;
 
   @override
@@ -115,13 +144,17 @@ class _StaticScaffoldBody extends StatelessWidget {
             ? constraints.maxHeight
             : MediaQuery.sizeOf(context).height;
         final hasLoadingMore = _hasLoadingMore(dataContext);
+        final bodyChild = fillViewport
+            ? Expanded(child: child)
+            : child;
         return SizedBox(
           width: double.infinity,
           height: height,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Expanded(child: child),
+              bodyChild,
               if (hasLoadingMore) _buildLoadingFooter(),
             ],
           ),

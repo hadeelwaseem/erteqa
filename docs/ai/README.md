@@ -19,6 +19,7 @@ Canonical documentation for humans and AI assistants. **Read `AGENTS.md` at repo
 | [10-file-index.md](10-file-index.md) | Full `lib/` file map |
 | [11-testing.md](11-testing.md) | Test layout and patterns |
 | [12-production-status.md](12-production-status.md) | Implemented vs gaps |
+| [13-ui-refactor-v2-summary.md](13-ui-refactor-v2-summary.md) | Production v2 JSON UI refactor changelog |
 
 ## Cursor integration
 

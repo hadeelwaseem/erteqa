@@ -31,6 +31,7 @@ class CardRenderer implements ComponentRenderer {
     final child = config.child != null ? buildChild(config.child!) : null;
 
     Widget card = Card(
+      clipBehavior: Clip.antiAlias,
       elevation: elevation,
       color: color,
       shape: RoundedRectangleBorder(borderRadius: borderRadius),

@@ -55,7 +55,7 @@ bool _isLoadingKey(Map<String, dynamic>? dataContext, String requestKey) {
   return false;
 }
 
-Map<String, dynamic>? _requestMap(
+Map<String, dynamic>? requestMapForKey(
   Map<String, dynamic>? dataContext,
   String requestKey,
 ) {
@@ -98,7 +98,7 @@ RequestBoundListPhase resolveRequestBoundListPhase({
     return RequestBoundListPhase.loading;
   }
 
-  final request = _requestMap(dataContext, requestKey);
+  final request = requestMapForKey(dataContext, requestKey);
   if (request == null) {
     // Absent + initial page fetch (non-qField) → loading (avoids empty flash).
     // Absent + deferred qField search → none (caller shows static empty/children).
@@ -135,27 +135,116 @@ String resolveDisplayMessage({
   return fallback;
 }
 
-const String kDefaultEmptyMessage = 'No items available';
-const String kDefaultErrorMessage = 'Unable to load content';
+const String kDefaultEmptyMessage = 'لا توجد عناصر';
+const String kDefaultErrorMessage = 'تعذر تحميل المحتوى';
 
-/// Placeholder for loading, error, or empty phases on list/grid.
+/// True when a successful request has no usable [data] payload yet.
+bool isRequestPayloadEmpty(Map<String, dynamic>? requestMap) {
+  if (requestMap == null) {
+    return true;
+  }
+  if (requestMap['success'] == false) {
+    return false;
+  }
+  final data = requestMap['data'];
+  if (data == null) {
+    return true;
+  }
+  if (data is Map && data.isEmpty) {
+    return true;
+  }
+  return false;
+}
+
+/// Placeholder for loading, error, or empty phases on list/grid/container.
 Widget buildRequestPhasePlaceholder({
   required RequestBoundListPhase phase,
   required String message,
+  bool compact = false,
 }) {
+  if (phase == RequestBoundListPhase.none ||
+      phase == RequestBoundListPhase.ready) {
+    return const SizedBox.shrink();
+  }
+
+  if (compact) {
+    return switch (phase) {
+      RequestBoundListPhase.loading => const SizedBox(
+        height: 72,
+        child: Center(
+          child: SizedBox(
+            width: 28,
+            height: 28,
+            child: CircularProgressIndicator(strokeWidth: 2.5),
+          ),
+        ),
+      ),
+      RequestBoundListPhase.error || RequestBoundListPhase.empty =>
+        const SizedBox.shrink(),
+      _ => const SizedBox.shrink(),
+    };
+  }
+
   return switch (phase) {
     RequestBoundListPhase.loading => const Center(
       child: Padding(
-        padding: EdgeInsets.all(24),
+        padding: EdgeInsets.symmetric(vertical: 48, horizontal: 24),
         child: CircularProgressIndicator(),
       ),
     ),
-    RequestBoundListPhase.error || RequestBoundListPhase.empty => Center(
+    RequestBoundListPhase.error => Center(
       child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Text(message, textAlign: TextAlign.center),
+        padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
+        child: _RequestPhaseMessage(
+          icon: Icons.error_outline,
+          iconColor: Color(0xFFDC2626),
+          message: message,
+        ),
       ),
     ),
-    RequestBoundListPhase.none || RequestBoundListPhase.ready => const SizedBox.shrink(),
+    RequestBoundListPhase.empty => Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
+        child: _RequestPhaseMessage(
+          icon: Icons.inventory_2_outlined,
+          iconColor: Color(0xFF94A3B8),
+          message: message,
+        ),
+      ),
+    ),
+    _ => const SizedBox.shrink(),
   };
+}
+
+class _RequestPhaseMessage extends StatelessWidget {
+  const _RequestPhaseMessage({
+    required this.icon,
+    required this.iconColor,
+    required this.message,
+  });
+
+  final IconData icon;
+  final Color iconColor;
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 48, color: iconColor),
+        const SizedBox(height: 12),
+        Text(
+          message,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF475569),
+            height: 1.4,
+          ),
+        ),
+      ],
+    );
+  }
 }

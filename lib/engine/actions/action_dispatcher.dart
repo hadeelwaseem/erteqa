@@ -71,9 +71,35 @@ class EngineActionDispatcher {
     final route = action['route'] as String?;
     if (route == null || route.isEmpty) return;
     final resolvedRoute = _resolveRoute(route, dataContext);
-    final navType = parseNavigationType(action['navigation_type'] as String?);
+    final requestedType = parseNavigationType(
+      action['navigation_type'] as String?,
+    );
+    final tabRoutes = _tabRoutesFromConfig();
+    final navType = AppNavigation.resolveForRoute(
+      route: resolvedRoute,
+      requested: requestedType,
+      tabRoutes: tabRoutes,
+    );
+    if (navType != requestedType) {
+      AppLogger.debug(
+        '[ActionDispatcher] push downgraded to go for tab route $resolvedRoute',
+      );
+    }
     AppLogger.debug('[ActionDispatcher] navigate to $resolvedRoute');
-    AppNavigation.navigate(_context, route: resolvedRoute, type: navType);
+    AppNavigation.navigate(
+      _context,
+      route: resolvedRoute,
+      type: navType,
+      tabRoutes: tabRoutes,
+    );
+  }
+
+  Set<String> _tabRoutesFromConfig() {
+    final config = registeredMobileAppConfig;
+    if (config == null || !config.navigation.hasTabs) {
+      return const {};
+    }
+    return config.navigation.tabs.map((tab) => tab.route).toSet();
   }
 
   String _resolveRoute(String route, Map<String, dynamic>? dataContext) {

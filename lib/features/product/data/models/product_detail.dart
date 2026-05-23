@@ -131,7 +131,9 @@ class ProductDetail extends Equatable {
   static List<ProductCategoryRef> _parseCategories(dynamic raw) {
     if (raw is! List) return const [];
     return raw
-        .map((item) => ProductCategoryRef.fromJson(item as Map<String, dynamic>))
+        .map(
+          (item) => ProductCategoryRef.fromJson(item as Map<String, dynamic>),
+        )
         .toList();
   }
 
@@ -157,23 +159,23 @@ class ProductDetail extends Equatable {
 
   @override
   List<Object?> get props => [
-        productId,
-        titleAr,
-        titleEn,
-        descriptionAr,
-        descriptionEn,
-        slug,
-        seoTitle,
-        seoDescription,
-        isAvailable,
-        pricing,
-        inventory,
-        images,
-        variants,
-        categories,
-        tags,
-        attributes,
-      ];
+    productId,
+    titleAr,
+    titleEn,
+    descriptionAr,
+    descriptionEn,
+    slug,
+    seoTitle,
+    seoDescription,
+    isAvailable,
+    pricing,
+    inventory,
+    images,
+    variants,
+    categories,
+    tags,
+    attributes,
+  ];
 }
 
 class PricingBlock extends Equatable {
@@ -208,25 +210,25 @@ class PricingBlock extends Equatable {
   }
 
   Map<String, dynamic> toJson() => {
-        'basePrice': basePrice,
-        'compareAtPrice': compareAtPrice,
-        'currencyCode': currencyCode,
-        'displayPrice': displayPrice,
-        'displayCompareAt': displayCompareAt,
-        'discountPercentage': discountPercentage,
-        'hasDiscount': hasDiscount,
-      };
+    'basePrice': basePrice,
+    'compareAtPrice': compareAtPrice,
+    'currencyCode': currencyCode,
+    'displayPrice': displayPrice,
+    'displayCompareAt': displayCompareAt,
+    'discountPercentage': discountPercentage,
+    'hasDiscount': hasDiscount,
+  };
 
   @override
   List<Object?> get props => [
-        basePrice,
-        compareAtPrice,
-        currencyCode,
-        displayPrice,
-        displayCompareAt,
-        discountPercentage,
-        hasDiscount,
-      ];
+    basePrice,
+    compareAtPrice,
+    currencyCode,
+    displayPrice,
+    displayCompareAt,
+    discountPercentage,
+    hasDiscount,
+  ];
 }
 
 class InventoryBlock extends Equatable {
@@ -249,10 +251,10 @@ class InventoryBlock extends Equatable {
   }
 
   Map<String, dynamic> toJson() => {
-        'isOutOfStock': isOutOfStock,
-        'isLowStock': isLowStock,
-        'stockStatus': stockStatus,
-      };
+    'isOutOfStock': isOutOfStock,
+    'isLowStock': isLowStock,
+    'stockStatus': stockStatus,
+  };
 
   @override
   List<Object?> get props => [isOutOfStock, isLowStock, stockStatus];
@@ -294,7 +296,11 @@ class ProductImage extends Equatable {
       mediaAssetId: ProductDetail._readString(json['mediaAssetId']),
       filename: ProductDetail._readString(json['filename']),
       mimeType: ProductDetail._readString(json['mimeType']),
-      publicUrl: _resolveBackendUrl(ProductDetail._readString(json['publicUrl'])),
+      publicUrl: _resolveBackendUrl(
+        ProductDetail._readString(
+          json['publicUrl'] ?? json['url'] ?? json['imageUrl'],
+        ),
+      ),
       thumbnailUrls: thumbs,
       sortOrder: (json['sortOrder'] as num?)?.toInt() ?? 0,
       isPrimary: json['isPrimary'] as bool? ?? false,
@@ -303,15 +309,15 @@ class ProductImage extends Equatable {
   }
 
   Map<String, dynamic> toJson() => {
-        'mediaAssetId': mediaAssetId,
-        'filename': filename,
-        'mimeType': mimeType,
-        'publicUrl': publicUrl,
-        'thumbnailUrls': thumbnailUrls,
-        'sortOrder': sortOrder,
-        'isPrimary': isPrimary,
-        'attachedAt': attachedAt,
-      };
+    'mediaAssetId': mediaAssetId,
+    'filename': filename,
+    'mimeType': mimeType,
+    'publicUrl': publicUrl,
+    'thumbnailUrls': thumbnailUrls,
+    'sortOrder': sortOrder,
+    'isPrimary': isPrimary,
+    'attachedAt': attachedAt,
+  };
 
   static String? _resolveBackendUrl(String? value) {
     final text = value?.trim();
@@ -330,15 +336,15 @@ class ProductImage extends Equatable {
 
   @override
   List<Object?> get props => [
-        mediaAssetId,
-        filename,
-        mimeType,
-        publicUrl,
-        thumbnailUrls,
-        sortOrder,
-        isPrimary,
-        attachedAt,
-      ];
+    mediaAssetId,
+    filename,
+    mimeType,
+    publicUrl,
+    thumbnailUrls,
+    sortOrder,
+    isPrimary,
+    attachedAt,
+  ];
 }
 
 class ProductVariant extends Equatable {
@@ -374,8 +380,11 @@ class ProductVariant extends Equatable {
       stockQty: (json['stockQty'] as num?)?.toInt() ?? 0,
       weightGrams: (json['weightGrams'] as num?)?.toInt(),
       barcode: ProductDetail._readString(json['barcode']),
-      optionValues: (rawOptions as List<dynamic>?)
-              ?.map((item) => OptionValue.fromJson(item as Map<String, dynamic>))
+      optionValues:
+          (rawOptions as List<dynamic>?)
+              ?.map(
+                (item) => OptionValue.fromJson(item as Map<String, dynamic>),
+              )
               .toList() ??
           [],
       available: json['available'] as bool? ?? false,
@@ -383,29 +392,29 @@ class ProductVariant extends Equatable {
   }
 
   Map<String, dynamic> toJson() => {
-        'variantId': variantId,
-        'sku': sku,
-        'price': price,
-        'compareAtPrice': compareAtPrice,
-        'stockQty': stockQty,
-        'weightGrams': weightGrams,
-        'barcode': barcode,
-        'optionValues': optionValues.map((item) => item.toJson()).toList(),
-        'available': available,
-      };
+    'variantId': variantId,
+    'sku': sku,
+    'price': price,
+    'compareAtPrice': compareAtPrice,
+    'stockQty': stockQty,
+    'weightGrams': weightGrams,
+    'barcode': barcode,
+    'optionValues': optionValues.map((item) => item.toJson()).toList(),
+    'available': available,
+  };
 
   @override
   List<Object?> get props => [
-        variantId,
-        sku,
-        price,
-        compareAtPrice,
-        stockQty,
-        weightGrams,
-        barcode,
-        optionValues,
-        available,
-      ];
+    variantId,
+    sku,
+    price,
+    compareAtPrice,
+    stockQty,
+    weightGrams,
+    barcode,
+    optionValues,
+    available,
+  ];
 }
 
 class OptionValue extends Equatable {
@@ -437,23 +446,23 @@ class OptionValue extends Equatable {
   }
 
   Map<String, dynamic> toJson() => {
-        'optionId': optionId,
-        'optionName': optionName,
-        'optionNameAr': optionNameAr,
-        'value': value,
-        'valueAr': valueAr,
-        'sortOrder': sortOrder,
-      };
+    'optionId': optionId,
+    'optionName': optionName,
+    'optionNameAr': optionNameAr,
+    'value': value,
+    'valueAr': valueAr,
+    'sortOrder': sortOrder,
+  };
 
   @override
   List<Object?> get props => [
-        optionId,
-        optionName,
-        optionNameAr,
-        value,
-        valueAr,
-        sortOrder,
-      ];
+    optionId,
+    optionName,
+    optionNameAr,
+    value,
+    valueAr,
+    sortOrder,
+  ];
 }
 
 class ProductCategoryRef extends Equatable {
@@ -482,12 +491,12 @@ class ProductCategoryRef extends Equatable {
   }
 
   Map<String, dynamic> toJson() => {
-        'categoryId': categoryId,
-        'nameAr': nameAr,
-        'nameEn': nameEn,
-        'slug': slug,
-        'depth': depth,
-      };
+    'categoryId': categoryId,
+    'nameAr': nameAr,
+    'nameEn': nameEn,
+    'slug': slug,
+    'depth': depth,
+  };
 
   String get name {
     final arabic = nameAr?.trim();
@@ -517,11 +526,11 @@ class ProductTag extends Equatable {
   }
 
   Map<String, dynamic> toJson() => {
-        'tagId': tagId,
-        'nameAr': nameAr,
-        'nameEn': nameEn,
-        'slug': slug,
-      };
+    'tagId': tagId,
+    'nameAr': nameAr,
+    'nameEn': nameEn,
+    'slug': slug,
+  };
 
   @override
   List<Object?> get props => [tagId, nameAr, nameEn, slug];
@@ -556,21 +565,21 @@ class ProductAttribute extends Equatable {
   }
 
   Map<String, dynamic> toJson() => {
-        'attributeId': attributeId,
-        'nameAr': nameAr,
-        'nameEn': nameEn,
-        'value': value,
-        'valueAr': valueAr,
-        'visibleOnStorefront': visibleOnStorefront,
-      };
+    'attributeId': attributeId,
+    'nameAr': nameAr,
+    'nameEn': nameEn,
+    'value': value,
+    'valueAr': valueAr,
+    'visibleOnStorefront': visibleOnStorefront,
+  };
 
   @override
   List<Object?> get props => [
-        attributeId,
-        nameAr,
-        nameEn,
-        value,
-        valueAr,
-        visibleOnStorefront,
-      ];
+    attributeId,
+    nameAr,
+    nameEn,
+    value,
+    valueAr,
+    visibleOnStorefront,
+  ];
 }

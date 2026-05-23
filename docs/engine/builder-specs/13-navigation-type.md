@@ -95,8 +95,10 @@ Two separate JSON/router concerns:
 |---------------|----------------------|-------------------|
 | Full-screen drill-down (list → detail, profile → settings) | **Include** route | `push` when back is needed |
 | Reset flow (splash, logout, order success → home) | Include if non-tab | `clear_stack` or omit |
-| Switch to a **tab** (same as tapping bottom nav) | **Do not** exclude tab route | omit or `clear_stack` (`go`) |
-| Tab route linked from another tab with back + no bar | Add a **`routeAliases`** drill path (e.g. `/categories/browse` → `/categories`) in `shellExcludeRoutes` + `navigation_type: push` — see prod `home-categories-more` |
+| Switch to a **tab** (same as tapping bottom nav) | **Do not** exclude tab route | omit or `clear_stack` (`go`) — **never `push`** (duplicate Navigator page key on `/cart`, `/home`, etc.) |
+| Tab screen linked from another tab **with back + no bottom bar** | Add alias route in **`shellExcludeRoutes`** + **`routeAliases`** (e.g. `/categories/browse` → `/categories`) + `navigation_type: push` — see prod `home-categories-more` |
+
+**Do not combine** alias drill paths with direct `push` to a tab `route` (e.g. `/cart`). Aliases are for alternate URLs that load the same `pages[].route` content outside the shell stack; tab switches use the tab `route` with `clear_stack` only.
 
 Production `mobile_production_v2` excludes: `/products`, `/orders`, `/settings`, `/wishlist`, `/notifications`, `/support`, checkout/order/auth/detail routes, etc. Tab routes (`/home`, `/categories`, `/search`, `/cart`, `/profile`) remain in the shell.
 

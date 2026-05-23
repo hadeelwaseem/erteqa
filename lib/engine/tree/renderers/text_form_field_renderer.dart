@@ -43,18 +43,23 @@ class TextFormFieldRenderer implements ComponentRenderer {
     final enableSuggestions = properties['enableSuggestions'] != false;
     final expands = properties['expands'] == true;
 
-    final keyboardType = PropertyParsers.parseKeyboardType(
-      properties['keyboardType'] as String?,
-    );
     final textInputAction = PropertyParsers.parseTextInputAction(
       properties['textInputAction'] as String?,
     );
     final textCapitalization = PropertyParsers.parseTextCapitalization(
       properties['textCapitalization'] as String?,
     );
-    final textAlign = PropertyParsers.parseTextAlign(
-      properties['textAlign'] as String?,
+    final explicitTextAlign = properties['textAlign'] as String?;
+    final keyboardType = PropertyParsers.parseKeyboardType(
+      properties['keyboardType'] as String?,
     );
+    final isPhoneKeyboard = keyboardType == TextInputType.phone;
+    final textDirection = PropertyParsers.parseTextDirection(
+          properties['textDirection'] as String?,
+        ) ??
+        (isPhoneKeyboard ? TextDirection.ltr : null);
+    final textAlign = PropertyParsers.parseTextAlign(explicitTextAlign) ??
+        (textDirection == TextDirection.ltr ? TextAlign.left : null);
 
     final inputFormatters = PropertyParsers.parseInputFormatters(
       properties['inputFormatters'],
@@ -173,7 +178,8 @@ class TextFormFieldRenderer implements ComponentRenderer {
           keyboardType: keyboardType,
           textInputAction: textInputAction,
           textCapitalization: textCapitalization,
-          textAlign: textAlign,
+          textDirection: textDirection,
+          textAlign: textAlign ?? TextAlign.start,
           inputFormatters: inputFormatters,
           maxLines: expands ? null : (maxLines ?? 1),
           minLines: expands ? null : minLines,

@@ -154,6 +154,52 @@ void main() {
     expect(sizedBox.height, 48);
   });
 
+  testWidgets('phone keyboard defaults to LTR in RTL app', (tester) async {
+    final renderer = TextFormFieldRenderer();
+    final store = FormStateStore();
+    final config = ComponentConfig(
+      type: GenericComponentType.textFormField,
+      properties: {
+        'id': 'phone',
+        'label': 'رقم الجوال',
+        'keyboardType': 'phone',
+      },
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.rtl,
+        child: MaterialApp(
+          home: Scaffold(
+            body: Form(
+              key: store.formKeyFor('f'),
+              child: renderer.render(
+                config,
+                buildChild: (_) => const SizedBox.shrink(),
+                dataContext: {
+                  ...formRendererDataContext(),
+                  FormStateStore.contextKey: store,
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final editable = tester.widget<EditableText>(
+      find.descendant(
+        of: find.byType(TextFormField),
+        matching: find.byType(EditableText),
+      ),
+    );
+    expect(editable.textDirection, TextDirection.ltr);
+    expect(
+      editable.textAlign,
+      anyOf(TextAlign.left, TextAlign.start),
+    );
+  });
+
   testWidgets('Semantics exposes label and hint', (tester) async {
     final renderer = TextFormFieldRenderer();
     final store = FormStateStore();

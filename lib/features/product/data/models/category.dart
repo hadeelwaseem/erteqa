@@ -48,7 +48,8 @@ class Category extends Equatable {
       depth: (json['depth'] as num?)?.toInt() ?? 0,
       sortOrder: (json['sortOrder'] as num?)?.toInt() ?? 0,
       isActive: json['isActive'] as bool? ?? true,
-      children: (rawChildren as List<dynamic>?)
+      children:
+          (rawChildren as List<dynamic>?)
               ?.map((item) => Category.fromJson(item as Map<String, dynamic>))
               .toList() ??
           [],
@@ -107,18 +108,18 @@ class Category extends Equatable {
 
   @override
   List<Object?> get props => [
-        categoryId,
-        parentCategoryId,
-        nameAr,
-        nameEn,
-        slug,
-        descriptionAr,
-        descriptionEn,
-        imageUrl,
-        depth,
-        sortOrder,
-        isActive,
-        children,
-        createdAt,
-      ];
+    categoryId,
+    parentCategoryId,
+    nameAr,
+    nameEn,
+    slug,
+    descriptionAr,
+    descriptionEn,
+    imageUrl,
+    depth,
+    sortOrder,
+    isActive,
+    children,
+    createdAt,
+  ];
 }

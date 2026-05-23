@@ -48,7 +48,9 @@ class ImageSliderRenderer implements ComponentRenderer {
     final indicatorStyle =
         (config.properties['indicatorStyle'] as String? ?? 'dot').toLowerCase();
     final indicatorBottomPadding =
-        PropertyParsers.parseDouble(config.properties['indicatorBottomPadding']) ??
+        PropertyParsers.parseDouble(
+          config.properties['indicatorBottomPadding'],
+        ) ??
         24.0;
 
     if (images.isEmpty) {
@@ -281,9 +283,7 @@ class _EngineImageSliderState extends State<_EngineImageSlider> {
                 ? (i == _currentIndex ? 8.0 : 8.0)
                 : (i == _currentIndex ? 10.0 : 8.0),
             decoration: BoxDecoration(
-              borderRadius: usePill
-                  ? BorderRadius.circular(4)
-                  : null,
+              borderRadius: usePill ? BorderRadius.circular(4) : null,
               shape: usePill ? BoxShape.rectangle : BoxShape.circle,
               color: i == _currentIndex
                   ? widget.activeDotColor

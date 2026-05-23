@@ -24,10 +24,10 @@ class ImageRenderer implements ComponentRenderer {
       config.properties['source'] as String?,
     );
     final urlPath = config.properties['urlPath'] as String?;
+    final fallbackUrl = (config.properties['url'] as String? ?? '').trim();
     final boundUrl = resolveDataContextPath(dataContext, urlPath);
-    final url = (boundUrl?.toString().trim().isNotEmpty ?? false)
-        ? boundUrl.toString()
-        : (config.properties['url'] as String? ?? '');
+    final boundText = boundUrl?.toString().trim() ?? '';
+    final url = boundText.isNotEmpty ? boundText : fallbackUrl;
     final resolvedUrl = _resolveNetworkUrl(url);
     final width = PropertyParsers.parseDouble(config.properties['width']);
     final height = PropertyParsers.parseDouble(config.properties['height']);

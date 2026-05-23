@@ -3,8 +3,11 @@ import 'package:sooq_merchant/core/navigation/auth_redirect.dart';
 
 void main() {
   group('AuthRedirect', () {
-    test('initialLocation is home when token exists', () {
-      expect(AuthRedirect.initialLocation(token: 'access-token'), '/home');
+    test('initialLocation is splash when token exists', () {
+      expect(
+        AuthRedirect.initialLocation(token: 'access-token'),
+        AuthRedirect.splashRoute,
+      );
     });
 
     test('initialLocation is splash when logged out', () {
@@ -70,7 +73,10 @@ void main() {
 
       test('logged-in user on settings stays', () {
         expect(
-          AuthRedirect.resolve(token: 'access-token', matchedLocation: '/settings'),
+          AuthRedirect.resolve(
+            token: 'access-token',
+            matchedLocation: '/settings',
+          ),
           isNull,
         );
       });
@@ -82,10 +88,33 @@ void main() {
         );
       });
 
-      test('logged-in user on splash redirects to home', () {
+      test('logged-in user on splash stays', () {
         expect(
-          AuthRedirect.resolve(token: 'access-token', matchedLocation: '/splash'),
+          AuthRedirect.resolve(
+            token: 'access-token',
+            matchedLocation: AuthRedirect.splashRoute,
+          ),
+          isNull,
+        );
+      });
+
+      test('logged-in user on splash-carousel redirects to home', () {
+        expect(
+          AuthRedirect.resolve(
+            token: 'access-token',
+            matchedLocation: AuthRedirect.splashCarouselRoute,
+          ),
           AuthRedirect.homeRoute,
+        );
+      });
+
+      test('logged-out user on splash-carousel stays', () {
+        expect(
+          AuthRedirect.resolve(
+            token: null,
+            matchedLocation: AuthRedirect.splashCarouselRoute,
+          ),
+          isNull,
         );
       });
     });

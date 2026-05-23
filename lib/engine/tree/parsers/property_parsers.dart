@@ -125,13 +125,16 @@ class PropertyParsers {
       case 'w200':
         return FontWeight.w200;
       case 'w300':
+      case 'light':
         return FontWeight.w300;
       case 'w400':
       case 'normal':
         return FontWeight.normal;
       case 'w500':
+      case 'medium':
         return FontWeight.w500;
       case 'w600':
+      case 'semibold':
         return FontWeight.w600;
       case 'w700':
       case 'bold':
@@ -356,6 +359,14 @@ class PropertyParsers {
         return Icons.shopping_bag;
       case 'chevron_right':
         return Icons.chevron_right;
+      case 'chevron_left':
+        return Icons.chevron_left;
+      case 'receipt_long':
+        return Icons.receipt_long;
+      case 'notifications':
+        return Icons.notifications;
+      case 'help_outline':
+        return Icons.help_outline;
       case 'credit_card':
         return Icons.credit_card;
       case 'payments':

@@ -63,6 +63,23 @@ void main() {
       );
     });
 
+    test('loading beats stale empty category-products payload', () {
+      expect(
+        resolveRequestBoundListPhase(
+          requestKey: 'category-products',
+          dataContext: {
+            'loadingRequestKeys': {'category-products': true},
+            'initialRequestKeys': {'category-products': true},
+            'requests': {
+              'category-products': {'success': true, 'data': []},
+            },
+          },
+          itemsEmpty: true,
+        ),
+        RequestBoundListPhase.loading,
+      );
+    });
+
     test('loading when requests entry missing and key is initial page request', () {
       expect(
         resolveRequestBoundListPhase(

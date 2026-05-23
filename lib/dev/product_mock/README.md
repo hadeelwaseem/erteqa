@@ -18,5 +18,8 @@ A helper script `scripts/remove_product_mock.ps1` will be provided to remove `li
 Notes
 
 - This mock mirrors the production `ProductRepo` contract and returns `Either<Failure, T>` like real repos.
+- **No SOOQ HTTP** — lists/search/detail come from memory, not `sooq.up.railway.app`.
+- **Images** — bundled under `assets/mock/` (e.g. `assets/mock/product-01.png`), copied into the APK. They are not loaded from `/uploads/...` on the backend while it is down.
+- To use your own demo photos, replace files in `assets/mock/` and run `flutter pub get` (paths are listed in `mock_product_data.dart`).
 - Tenant ID parameter is accepted but ignored in Phase 0.
 - Pagination and search implement simple, deterministic in-memory behavior for UI testing.

@@ -63,6 +63,43 @@ void main() {
     expect(column.mainAxisSize, MainAxisSize.max);
   });
 
+  testWidgets('crossAxis stretch makes children full width', (tester) async {
+    final renderer = ColumnRenderer();
+    final config = ComponentConfig(
+      type: GenericComponentType.column,
+      properties: const {'crossAxisAlignment': 'stretch'},
+      children: [
+        ComponentConfig(
+          type: GenericComponentType.text,
+          properties: {'value': 'full width line'},
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 280,
+            child: renderer.render(
+              config,
+              buildChild: (child) => TextRenderer().render(
+                child,
+                buildChild: (_) => const SizedBox.shrink(),
+                dataContext: rendererDataContext(),
+              ),
+              dataContext: rendererDataContext(),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final column = tester.widget<Column>(find.byType(Column));
+    expect(column.crossAxisAlignment, CrossAxisAlignment.stretch);
+    expect(tester.getSize(find.text('full width line')).width, 280);
+  });
+
   testWidgets('honors textDirection rtl when set', (tester) async {
     final column = await pumpColumn(
       tester,

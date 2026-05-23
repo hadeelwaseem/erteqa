@@ -29,7 +29,7 @@ class GridViewRenderer implements ComponentRenderer {
         phase == RequestBoundListPhase.empty) {
       final requestMap = requestKey == null
           ? null
-          : _requestMap(dataContext, requestKey);
+          : requestMapForKey(dataContext, requestKey);
       final message = switch (phase) {
         RequestBoundListPhase.error => resolveDisplayMessage(
           prop: props['errorMessage'] as String?,
@@ -85,7 +85,13 @@ class GridViewRenderer implements ComponentRenderer {
     );
 
     if (itemTemplate != null) {
-      if (items.isEmpty) return _emptyState(props);
+      if (items.isEmpty) {
+        return _phasePlaceholderForEmptyItems(
+          requestKey: requestKey,
+          dataContext: dataContext,
+          props: props,
+        );
+      }
       return GridView.builder(
         scrollDirection: scrollDirection,
         gridDelegate: delegate,
@@ -122,18 +128,6 @@ class GridViewRenderer implements ComponentRenderer {
         return buildChild(scoped);
       },
     );
-  }
-
-  Map<String, dynamic>? _requestMap(
-    Map<String, dynamic>? dataContext,
-    String requestKey,
-  ) {
-    final requests = dataContext?['requests'];
-    if (requests is! Map) return null;
-    final entry = requests[requestKey];
-    if (entry is Map<String, dynamic>) return entry;
-    if (entry is Map) return Map<String, dynamic>.from(entry);
-    return null;
   }
 
   Axis _parseAxis(String? axis) {
@@ -238,6 +232,39 @@ class GridViewRenderer implements ComponentRenderer {
       crossAxisSpacing: template.crossAxisSpacing,
       dataContextOverride: merged,
     );
+  }
+
+  Widget _phasePlaceholderForEmptyItems({
+    required String? requestKey,
+    required Map<String, dynamic>? dataContext,
+    required Map<String, dynamic>? props,
+  }) {
+    if (requestKey != null) {
+      final phase = resolveRequestBoundListPhase(
+        requestKey: requestKey,
+        dataContext: dataContext,
+        itemsEmpty: true,
+      );
+      if (phase != RequestBoundListPhase.ready &&
+          phase != RequestBoundListPhase.none) {
+        final requestMap = requestMapForKey(dataContext, requestKey);
+        final message = switch (phase) {
+          RequestBoundListPhase.error => resolveDisplayMessage(
+            prop: props?['errorMessage'] as String?,
+            requestMap: requestMap,
+            fallback: kDefaultErrorMessage,
+          ),
+          RequestBoundListPhase.empty => resolveDisplayMessage(
+            prop: props?['emptyMessage'] as String?,
+            requestMap: requestMap,
+            fallback: kDefaultEmptyMessage,
+          ),
+          _ => '',
+        };
+        return buildRequestPhasePlaceholder(phase: phase, message: message);
+      }
+    }
+    return _emptyState(props ?? const {});
   }
 
   Widget _emptyState(Map<String, dynamic> props) {

@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../config/component_config.dart';
+import '../../../core/enums/generic_component_type.dart';
 import '../../../core/utils/app_logger.dart';
 
 import '../../component_renderer/component_renderer.dart';
@@ -28,8 +29,17 @@ class RowRenderer implements ComponentRenderer {
     );
     final children = config.children ?? [];
     final gap = PropertyParsers.parseDouble(config.properties['gap']) ?? 0;
+    final wantsFlex = children.any(_isExpandContainer);
     final childWidgets = _withGap(
-      children.map((c) => buildChild(c)).toList(),
+      children
+          .map(
+            (c) => _wrapRowChild(
+              buildChild(c),
+              config: c,
+              useExpanded: wantsFlex,
+            ),
+          )
+          .toList(),
       gap,
     );
 
@@ -63,6 +73,22 @@ class RowRenderer implements ComponentRenderer {
         );
       },
     );
+  }
+
+  static bool _isExpandContainer(ComponentConfig config) {
+    return config.type == GenericComponentType.container &&
+        config.properties['expand'] == true;
+  }
+
+  static Widget _wrapRowChild(
+    Widget child, {
+    required ComponentConfig config,
+    required bool useExpanded,
+  }) {
+    if (useExpanded && _isExpandContainer(config)) {
+      return Expanded(child: child);
+    }
+    return child;
   }
 
   List<Widget> _withGap(List<Widget> children, double gap) {

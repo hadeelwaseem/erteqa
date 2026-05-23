@@ -6,10 +6,12 @@ class AuthRedirect {
 
   static const String homeRoute = '/home';
   static const String loginRoute = '/auth/login';
+  static const String splashRoute = '/splash';
+  static const String splashCarouselRoute = '/splash-carousel';
 
   static const Set<String> authRoutes = {'/auth/login', '/auth/otp-reset'};
 
-  static const Set<String> guestIntroRoutes = {'/splash', '/splash-carousel'};
+  static const Set<String> guestIntroRoutes = {splashRoute, splashCarouselRoute};
 
   static const Set<String> publicGuestRoutes = {
     ...authRoutes,
@@ -51,10 +53,8 @@ class AuthRedirect {
     required String? token,
     MobileAppConfig? mobileConfig,
   }) {
-    if (isLoggedIn(token)) {
-      return homeRoute;
-    }
-    return mobileConfig?.navigation.initialRoute ?? '/splash';
+    // Intro splash always runs on cold start (logged in or out).
+    return mobileConfig?.navigation.initialRoute ?? splashRoute;
   }
 
   /// Returns a redirect path, or null to stay on the current route.
@@ -66,8 +66,11 @@ class AuthRedirect {
     final loggedIn = isLoggedIn(token);
 
     if (loggedIn) {
-      if (authRoutes.contains(location) ||
-          guestIntroRoutes.contains(location)) {
+      if (authRoutes.contains(location)) {
+        return homeRoute;
+      }
+      // Onboarding carousel is guest-only; intro splash may still be shown.
+      if (location == splashCarouselRoute) {
         return homeRoute;
       }
       return null;

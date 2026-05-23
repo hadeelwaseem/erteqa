@@ -56,7 +56,9 @@ class _VariantScreenState extends State<VariantScreen> {
   late final FormStateStore _formStateStore;
   late final Map<String, dynamic> _dataContext;
   final Map<String, dynamic> _requestResults = <String, dynamic>{};
+  final Set<String> _loadingRequestKeys = <String>{};
   final Set<String> _loadingMoreRequestKeys = <String>{};
+  String? _primedPageSignature;
 
   static const _authRoutes = {'/auth/login', '/auth/otp-reset'};
 
@@ -132,7 +134,14 @@ class _VariantScreenState extends State<VariantScreen> {
       routeParams: widget.routeParams,
       queryParams: widget.queryParams,
     );
-    final renderContext = _buildRenderContext();
+    final pageRequestKeys = mappedRequests
+        .where((request) => request.qField == null)
+        .map((request) => request.key)
+        .toSet();
+    _ensurePageRequestsPrimed(pageRequestKeys);
+    final renderContext = _buildRenderContext(
+      mappedRequests: mappedRequests,
+    );
 
     Widget content;
     if (mappedRequests.isEmpty) {
@@ -171,8 +180,12 @@ class _VariantScreenState extends State<VariantScreen> {
           routeParams: widget.routeParams,
           queryParams: widget.queryParams,
           mappedRequests: mappedRequests,
+          pageRequestKeys: pageRequestKeys,
           renderContext: renderContext,
           formStateStore: _formStateStore,
+          onPreparePageRequests: () =>
+              _ensurePageRequestsPrimed(pageRequestKeys),
+          onRequestLoadingChanged: _setRequestLoading,
           onProductSuccess: _handleProductSuccess,
           onProductFailure: _handleProductFailure,
           onSearchSuccess: _handleSearchSuccess,
@@ -208,6 +221,36 @@ class _VariantScreenState extends State<VariantScreen> {
     return content;
   }
 
+  String _pageSignature() =>
+      '${widget.pageRoute ?? ''}|${widget.routeParams.entries.map((e) => '${e.key}=${e.value}').join('|')}';
+
+  void _ensurePageRequestsPrimed(Set<String> requestKeys) {
+    if (requestKeys.isEmpty) {
+      return;
+    }
+    final signature = _pageSignature();
+    if (_primedPageSignature == signature) {
+      return;
+    }
+    _primedPageSignature = signature;
+    for (final key in requestKeys) {
+      _requestResults.remove(key);
+    }
+    _loadingRequestKeys
+      ..clear()
+      ..addAll(requestKeys);
+  }
+
+  void _setRequestLoading(String requestKey, bool isLoading) {
+    setState(() {
+      if (isLoading) {
+        _loadingRequestKeys.add(requestKey);
+      } else {
+        _loadingRequestKeys.remove(requestKey);
+      }
+    });
+  }
+
   void _handleProductSuccess(
     String requestKey,
     dynamic productListResponse,
@@ -229,6 +272,9 @@ class _VariantScreenState extends State<VariantScreen> {
         'meta': productListResponse.meta.toJson(),
         'timestamp': productListResponse.timestamp,
       };
+      if (!isLoadMore) {
+        _loadingRequestKeys.remove(requestKey);
+      }
       _loadingMoreRequestKeys.remove(requestKey);
     });
   }
@@ -247,9 +293,10 @@ class _VariantScreenState extends State<VariantScreen> {
         'success': true,
         'data': searchResult.toJson(),
       };
-      if (isLoadMore) {
-        _loadingMoreRequestKeys.remove(requestKey);
+      if (!isLoadMore) {
+        _loadingRequestKeys.remove(requestKey);
       }
+      _loadingMoreRequestKeys.remove(requestKey);
     });
   }
 
@@ -264,6 +311,9 @@ class _VariantScreenState extends State<VariantScreen> {
 
     setState(() {
       _loadingMoreRequestKeys.remove(requestKey);
+      if (!isLoadMore) {
+        _loadingRequestKeys.remove(requestKey);
+      }
       if (isLoadMore && _requestResults[requestKey] is Map<String, dynamic>) {
         _requestResults[requestKey] = {
           ..._requestResults[requestKey] as Map<String, dynamic>,
@@ -292,6 +342,7 @@ class _VariantScreenState extends State<VariantScreen> {
         'success': true,
         'data': autocompleteResult.toJson(),
       };
+      _loadingRequestKeys.remove(requestKey);
     });
   }
 
@@ -306,6 +357,7 @@ class _VariantScreenState extends State<VariantScreen> {
         'message': message,
         'data': const <String, dynamic>{},
       };
+      _loadingRequestKeys.remove(requestKey);
     });
   }
 
@@ -319,6 +371,7 @@ class _VariantScreenState extends State<VariantScreen> {
         'success': true,
         'data': detail.toJson(),
       };
+      _loadingRequestKeys.remove(requestKey);
     });
   }
 
@@ -333,6 +386,7 @@ class _VariantScreenState extends State<VariantScreen> {
         'message': message,
         'data': const <String, dynamic>{},
       };
+      _loadingRequestKeys.remove(requestKey);
     });
   }
 
@@ -349,6 +403,7 @@ class _VariantScreenState extends State<VariantScreen> {
         'success': true,
         'data': categories.map((item) => item.toJson()).toList(),
       };
+      _loadingRequestKeys.remove(requestKey);
     });
   }
 
@@ -362,6 +417,7 @@ class _VariantScreenState extends State<VariantScreen> {
         'success': true,
         'data': category.toJson(),
       };
+      _loadingRequestKeys.remove(requestKey);
     });
   }
 
@@ -376,6 +432,7 @@ class _VariantScreenState extends State<VariantScreen> {
         'message': message,
         'data': const <String, dynamic>{},
       };
+      _loadingRequestKeys.remove(requestKey);
     });
   }
 
@@ -390,6 +447,9 @@ class _VariantScreenState extends State<VariantScreen> {
 
     setState(() {
       _loadingMoreRequestKeys.remove(requestKey);
+      if (!isLoadMore) {
+        _loadingRequestKeys.remove(requestKey);
+      }
       if (isLoadMore && _requestResults[requestKey] is Map<String, dynamic>) {
         _requestResults[requestKey] = {
           ..._requestResults[requestKey] as Map<String, dynamic>,
@@ -417,7 +477,9 @@ class _VariantScreenState extends State<VariantScreen> {
   /// - `loadingRequestKeys` — `Map<String, bool>` initial load per key
   /// - `initialRequestKeys` — keys auto-dispatched on page load (no `qField`)
   /// - `loadingMoreRequests` — load-more in progress (scaffold footer)
-  Map<String, dynamic> _buildRenderContext() {
+  Map<String, dynamic> _buildRenderContext({
+    List<EngineMappedRequest> mappedRequests = const [],
+  }) {
     final merged = <String, dynamic>{..._dataContext};
     if (widget.routeParams.isNotEmpty) {
       merged['routeParams'] = Map<String, String>.from(widget.routeParams);
@@ -435,17 +497,25 @@ class _VariantScreenState extends State<VariantScreen> {
       };
       merged[EngineTheme.contextKey] = EngineTheme.fromConfig(config.theme);
     }
-    merged['loadingRequestKeys'] = const <String, bool>{};
+    merged['loadingRequestKeys'] = {
+      for (final key in _loadingRequestKeys) key: true,
+    };
+    merged['initialRequestKeys'] = {
+      for (final request in mappedRequests)
+        if (request.qField == null) request.key: true,
+    };
     if (_requestResults.isNotEmpty) {
       merged['requests'] = _requestResults;
+    }
+    if (_loadingMoreRequestKeys.isNotEmpty) {
       merged['loadingMoreRequests'] = {
         for (final key in _loadingMoreRequestKeys) key: true,
       };
+    }
 
-      final productResult = _requestResults['product-list'];
-      if (productResult is Map<String, dynamic>) {
-        merged['products'] = productResult['data'] ?? const <dynamic>[];
-      }
+    final productResult = _requestResults['product-list'];
+    if (productResult is Map<String, dynamic>) {
+      merged['products'] = productResult['data'] ?? const <dynamic>[];
     }
     return merged;
   }
@@ -466,7 +536,7 @@ class _AuthRequestHost extends StatelessWidget {
     // create a Material Scaffold; we need one here for the loading overlay.
     // User messages use root [AppMessenger], not SnackBar.
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: const Color(0xFFF1F5F9),
       body: BlocListener<AuthCubit, AuthState>(
         listenWhen: (previous, current) =>
             current is AuthFailureState ||
@@ -539,8 +609,11 @@ class _ProductRequestHost extends StatefulWidget {
     this.routeParams = const {},
     this.queryParams = const {},
     required this.mappedRequests,
+    required this.pageRequestKeys,
     required this.renderContext,
     required this.formStateStore,
+    required this.onPreparePageRequests,
+    required this.onRequestLoadingChanged,
     required this.onProductSuccess,
     required this.onProductFailure,
     required this.onSearchSuccess,
@@ -559,8 +632,11 @@ class _ProductRequestHost extends StatefulWidget {
   final Map<String, String> routeParams;
   final Map<String, String> queryParams;
   final List<EngineMappedRequest> mappedRequests;
+  final Set<String> pageRequestKeys;
   final Map<String, dynamic> renderContext;
   final FormStateStore formStateStore;
+  final VoidCallback onPreparePageRequests;
+  final void Function(String requestKey, bool isLoading) onRequestLoadingChanged;
   final void Function(
     String requestKey,
     dynamic productListResponse,
@@ -599,32 +675,92 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
   static const double _prefetchExtentAfter = 240.0;
 
   final Set<String> _dispatchedRequestKeys = <String>{};
-  final Set<String> _loadingRequestKeys = <String>{};
   final Set<String> _loadingMoreRequestKeys = <String>{};
   final Set<String> _pendingLoadMoreKeys = <String>{};
+  final Set<String> _keysSeenLoadingThisSession = <String>{};
   final Map<String, VoidCallback> _queryListenerRemovers = {};
   bool _dispatchScheduled = false;
   bool _isDispatching = false;
   late String _routeSignature;
   Timer? _queryDebounce;
 
-  void _syncLoadingFlagsToContext() {
-    widget.renderContext['loadingRequestKeys'] = {
-      for (final key in _loadingRequestKeys) key: true,
-    };
+  void _syncLoadingMoreToContext() {
     widget.renderContext['loadingMoreRequests'] = {
       for (final key in _loadingMoreRequestKeys) key: true,
     };
+  }
+
+  void _setRequestLoading(String requestKey, bool isLoading) {
+    widget.onRequestLoadingChanged(requestKey, isLoading);
+  }
+
+  bool _isPageRequestKey(String? requestKey) {
+    return requestKey != null && widget.pageRequestKeys.contains(requestKey);
+  }
+
+  bool _shouldHandleTerminalProductState(String requestKey) {
+    return _dispatchedRequestKeys.contains(requestKey) &&
+        _keysSeenLoadingThisSession.contains(requestKey);
+  }
+
+  static String? _requestKeyFromProductState(ProductState state) {
+    return switch (state) {
+      ProductLoading(:final requestKey) => requestKey,
+      ProductSuccess(:final requestKey) => requestKey,
+      ProductFailure(:final requestKey) => requestKey,
+      _ => null,
+    };
+  }
+
+  static String? _requestKeyFromSearchState(ProductSearchState state) {
+    return switch (state) {
+      ProductSearchLoading(:final requestKey) => requestKey,
+      ProductSearchSuccess(:final requestKey) => requestKey,
+      ProductSearchFailure(:final requestKey) => requestKey,
+      _ => null,
+    };
+  }
+
+  static String? _requestKeyFromAutocompleteState(
+    ProductAutocompleteState state,
+  ) {
+    return switch (state) {
+      ProductAutocompleteLoading(:final requestKey) => requestKey,
+      ProductAutocompleteSuccess(:final requestKey) => requestKey,
+      ProductAutocompleteFailure(:final requestKey) => requestKey,
+      _ => null,
+    };
+  }
+
+  static String? _requestKeyFromDetailState(ProductDetailState state) {
+    return switch (state) {
+      ProductDetailLoading(:final requestKey) => requestKey,
+      ProductDetailSuccess(:final requestKey) => requestKey,
+      ProductDetailFailure(:final requestKey) => requestKey,
+      _ => null,
+    };
+  }
+
+  static String? _requestKeyFromCategoryState(CategoryState state) {
+    return switch (state) {
+      CategoryLoading(:final requestKey) => requestKey,
+      CategoryTreeSuccess(:final requestKey) => requestKey,
+      CategorySuccess(:final requestKey) => requestKey,
+      CategoryFailure(:final requestKey) => requestKey,
+      _ => null,
+    };
+  }
+
+  bool _shouldHandleTerminalCategoryState(String requestKey) {
+    return _dispatchedRequestKeys.contains(requestKey) &&
+        _keysSeenLoadingThisSession.contains(requestKey);
   }
 
   @override
   void initState() {
     super.initState();
     _routeSignature = _buildRouteSignature(widget.routeParams);
-    widget.renderContext['initialRequestKeys'] = {
-      for (final request in widget.mappedRequests)
-        if (request.qField == null) request.key: true,
-    };
+    _keysSeenLoadingThisSession.clear();
     _bindFormQueryListeners();
     _scheduleDispatch();
     _scheduleLoadMoreCheck();
@@ -686,11 +822,9 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
 
     if (oldWidget.config != widget.config || routeParamsChanged) {
       _dispatchedRequestKeys.clear();
+      _keysSeenLoadingThisSession.clear();
       _dispatchScheduled = false;
-      widget.renderContext['initialRequestKeys'] = {
-        for (final request in widget.mappedRequests)
-          if (request.qField == null) request.key: true,
-      };
+      widget.onPreparePageRequests();
       _scheduleDispatch();
       _scheduleLoadMoreCheck();
     }
@@ -900,22 +1034,31 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
     if (EngineRequestMapper.needsProductCubit(widget.mappedRequests)) {
       listeners.add(
         BlocListener<ProductCubit, ProductState>(
+          listenWhen: (previous, current) =>
+              _isPageRequestKey(_requestKeyFromProductState(current)),
           listener: (context, state) {
             if (state is ProductLoading) {
-              setState(() {
-                if (state.isLoadMore) {
+              _keysSeenLoadingThisSession.add(state.requestKey);
+              if (state.isLoadMore) {
+                setState(() {
                   _loadingMoreRequestKeys.add(state.requestKey);
-                } else {
-                  _loadingRequestKeys.add(state.requestKey);
-                }
-                _syncLoadingFlagsToContext();
-              });
+                  _syncLoadingMoreToContext();
+                });
+              } else {
+                _setRequestLoading(state.requestKey, true);
+              }
             } else if (state is ProductSuccess) {
-              setState(() {
-                _loadingRequestKeys.remove(state.requestKey);
-                _loadingMoreRequestKeys.remove(state.requestKey);
-                _syncLoadingFlagsToContext();
-              });
+              if (!_shouldHandleTerminalProductState(state.requestKey)) {
+                return;
+              }
+              if (state.isLoadMore) {
+                setState(() {
+                  _loadingMoreRequestKeys.remove(state.requestKey);
+                  _syncLoadingMoreToContext();
+                });
+              } else {
+                _setRequestLoading(state.requestKey, false);
+              }
               widget.onProductSuccess(
                 state.requestKey,
                 state.productListResponse,
@@ -923,11 +1066,17 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
               );
               _scheduleLoadMoreCheck();
             } else if (state is ProductFailure) {
-              setState(() {
-                _loadingRequestKeys.remove(state.requestKey);
-                _loadingMoreRequestKeys.remove(state.requestKey);
-                _syncLoadingFlagsToContext();
-              });
+              if (!_shouldHandleTerminalProductState(state.requestKey)) {
+                return;
+              }
+              if (state.isLoadMore) {
+                setState(() {
+                  _loadingMoreRequestKeys.remove(state.requestKey);
+                  _syncLoadingMoreToContext();
+                });
+              } else {
+                _setRequestLoading(state.requestKey, false);
+              }
               widget.onProductFailure(
                 state.requestKey,
                 state.errMessage,
@@ -942,33 +1091,48 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
     if (EngineRequestMapper.needsSearchCubit(widget.mappedRequests)) {
       listeners.add(
         BlocListener<ProductSearchCubit, ProductSearchState>(
+          listenWhen: (previous, current) =>
+              _isPageRequestKey(_requestKeyFromSearchState(current)),
           listener: (context, state) {
             if (state is ProductSearchLoading) {
-              setState(() {
-                if (state.isLoadMore) {
+              _keysSeenLoadingThisSession.add(state.requestKey);
+              if (state.isLoadMore) {
+                setState(() {
                   _loadingMoreRequestKeys.add(state.requestKey);
-                } else {
-                  _loadingRequestKeys.add(state.requestKey);
-                }
-                _syncLoadingFlagsToContext();
-              });
+                  _syncLoadingMoreToContext();
+                });
+              } else {
+                _setRequestLoading(state.requestKey, true);
+              }
             } else if (state is ProductSearchSuccess) {
-              setState(() {
-                _loadingRequestKeys.remove(state.requestKey);
-                _loadingMoreRequestKeys.remove(state.requestKey);
-                _syncLoadingFlagsToContext();
-              });
+              if (!_shouldHandleTerminalProductState(state.requestKey)) {
+                return;
+              }
+              if (state.isLoadMore) {
+                setState(() {
+                  _loadingMoreRequestKeys.remove(state.requestKey);
+                  _syncLoadingMoreToContext();
+                });
+              } else {
+                _setRequestLoading(state.requestKey, false);
+              }
               widget.onSearchSuccess(
                 state.requestKey,
                 state.searchResult,
                 state.isLoadMore,
               );
             } else if (state is ProductSearchFailure) {
-              setState(() {
-                _loadingRequestKeys.remove(state.requestKey);
-                _loadingMoreRequestKeys.remove(state.requestKey);
-                _syncLoadingFlagsToContext();
-              });
+              if (!_shouldHandleTerminalProductState(state.requestKey)) {
+                return;
+              }
+              if (state.isLoadMore) {
+                setState(() {
+                  _loadingMoreRequestKeys.remove(state.requestKey);
+                  _syncLoadingMoreToContext();
+                });
+              } else {
+                _setRequestLoading(state.requestKey, false);
+              }
               widget.onSearchFailure(
                 state.requestKey,
                 state.errMessage,
@@ -983,26 +1147,27 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
     if (EngineRequestMapper.needsAutocompleteCubit(widget.mappedRequests)) {
       listeners.add(
         BlocListener<ProductAutocompleteCubit, ProductAutocompleteState>(
+          listenWhen: (previous, current) => _isPageRequestKey(
+            _requestKeyFromAutocompleteState(current),
+          ),
           listener: (context, state) {
             if (state is ProductAutocompleteLoading) {
-              setState(() {
-                _loadingRequestKeys.add(state.requestKey);
-                _syncLoadingFlagsToContext();
-              });
+              _keysSeenLoadingThisSession.add(state.requestKey);
+              _setRequestLoading(state.requestKey, true);
             } else if (state is ProductAutocompleteSuccess) {
-              setState(() {
-                _loadingRequestKeys.remove(state.requestKey);
-                _syncLoadingFlagsToContext();
-              });
+              if (!_shouldHandleTerminalProductState(state.requestKey)) {
+                return;
+              }
+              _setRequestLoading(state.requestKey, false);
               widget.onAutocompleteSuccess(
                 state.requestKey,
                 state.autocompleteResult,
               );
             } else if (state is ProductAutocompleteFailure) {
-              setState(() {
-                _loadingRequestKeys.remove(state.requestKey);
-                _syncLoadingFlagsToContext();
-              });
+              if (!_shouldHandleTerminalProductState(state.requestKey)) {
+                return;
+              }
+              _setRequestLoading(state.requestKey, false);
               widget.onAutocompleteFailure(
                 state.requestKey,
                 state.errMessage,
@@ -1016,26 +1181,26 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
     if (EngineRequestMapper.needsProductDetailCubit(widget.mappedRequests)) {
       listeners.add(
         BlocListener<ProductDetailCubit, ProductDetailState>(
+          listenWhen: (previous, current) =>
+              _isPageRequestKey(_requestKeyFromDetailState(current)),
           listener: (context, state) {
             if (state is ProductDetailLoading) {
-              setState(() {
-                _loadingRequestKeys.add(state.requestKey);
-                _syncLoadingFlagsToContext();
-              });
+              _keysSeenLoadingThisSession.add(state.requestKey);
+              _setRequestLoading(state.requestKey, true);
             } else if (state is ProductDetailSuccess) {
-              setState(() {
-                _loadingRequestKeys.remove(state.requestKey);
-                _syncLoadingFlagsToContext();
-              });
+              if (!_shouldHandleTerminalProductState(state.requestKey)) {
+                return;
+              }
+              _setRequestLoading(state.requestKey, false);
               widget.onProductDetailSuccess(
                 state.requestKey,
                 state.detail,
               );
             } else if (state is ProductDetailFailure) {
-              setState(() {
-                _loadingRequestKeys.remove(state.requestKey);
-                _syncLoadingFlagsToContext();
-              });
+              if (!_shouldHandleTerminalProductState(state.requestKey)) {
+                return;
+              }
+              _setRequestLoading(state.requestKey, false);
               widget.onProductDetailFailure(
                 state.requestKey,
                 state.errMessage,
@@ -1049,35 +1214,35 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
     if (EngineRequestMapper.needsCategoryCubit(widget.mappedRequests)) {
       listeners.add(
         BlocListener<CategoryCubit, CategoryState>(
+          listenWhen: (previous, current) =>
+              _isPageRequestKey(_requestKeyFromCategoryState(current)),
           listener: (context, state) {
             if (state is CategoryLoading) {
-              setState(() {
-                _loadingRequestKeys.add(state.requestKey);
-                _syncLoadingFlagsToContext();
-              });
+              _keysSeenLoadingThisSession.add(state.requestKey);
+              _setRequestLoading(state.requestKey, true);
             } else if (state is CategoryTreeSuccess) {
-              setState(() {
-                _loadingRequestKeys.remove(state.requestKey);
-                _syncLoadingFlagsToContext();
-              });
+              if (!_shouldHandleTerminalCategoryState(state.requestKey)) {
+                return;
+              }
+              _setRequestLoading(state.requestKey, false);
               widget.onCategoryTreeSuccess(
                 state.requestKey,
                 state.categories,
               );
             } else if (state is CategorySuccess) {
-              setState(() {
-                _loadingRequestKeys.remove(state.requestKey);
-                _syncLoadingFlagsToContext();
-              });
+              if (!_shouldHandleTerminalCategoryState(state.requestKey)) {
+                return;
+              }
+              _setRequestLoading(state.requestKey, false);
               widget.onCategorySuccess(
                 state.requestKey,
                 state.category,
               );
             } else if (state is CategoryFailure) {
-              setState(() {
-                _loadingRequestKeys.remove(state.requestKey);
-                _syncLoadingFlagsToContext();
-              });
+              if (!_shouldHandleTerminalCategoryState(state.requestKey)) {
+                return;
+              }
+              _setRequestLoading(state.requestKey, false);
               widget.onCategoryFailure(
                 state.requestKey,
                 state.errMessage,

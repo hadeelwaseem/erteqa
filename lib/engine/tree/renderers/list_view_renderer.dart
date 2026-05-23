@@ -4,6 +4,7 @@ import '../../../config/component_config.dart';
 import '../../component_renderer/component_renderer.dart';
 import '../../request_ui_state.dart';
 import '../parsers/data_context_path.dart';
+import '../parsers/property_parsers.dart';
 
 class ListViewRenderer implements ComponentRenderer {
   @override
@@ -21,12 +22,19 @@ class ListViewRenderer implements ComponentRenderer {
       itemsEmpty: items.isEmpty,
     );
 
+    final scrollDirection = _parseAxis(
+      config.scrollDirection ?? config.properties['scrollDirection'] as String?,
+    );
+    final isHorizontal = scrollDirection == Axis.horizontal;
+    final boundedHeight = PropertyParsers.parseDouble(props['height']) ??
+        (isHorizontal ? 72.0 : null);
+
     if (phase == RequestBoundListPhase.loading ||
         phase == RequestBoundListPhase.error ||
         phase == RequestBoundListPhase.empty) {
       final requestMap = requestKey == null
           ? null
-          : _requestMap(dataContext, requestKey);
+          : requestMapForKey(dataContext, requestKey);
       final message = switch (phase) {
         RequestBoundListPhase.error => resolveDisplayMessage(
           prop: props['errorMessage'] as String?,
@@ -40,73 +48,66 @@ class ListViewRenderer implements ComponentRenderer {
         ),
         _ => '',
       };
-      return buildRequestPhasePlaceholder(phase: phase, message: message);
-    }
-
-    final scrollDirection = _parseAxis(
-      config.scrollDirection ?? config.properties['scrollDirection'] as String?,
-    );
-
-    final itemTemplate = config.itemBuilder?.item ?? config.child;
-    final children = config.children ?? const <ComponentConfig>[];
-    final enableInnerScroll = config.properties['enableInnerScroll'] == true;
-    final shrinkWrap = !enableInnerScroll;
-    final physics = enableInnerScroll
-        ? null
-        : const NeverScrollableScrollPhysics();
-
-    if (itemTemplate == null && children.isEmpty) {
-      return _emptyState(props);
-    }
-
-    if (itemTemplate != null) {
-      if (items.isEmpty) return _emptyState(props);
-      return ListView.builder(
-        scrollDirection: scrollDirection,
-        shrinkWrap: shrinkWrap,
-        physics: physics,
-        primary: enableInnerScroll ? null : false,
-        itemCount: items.length,
-        itemBuilder: (context, index) {
-          final scoped = _withItemContext(
-            itemTemplate,
-            dataContext,
-            items[index],
-            index,
-          );
-          return buildChild(scoped);
-        },
+      return buildRequestPhasePlaceholder(
+        phase: phase,
+        message: message,
+        compact: isHorizontal,
       );
     }
 
-    return ListView.builder(
-      scrollDirection: scrollDirection,
-      shrinkWrap: shrinkWrap,
-      physics: physics,
-      primary: enableInnerScroll ? null : false,
-      itemCount: children.length,
-      itemBuilder: (context, index) {
-        final scoped = _withItemContext(
-          children[index],
-          dataContext,
-          items.length > index ? items[index] : null,
-          index,
-        );
-        return buildChild(scoped);
-      },
-    );
-  }
+    final itemTemplate = config.itemBuilder?.item ?? config.child;
+    final children = config.children ?? const <ComponentConfig>[];
 
-  Map<String, dynamic>? _requestMap(
-    Map<String, dynamic>? dataContext,
-    String requestKey,
-  ) {
-    final requests = dataContext?['requests'];
-    if (requests is! Map) return null;
-    final entry = requests[requestKey];
-    if (entry is Map<String, dynamic>) return entry;
-    if (entry is Map) return Map<String, dynamic>.from(entry);
-    return null;
+    if (itemTemplate == null && children.isEmpty) {
+      return _emptyState(props, compact: isHorizontal);
+    }
+
+    if (itemTemplate != null && items.isEmpty) {
+      return _emptyState(props, compact: isHorizontal);
+    }
+
+    final listView = itemTemplate != null
+        ? ListView.builder(
+            scrollDirection: scrollDirection,
+            shrinkWrap: true,
+            physics: isHorizontal
+                ? const ClampingScrollPhysics()
+                : const NeverScrollableScrollPhysics(),
+            primary: false,
+            itemCount: items.length,
+            itemBuilder: (context, index) {
+              final scoped = _withItemContext(
+                itemTemplate,
+                dataContext,
+                items[index],
+                index,
+              );
+              return buildChild(scoped);
+            },
+          )
+        : ListView.builder(
+            scrollDirection: scrollDirection,
+            shrinkWrap: true,
+            physics: isHorizontal
+                ? const ClampingScrollPhysics()
+                : const NeverScrollableScrollPhysics(),
+            primary: false,
+            itemCount: children.length,
+            itemBuilder: (context, index) {
+              final scoped = _withItemContext(
+                children[index],
+                dataContext,
+                items.length > index ? items[index] : null,
+                index,
+              );
+              return buildChild(scoped);
+            },
+          );
+
+    if (isHorizontal && boundedHeight != null) {
+      return SizedBox(height: boundedHeight, child: listView);
+    }
+    return listView;
   }
 
   Axis _parseAxis(String? axis) {
@@ -200,14 +201,22 @@ class ListViewRenderer implements ComponentRenderer {
     );
   }
 
-  Widget _emptyState(Map<String, dynamic> props) {
+  Widget _emptyState(Map<String, dynamic> props, {required bool compact}) {
+    final prop = props['emptyMessage'] as String?;
+    if (prop == null || prop.trim().isEmpty) {
+      return const SizedBox.shrink();
+    }
     final message = resolveDisplayMessage(
-      prop: props['emptyMessage'] as String?,
+      prop: prop,
       requestMap: null,
       fallback: kDefaultEmptyMessage,
     );
-    return Center(
-      child: Text(message, textAlign: TextAlign.center),
+    if (compact) {
+      return const SizedBox.shrink();
+    }
+    return buildRequestPhasePlaceholder(
+      phase: RequestBoundListPhase.empty,
+      message: message,
     );
   }
 }

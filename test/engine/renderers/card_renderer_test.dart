@@ -37,6 +37,7 @@ void main() {
     );
 
     final card = tester.widget<Card>(find.byType(Card));
+    expect(card.clipBehavior, Clip.antiAlias);
     final shape = card.shape as RoundedRectangleBorder;
     expect(shape.borderRadius, BorderRadius.circular(10));
     expect(find.text('inside'), findsOneWidget);

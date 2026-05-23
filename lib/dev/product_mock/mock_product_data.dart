@@ -39,8 +39,10 @@ class MockProductData {
       titleAr: titleAr,
       titleEn: titleEn,
       status: 'ACTIVE',
-      primaryImageUrl: 'https://via.placeholder.com/600x400?text=$slug',
-      primaryThumbnailUrl: 'https://via.placeholder.com/200x150?text=$slug',
+      primaryImageUrl:
+          'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80',
+      primaryThumbnailUrl:
+          'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200&q=80',
       basePrice: basePrice,
       compareAtPrice: compareAt,
       currencyCode: 'AED',
@@ -63,7 +65,8 @@ class MockProductData {
       nameAr: 'تصنيف $n',
       nameEn: 'Category $n',
       slug: slug,
-      imageUrl: 'https://via.placeholder.com/400x200?text=$slug',
+      imageUrl:
+          'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&q=80',
       depth: 0,
       sortOrder: 0,
       isActive: true,
@@ -215,11 +218,9 @@ class MockProductData {
         'currency': found.currencyCode,
         'displayPrice': found.displayPrice,
       },
+      'inventory': {'stockStatus': 'IN_STOCK'},
       'images': [
-        {
-          'url': found.primaryImageUrl,
-          'thumbnailUrl': found.primaryThumbnailUrl,
-        },
+        {'publicUrl': found.primaryImageUrl, 'isPrimary': true},
       ],
       'variants': [],
       'categories': [

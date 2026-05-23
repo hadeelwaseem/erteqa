@@ -61,6 +61,39 @@ void main() {
   testWidgets('pageScroll none omits SingleChildScrollView', (tester) async {
     await pumpScaffold(tester, pageScroll: 'none');
     expect(find.byType(SingleChildScrollView), findsNothing);
+    expect(find.byType(Expanded), findsNothing);
+  });
+
+  testWidgets('pageScroll none with expand body uses Expanded', (tester) async {
+    final renderer = ScaffoldRenderer();
+    final config = ComponentConfig(
+      type: GenericComponentType.scaffold,
+      properties: {'pageScroll': 'none'},
+      child: ComponentConfig(
+        type: GenericComponentType.container,
+        properties: const {'expand': true},
+        child: ComponentConfig(
+          type: GenericComponentType.text,
+          properties: {'value': 'body'},
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: renderer.render(
+          config,
+          buildChild: (child) => TextRenderer().render(
+            child,
+            buildChild: (_) => const SizedBox.shrink(),
+            dataContext: rendererDataContext(),
+          ),
+          dataContext: rendererDataContext(),
+        ),
+      ),
+    );
+
+    expect(find.byType(SingleChildScrollView), findsNothing);
     expect(find.byType(Expanded), findsOneWidget);
   });
 

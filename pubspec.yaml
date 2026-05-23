@@ -49,6 +49,7 @@ dependencies:
   hive_flutter: ^1.1.0
   flutter_colorpicker: ^1.1.0
   video_player: ^2.9.5
+  cached_network_image: ^3.4.1
 
 dev_dependencies:
   flutter_test:
@@ -78,6 +79,7 @@ flutter:
     - assets/translations/
     - assets/config/
     - assets/icons/
+    - assets/mock/
 
   #   - images/a_dot_ham.jpeg
 
