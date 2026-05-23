@@ -13,6 +13,43 @@ import 'package:sooq_merchant/features/product/data/models/autocomplete_product_
 class MockProductData {
   MockProductData._();
 
+  /// Distinct HTTPS catalog images (placehold.co — reliable on real devices).
+  ///
+  /// Do not use picsum.photos here; many mobile networks get CDN "Global locked" / 403.
+  static const List<String> _kMockProductImageUrls = [
+    'https://placehold.co/600x600/png?text=Prod+01',
+    'https://placehold.co/600x600/png?text=Prod+02',
+    'https://placehold.co/600x600/png?text=Prod+03',
+    'https://placehold.co/600x600/png?text=Prod+04',
+    'https://placehold.co/600x600/png?text=Prod+05',
+    'https://placehold.co/600x600/png?text=Prod+06',
+    'https://placehold.co/600x600/png?text=Prod+07',
+    'https://placehold.co/600x600/png?text=Prod+08',
+    'https://placehold.co/600x600/png?text=Prod+09',
+    'https://placehold.co/600x600/png?text=Prod+10',
+    'https://placehold.co/600x600/png?text=Prod+11',
+    'https://placehold.co/600x600/png?text=Prod+12',
+    'https://placehold.co/600x600/png?text=Prod+13',
+    'https://placehold.co/600x600/png?text=Prod+14',
+    'https://placehold.co/600x600/png?text=Prod+15',
+  ];
+
+  static const List<String> _kMockCategoryImageUrls = [
+    'https://placehold.co/400x400/png?text=Cat+01',
+    'https://placehold.co/400x400/png?text=Cat+02',
+  ];
+
+  static String _productImageUrl(int n) =>
+      _kMockProductImageUrls[(n - 1) % _kMockProductImageUrls.length];
+
+  static String _productThumbnailUrl(int n) {
+    final label = n.toString().padLeft(2, '0');
+    return 'https://placehold.co/200x200/png?text=P$label';
+  }
+
+  static String _categoryImageUrl(int n) =>
+      _kMockCategoryImageUrls[(n - 1) % _kMockCategoryImageUrls.length];
+
   static final List<Product> _products = List.generate(
     ProductMockConfig.sampleProductCount,
     (i) => _sampleProduct(i + 1),
@@ -39,10 +76,8 @@ class MockProductData {
       titleAr: titleAr,
       titleEn: titleEn,
       status: 'ACTIVE',
-      primaryImageUrl:
-          'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80',
-      primaryThumbnailUrl:
-          'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200&q=80',
+      primaryImageUrl: _productImageUrl(n),
+      primaryThumbnailUrl: _productThumbnailUrl(n),
       basePrice: basePrice,
       compareAtPrice: compareAt,
       currencyCode: 'AED',
@@ -65,8 +100,7 @@ class MockProductData {
       nameAr: 'تصنيف $n',
       nameEn: 'Category $n',
       slug: slug,
-      imageUrl:
-          'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&q=80',
+      imageUrl: _categoryImageUrl(n),
       depth: 0,
       sortOrder: 0,
       isActive: true,

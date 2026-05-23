@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/network/network_config.dart';
-import '../../../core/utils/constants.dart';
-import '../../../core/utils/service_locator.dart';
 import '../../../config/component_config.dart';
+import '../../../core/network/remote_image_url.dart';
+import '../../../core/widgets/engine_network_image.dart';
 import '../../component_renderer/component_renderer.dart';
 import '../../theme/engine_theme.dart';
 import '../parsers/data_context_path.dart';
@@ -25,10 +24,10 @@ class ImageRenderer implements ComponentRenderer {
     );
     final urlPath = config.properties['urlPath'] as String?;
     final fallbackUrl = (config.properties['url'] as String? ?? '').trim();
-    final boundUrl = resolveDataContextPath(dataContext, urlPath);
-    final boundText = boundUrl?.toString().trim() ?? '';
+    final boundUrl = resolveBoundImageUrl(dataContext, urlPath);
+    final boundText = boundUrl?.trim() ?? '';
     final url = boundText.isNotEmpty ? boundText : fallbackUrl;
-    final resolvedUrl = _resolveNetworkUrl(url);
+    final resolvedUrl = resolveRemoteImageUrl(url);
     final width = PropertyParsers.parseDouble(config.properties['width']);
     final height = PropertyParsers.parseDouble(config.properties['height']);
     final fitString = PropertyParsers.parseImageFitString(
@@ -85,21 +84,6 @@ class ImageRenderer implements ComponentRenderer {
     return url;
   }
 
-  String _resolveNetworkUrl(String url) {
-    final value = url.trim();
-    if (value.startsWith('http://') || value.startsWith('https://')) {
-      return value;
-    }
-    if (value.startsWith('/')) {
-      // Follow-up: inject assetBaseUrl via dataContext instead of getIt.
-      final assetBase = getIt.isRegistered<NetworkConfig>()
-          ? getIt<NetworkConfig>().assetBaseUrl
-          : kBaseUrlAsset;
-      return '$assetBase$value';
-    }
-    return value;
-  }
-
   static BoxFit _stringToBoxFit(String fit) {
     switch (fit) {
       case 'fill':
@@ -130,8 +114,8 @@ class ImageRenderer implements ComponentRenderer {
       return _placeholderBox(width, height, theme: theme);
     }
 
-    final image = Image.network(
-      url,
+    final image = EngineNetworkImage(
+      url: url,
       width: width,
       height: height,
       fit: fit,

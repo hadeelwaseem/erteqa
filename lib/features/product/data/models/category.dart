@@ -1,7 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:get_it/get_it.dart';
-import 'package:sooq_merchant/core/network/network_config.dart';
-import 'package:sooq_merchant/core/utils/constants.dart';
+import 'package:sooq_merchant/core/network/remote_image_url.dart';
 
 class Category extends Equatable {
   final String? categoryId;
@@ -94,16 +92,8 @@ class Category extends Equatable {
   static String? _resolveBackendUrl(String? value) {
     final text = value?.trim();
     if (text == null || text.isEmpty) return null;
-    if (text.startsWith('http://') || text.startsWith('https://')) {
-      return text;
-    }
-    if (text.startsWith('/')) {
-      final assetBase = GetIt.I.isRegistered<NetworkConfig>()
-          ? GetIt.I<NetworkConfig>().assetBaseUrl
-          : kBaseUrlAsset;
-      return '$assetBase$text';
-    }
-    return text;
+    final resolved = resolveRemoteImageUrl(text);
+    return resolved.isEmpty ? null : resolved;
   }
 
   @override

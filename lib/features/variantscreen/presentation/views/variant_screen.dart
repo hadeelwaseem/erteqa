@@ -139,9 +139,7 @@ class _VariantScreenState extends State<VariantScreen> {
         .map((request) => request.key)
         .toSet();
     _ensurePageRequestsPrimed(pageRequestKeys);
-    final renderContext = _buildRenderContext(
-      mappedRequests: mappedRequests,
-    );
+    final renderContext = _buildRenderContext(mappedRequests: mappedRequests);
 
     Widget content;
     if (mappedRequests.isEmpty) {
@@ -167,9 +165,7 @@ class _VariantScreenState extends State<VariantScreen> {
             create: (_) => getIt<ProductDetailCubit>(),
           ),
         if (EngineRequestMapper.needsCategoryCubit(mappedRequests))
-          BlocProvider<CategoryCubit>(
-            create: (_) => getIt<CategoryCubit>(),
-          ),
+          BlocProvider<CategoryCubit>(create: (_) => getIt<CategoryCubit>()),
       ];
 
       content = MultiBlocProvider(
@@ -204,10 +200,7 @@ class _VariantScreenState extends State<VariantScreen> {
     if (_isAuthRoute) {
       return BlocProvider<AuthCubit>.value(
         value: getIt<AuthCubit>(),
-        child: _AuthRequestHost(
-          renderContext: renderContext,
-          child: content,
-        ),
+        child: _AuthRequestHost(renderContext: renderContext, child: content),
       );
     }
 
@@ -367,10 +360,7 @@ class _VariantScreenState extends State<VariantScreen> {
     }
 
     setState(() {
-      _requestResults[requestKey] = {
-        'success': true,
-        'data': detail.toJson(),
-      };
+      _requestResults[requestKey] = {'success': true, 'data': detail.toJson()};
       _loadingRequestKeys.remove(requestKey);
     });
   }
@@ -522,10 +512,7 @@ class _VariantScreenState extends State<VariantScreen> {
 }
 
 class _AuthRequestHost extends StatelessWidget {
-  const _AuthRequestHost({
-    required this.child,
-    required this.renderContext,
-  });
+  const _AuthRequestHost({required this.child, required this.renderContext});
 
   final Widget child;
   final Map<String, dynamic> renderContext;
@@ -636,7 +623,8 @@ class _ProductRequestHost extends StatefulWidget {
   final Map<String, dynamic> renderContext;
   final FormStateStore formStateStore;
   final VoidCallback onPreparePageRequests;
-  final void Function(String requestKey, bool isLoading) onRequestLoadingChanged;
+  final void Function(String requestKey, bool isLoading)
+  onRequestLoadingChanged;
   final void Function(
     String requestKey,
     dynamic productListResponse,
@@ -1147,9 +1135,8 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
     if (EngineRequestMapper.needsAutocompleteCubit(widget.mappedRequests)) {
       listeners.add(
         BlocListener<ProductAutocompleteCubit, ProductAutocompleteState>(
-          listenWhen: (previous, current) => _isPageRequestKey(
-            _requestKeyFromAutocompleteState(current),
-          ),
+          listenWhen: (previous, current) =>
+              _isPageRequestKey(_requestKeyFromAutocompleteState(current)),
           listener: (context, state) {
             if (state is ProductAutocompleteLoading) {
               _keysSeenLoadingThisSession.add(state.requestKey);
@@ -1168,10 +1155,7 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
                 return;
               }
               _setRequestLoading(state.requestKey, false);
-              widget.onAutocompleteFailure(
-                state.requestKey,
-                state.errMessage,
-              );
+              widget.onAutocompleteFailure(state.requestKey, state.errMessage);
             }
           },
         ),
@@ -1192,19 +1176,13 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
                 return;
               }
               _setRequestLoading(state.requestKey, false);
-              widget.onProductDetailSuccess(
-                state.requestKey,
-                state.detail,
-              );
+              widget.onProductDetailSuccess(state.requestKey, state.detail);
             } else if (state is ProductDetailFailure) {
               if (!_shouldHandleTerminalProductState(state.requestKey)) {
                 return;
               }
               _setRequestLoading(state.requestKey, false);
-              widget.onProductDetailFailure(
-                state.requestKey,
-                state.errMessage,
-              );
+              widget.onProductDetailFailure(state.requestKey, state.errMessage);
             }
           },
         ),
@@ -1225,28 +1203,19 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
                 return;
               }
               _setRequestLoading(state.requestKey, false);
-              widget.onCategoryTreeSuccess(
-                state.requestKey,
-                state.categories,
-              );
+              widget.onCategoryTreeSuccess(state.requestKey, state.categories);
             } else if (state is CategorySuccess) {
               if (!_shouldHandleTerminalCategoryState(state.requestKey)) {
                 return;
               }
               _setRequestLoading(state.requestKey, false);
-              widget.onCategorySuccess(
-                state.requestKey,
-                state.category,
-              );
+              widget.onCategorySuccess(state.requestKey, state.category);
             } else if (state is CategoryFailure) {
               if (!_shouldHandleTerminalCategoryState(state.requestKey)) {
                 return;
               }
               _setRequestLoading(state.requestKey, false);
-              widget.onCategoryFailure(
-                state.requestKey,
-                state.errMessage,
-              );
+              widget.onCategoryFailure(state.requestKey, state.errMessage);
             }
           },
         ),
@@ -1269,10 +1238,7 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
 
 /// Transparent status bar on splash routes (purple stays on in-app UI only).
 class _SplashSystemUiOverlay extends StatelessWidget {
-  const _SplashSystemUiOverlay({
-    required this.pageRoute,
-    required this.child,
-  });
+  const _SplashSystemUiOverlay({required this.pageRoute, required this.child});
 
   final String? pageRoute;
   final Widget child;

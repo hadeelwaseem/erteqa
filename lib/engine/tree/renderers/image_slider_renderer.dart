@@ -2,10 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../../core/network/network_config.dart';
-import '../../../core/utils/constants.dart';
-import '../../../core/utils/service_locator.dart';
 import '../../../config/component_config.dart';
+import '../../../core/network/remote_image_url.dart';
+import '../../../core/widgets/engine_network_image.dart';
 import '../../component_renderer/component_renderer.dart';
 import '../../theme/engine_theme.dart';
 import '../parsers/property_parsers.dart';
@@ -220,8 +219,7 @@ class _EngineImageSliderState extends State<_EngineImageSlider> {
   }
 
   Widget _buildImage(_SliderImage image) {
-    final url = _resolveNetworkUrl(image.url);
-    final resolvedUrl = url.trim();
+    final resolvedUrl = resolveRemoteImageUrl(image.url).trim();
     if (resolvedUrl.startsWith('assets/') ||
         (!resolvedUrl.startsWith('http://') &&
             !resolvedUrl.startsWith('https://'))) {
@@ -234,8 +232,8 @@ class _EngineImageSliderState extends State<_EngineImageSlider> {
       );
     }
 
-    return Image.network(
-      resolvedUrl,
+    return EngineNetworkImage(
+      url: resolvedUrl,
       fit: widget.fit,
       width: double.infinity,
       height: double.infinity,
@@ -308,17 +306,4 @@ class _EngineImageSliderState extends State<_EngineImageSlider> {
     );
   }
 
-  String _resolveNetworkUrl(String url) {
-    final value = url.trim();
-    if (value.startsWith('http://') || value.startsWith('https://')) {
-      return value;
-    }
-    if (value.startsWith('/')) {
-      final assetBase = getIt.isRegistered<NetworkConfig>()
-          ? getIt<NetworkConfig>().assetBaseUrl
-          : kBaseUrlAsset;
-      return '$assetBase$value';
-    }
-    return value;
-  }
 }
