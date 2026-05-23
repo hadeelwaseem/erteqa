@@ -66,6 +66,7 @@ Copy structure from [`_TEMPLATE.md`](_TEMPLATE.md).
 | [13-navigation-type.md](13-navigation-type.md) | Nav 2–7 | implemented-in-json | `navigation_type` push on detail taps; `clear_stack` on splash/auth/checkout; logout `onSuccess` |
 | [14-textformfield-textdirection.md](14-textformfield-textdirection.md) | UI fixes | implemented-in-json | `textFormField.textDirection` ltr/rtl; phone fields default LTR |
 | [15-page-layout-preset.md](15-page-layout-preset.md) | Layout Phase 3 | implemented-in-json | `pages[].layout: "centered"` — splash viewport preset |
+| [16-app-drawer-tabs-otp.md](16-app-drawer-tabs-otp.md) | Engine primitives | mixed | `appDrawer`, in-page `tabs`, `otpInput` (+ `openDrawer`/`closeDrawer` actions); OTP on `/auth/otp-reset` |
 
 Update this table when adding a spec.
 

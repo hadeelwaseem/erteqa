@@ -19,7 +19,7 @@ Optional `pages[].layout: "centered"` tells the mobile engine to build a full-vi
 
 | Item | Exists in prod JSON? | Evidence |
 |------|----------------------|----------|
-| `pages[].layout: "centered"` | Yes | `/splash`, `/splash-carousel` |
+| `pages[].layout: "centered"` | Yes | `/splash`, `/splash-carousel`, `/auth/login`, `/auth/otp-reset` |
 | Manual `scroll: "none"` on centered pages | No (removed; engine forces `none`) | grep `layout` on splash routes |
 
 ---
@@ -74,8 +74,12 @@ Optional `pages[].layout: "centered"` tells the mobile engine to build a full-vi
 |-------|-------|
 | `/splash` | Intro splash; expand container + stack |
 | `/splash-carousel` | Carousel splash |
+| `/auth/login` | Login form; expand + column `mainAxis: center` for vertical centering |
+| `/auth/otp-reset` | OTP verify form; same centered body pattern |
 
-**Auth pages** (`/auth/login`, `/auth/otp-reset`) stay `scroll: none` without `layout: centered` — whitelisted as short static forms.
+**App bar title alignment:** use `appBar.props.titleAlign` — `start` (default), `center`, or `end`. `start`/`end` follow app text direction (RTL app → title on the right by default). Home uses `center` for the SOOQ brand title.
+
+**Auth pages** use `layout: centered` with an explicit expand container and inner column `mainAxis: center` so the form block sits vertically centered under the app bar.
 
 ---
 

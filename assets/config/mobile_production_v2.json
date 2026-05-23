@@ -102,10 +102,12 @@
       "/state/error",
       "/state/loading",
       "/component-coverage",
-      "/categories/browse"
+      "/categories/browse",
+      "/profile/browse"
     ],
     "routeAliases": {
-      "/categories/browse": "/categories"
+      "/categories/browse": "/categories",
+      "/profile/browse": "/profile"
     },
     "tabs": [
       {
@@ -355,7 +357,7 @@
       "route": "/auth/login",
       "title": "تسجيل الدخول",
       "background": "#F1F5F9",
-      "scroll": "none",
+      "layout": "centered",
       "appBar": {
         "id": "auth-login-appbar",
         "type": "appBar",
@@ -365,6 +367,20 @@
       },
       "body": [
         {
+          "id": "auth-login-expand",
+          "type": "container",
+          "props": {
+            "expand": true
+          },
+          "child": {
+            "id": "auth-login-center-wrap",
+            "type": "column",
+            "props": {
+              "crossAxis": "stretch",
+              "mainAxis": "center",
+              "mainAxisSize": "max"
+            },
+            "child": {
           "id": "auth-login-form",
           "type": "form",
           "props": {
@@ -500,6 +516,8 @@
             ]
           }
         }
+          }
+        }
       ]
     },
     {
@@ -507,7 +525,7 @@
       "route": "/auth/otp-reset",
       "title": "تأكيد الرمز",
       "background": "#F1F5F9",
-      "scroll": "none",
+      "layout": "centered",
       "appBar": {
         "id": "auth-otp-appbar",
         "type": "appBar",
@@ -517,6 +535,20 @@
       },
       "body": [
         {
+          "id": "auth-otp-expand",
+          "type": "container",
+          "props": {
+            "expand": true
+          },
+          "child": {
+            "id": "auth-otp-center-wrap",
+            "type": "column",
+            "props": {
+              "crossAxis": "stretch",
+              "mainAxis": "center",
+              "mainAxisSize": "max"
+            },
+            "child": {
           "id": "auth-otp-form",
           "type": "form",
           "props": {
@@ -546,24 +578,23 @@
               },
               {
                 "id": "auth-otp-code",
-                "type": "textFormField",
+                "type": "otpInput",
                 "props": {
-                  "id": "otpCode",
-                  "label": "رمز التحقق",
-                  "keyboardType": "number",
-                  "textAlign": "center",
+                  "fieldId": "otpCode",
+                  "length": 6,
+                  "autofocus": true,
+                  "textDirection": "ltr",
                   "validateRequired": true,
                   "validateMinLength": 6,
                   "validateMaxLength": 6,
                   "requiredMessage": "هذا الحقل مطلوب"
                 },
                 "style": {
-                  "padding": 8,
-                  "background": "#F8FAFC",
-                  "borderRadius": 10,
+                  "background": "#FFFFFF",
+                  "borderRadius": 12,
                   "border": {
                     "width": 1,
-                    "color": "#E2E8F0"
+                    "color": "#94A3B8"
                   }
                 }
               },
@@ -635,6 +666,8 @@
             ]
           }
         }
+          }
+        }
       ]
     },
     {
@@ -647,13 +680,236 @@
         "id": "home-appbar",
         "type": "appBar",
         "props": {
-          "title": "سوق"
+          "title": "SOOQ",
+          "titleAlign": "center",
+          "showMenu": true,
+          "menuIcon": "menu",
+          "menuAction": {
+            "type": "openDrawer"
+          },
+          "trailingIcon": "notifications",
+          "trailingAction": {
+            "type": "navigate",
+            "route": "/notifications",
+            "navigation_type": "push"
+          },
+          "foregroundColor": "#0F172A"
         },
         "style": {
           "background": "#FFFFFF"
         }
       },
       "body": [
+        {
+          "id": "home-drawer",
+          "type": "appDrawer",
+          "props": {
+            "drawerEdge": "start",
+            "width": 280,
+            "backgroundColor": "#FFFFFF"
+          },
+          "child": {
+            "id": "home-drawer-column",
+            "type": "column",
+            "props": {
+              "crossAxis": "stretch",
+              "gap": 0
+            },
+            "children": [
+              {
+                "id": "home-drawer-header",
+                "type": "container",
+                "style": {
+                  "padding": 20,
+                  "background": "#1D4ED8"
+                },
+                "child": {
+                  "id": "home-drawer-title",
+                  "type": "text",
+                  "props": {
+                    "value": "سوق",
+                    "fontSize": 22,
+                    "fontWeight": "bold",
+                    "textAlign": "right",
+                    "color": "#FFFFFF"
+                  }
+                }
+              },
+              {
+                "id": "home-drawer-nav",
+                "type": "column",
+                "props": {
+                  "crossAxis": "stretch",
+                  "gap": 0
+                },
+                "children": [
+                  {
+                    "id": "home-drawer-item-home",
+                    "type": "container",
+                    "style": {
+                      "padding": 16
+                    },
+                    "tap": {
+                      "type": "closeDrawer"
+                    },
+                    "child": {
+                      "id": "home-drawer-item-home-row",
+                      "type": "row",
+                      "props": {
+                        "gap": 12,
+                        "crossAxis": "center"
+                      },
+                      "children": [
+                        {
+                          "id": "home-drawer-item-home-icon",
+                          "type": "icon",
+                          "props": {
+                            "name": "home",
+                            "size": 22,
+                            "color": "#1D4ED8"
+                          }
+                        },
+                        {
+                          "id": "home-drawer-item-home-label",
+                          "type": "text",
+                          "props": {
+                            "value": "الرئيسية",
+                            "fontSize": 16,
+                            "textAlign": "right",
+                            "color": "#0F172A"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "home-drawer-item-categories",
+                    "type": "container",
+                    "style": {
+                      "padding": 16
+                    },
+                    "tap": {
+                      "type": "navigate",
+                      "route": "/categories/browse",
+                      "navigation_type": "push"
+                    },
+                    "child": {
+                      "id": "home-drawer-item-categories-row",
+                      "type": "row",
+                      "props": {
+                        "gap": 12,
+                        "crossAxis": "center"
+                      },
+                      "children": [
+                        {
+                          "id": "home-drawer-item-categories-icon",
+                          "type": "icon",
+                          "props": {
+                            "name": "grid_view",
+                            "size": 22,
+                            "color": "#475569"
+                          }
+                        },
+                        {
+                          "id": "home-drawer-item-categories-label",
+                          "type": "text",
+                          "props": {
+                            "value": "الأقسام",
+                            "fontSize": 16,
+                            "textAlign": "right",
+                            "color": "#0F172A"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "home-drawer-item-profile",
+                    "type": "container",
+                    "style": {
+                      "padding": 16
+                    },
+                    "tap": {
+                      "type": "navigate",
+                      "route": "/profile/browse",
+                      "navigation_type": "push"
+                    },
+                    "child": {
+                      "id": "home-drawer-item-profile-row",
+                      "type": "row",
+                      "props": {
+                        "gap": 12,
+                        "crossAxis": "center"
+                      },
+                      "children": [
+                        {
+                          "id": "home-drawer-item-profile-icon",
+                          "type": "icon",
+                          "props": {
+                            "name": "person",
+                            "size": 22,
+                            "color": "#475569"
+                          }
+                        },
+                        {
+                          "id": "home-drawer-item-profile-label",
+                          "type": "text",
+                          "props": {
+                            "value": "حسابي",
+                            "fontSize": 16,
+                            "textAlign": "right",
+                            "color": "#0F172A"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "home-drawer-item-settings",
+                    "type": "container",
+                    "style": {
+                      "padding": 16
+                    },
+                    "tap": {
+                      "type": "navigate",
+                      "route": "/settings",
+                      "navigation_type": "push"
+                    },
+                    "child": {
+                      "id": "home-drawer-item-settings-row",
+                      "type": "row",
+                      "props": {
+                        "gap": 12,
+                        "crossAxis": "center"
+                      },
+                      "children": [
+                        {
+                          "id": "home-drawer-item-settings-icon",
+                          "type": "icon",
+                          "props": {
+                            "name": "settings",
+                            "size": 22,
+                            "color": "#475569"
+                          }
+                        },
+                        {
+                          "id": "home-drawer-item-settings-label",
+                          "type": "text",
+                          "props": {
+                            "value": "الإعدادات",
+                            "fontSize": 16,
+                            "textAlign": "right",
+                            "color": "#0F172A"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
         {
           "id": "home-search-entry",
           "type": "container",
@@ -1121,7 +1377,8 @@
         "id": "categories-appbar",
         "type": "appBar",
         "props": {
-          "title": "الأقسام"
+          "title": "الأقسام",
+          "height": 62
         },
         "style": {
           "background": "#FFFFFF"
@@ -1252,7 +1509,7 @@
       },
       "body": [
         {
-          "id": "products-toolbar",
+          "id": "products-filter-tabs-wrap",
           "type": "container",
           "style": {
             "padding": {
@@ -1263,33 +1520,32 @@
             }
           },
           "child": {
-            "id": "products-toolbar-row",
-            "type": "row",
+            "id": "products-filter-tabs",
+            "type": "tabs",
             "props": {
-              "mainAxis": "spaceBetween",
-              "crossAxis": "center",
-              "gap": 8
+              "selectedIndex": 0,
+              "spacing": 10,
+              "runSpacing": 6,
+              "activeColor": "#1D4ED8",
+              "inactiveColor": "#64748B",
+              "indicatorWidth": 3
             },
-            "children": [
-              {
-                "id": "products-count-hint",
-                "type": "text",
-                "props": {
-                  "value": "تصفح كل المنتجات",
-                  "fontSize": 14,
-                  "textAlign": "right",
-                  "color": "#475569"
+            "data": {
+              "items": [
+                {
+                  "title": "الكل",
+                  "index": 0
+                },
+                {
+                  "title": "عروض",
+                  "index": 1
+                },
+                {
+                  "title": "جديد",
+                  "index": 2
                 }
-              },
-              {
-                "id": "products-filter-btn",
-                "type": "button",
-                "props": {
-                  "label": "تصفية",
-                  "variant": "outlined"
-                }
-              }
-            ]
+              ]
+            }
           }
         },
         {
@@ -1824,7 +2080,8 @@
         "id": "search-appbar",
         "type": "appBar",
         "props": {
-          "title": "البحث"
+          "title": "البحث",
+          "height": 62
         },
         "style": {
           "background": "#FFFFFF"
@@ -2110,7 +2367,8 @@
         "id": "cart-appbar",
         "type": "appBar",
         "props": {
-          "title": "السلة"
+          "title": "السلة",
+          "height": 62
         },
         "style": {
           "background": "#FFFFFF"
@@ -2967,7 +3225,8 @@
         "id": "profile-appbar",
         "type": "appBar",
         "props": {
-          "title": "الحساب"
+          "title": "الحساب",
+          "height": 62
         }
       },
       "body": [

@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 import '../../core/enums/generic_component_type.dart';
 import '../../config/component_config.dart';
@@ -29,8 +29,12 @@ import '../tree/renderers/stack_renderer.dart';
 import '../tree/renderers/image_slider_renderer.dart';
 import '../tree/renderers/timer_renderer.dart';
 import '../tree/renderers/progress_indicator_renderer.dart';
+import '../tree/renderers/app_drawer_renderer.dart';
+import '../tree/renderers/tabs_renderer.dart';
+import '../tree/renderers/otp_input_renderer.dart';
 import '../tree/renderers/unsupported_component_renderer.dart';
 import '../actions/action_dispatcher.dart';
+import '../engine_page_chrome.dart';
 import '../form/form_state_store.dart';
 import '../validation/layout_constraint_validator.dart';
 
@@ -95,6 +99,9 @@ class ScreenRenderer {
       GenericComponentType.imageSlider: ImageSliderRenderer(),
       GenericComponentType.timer: TimerRenderer(),
       GenericComponentType.progressIndicator: ProgressIndicatorRenderer(),
+      GenericComponentType.appDrawer: AppDrawerRenderer(),
+      GenericComponentType.tabs: TabsRenderer(),
+      GenericComponentType.otpInput: OtpInputRenderer(),
       GenericComponentType.unsupported: UnsupportedComponentRenderer(),
     };
   }
@@ -107,6 +114,7 @@ class ScreenRenderer {
   }) {
     final rootContext = dataContext ?? <String, dynamic>{};
     _ensureFormState(rootContext);
+    _ensurePageChrome(rootContext);
     if (context != null) {
       _ensureActionDispatcher(rootContext, context);
     }
@@ -120,12 +128,45 @@ class ScreenRenderer {
       );
       return true;
     }());
-    return _buildComponent(
+    final body = _buildComponent(
       config.root,
       dataContext: rootContext,
       context: context,
       variantId: config.pageId,
       path: 'root',
+    );
+    final page = _wrapPageDrawer(rootContext, body, context: context);
+    return SafeArea(child: page);
+  }
+
+  void _ensurePageChrome(Map<String, dynamic> dataContext) {
+    if (dataContext[EnginePageChromeRegistry.contextKey]
+        is EnginePageChromeRegistry) {
+      return;
+    }
+    dataContext[EnginePageChromeRegistry.contextKey] =
+        EnginePageChromeRegistry();
+  }
+
+  Widget _wrapPageDrawer(
+    Map<String, dynamic> dataContext,
+    Widget body, {
+    BuildContext? context,
+  }) {
+    final registry = dataContext[EnginePageChromeRegistry.contextKey];
+    if (registry is! EnginePageChromeRegistry) return body;
+
+    final drawer = registry.drawer;
+    if (drawer == null) return body;
+
+    // `drawer` = start edge (visual right in RTL). `endDrawer` = end edge (visual left).
+    final useEnd = registry.drawerEdge.toLowerCase() == 'end';
+
+    return Scaffold(
+      key: registry.scaffoldKey,
+      drawer: useEnd ? null : drawer,
+      endDrawer: useEnd ? drawer : null,
+      body: body,
     );
   }
 
@@ -183,7 +224,9 @@ class ScreenRenderer {
       ),
       dataContext: _withPath(mergedContext, path),
     );
-    if (onTap == null || config.type == GenericComponentType.button) {
+    if (onTap == null ||
+        config.type == GenericComponentType.button ||
+        config.type == GenericComponentType.tabs) {
       return widget;
     }
     return Semantics(

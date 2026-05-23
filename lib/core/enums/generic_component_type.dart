@@ -23,5 +23,8 @@ enum GenericComponentType {
   imageSlider,
   timer,
   progressIndicator,
+  appDrawer,
+  tabs,
+  otpInput,
   unsupported,
 }

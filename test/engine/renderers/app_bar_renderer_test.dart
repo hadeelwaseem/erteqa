@@ -85,7 +85,7 @@ void main() {
     expect(iconButton.constraints?.minWidth, 48);
     expect(iconButton.constraints?.minHeight, 48);
 
-    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.tap(find.byIcon(Icons.arrow_forward));
     await tester.pumpAndSettle();
 
     expect(router.state.uri.path, '/start');
@@ -116,7 +116,109 @@ void main() {
 
     await tester.pumpWidget(MaterialApp.router(routerConfig: router));
 
-    expect(find.byIcon(Icons.arrow_back), findsNothing);
+    expect(find.byIcon(Icons.arrow_forward), findsNothing);
     expect(find.text('Root'), findsOneWidget);
+  });
+
+  testWidgets('titleAlign start places title at directional start (RTL → right)',
+      (tester) async {
+    final renderer = AppBarRenderer();
+    final config = ComponentConfig(
+      type: GenericComponentType.appBar,
+      properties: {'title': 'Start title'},
+    );
+
+    final router = GoRouter(
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, state) => renderer.render(
+            config,
+            buildChild: (_) => const SizedBox.shrink(),
+            dataContext: rendererDataContext(),
+          ),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.rtl,
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
+
+    final titleText = tester.widget<Text>(find.text('Start title'));
+    expect(titleText.textAlign, TextAlign.start);
+
+    final align = tester.widget<Align>(
+      find.ancestor(of: find.text('Start title'), matching: find.byType(Align)),
+    );
+    expect(align.alignment, AlignmentDirectional.centerStart);
+  });
+
+  testWidgets('titleAlign center centers title text', (tester) async {
+    final renderer = AppBarRenderer();
+    final config = ComponentConfig(
+      type: GenericComponentType.appBar,
+      properties: {'title': 'Center title', 'titleAlign': 'center'},
+    );
+
+    final router = GoRouter(
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, state) => Scaffold(
+            body: renderer.render(
+              config,
+              buildChild: (_) => const SizedBox.shrink(),
+              dataContext: rendererDataContext(),
+            ),
+          ),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+
+    final titleText = tester.widget<Text>(find.text('Center title'));
+    expect(titleText.textAlign, TextAlign.center);
+  });
+
+  testWidgets('height sets fixed app bar height', (tester) async {
+    final renderer = AppBarRenderer();
+    final config = ComponentConfig(
+      type: GenericComponentType.appBar,
+      properties: {'title': 'Tall bar', 'height': 72},
+    );
+
+    final router = GoRouter(
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, state) => Scaffold(
+            body: renderer.render(
+              config,
+              buildChild: (_) => const SizedBox.shrink(),
+              dataContext: rendererDataContext(),
+            ),
+          ),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+
+    expect(
+      tester.widgetList<SizedBox>(
+        find.descendant(
+          of: find.byType(Material),
+          matching: find.byWidgetPredicate(
+            (w) => w is SizedBox && w.height == 72,
+          ),
+        ),
+      ),
+      hasLength(1),
+    );
   });
 }

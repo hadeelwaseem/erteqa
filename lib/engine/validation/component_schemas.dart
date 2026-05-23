@@ -314,7 +314,32 @@ class ComponentSchemas {
   static const appBar = ComponentSchema(
     type: 'appBar',
     requiredProperties: {},
-    optionalProperties: {'title', 'backgroundColor', 'color'},
+    optionalProperties: {
+      'title',
+      'backgroundColor',
+      'color',
+      'foregroundColor',
+      'titleColor',
+      'showMenu',
+      'menuIcon',
+      'menuAction',
+      'trailingIcon',
+      'trailingAction',
+      'titleAlign',
+      'height',
+    },
+    propertyTypes: {
+      'title': 'string',
+      'backgroundColor': 'string (hex)',
+      'foregroundColor': 'string (hex)',
+      'titleAlign': 'string (start|center|end; start follows app direction, default start)',
+      'height': 'number (optional fixed bar height)',
+      'showMenu': 'bool (menu left, openDrawer default)',
+      'menuIcon': 'string (icon name)',
+      'menuAction': 'action object (default openDrawer)',
+      'trailingIcon': 'string (icon name)',
+      'trailingAction': 'action object',
+    },
   );
 
   static const divider = ComponentSchema(
@@ -531,6 +556,92 @@ class ComponentSchemas {
     },
   );
 
+  static const appDrawer = ComponentSchema(
+    type: 'appDrawer',
+    requiredProperties: {},
+    optionalProperties: {
+      'drawerEdge',
+      'width',
+      'backgroundColor',
+      'child',
+    },
+    propertyTypes: {
+      'drawerEdge': 'string (start|end)',
+      'width': 'number',
+      'backgroundColor': 'string (hex)',
+    },
+  );
+
+  static const tabs = ComponentSchema(
+    type: 'tabs',
+    requiredProperties: {},
+    optionalProperties: {
+      'selectedIndex',
+      'selectedIndexPath',
+      'spacing',
+      'runSpacing',
+      'activeColor',
+      'inactiveColor',
+      'indicatorWidth',
+      'data',
+      'tap',
+    },
+    propertyTypes: {
+      'selectedIndex': 'number',
+      'selectedIndexPath': 'string (dataContext path)',
+      'spacing': 'number',
+      'runSpacing': 'number',
+      'activeColor': 'string (hex)',
+      'inactiveColor': 'string (hex)',
+      'indicatorWidth': 'number',
+      'data': 'object { items: [{ title, index }] }',
+      'tap': 'action object (cubitCall with source:tap index)',
+    },
+  );
+
+  static const otpInput = ComponentSchema(
+    type: 'otpInput',
+    requiredProperties: {},
+    optionalProperties: {
+      'fieldId',
+      'length',
+      'boxWidth',
+      'boxHeight',
+      'gap',
+      'readOnly',
+      'enabled',
+      'autofocus',
+      'textDirection',
+      'validateRequired',
+      'validateMinLength',
+      'validateMaxLength',
+      'requiredMessage',
+      'validationMessage',
+      'color',
+      'borderRadius',
+      'border',
+    },
+    propertyTypes: {
+      'fieldId': 'string (default otpCode)',
+      'length': 'number (default 6)',
+      'boxWidth': 'number',
+      'boxHeight': 'number',
+      'gap': 'number',
+      'readOnly': 'bool',
+      'enabled': 'bool',
+      'autofocus': 'bool',
+      'textDirection': 'string (ltr|rtl, default ltr)',
+      'validateRequired': 'bool',
+      'validateMinLength': 'number',
+      'validateMaxLength': 'number',
+      'requiredMessage': 'string',
+      'validationMessage': 'string',
+      'color': 'string (hex, from style.background)',
+      'borderRadius': 'number',
+      'border': 'object {width, color}',
+    },
+  );
+
   static const unsupported = ComponentSchema(
     type: 'unsupported',
     requiredProperties: {},
@@ -588,6 +699,12 @@ class ComponentSchemas {
         return timer;
       case 'progressIndicator':
         return progressIndicator;
+      case 'appDrawer':
+        return appDrawer;
+      case 'tabs':
+        return tabs;
+      case 'otpInput':
+        return otpInput;
       case 'unsupported':
         return unsupported;
       default:
@@ -621,6 +738,9 @@ class ComponentSchemas {
       'imageSlider': imageSlider,
       'timer': timer,
       'progressIndicator': progressIndicator,
+      'appDrawer': appDrawer,
+      'tabs': tabs,
+      'otpInput': otpInput,
       'unsupported': unsupported,
     };
   }

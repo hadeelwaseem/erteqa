@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 import '../../core/feedback/app_messenger.dart';
 import '../../core/navigation/app_navigation.dart';
@@ -7,6 +7,7 @@ import '../../core/utils/api_service.dart';
 import '../../core/utils/app_logger.dart';
 import '../../core/utils/service_locator.dart';
 import '../../features/auth/presentation/manager/auth_cubit/auth_cubit.dart';
+import '../engine_page_chrome.dart';
 import '../form/form_state_store.dart';
 
 class EngineActionDispatcher {
@@ -58,9 +59,76 @@ class EngineActionDispatcher {
       case 'cubitCall':
         await _handleCubitCall(action, dataContext: mergedContext);
         return;
+      case 'openDrawer':
+        _handleDrawer(action, open: true, dataContext: mergedContext);
+        return;
+      case 'closeDrawer':
+        _handleDrawer(action, open: false, dataContext: mergedContext);
+        return;
       default:
         AppLogger.debug('[ActionDispatcher] Unsupported action type: $type');
         return;
+    }
+  }
+
+  void _handleDrawer(
+    Map<String, dynamic> action, {
+    required bool open,
+    Map<String, dynamic>? dataContext,
+  }) {
+    final edge = (action['drawerEdge'] as String?)?.toLowerCase();
+    final ctx = dataContext ?? _dataContext;
+    final registry = ctx?[EnginePageChromeRegistry.contextKey];
+    if (registry is EnginePageChromeRegistry) {
+      final useEnd = edge == 'end' || registry.drawerEdge.toLowerCase() == 'end';
+      final state = registry.scaffoldKey.currentState;
+      if (state != null) {
+        if (open) {
+          if (useEnd) {
+            state.openEndDrawer();
+          } else {
+            state.openDrawer();
+          }
+        } else {
+          if (useEnd) {
+            state.closeEndDrawer();
+          } else {
+            state.closeDrawer();
+          }
+        }
+        return;
+      }
+    }
+
+    final scaffoldState = Scaffold.maybeOf(_context);
+    if (scaffoldState == null) return;
+
+    final useEnd = edge == 'end';
+    if (open) {
+      if (useEnd) {
+        scaffoldState.openEndDrawer();
+      } else {
+        scaffoldState.openDrawer();
+      }
+    } else {
+      if (useEnd) {
+        scaffoldState.closeEndDrawer();
+      } else {
+        scaffoldState.closeDrawer();
+      }
+    }
+  }
+
+  void _closeDrawerIfOpen(Map<String, dynamic>? dataContext) {
+    final ctx = dataContext ?? _dataContext;
+    final registry = ctx?[EnginePageChromeRegistry.contextKey];
+    if (registry is! EnginePageChromeRegistry) return;
+    final state = registry.scaffoldKey.currentState;
+    if (state == null) return;
+    if (registry.drawerEdge.toLowerCase() == 'end') {
+      state.closeEndDrawer();
+    } else {
+      state.closeDrawer();
     }
   }
 
@@ -68,6 +136,7 @@ class EngineActionDispatcher {
     Map<String, dynamic> action, {
     Map<String, dynamic>? dataContext,
   }) {
+    _closeDrawerIfOpen(dataContext);
     final route = action['route'] as String?;
     if (route == null || route.isEmpty) return;
     final resolvedRoute = _resolveRoute(route, dataContext);
@@ -304,6 +373,13 @@ class EngineActionDispatcher {
           }
         case 'authstate':
           resolved[entry.key] = _readAuthStateField(authState, field);
+        case 'tap':
+          if (field != null && dataContext != null) {
+            final tap = dataContext['tap'];
+            if (tap is Map && tap.containsKey(field)) {
+              resolved[entry.key] = tap[field];
+            }
+          }
         case 'value':
           resolved[entry.key] = spec['value'];
         default:
