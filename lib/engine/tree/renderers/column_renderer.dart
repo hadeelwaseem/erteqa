@@ -26,7 +26,7 @@ class ColumnRenderer implements ComponentRenderer {
     final textDirection = PropertyParsers.parseTextDirection(
       config.properties['textDirection'] as String?,
     );
-    final children = config.children ?? [];
+    final children = config.layoutChildren;
     final gap = PropertyParsers.parseDouble(config.properties['gap']) ?? 0;
     final wantsFlex = mainAxisSize == MainAxisSize.max &&
         children.any(_isExpandContainer);

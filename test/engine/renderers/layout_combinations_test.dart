@@ -213,5 +213,46 @@ void main() {
       expect(offset.dy, lessThan(500));
       expect(find.byType(Expanded), findsWidgets);
     });
+
+    testWidgets('auth-style center column with single child renders content', (
+      tester,
+    ) async {
+      await pumpTree(
+        tester,
+        ComponentConfig(
+          type: GenericComponentType.scaffold,
+          properties: const {
+            'pageScroll': 'none',
+            'pageLayout': 'centered',
+          },
+          child: ComponentConfig(
+            type: GenericComponentType.column,
+            properties: const {
+              'mainAxisSize': 'max',
+              'crossAxisAlignment': 'stretch',
+            },
+            children: [
+              ComponentConfig(
+                type: GenericComponentType.container,
+                properties: const {'expand': true},
+                child: ComponentConfig(
+                  type: GenericComponentType.column,
+                  properties: const {
+                    'mainAxisSize': 'max',
+                    'mainAxisAlignment': 'center',
+                    'crossAxisAlignment': 'stretch',
+                  },
+                  child: ComponentConfig(
+                    type: GenericComponentType.text,
+                    properties: {'value': 'أدخل رقم جوالك'},
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      expect(find.text('أدخل رقم جوالك'), findsOneWidget);
+    });
   });
 }

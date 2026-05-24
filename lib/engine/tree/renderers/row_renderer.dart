@@ -27,7 +27,7 @@ class RowRenderer implements ComponentRenderer {
     final textDirection = PropertyParsers.parseTextDirection(
       config.properties['textDirection'] as String?,
     );
-    final children = config.children ?? [];
+    final children = config.layoutChildren;
     final gap = PropertyParsers.parseDouble(config.properties['gap']) ?? 0;
     final wantsFlex = children.any(_isExpandContainer);
     final childWidgets = _withGap(

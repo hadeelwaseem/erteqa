@@ -10,8 +10,9 @@ class ItemBuilderConfig {
 }
 
 /// Tree-based configuration for a UI component.
-/// Each node may have a single [child] (scaffold, container, card) or
-/// multiple [children] (column, row), or be a leaf (text, button).
+///
+/// Most nodes use either [child] (single subtree) or [children] (multi-child
+/// flex). Column and row nodes accept both shapes in the engine.
 class ComponentConfig {
   final GenericComponentType type;
   final Map<String, dynamic> properties;
@@ -38,4 +39,13 @@ class ComponentConfig {
     this.crossAxisSpacing,
     this.dataContextOverride,
   });
+
+  /// Flex/layout children: non-empty [children], else singleton [child].
+  List<ComponentConfig> get layoutChildren {
+    final list = children;
+    if (list != null && list.isNotEmpty) return list;
+    final single = child;
+    if (single != null) return [single];
+    return const [];
+  }
 }

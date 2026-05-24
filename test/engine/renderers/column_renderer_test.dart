@@ -108,6 +108,36 @@ void main() {
     expect(column.textDirection, TextDirection.rtl);
   });
 
+  testWidgets('renders single child when only child is set', (tester) async {
+    final renderer = ColumnRenderer();
+    final config = ComponentConfig(
+      type: GenericComponentType.column,
+      properties: const {'crossAxisAlignment': 'stretch'},
+      child: ComponentConfig(
+        type: GenericComponentType.text,
+        properties: {'value': 'single child'},
+      ),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: renderer.render(
+            config,
+            buildChild: (child) => TextRenderer().render(
+              child,
+              buildChild: (_) => const SizedBox.shrink(),
+              dataContext: rendererDataContext(),
+            ),
+            dataContext: rendererDataContext(),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('single child'), findsOneWidget);
+  });
+
   testWidgets('expand child in max column does not throw under min parent', (
     tester,
   ) async {

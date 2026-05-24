@@ -358,13 +358,7 @@
       "title": "تسجيل الدخول",
       "background": "#F1F5F9",
       "layout": "centered",
-      "appBar": {
-        "id": "auth-login-appbar",
-        "type": "appBar",
-        "props": {
-          "title": "تسجيل الدخول"
-        }
-      },
+
       "body": [
         {
           "id": "auth-login-expand",
@@ -376,7 +370,7 @@
             "id": "auth-login-center-wrap",
             "type": "column",
             "props": {
-              "crossAxis": "stretch",
+
               "mainAxis": "center",
               "mainAxisSize": "max"
             },
@@ -404,6 +398,18 @@
             },
             "children": [
               {
+                "id": "auth-login-logo",
+                "type": "image",
+                "props": {
+                  "source": "asset",
+                  "url": "assets/icons/app_logo.png",
+                  "width": 120,
+                  "height": 120,
+                  "fit": "contain",
+                  "alt": "SOOQ"
+                }
+              },
+              {
                 "id": "auth-login-heading",
                 "type": "text",
                 "props": {
@@ -414,6 +420,7 @@
                   "color": "#0F172A"
                 }
               },
+
               {
                 "id": "auth-login-subheading",
                 "type": "text",
@@ -566,6 +573,18 @@
               "padding": 16
             },
             "children": [
+              {
+                "id": "auth-otp-logo",
+                "type": "image",
+                "props": {
+                  "source": "asset",
+                  "url": "assets/icons/app_logo.png",
+                  "width": 120,
+                  "height": 120,
+                  "fit": "contain",
+                  "alt": "SOOQ"
+                }
+              },
               {
                 "id": "auth-otp-heading",
                 "type": "text",
