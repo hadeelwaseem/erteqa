@@ -20,7 +20,8 @@ import '../parsers/property_parsers.dart';
 /// - `titleAlign` (string) — `start` (default) | `center` | `end`
 ///   `start`/`end` follow app text direction (RTL → title on the right by default).
 /// - `height` (number) — optional fixed bar height in logical pixels
-/// - `backgroundColor`, `foregroundColor` / `titleColor`
+/// - `elevation` (number) — Material elevation; default `1`
+/// - `backgroundColor`, `foregroundColor` / `titleColor` — hex `#RRGGBB`, `#AARRGGBB`, or `transparent`
 ///
 /// Bar layout uses LTR: notifications left, menu and back on the right.
 /// Back button shows on the right when [GoRouter] can pop.
@@ -63,9 +64,11 @@ class AppBarRenderer implements ComponentRenderer {
     final titleCenter = titleAlignRaw == 'center';
     final titleTextAlign = PropertyParsers.parseTextAlign(titleAlignRaw);
     final barHeight = PropertyParsers.parseDouble(properties['height']);
+    final elevation = PropertyParsers.parseDouble(properties['elevation']) ?? 1.0;
 
     return Builder(
       builder: (context) {
+        final statusBarTop = MediaQuery.paddingOf(context).top;
         final ambientDirection = Directionality.of(context);
         final router = GoRouter.of(context);
         final canPop = router.canPop();
@@ -142,7 +145,7 @@ class AppBarRenderer implements ComponentRenderer {
                 ),
               );
 
-        final barBody = Padding(
+        final barRow = Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
           child: Directionality(
             textDirection: TextDirection.ltr,
@@ -161,18 +164,25 @@ class AppBarRenderer implements ComponentRenderer {
           ),
         );
 
+        final barContent = barHeight != null
+            ? SizedBox(
+                height: barHeight,
+                child: Align(
+                  alignment: Alignment.center,
+                  child: barRow,
+                ),
+              )
+            : barRow;
+
         return Material(
           color: backgroundColor,
-          elevation: 1,
-          child: barHeight != null
-              ? SizedBox(
-                  height: barHeight,
-                  child: Align(
-                    alignment: Alignment.center,
-                    child: barBody,
-                  ),
-                )
-              : barBody,
+          elevation: elevation,
+          shadowColor: elevation > 0 ? null : Colors.transparent,
+          surfaceTintColor: Colors.transparent,
+          child: Padding(
+            padding: EdgeInsets.only(top: statusBarTop),
+            child: barContent,
+          ),
         );
       },
     );

@@ -7,8 +7,19 @@ class PropertyParsers {
 
   static Color? parseColor(String? hex) {
     if (hex == null || hex.isEmpty) return null;
+    final normalized = hex.trim().toLowerCase();
+    if (normalized == 'transparent') {
+      return Colors.transparent;
+    }
     try {
-      return Color(int.parse(hex.replaceFirst('#', '0xff')));
+      final raw = normalized.replaceFirst('#', '');
+      if (raw.length == 8) {
+        return Color(int.parse('0x$raw'));
+      }
+      if (raw.length == 6) {
+        return Color(int.parse('0xFF$raw'));
+      }
+      return null;
     } catch (_) {
       return null;
     }

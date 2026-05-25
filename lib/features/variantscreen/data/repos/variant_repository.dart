@@ -208,8 +208,9 @@ class AssetVariantRepository implements VariantRepository {
     final children = <ComponentConfig>[if (appBar != null) appBar, ...bodyNodes];
 
     // scroll:none / layout:centered need max-height root column for expand/flex children.
-    final rootColumnProps = <String, String>{
+    final rootColumnProps = <String, dynamic>{
       'crossAxisAlignment': 'stretch',
+      'safeAreaBody': true,
       if (pageScroll == 'none' || isCenteredLayout) 'mainAxisSize': 'max',
     };
 

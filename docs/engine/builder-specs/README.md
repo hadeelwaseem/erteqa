@@ -67,6 +67,7 @@ Copy structure from [`_TEMPLATE.md`](_TEMPLATE.md).
 | [14-textformfield-textdirection.md](14-textformfield-textdirection.md) | UI fixes | implemented-in-json | `textFormField.textDirection` ltr/rtl; phone fields default LTR |
 | [15-page-layout-preset.md](15-page-layout-preset.md) | Layout Phase 3 | implemented-in-json | `pages[].layout: "centered"` — splash viewport preset |
 | [16-app-drawer-tabs-otp.md](16-app-drawer-tabs-otp.md) | Engine primitives | mixed | `appDrawer`, in-page `tabs`, `otpInput` (+ `openDrawer`/`closeDrawer` actions); OTP on `/auth/otp-reset` |
+| [17-appbar-layout-ui.md](17-appbar-layout-ui.md) | AppBar layout/UI | implemented-in-json | `appBar.elevation`, alpha/`transparent` `backgroundColor`; body-only SafeArea (engine default) |
 
 Update this table when adding a spec.
 

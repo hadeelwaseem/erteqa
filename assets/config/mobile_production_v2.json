@@ -358,7 +358,13 @@
       "title": "تسجيل الدخول",
       "background": "#F1F5F9",
       "layout": "centered",
-
+      "appBar": {
+        "id": "auth-login-appbar",
+        "type": "appBar",
+        "props": {
+          "title": "تسجيل الدخول"
+        }
+      },
       "body": [
         {
           "id": "auth-login-expand",
@@ -370,7 +376,7 @@
             "id": "auth-login-center-wrap",
             "type": "column",
             "props": {
-
+              "crossAxis": "stretch",
               "mainAxis": "center",
               "mainAxisSize": "max"
             },
@@ -1694,10 +1700,10 @@
         "id": "product-details-appbar",
         "type": "appBar",
         "props": {
-          "title": "تفاصيل المنتج"
-        },
-        "style": {
-          "background": "#FFFFFF"
+          "title": "تفاصيل المنتج",
+          "backgroundColor": "#00000000",
+          "elevation": 0,
+          "foregroundColor": "#0F172A"
         }
       },
       "body": [

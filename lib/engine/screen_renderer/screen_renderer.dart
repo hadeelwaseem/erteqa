@@ -136,7 +136,7 @@ class ScreenRenderer {
       path: 'root',
     );
     final page = _wrapPageDrawer(rootContext, body, context: context);
-    return SafeArea(child: page);
+    return page;
   }
 
   void _ensurePageChrome(Map<String, dynamic> dataContext) {

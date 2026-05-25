@@ -221,4 +221,110 @@ void main() {
       hasLength(1),
     );
   });
+
+  testWidgets('elevation defaults to 1', (tester) async {
+    final renderer = AppBarRenderer();
+    final config = ComponentConfig(
+      type: GenericComponentType.appBar,
+      properties: {'title': 'Default elevation'},
+    );
+
+    final router = GoRouter(
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, state) => Scaffold(
+            body: renderer.render(
+              config,
+              buildChild: (_) => const SizedBox.shrink(),
+              dataContext: rendererDataContext(),
+            ),
+          ),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+
+    final appBarMaterial = tester
+        .widgetList<Material>(find.byType(Material))
+        .firstWhere((material) => material.elevation == 1);
+    expect(appBarMaterial.elevation, 1);
+  });
+
+  testWidgets('elevation 0 uses transparent Material styling', (tester) async {
+    final renderer = AppBarRenderer();
+    final config = ComponentConfig(
+      type: GenericComponentType.appBar,
+      properties: {
+        'title': 'Flat bar',
+        'backgroundColor': '#00000000',
+        'elevation': 0,
+      },
+    );
+
+    final router = GoRouter(
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, state) => Scaffold(
+            body: renderer.render(
+              config,
+              buildChild: (_) => const SizedBox.shrink(),
+              dataContext: rendererDataContext(),
+            ),
+          ),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+
+    final appBarMaterial = tester.widgetList<Material>(find.byType(Material)).firstWhere(
+      (material) =>
+          material.elevation == 0 && material.color == Colors.transparent,
+    );
+    expect(appBarMaterial.elevation, 0);
+    expect(appBarMaterial.color, Colors.transparent);
+    expect(appBarMaterial.shadowColor, Colors.transparent);
+  });
+
+  testWidgets('applies status bar top padding for edge-to-edge layout',
+      (tester) async {
+    final renderer = AppBarRenderer();
+    final config = ComponentConfig(
+      type: GenericComponentType.appBar,
+      properties: {'title': 'Status bar inset'},
+    );
+
+    final router = GoRouter(
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, state) => MediaQuery(
+            data: const MediaQueryData(padding: EdgeInsets.only(top: 44)),
+            child: renderer.render(
+              config,
+              buildChild: (_) => const SizedBox.shrink(),
+              dataContext: rendererDataContext(),
+            ),
+          ),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+
+    expect(
+      find.descendant(
+        of: find.byType(Material),
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget is Padding &&
+              widget.padding == const EdgeInsets.only(top: 44),
+        ),
+      ),
+      findsOneWidget,
+    );
+  });
 }
