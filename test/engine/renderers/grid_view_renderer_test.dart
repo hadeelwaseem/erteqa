@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:sooq_merchant/config/component_config.dart';
 import 'package:sooq_merchant/core/enums/generic_component_type.dart';
 import 'package:sooq_merchant/core/widgets/engine_network_image.dart';
@@ -49,23 +50,63 @@ void main() {
     );
   }
 
-  testWidgets('loading phase shows CircularProgressIndicator', (tester) async {
+  testWidgets('loading phase shows Skeletonizer with grid layout', (
+    tester,
+  ) async {
     final renderer = GridViewRenderer();
+    final dataContext = requestLoadingDataContext(_requestKey);
 
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: renderer.render(
-            _gridConfig(),
-            buildChild: (c) => _buildChild(c, requestLoadingDataContext(_requestKey)),
-            dataContext: requestLoadingDataContext(_requestKey),
+            _gridConfig(
+              extraProps: {
+                'data': {'requestKey': _requestKey, 'size': 6},
+              },
+            ),
+            buildChild: (c) => _buildChild(c, dataContext),
+            dataContext: dataContext,
           ),
         ),
       ),
     );
 
-    expect(find.byType(GridView), findsNothing);
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(
+      find.byWidgetPredicate((w) => w is Skeletonizer),
+      findsOneWidget,
+    );
+    expect(find.byType(GridView), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+  });
+
+  testWidgets('error phase still shows message not skeleton', (tester) async {
+    final renderer = GridViewRenderer();
+    const arabicError = 'تعذر تحميل المنتجات';
+    final dataContext = {
+      ...rendererDataContext(),
+      'requests': {
+        _requestKey: {'success': false, 'message': 'fail'},
+      },
+    };
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: renderer.render(
+            _gridConfig(extraProps: {'errorMessage': arabicError}),
+            buildChild: (c) => _buildChild(c, dataContext),
+            dataContext: dataContext,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text(arabicError), findsOneWidget);
+    expect(
+      find.byWidgetPredicate((w) => w is Skeletonizer),
+      findsNothing,
+    );
   });
 
   testWidgets('empty phase shows Arabic emptyMessage from props', (

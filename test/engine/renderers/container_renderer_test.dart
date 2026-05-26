@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:sooq_merchant/config/component_config.dart';
 import 'package:sooq_merchant/core/enums/generic_component_type.dart';
 import 'package:sooq_merchant/engine/tree/renderers/column_renderer.dart';
@@ -260,6 +261,8 @@ void main() {
       ),
     );
 
+    final dataContext = requestLoadingDataContext(requestKey);
+
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -268,21 +271,18 @@ void main() {
             buildChild: (c) => TextRenderer().render(
               c,
               buildChild: (_) => const SizedBox.shrink(),
-              dataContext: {
-                'initialRequestKeys': {requestKey: true},
-                'loadingRequestKeys': {requestKey: true},
-              },
+              dataContext: mergeRendererContext(dataContext, c),
             ),
-            dataContext: {
-              'initialRequestKeys': {requestKey: true},
-              'loadingRequestKeys': {requestKey: true},
-            },
+            dataContext: dataContext,
           ),
         ),
       ),
     );
 
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
-    expect(find.text('يجب ألا يظهر'), findsNothing);
+    expect(
+      find.byWidgetPredicate((w) => w is Skeletonizer),
+      findsOneWidget,
+    );
+    expect(find.byType(CircularProgressIndicator), findsNothing);
   });
 }

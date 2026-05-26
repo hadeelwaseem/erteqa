@@ -4,6 +4,8 @@ import '../../../config/component_config.dart';
 import '../../../core/network/remote_image_url.dart';
 import '../../../core/widgets/engine_network_image.dart';
 import '../../component_renderer/component_renderer.dart';
+import '../../skeleton/skeleton_effect_factory.dart';
+import '../../skeleton/skeleton_item_factory.dart';
 import '../../theme/engine_theme.dart';
 import '../parsers/data_context_path.dart';
 import '../parsers/property_parsers.dart';
@@ -19,6 +21,20 @@ class ImageRenderer implements ComponentRenderer {
     Map<String, dynamic>? dataContext,
   }) {
     final theme = EngineTheme.fromDataContext(dataContext);
+    final width = PropertyParsers.parseDouble(config.properties['width']);
+    final height = PropertyParsers.parseDouble(config.properties['height']);
+    final aspectRatio = PropertyParsers.parseDouble(
+      config.properties['aspectRatio'],
+    );
+
+    if (SkeletonItemFactory.isSkeletonMode(dataContext)) {
+      return _buildSkeletonPlaceholder(
+        width: width,
+        height: height,
+        aspectRatio: aspectRatio,
+      );
+    }
+
     final source = PropertyParsers.parseImageSource(
       config.properties['source'] as String?,
     );
@@ -28,15 +44,10 @@ class ImageRenderer implements ComponentRenderer {
     final boundText = boundUrl?.trim() ?? '';
     final url = boundText.isNotEmpty ? boundText : fallbackUrl;
     final resolvedUrl = resolveRemoteImageUrl(url);
-    final width = PropertyParsers.parseDouble(config.properties['width']);
-    final height = PropertyParsers.parseDouble(config.properties['height']);
     final fitString = PropertyParsers.parseImageFitString(
       config.properties['fit'] as String?,
     );
     final fit = _stringToBoxFit(fitString);
-    final aspectRatio = PropertyParsers.parseDouble(
-      config.properties['aspectRatio'],
-    );
 
     Widget image;
     if (source == 'network') {
@@ -180,6 +191,23 @@ class ImageRenderer implements ComponentRenderer {
       theme: theme,
       child: const Center(child: Text('File images not yet supported')),
     );
+  }
+
+  Widget _buildSkeletonPlaceholder({
+    double? width,
+    double? height,
+    double? aspectRatio,
+  }) {
+    Widget box = ColoredBox(
+      color: SkeletonEffectFactory.kBoneBase,
+      child: SizedBox(width: width, height: height),
+    );
+    if (aspectRatio != null && aspectRatio > 0) {
+      box = AspectRatio(aspectRatio: aspectRatio, child: box);
+    } else if (width == null && height == null) {
+      box = AspectRatio(aspectRatio: 1, child: box);
+    }
+    return box;
   }
 
   Widget _placeholderBox(

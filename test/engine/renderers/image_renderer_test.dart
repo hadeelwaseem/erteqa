@@ -3,12 +3,45 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sooq_merchant/config/component_config.dart';
 import 'package:sooq_merchant/core/enums/generic_component_type.dart';
 import 'package:sooq_merchant/core/widgets/engine_network_image.dart';
+import 'package:sooq_merchant/engine/skeleton/skeleton_item_factory.dart';
 import 'package:sooq_merchant/engine/tree/renderers/image_renderer.dart';
 
 import 'renderer_test_utils.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  testWidgets('skeletonMode skips network image', (tester) async {
+    final renderer = ImageRenderer();
+    final config = ComponentConfig(
+      type: GenericComponentType.image,
+      properties: {
+        'source': 'network',
+        'urlPath': 'item.image',
+        'url': 'https://example.com/fallback.png',
+        'aspectRatio': 1,
+      },
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: renderer.render(
+            config,
+            buildChild: (_) => const SizedBox.shrink(),
+            dataContext: {
+              ...rendererDataContext(),
+              SkeletonItemFactory.skeletonModeKey: true,
+              'item': SkeletonItemFactory.itemAt(0),
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(EngineNetworkImage), findsNothing);
+    expect(find.byType(AspectRatio), findsOneWidget);
+  });
 
   testWidgets('urlPath item.image resolves from list item map', (tester) async {
     final renderer = ImageRenderer();

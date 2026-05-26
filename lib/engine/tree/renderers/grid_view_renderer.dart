@@ -3,6 +3,8 @@ import 'package:flutter/widgets.dart';
 import '../../../config/component_config.dart';
 import '../../component_renderer/component_renderer.dart';
 import '../../request_ui_state.dart';
+import '../../skeleton/request_bound_skeleton.dart';
+import '../../skeleton/skeleton_item_factory.dart';
 import '../parsers/data_context_path.dart';
 import '../parsers/property_parsers.dart';
 
@@ -24,8 +26,74 @@ class GridViewRenderer implements ComponentRenderer {
       itemsEmpty: items.isEmpty,
     );
 
-    if (phase == RequestBoundListPhase.loading ||
-        phase == RequestBoundListPhase.error ||
+    final itemTemplateEarly = config.itemBuilder?.item ?? config.child;
+
+    if (phase == RequestBoundListPhase.loading) {
+      if (itemTemplateEarly != null &&
+          crossAxisCount != null &&
+          crossAxisCount > 0) {
+        final scrollDirection = _parseAxis(
+          config.scrollDirection ??
+              config.properties['scrollDirection'] as String?,
+        );
+        final mainAxisSpacing =
+            config.mainAxisSpacing ??
+            _parseDouble(config.properties['mainAxisSpacing']) ??
+            0.0;
+        final crossAxisSpacing =
+            config.crossAxisSpacing ??
+            _parseDouble(config.properties['crossAxisSpacing']) ??
+            0.0;
+        final childAspectRatio =
+            PropertyParsers.parseDouble(config.properties['childAspectRatio']) ??
+            1.0;
+        final enableInnerScroll = config.properties['enableInnerScroll'] == true;
+        final shrinkWrap = !enableInnerScroll;
+        final physics = enableInnerScroll
+            ? null
+            : const NeverScrollableScrollPhysics();
+
+        final count = SkeletonItemFactory.resolveCount(
+          props: props,
+          crossAxisCount: crossAxisCount,
+          isGrid: true,
+        );
+        final fakeItems = SkeletonItemFactory.items(count);
+        final skeletonContext = RequestBoundSkeleton.skeletonContext(
+          dataContext,
+        );
+        final delegate = SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: crossAxisCount,
+          mainAxisSpacing: mainAxisSpacing,
+          crossAxisSpacing: crossAxisSpacing,
+          childAspectRatio: childAspectRatio,
+        );
+        final grid = GridView.builder(
+          scrollDirection: scrollDirection,
+          gridDelegate: delegate,
+          shrinkWrap: shrinkWrap,
+          physics: physics,
+          primary: enableInnerScroll ? null : false,
+          itemCount: count,
+          itemBuilder: (context, index) {
+            final scoped = _withItemContext(
+              itemTemplateEarly,
+              skeletonContext,
+              fakeItems[index],
+              index,
+            );
+            return buildChild(scoped);
+          },
+        );
+        return RequestBoundSkeleton.wrap(
+          child: grid,
+          dataContext: dataContext,
+        );
+      }
+      return buildRequestPhasePlaceholder(phase: phase, message: '');
+    }
+
+    if (phase == RequestBoundListPhase.error ||
         phase == RequestBoundListPhase.empty) {
       final requestMap = requestKey == null
           ? null

@@ -60,6 +60,15 @@ Enum: `lib/core/enums/generic_component_type.dart`.
 
 File: `lib/features/variantscreen/data/repos/variant_repository.dart`.
 
+## Request-bound skeleton loading (engine default)
+
+- **Scope:** `listView` / `gridView` / `container` when `RequestBoundListPhase.loading` (`loadingRequestKeys` or missing `requests.{key}` + `initialRequestKeys`).
+- **List/grid:** fake row count from `props.data.size`, `requestUrl` `size=`, or grid/list heuristics; renders real `itemBuilder` trees under `Skeletonizer`.
+- **Container (detail shells):** `product-detail`, `category-detail`, etc. — injects `SkeletonItemFactory.detailRequestContext` on the direct `child`, builds the real subtree, wraps with `RequestBoundSkeleton`; spinner only when loading with no `child`.
+- **Not skeletonized:** error/empty placeholders (`buildRequestPhasePlaceholder`), load-more footer, page JSON load (`VariantLoading`).
+- **Implementation:** `lib/engine/skeleton/` — `skeletonMode` on `dataContext` skips network images in `ImageRenderer`.
+- **No JSON props** — merchants do not configure skeleton behavior in v1.
+
 ## ScreenRenderer behavior
 
 - Recursive `_buildComponent` with debug path `_enginePath`.

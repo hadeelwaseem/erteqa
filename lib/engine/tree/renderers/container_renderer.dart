@@ -3,6 +3,8 @@ import 'package:flutter/widgets.dart';
 import '../../../config/component_config.dart';
 import '../../component_renderer/component_renderer.dart';
 import '../../request_ui_state.dart';
+import '../../skeleton/request_bound_skeleton.dart';
+import '../../skeleton/skeleton_item_factory.dart';
 import '../../theme/engine_theme.dart';
 import '../parsers/property_parsers.dart';
 
@@ -53,8 +55,44 @@ class ContainerRenderer implements ComponentRenderer {
         dataContext: dataContext,
         itemsEmpty: isRequestPayloadEmpty(requestMap),
       );
-      if (phase == RequestBoundListPhase.loading ||
-          phase == RequestBoundListPhase.error ||
+
+      if (phase == RequestBoundListPhase.loading) {
+        if (config.child != null) {
+          final ctx = SkeletonItemFactory.detailRequestContext(
+            dataContext,
+            requestKey,
+          );
+          final childConfig = SkeletonItemFactory.withContextOverride(
+            config.child!,
+            ctx,
+          );
+          var builtChild = buildChild(childConfig);
+          builtChild = _applyExpandIfNeeded(
+            builtChild,
+            config: config,
+            width: width,
+            height: height,
+          );
+          final wrapped = RequestBoundSkeleton.wrap(
+            child: builtChild,
+            dataContext: dataContext,
+          );
+          return _buildShell(
+            width: width,
+            height: height,
+            padding: padding,
+            margin: margin,
+            color: color,
+            borderRadius: borderRadius,
+            shadow: shadow,
+            border: border,
+            child: wrapped,
+          );
+        }
+        return buildRequestPhasePlaceholder(phase: phase, message: '');
+      }
+
+      if (phase == RequestBoundListPhase.error ||
           phase == RequestBoundListPhase.empty) {
         final message = switch (phase) {
           RequestBoundListPhase.error => resolveDisplayMessage(
@@ -74,51 +112,39 @@ class ContainerRenderer implements ComponentRenderer {
     }
 
     Widget? child = config.child != null ? buildChild(config.child!) : null;
-    final expand = config.properties['expand'] == true;
-    if (expand && child != null && width == null && height == null) {
-      final expandedChild = child;
-      final expandAxis = (config.properties['expandAxis'] as String? ?? 'both')
-          .toLowerCase();
-      child = LayoutBuilder(
-        builder: (context, constraints) {
-          final canWidth =
-              constraints.maxWidth.isFinite && expandAxis != 'vertical';
-          final canHeight =
-              constraints.maxHeight.isFinite && expandAxis != 'horizontal';
-
-          if (canWidth && canHeight) {
-            return SizedBox(
-              width: double.infinity,
-              height: constraints.maxHeight,
-              child: expandedChild,
-            );
-          }
-          if (canWidth) {
-            return SizedBox(
-              width: double.infinity,
-              child: expandedChild,
-            );
-          }
-          if (canHeight) {
-            return SizedBox(
-              height: constraints.maxHeight,
-              width: constraints.maxWidth.isFinite
-                  ? constraints.maxWidth
-                  : double.infinity,
-              child: expandedChild,
-            );
-          }
-          // Both unbounded (e.g. scroll column) — viewport fill for splash.
-          final height = _expandHeight(context, constraints);
-          return SizedBox(
-            width: double.infinity,
-            height: height,
-            child: expandedChild,
-          );
-        },
+    if (child != null) {
+      child = _applyExpandIfNeeded(
+        child,
+        config: config,
+        width: width,
+        height: height,
       );
     }
 
+    return _buildShell(
+      width: width,
+      height: height,
+      padding: padding,
+      margin: margin,
+      color: color,
+      borderRadius: borderRadius,
+      shadow: shadow,
+      border: border,
+      child: child,
+    );
+  }
+
+  static Widget _buildShell({
+    required double? width,
+    required double? height,
+    required EdgeInsetsDirectional? padding,
+    required EdgeInsetsDirectional? margin,
+    required Color? color,
+    required BorderRadius? borderRadius,
+    required BoxShadow? shadow,
+    required Border? border,
+    required Widget? child,
+  }) {
     final hasDecoration =
         color != null ||
         borderRadius != null ||
@@ -139,6 +165,58 @@ class ContainerRenderer implements ComponentRenderer {
             )
           : null,
       child: child,
+    );
+  }
+
+  static Widget _applyExpandIfNeeded(
+    Widget child, {
+    required ComponentConfig config,
+    required double? width,
+    required double? height,
+  }) {
+    final expand = config.properties['expand'] == true;
+    if (!expand || width != null || height != null) {
+      return child;
+    }
+    final expandedChild = child;
+    final expandAxis = (config.properties['expandAxis'] as String? ?? 'both')
+        .toLowerCase();
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final canWidth =
+            constraints.maxWidth.isFinite && expandAxis != 'vertical';
+        final canHeight =
+            constraints.maxHeight.isFinite && expandAxis != 'horizontal';
+
+        if (canWidth && canHeight) {
+          return SizedBox(
+            width: double.infinity,
+            height: constraints.maxHeight,
+            child: expandedChild,
+          );
+        }
+        if (canWidth) {
+          return SizedBox(
+            width: double.infinity,
+            child: expandedChild,
+          );
+        }
+        if (canHeight) {
+          return SizedBox(
+            height: constraints.maxHeight,
+            width: constraints.maxWidth.isFinite
+                ? constraints.maxWidth
+                : double.infinity,
+            child: expandedChild,
+          );
+        }
+        final expandHeight = _expandHeight(context, constraints);
+        return SizedBox(
+          width: double.infinity,
+          height: expandHeight,
+          child: expandedChild,
+        );
+      },
     );
   }
 

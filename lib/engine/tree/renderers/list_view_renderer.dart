@@ -3,6 +3,8 @@ import 'package:flutter/widgets.dart';
 import '../../../config/component_config.dart';
 import '../../component_renderer/component_renderer.dart';
 import '../../request_ui_state.dart';
+import '../../skeleton/request_bound_skeleton.dart';
+import '../../skeleton/skeleton_item_factory.dart';
 import '../parsers/data_context_path.dart';
 import '../parsers/property_parsers.dart';
 
@@ -29,8 +31,53 @@ class ListViewRenderer implements ComponentRenderer {
     final boundedHeight = PropertyParsers.parseDouble(props['height']) ??
         (isHorizontal ? 72.0 : null);
 
-    if (phase == RequestBoundListPhase.loading ||
-        phase == RequestBoundListPhase.error ||
+    final itemTemplate = config.itemBuilder?.item ?? config.child;
+
+    if (phase == RequestBoundListPhase.loading) {
+      if (itemTemplate != null) {
+        final count = SkeletonItemFactory.resolveCount(
+          props: props,
+          isHorizontal: isHorizontal,
+        );
+        final fakeItems = SkeletonItemFactory.items(count);
+        final skeletonContext = RequestBoundSkeleton.skeletonContext(
+          dataContext,
+        );
+        final listView = ListView.builder(
+          scrollDirection: scrollDirection,
+          shrinkWrap: true,
+          physics: isHorizontal
+              ? const ClampingScrollPhysics()
+              : const NeverScrollableScrollPhysics(),
+          primary: false,
+          itemCount: count,
+          itemBuilder: (context, index) {
+            final scoped = _withItemContext(
+              itemTemplate,
+              skeletonContext,
+              fakeItems[index],
+              index,
+            );
+            return buildChild(scoped);
+          },
+        );
+        Widget skeletonList = RequestBoundSkeleton.wrap(
+          child: listView,
+          dataContext: dataContext,
+        );
+        if (isHorizontal && boundedHeight != null) {
+          skeletonList = SizedBox(height: boundedHeight, child: skeletonList);
+        }
+        return skeletonList;
+      }
+      return buildRequestPhasePlaceholder(
+        phase: phase,
+        message: '',
+        compact: isHorizontal,
+      );
+    }
+
+    if (phase == RequestBoundListPhase.error ||
         phase == RequestBoundListPhase.empty) {
       final requestMap = requestKey == null
           ? null
@@ -55,7 +102,6 @@ class ListViewRenderer implements ComponentRenderer {
       );
     }
 
-    final itemTemplate = config.itemBuilder?.item ?? config.child;
     final children = config.children ?? const <ComponentConfig>[];
 
     if (itemTemplate == null && children.isEmpty) {
