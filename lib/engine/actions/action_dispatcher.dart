@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/cubits/token_cubit/token_cubit.dart';
 import '../../core/feedback/app_messenger.dart';
 import '../../core/navigation/app_navigation.dart';
+import '../../core/navigation/auth_redirect.dart';
 import '../../core/network/network_config.dart';
 import '../../core/utils/api_service.dart';
 import '../../core/utils/app_logger.dart';
@@ -9,6 +12,9 @@ import '../../core/utils/service_locator.dart';
 import '../../features/auth/presentation/manager/auth_cubit/auth_cubit.dart';
 import '../engine_page_chrome.dart';
 import '../form/form_state_store.dart';
+import '../tree/parsers/data_context_path.dart';
+import 'action_value_resolver.dart';
+import 'contact_uri_builder.dart';
 
 class EngineActionDispatcher {
   static const contextKey = '_engineActionDispatcher';
@@ -48,6 +54,10 @@ class EngineActionDispatcher {
         return;
       }
     }
+    if (!_passesAuthGate(action, dataContext: mergedContext)) {
+      return;
+    }
+
     final type = action['type'] as String?;
     switch (type) {
       case 'navigate':
@@ -65,9 +75,86 @@ class EngineActionDispatcher {
       case 'closeDrawer':
         _handleDrawer(action, open: false, dataContext: mergedContext);
         return;
+      case 'openUrl':
+        await _handleOpenUrl(action, dataContext: mergedContext);
+        return;
+      case 'openContact':
+        await _handleOpenContact(action, dataContext: mergedContext);
+        return;
       default:
         AppLogger.debug('[ActionDispatcher] Unsupported action type: $type');
         return;
+    }
+  }
+
+  bool _passesAuthGate(
+    Map<String, dynamic> action, {
+    Map<String, dynamic>? dataContext,
+  }) {
+    if (action['requireAuth'] != true) return true;
+    final token =
+        getIt.isRegistered<TokenCubit>() ? getIt<TokenCubit>().state : null;
+    if (AuthRedirect.isLoggedIn(token)) return true;
+
+    final onUnauthenticated = action['onUnauthenticated'];
+    if (onUnauthenticated is Map<String, dynamic>) {
+      dispatch(onUnauthenticated, dataContext: dataContext);
+      return false;
+    }
+
+    AppNavigation.navigate(
+      _context,
+      route: AuthRedirect.loginRoute,
+      type: NavigationType.push,
+    );
+    return false;
+  }
+
+  Future<void> _handleOpenUrl(
+    Map<String, dynamic> action, {
+    Map<String, dynamic>? dataContext,
+  }) async {
+    final resolver = ActionValueResolver(formState: _formState);
+    final urlPath = action['urlPath'] as String?;
+    final url = resolver.resolveString(action['url'], dataContext: dataContext) ??
+        (urlPath != null && urlPath.isNotEmpty
+            ? resolveDataContextPath(dataContext, urlPath)?.toString().trim()
+            : null);
+    if (url == null || url.isEmpty) {
+      AppLogger.debug('[ActionDispatcher] openUrl: missing url');
+      return;
+    }
+    await _launchExternal(Uri.parse(url));
+  }
+
+  Future<void> _handleOpenContact(
+    Map<String, dynamic> action, {
+    Map<String, dynamic>? dataContext,
+  }) async {
+    final channel =
+        (action['channel'] as String? ?? 'whatsapp').toLowerCase();
+    final resolver = ActionValueResolver(formState: _formState);
+    final target = resolver.resolveString(action['target'], dataContext: dataContext);
+    if (target == null || target.isEmpty) {
+      AppLogger.debug('[ActionDispatcher] openContact: missing target');
+      return;
+    }
+    final uriString = ContactUriBuilder.buildUri(channel: channel, target: target);
+    if (uriString == null || uriString.isEmpty) {
+      AppLogger.debug('[ActionDispatcher] openContact: invalid target for $channel');
+      return;
+    }
+    await _launchExternal(Uri.parse(uriString));
+  }
+
+  Future<void> _launchExternal(Uri uri) async {
+    try {
+      final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!launched) {
+        AppLogger.debug('[ActionDispatcher] launchUrl returned false for $uri');
+      }
+    } catch (e) {
+      AppLogger.debug('[ActionDispatcher] launchUrl failed: $e');
     }
   }
 

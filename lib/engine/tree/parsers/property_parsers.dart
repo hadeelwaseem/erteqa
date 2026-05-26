@@ -366,6 +366,8 @@ class PropertyParsers {
         return Icons.lock;
       case 'phone':
         return Icons.phone;
+      case 'sms':
+        return Icons.sms;
       case 'shopping_bag':
         return Icons.shopping_bag;
       case 'chevron_right':

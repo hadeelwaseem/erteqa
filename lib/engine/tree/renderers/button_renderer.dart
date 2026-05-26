@@ -4,6 +4,7 @@ import '../../../config/component_config.dart';
 import '../../component_renderer/component_renderer.dart';
 import '../../theme/engine_theme.dart';
 import '../parsers/property_parsers.dart';
+import 'button_label_row.dart';
 
 class ButtonRenderer implements ComponentRenderer {
   @override
@@ -80,6 +81,20 @@ class ButtonRenderer implements ComponentRenderer {
             : baseMinimumSize;
 
     final shape = RoundedRectangleBorder(borderRadius: borderRadius);
+    final iconName = config.properties['icon'] as String?;
+    final iconPosition =
+        config.properties['iconPosition'] as String? ?? 'trailing';
+    final iconSize = PropertyParsers.parseDouble(config.properties['iconSize']);
+    final iconGap = PropertyParsers.parseDouble(config.properties['iconGap']);
+    final buttonChild = ButtonLabelRow.build(
+      label: label,
+      labelStyle: labelStyle,
+      iconName: iconName,
+      iconPosition: iconPosition,
+      iconSize: iconSize,
+      iconGap: iconGap,
+      iconColor: resolvedForeground,
+    );
 
     late final Widget button;
     switch (variant) {
@@ -92,7 +107,7 @@ class ButtonRenderer implements ComponentRenderer {
             minimumSize: minimumSize,
             shape: shape,
           ),
-          child: Text(label, style: labelStyle),
+          child: buttonChild,
         );
         break;
       case 'outlined':
@@ -108,7 +123,7 @@ class ButtonRenderer implements ComponentRenderer {
               color: textColor ?? theme?.primaryColor ?? const Color(0xFF1D4ED8),
             ),
           ),
-          child: Text(label, style: labelStyle),
+          child: buttonChild,
         );
         break;
       case 'filled':
@@ -123,7 +138,7 @@ class ButtonRenderer implements ComponentRenderer {
             minimumSize: minimumSize,
             shape: shape,
           ),
-          child: Text(label, style: labelStyle),
+          child: buttonChild,
         );
     }
 

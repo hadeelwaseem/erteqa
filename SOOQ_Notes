@@ -8,7 +8,7 @@ so the splash screen will have two cases,
 
 
 
-- add sidebar component 
+- add sidebar component (Done)
 
 - check Navigation in the project, and add the missing Navigation types (two main types: the one that stack the pages so i can navigate back and the one that remove all the pages in the stack and navigate from zero),
 first we need to check the status of the navigation now in our project, is it scalabile to our need as we are descriping now?
@@ -16,3 +16,8 @@ OR we will have problems in some parts?
 The Type of the Navigation should come from the json itslef, so like when Navigating from Auth to HomeScreen For sure will be the one with deleting all pages in the stack, but in the home screen itself like when we moving to product details, it should navigate back.
 
 so How our code status now for that things?
+
+
+- add dropDown in our engine
+
+- check if you can create button 

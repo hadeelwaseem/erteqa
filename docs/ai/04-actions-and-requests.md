@@ -2,7 +2,7 @@
 
 ## AI must know
 
-- **`tap`** in JSON triggers `EngineActionDispatcher` (navigate, apiCall, cubitCall).
+- **`tap`** in JSON triggers `EngineActionDispatcher` (navigate, apiCall, cubitCall, openUrl, openContact, openDrawer, closeDrawer).
 - **`props.data.requestUrl`** triggers `EngineRequestMapper` → cubit loads in `VariantScreen`.
 - Do not add product-fetch logic to renderers — extend mapper + `VariantScreen` wiring instead.
 
@@ -27,8 +27,15 @@ Omit `navigation_type` for default **clear stack** (`context.go`).
 | `navigate` | [`AppNavigation`](../../lib/core/navigation/app_navigation.dart) — `push` or `go` per `navigation_type`; `:param` from `routeParams`, `dataContext`, or `item` |
 | `apiCall` | HTTP via `ApiService` (auth headers when needed) |
 | `cubitCall` | Auth cubit: `requestOtp`, `verifyOtp`, `logout` — runs `onSuccess` / `onFailure` action maps when applicable |
+| `openUrl` | Opens `url` or `urlPath` in external app (`url_launcher`) |
+| `openContact` | Builds URI from `channel` + `target` (string or `{source,field}`) — `whatsapp`, `tel`, `sms`, `email`, `url` |
+| `openDrawer` / `closeDrawer` | Page chrome drawer |
 
 Optional on navigate: `requireValidForm`, `formId` — validates `FormStateStore` before dispatch.
+
+Optional on `openUrl` / `openContact` / others: `requireAuth: true` — if no session token, runs `onUnauthenticated` tap or navigates to `/auth/login`.
+
+Builder handoff: [`docs/engine/builder-specs/18-contact-button-open-contact.md`](../engine/builder-specs/18-contact-button-open-contact.md).
 
 File: `lib/engine/actions/action_dispatcher.dart`.
 

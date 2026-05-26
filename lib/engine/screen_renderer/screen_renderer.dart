@@ -6,6 +6,7 @@ import '../../config/component_config.dart';
 import '../../config/screen_config.dart';
 import '../../core/utils/app_logger.dart';
 import '../tree/renderers/button_renderer.dart';
+import '../tree/renderers/contact_button_renderer.dart';
 import '../tree/renderers/card_renderer.dart';
 import '../tree/renderers/column_renderer.dart';
 import '../component_renderer/component_renderer.dart';
@@ -32,6 +33,8 @@ import '../tree/renderers/progress_indicator_renderer.dart';
 import '../tree/renderers/app_drawer_renderer.dart';
 import '../tree/renderers/tabs_renderer.dart';
 import '../tree/renderers/otp_input_renderer.dart';
+import '../tree/renderers/dropdown_renderer.dart';
+import '../tree/renderers/expansion_tile_renderer.dart';
 import '../tree/renderers/unsupported_component_renderer.dart';
 import '../actions/action_dispatcher.dart';
 import '../engine_page_chrome.dart';
@@ -87,6 +90,7 @@ class ScreenRenderer {
       GenericComponentType.textFormField: TextFormFieldRenderer(),
       GenericComponentType.form: FormRenderer(),
       GenericComponentType.button: ButtonRenderer(),
+      GenericComponentType.contactButton: ContactButtonRenderer(),
       GenericComponentType.card: CardRenderer(),
       GenericComponentType.spacer: SpacerRenderer(),
       GenericComponentType.image: ImageRenderer(),
@@ -102,6 +106,8 @@ class ScreenRenderer {
       GenericComponentType.appDrawer: AppDrawerRenderer(),
       GenericComponentType.tabs: TabsRenderer(),
       GenericComponentType.otpInput: OtpInputRenderer(),
+      GenericComponentType.dropdown: DropdownRenderer(),
+      GenericComponentType.expansionTile: ExpansionTileRenderer(),
       GenericComponentType.unsupported: UnsupportedComponentRenderer(),
     };
   }
@@ -226,7 +232,9 @@ class ScreenRenderer {
     );
     if (onTap == null ||
         config.type == GenericComponentType.button ||
-        config.type == GenericComponentType.tabs) {
+        config.type == GenericComponentType.contactButton ||
+        config.type == GenericComponentType.tabs ||
+        config.type == GenericComponentType.dropdown) {
       return widget;
     }
     return Semantics(

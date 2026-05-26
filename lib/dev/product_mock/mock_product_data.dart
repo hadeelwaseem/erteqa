@@ -37,6 +37,14 @@ class MockProductData {
   static const List<String> _kMockCategoryImageUrls = [
     'https://placehold.co/400x400/png?text=Cat+01',
     'https://placehold.co/400x400/png?text=Cat+02',
+    'https://placehold.co/400x400/png?text=Cat+03',
+    'https://placehold.co/400x400/png?text=Cat+04',
+    'https://placehold.co/400x400/png?text=Cat+05',
+    'https://placehold.co/400x400/png?text=Cat+06',
+    'https://placehold.co/400x400/png?text=Cat+07',
+    'https://placehold.co/400x400/png?text=Cat+08',
+    'https://placehold.co/400x400/png?text=Cat+09',
+    'https://placehold.co/400x400/png?text=Cat+10',
   ];
 
   static String _productImageUrl(int n) =>
@@ -56,7 +64,7 @@ class MockProductData {
   );
 
   static final List<Category> _categories = List.generate(
-    ProductMockConfig.sampleCategoryCount,
+    10,
     (i) => _sampleCategory(i + 1),
   );
 
@@ -94,15 +102,54 @@ class MockProductData {
   }
 
   static Category _sampleCategory(int n) {
-    final slug = 'category-$n';
+    final slugs = [
+      "food-beverage",
+      "fashion",
+      "electronics",
+      "home-garden",
+      "beauty",
+      "sports",
+      "kids",
+      "books",
+      "automotive",
+      "pets",
+    ];
+    final enNames = [
+      "Food & Beverage",
+      "Fashion",
+      "Electronics",
+      "Home & Garden",
+      "Beauty & Health",
+      "Sports & Outdoors",
+      "Kids & Babies",
+      "Books & Stationery",
+      "Automotive",
+      "Pets & Supplies",
+    ];
+    final arNames = [
+      "مأكولات ومشروبات",
+      "موضة",
+      "إلكترونيات",
+      "المنزل والحديقة",
+      "الجمال والصحة",
+      "رياضة وهواء طلق",
+      "الأطفال والرضع",
+      "كتب وأدوات مكتبية",
+      "السيارات",
+      "الحيوانات الأليفة وإمداداتها",
+    ];
+    final idx = (n - 1);
+    final slug = idx < slugs.length ? slugs[idx] : 'category-$n';
+    final nameEn = idx < enNames.length ? enNames[idx] : 'Category $n';
+    final nameAr = idx < arNames.length ? arNames[idx] : 'تصنيف $n';
     return Category(
       categoryId: 'cat-${n.toString().padLeft(3, '0')}',
-      nameAr: 'تصنيف $n',
-      nameEn: 'Category $n',
+      nameAr: nameAr,
+      nameEn: nameEn,
       slug: slug,
       imageUrl: _categoryImageUrl(n),
       depth: 0,
-      sortOrder: 0,
+      sortOrder: idx,
       isActive: true,
       children: const [],
     );

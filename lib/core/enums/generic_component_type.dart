@@ -9,6 +9,7 @@ enum GenericComponentType {
   gridView,
   text,
   button,
+  contactButton,
   card,
   spacer,
   image,
@@ -26,5 +27,7 @@ enum GenericComponentType {
   appDrawer,
   tabs,
   otpInput,
+  dropdown,
+  expansionTile,
   unsupported,
 }

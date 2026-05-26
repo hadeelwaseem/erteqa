@@ -47,7 +47,7 @@ This is a **Flutter-based dynamic mobile app generator**, not a traditional Flut
 ```
 JSON (assets/config) → MobileAppConfig + page slice → ScreenConfig
   → EngineRequestMapper → Feature cubits → dataContext
-  → ScreenRenderer (24 component types) → Flutter UI
+  → ScreenRenderer (30 component types) → Flutter UI
 ```
 
 ---
@@ -81,7 +81,7 @@ JSON (assets/config) → MobileAppConfig + page slice → ScreenConfig
 
 ## Component types (quick reference)
 
-`scaffold`, `singleChildScrollView`, `column`, `row`, `container`, `listView`, `gridView`, `text`, `textFormField`, `form`, `button`, `card`, `spacer`, `image`, `appBar`, `divider`, `icon`, `richtext`, `videoPlayer`, `unsupported`
+`scaffold`, `singleChildScrollView`, `column`, `row`, `container`, `listView`, `gridView`, `text`, `textFormField`, `form`, `button`, `card`, `spacer`, `image`, `appBar`, `divider`, `icon`, `richtext`, `videoPlayer`, `stack`, `imageSlider`, `timer`, `progressIndicator`, `appDrawer`, `tabs`, `otpInput`, `dropdown`, `expansionTile`, `unsupported`
 
 Details: [`docs/ai/03-engine.md`](docs/ai/03-engine.md)
 

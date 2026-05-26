@@ -76,6 +76,49 @@ flutter test test/features/product/data/repos/product_repo_impl_test.dart
 
 See [11-testing.md](11-testing.md).
 
+## Use `dropdown` or `expansionTile`
+
+**Dropdown (filter in row):**
+
+```json
+{
+  "type": "dropdown",
+  "props": {
+    "id": "searchSort",
+    "hint": "ترتيب",
+    "value": "relevance",
+    "data": { "items": [{ "label": "الأكثر صلة", "value": "relevance" }] }
+  }
+}
+```
+
+**Dropdown (labeled field in column):**
+
+```json
+{
+  "type": "dropdown",
+  "props": {
+    "id": "appLanguage",
+    "label": "اللغة",
+    "isExpanded": true,
+    "isDense": true,
+    "data": { "items": [{ "label": "العربية", "value": "ar" }] }
+  }
+}
+```
+
+**Expansion tile (FAQ / details):**
+
+```json
+{
+  "type": "expansionTile",
+  "props": { "title": "الوصف", "showDivider": false },
+  "children": [{ "type": "text", "props": { "value": "…" } }]
+}
+```
+
+Layout rules: [03-engine.md — dropdown & expansionTile usage](03-engine.md#dropdown-and-expansiontile-usage).
+
 ## Code review checklist
 
 - [ ] UI change is JSON-first

@@ -5,7 +5,9 @@
     "bundleId": "com.sooq.merchant.mobile",
     "apiBaseUrl": "https://sooq.up.railway.app",
     "tenantId": "3fc183e8-ac80-4b2a-8bf1-4cd6ac6ffcb1",
-    "tenantSlug": "anasgoldenmer"
+    "tenantSlug": "anasgoldenmer",
+    "supportWhatsApp": "963935237452",
+    "supportPhone": "963935237452"
   },
   "theme": {
     "mode": "light",
@@ -1128,6 +1130,90 @@
           }
         },
         {
+          "id": "home-categories-strip",
+          "type": "listView",
+          "props": {
+            "scrollDirection": "horizontal",
+            "height": 130,
+            "enableInnerScroll": false,
+            "data": {
+              "source": "collection",
+              "id": "home-categories-strip",
+              "requestKey": "home-categories",
+              "requestUrl": "/api/v1/public/categories"
+            },
+            "emptyMessage": "لا توجد أقسام",
+            "errorMessage": "تعذر تحميل الأقسام"
+          },
+          "style": {
+            "padding": {
+              "left": 16,
+              "right": 16,
+              "bottom": 8
+            }
+          },
+          "itemBuilder": {
+            "type": "repeat",
+            "source": "dataContext.requests.home-categories.data",
+            "item": {
+              "id": "home-categories-strip-item",
+              "type": "container",
+              "props": {
+                "width": 110
+              },
+              "style": {
+                "margin": {
+                  "right": 10
+                }
+              },
+              "child": {
+                "id": "home-categories-strip-item-content",
+                "type": "column",
+                "props": {
+                  "crossAxis": "stretch",
+                  "gap": 6
+                },
+                "children": [
+                  {
+                    "id": "home-categories-strip-item-image",
+                    "type": "image",
+                    "props": {
+                      "source": "network",
+                      "urlPath": "item.imageUrl",
+                      "url": "https://picsum.photos/seed/sooq-category-fallback/400/400",
+                      "width": 110,
+                      "height": 80,
+                      "fit": "cover"
+                    },
+                    "style": {
+                      "borderRadius": 10
+                    }
+                  },
+                  {
+                    "id": "home-categories-strip-item-name",
+                    "type": "text",
+                    "props": {
+                      "valuePath": "item.name",
+                      "value": "",
+                      "fontSize": 12,
+                      "fontWeight": "semibold",
+                      "textAlign": "center",
+                      "color": "#0F172A",
+                      "maxLines": 1,
+                      "overflow": "ellipsis"
+                    }
+                  }
+                ]
+              },
+              "tap": {
+                "type": "navigate",
+                "route": "/categories/:categorySlug/products",
+                "navigation_type": "push"
+              }
+            }
+          }
+        },
+        {
           "id": "home-categories-grid",
           "type": "gridView",
           "props": {
@@ -1849,33 +1935,37 @@
                 "id": "product-divider",
                 "type": "divider",
                 "style": {
+                  "height": 1,
                   "margin": {
                     "left": 16,
                     "right": 16
-                  }
+                  },
+                  "color": "#E5E7EB"
                 }
               },
+         
               {
-                "id": "product-desc-block",
-                "type": "container",
-                "style": {
-                  "padding": {
-                    "left": 16,
-                    "right": 16,
-                    "bottom": 16
-                  }
+                "id": "product-desc-expansion",
+                "type": "expansionTile",
+                "props": {
+                  "title": "الوصف",
+                  "initiallyExpanded": true,
+                  "maintainState": true,
+                  "showDivider": false
                 },
-                "child": {
-                  "id": "product-desc",
-                  "type": "text",
-                  "props": {
-                    "valuePath": "dataContext.requests.product-detail.data.description",
-                    "value": "",
-                    "fontSize": 14,
-                    "textAlign": "right",
-                    "color": "#475569"
+                "children": [
+                  {
+                    "id": "product-desc",
+                    "type": "text",
+                    "props": {
+                      "valuePath": "dataContext.requests.product-detail.data.description",
+                      "value": "",
+                      "fontSize": 14,
+                      "textAlign": "right",
+                      "color": "#475569"
+                    }
                   }
-                }
+                ]
               },
               {
                 "id": "product-cta-block",
@@ -2260,6 +2350,35 @@
                   "fontWeight": "bold",
                   "textAlign": "right",
                   "color": "#0F172A"
+                }
+              },
+              {
+                "id": "search-sort-dropdown",
+                "type": "dropdown",
+                "props": {
+                  "id": "searchSort",
+                  "hint": "ترتيب",
+                  "isExpanded": false,
+                  "value": "relevance",
+                  "data": {
+                    "items": [
+                      {
+                        "label": "الأكثر صلة",
+                        "value": "relevance",
+                        "index": 0
+                      },
+                      {
+                        "label": "السعر: الأقل",
+                        "value": "price_asc",
+                        "index": 1
+                      },
+                      {
+                        "label": "السعر: الأعلى",
+                        "value": "price_desc",
+                        "index": 2
+                      }
+                    ]
+                  }
                 }
               }
             ]
@@ -4140,12 +4259,32 @@
           },
           "children": [
             {
-              "id": "settings-language",
-              "type": "button",
+              "id": "settings-language-dropdown",
+              "type": "dropdown",
               "props": {
+                "id": "appLanguage",
                 "label": "اللغة",
-                "variant": "outlined",
-                "fullWidth": true
+                "value": "ar",
+                "isExpanded": true,
+                "isDense": true,
+                "padding": {
+                  "left": 12,
+                  "right": 12,
+                  "top": 4,
+                  "bottom": 4
+                },
+                "data": {
+                  "items": [
+                    {
+                      "label": "العربية",
+                      "value": "ar"
+                    },
+                    {
+                      "label": "English",
+                      "value": "en"
+                    }
+                  ]
+                }
               }
             },
             {
@@ -4219,59 +4358,121 @@
           },
           "children": [
             {
-              "id": "support-faq-1",
-              "type": "card",
+              "id": "support-faq-track-order",
+              "type": "expansionTile",
               "props": {
-                "color": "#F8FAFC",
-                "borderRadius": 10,
-                "elevation": 0
+                "title": "كيف أتابع طلبي؟",
+                "initiallyExpanded": false,
+                "leadingIcon": "help_outline",
+                "showDivider": false
               },
-              "child": {
-                "id": "support-faq-1-col",
-                "type": "column",
-                "props": {
-                  "gap": 6,
-                  "crossAxis": "start"
-                },
-                "style": {
-                  "padding": 14
-                },
-                "children": [
-                  {
-                    "id": "support-faq-1-q",
-                    "type": "text",
-                    "props": {
-                      "value": "كيف أتابع طلبي؟",
-                      "fontSize": 15,
-                      "fontWeight": "bold",
-                      "textAlign": "right"
-                    }
-                  },
-                  {
-                    "id": "support-faq-1-a",
-                    "type": "text",
-                    "props": {
-                      "value": "من صفحة طلباتي داخل حسابك.",
-                      "fontSize": 14,
-                      "textAlign": "right",
-                      "color": "#475569"
-                    }
+              "children": [
+                {
+                  "id": "support-faq-track-order-body",
+                  "type": "text",
+                  "props": {
+                    "value": "من صفحة طلباتي داخل حسابك.",
+                    "fontSize": 14,
+                    "textAlign": "right",
+                    "color": "#475569"
                   }
-                ]
-              }
+                }
+              ]
             },
             {
-              "id": "support-contact-cta",
-              "type": "button",
+              "id": "support-faq-returns",
+              "type": "expansionTile",
               "props": {
-                "label": "تواصل مع الدعم",
-                "variant": "filled",
-                "fullWidth": true
+                "title": "كيف أسترجع منتجاً؟",
+                "initiallyExpanded": false,
+                "leadingIcon": "replay",
+                "showDivider": false
               },
-              "tap": {
-                "type": "openUrl",
-                "url": "https://sooq.support"
-              }
+              "children": [
+                {
+                  "id": "support-faq-returns-body",
+                  "type": "text",
+                  "props": {
+                    "value": "تواصل مع الدعم خلال 14 يوماً من استلام الطلب.",
+                    "fontSize": 14,
+                    "textAlign": "right",
+                    "color": "#475569"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "support-contact-row",
+              "type": "row",
+              "props": {
+                "gap": 10,
+                "crossAxis": "stretch"
+              },
+              "children": [
+                {
+                  "id": "support-whatsapp-wrap",
+                  "type": "container",
+                  "props": {
+                    "expand": true,
+                    "expandAxis": "horizontal"
+                  },
+                  "child": {
+                    "id": "support-whatsapp-cta",
+                    "type": "contactButton",
+                    "props": {
+                      "channel": "whatsapp",
+                      "label": "واتساب",
+                      "targetPath": "app.supportWhatsApp",
+                      "fullWidth": true,
+                      "borderRadius": 10,
+                      "fontSize": 14,
+                      "fontWeight": "bold",
+                      "iconSize": 18,
+                      "gap": 6
+                    },
+                    "tap": {
+                      "type": "openContact",
+                      "channel": "whatsapp",
+                      "target": {
+                        "source": "app",
+                        "field": "supportWhatsApp"
+                      }
+                    }
+                  }
+                },
+                {
+                  "id": "support-call-wrap",
+                  "type": "container",
+                  "props": {
+                    "expand": true,
+                    "expandAxis": "horizontal"
+                  },
+                  "child": {
+                    "id": "support-call-cta",
+                    "type": "contactButton",
+                    "props": {
+                      "channel": "tel",
+                      "label": "اتصل بنا",
+                      "targetPath": "app.supportPhone",
+                      "fullWidth": true,
+                      "borderRadius": 10,
+                      "fontSize": 14,
+                      "fontWeight": "bold",
+                      "icon": "phone",
+                      "iconSize": 18,
+                      "gap": 6
+                    },
+                    "tap": {
+                      "type": "openContact",
+                      "channel": "tel",
+                      "target": {
+                        "source": "app",
+                        "field": "supportPhone"
+                      }
+                    }
+                  }
+                }
+              ]
             }
           ]
         }

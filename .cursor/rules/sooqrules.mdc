@@ -103,9 +103,9 @@ Handoffs: `02-list-grid`, `05-high-traffic`, `06-form-autovalidate`, `08-page-sc
 
 Match JSON `requestUrl` to repo paths.
 
-## Component types (24)
+## Component types (29)
 
-`scaffold`, `singleChildScrollView`, `column`, `row`, `container`, `listView`, `gridView`, `text`, `textFormField`, `form`, `button`, `card`, `spacer`, `image`, `appBar`, `divider`, `icon`, `richtext`, `videoPlayer`, `stack`, `imageSlider`, `timer`, `progressIndicator`, `unsupported`
+`scaffold`, `singleChildScrollView`, `column`, `row`, `container`, `listView`, `gridView`, `text`, `textFormField`, `form`, `button`, `card`, `spacer`, `image`, `appBar`, `divider`, `icon`, `richtext`, `videoPlayer`, `stack`, `imageSlider`, `timer`, `progressIndicator`, `appDrawer`, `tabs`, `otpInput`, `dropdown`, `expansionTile`, `unsupported`
 
 → [docs/ai/03-engine.md](../../docs/ai/03-engine.md)
 

@@ -236,11 +236,21 @@ class ComponentSchemas {
       'borderRadius',
       'padding',
       'alignment',
+      'icon',
+      'iconPosition',
+      'iconSize',
+      'iconGap',
+      'enabled',
       'onTap', // Runtime-injected from tap; not authored in JSON
     },
     propertyTypes: {
       'label': 'string',
       'variant': 'string (elevated|filled|outlined|text)',
+      'icon': 'string (Material icon name)',
+      'iconPosition': 'string (leading|trailing)',
+      'iconSize': 'number',
+      'iconGap': 'number',
+      'enabled': 'bool',
       'backgroundColor': 'string (hex)',
       'textColor': 'string (hex)',
       'borderRadius': 'number',
@@ -249,6 +259,49 @@ class ComponentSchemas {
       'fontSize': 'number',
       'fontWeight': 'string (bold|w600|...)',
       'letterSpacing': 'number',
+      'onTap': 'VoidCallback (runtime-injected)',
+    },
+  );
+
+  /// Schema: ContactButton - external contact CTA (WhatsApp, tel, sms, …).
+  static const contactButton = ComponentSchema(
+    type: 'contactButton',
+    requiredProperties: {'channel', 'label'},
+    optionalProperties: {
+      'target',
+      'targetPath',
+      'backgroundColor',
+      'foregroundColor',
+      'fullWidth',
+      'borderRadius',
+      'fontSize',
+      'fontWeight',
+      'icon',
+      'iconSize',
+      'iconGap',
+      'gap',
+      'iconPosition',
+      'enabled',
+      'padding',
+      'onTap',
+    },
+    propertyTypes: {
+      'channel': 'string (whatsapp|tel|sms|email|url)',
+      'label': 'string',
+      'target': 'string',
+      'targetPath': 'string (dataContext path)',
+      'backgroundColor': 'string (hex)',
+      'foregroundColor': 'string (hex)',
+      'fullWidth': 'bool',
+      'borderRadius': 'number',
+      'fontSize': 'number',
+      'fontWeight': 'string',
+      'icon': 'string',
+      'iconSize': 'number',
+      'iconGap': 'number',
+      'gap': 'number',
+      'iconPosition': 'string (leading|trailing)',
+      'enabled': 'bool',
       'onTap': 'VoidCallback (runtime-injected)',
     },
   );
@@ -347,7 +400,13 @@ class ComponentSchemas {
   static const divider = ComponentSchema(
     type: 'divider',
     requiredProperties: {},
-    optionalProperties: {'thickness', 'color'},
+    optionalProperties: {'height', 'thickness', 'color', 'margin'},
+    propertyTypes: {
+      'height': 'number (total vertical space; from style.height)',
+      'thickness': 'number (line stroke width)',
+      'color': 'string (hex; from style.color)',
+      'margin': 'number | object (from style.margin)',
+    },
   );
 
   static const icon = ComponentSchema(
@@ -601,6 +660,128 @@ class ComponentSchemas {
     },
   );
 
+  static const dropdown = ComponentSchema(
+    type: 'dropdown',
+    requiredProperties: {},
+    optionalProperties: {
+      'id',
+      'controllerId',
+      'label',
+      'hint',
+      'helper',
+      'error',
+      'emptyHint',
+      'value',
+      'valuePath',
+      'selectedIndex',
+      'selectedIndexPath',
+      'data',
+      'itemsPath',
+      'itemLabelPath',
+      'itemValuePath',
+      'required',
+      'validateRequired',
+      'requiredMessage',
+      'validationMessage',
+      'enabled',
+      'readOnly',
+      'isDense',
+      'isExpanded',
+      'margin',
+      'padding',
+      'width',
+      'color',
+      'borderRadius',
+      'border',
+      'tap',
+      'onChanged',
+      'semanticsLabel',
+    },
+    propertyTypes: {
+      'id': 'string',
+      'controllerId': 'string',
+      'label': 'string',
+      'hint': 'string',
+      'helper': 'string',
+      'error': 'string',
+      'emptyHint': 'string',
+      'value': 'string',
+      'valuePath': 'string (dataContext path)',
+      'selectedIndex': 'number',
+      'selectedIndexPath': 'string (dataContext path)',
+      'data': 'object { items: [{ label, value, index?, disabled? }] }',
+      'itemsPath': 'string (dataContext path)',
+      'itemLabelPath': 'string',
+      'itemValuePath': 'string',
+      'required': 'bool',
+      'validateRequired': 'bool',
+      'requiredMessage': 'string',
+      'validationMessage': 'string',
+      'enabled': 'bool',
+      'readOnly': 'bool',
+      'isDense': 'bool (default true)',
+      'isExpanded': 'bool (default false; use true in column/form)',
+      'margin': 'number | object',
+      'padding': 'number | object',
+      'width': 'number',
+      'color': 'string (hex)',
+      'borderRadius': 'number',
+      'border': 'object',
+      'tap': 'action object (value, index, label in dataContext.tap)',
+      'onChanged': 'action object',
+      'semanticsLabel': 'string',
+    },
+  );
+
+  static const expansionTile = ComponentSchema(
+    type: 'expansionTile',
+    requiredProperties: {'title'},
+    optionalProperties: {
+      'title',
+      'subtitle',
+      'leadingIcon',
+      'trailingIcon',
+      'initiallyExpanded',
+      'maintainState',
+      'enabled',
+      'showDivider',
+      'backgroundColor',
+      'collapsedBackgroundColor',
+      'iconColor',
+      'textColor',
+      'subtitleColor',
+      'dividerColor',
+      'tilePadding',
+      'childrenPadding',
+      'borderRadius',
+      'onExpansionChanged',
+      'semanticsLabel',
+      'child',
+      'children',
+    },
+    propertyTypes: {
+      'title': 'string',
+      'subtitle': 'string',
+      'leadingIcon': 'string (Material icon name)',
+      'trailingIcon': 'string (Material icon name)',
+      'initiallyExpanded': 'bool',
+      'maintainState': 'bool',
+      'enabled': 'bool',
+      'showDivider': 'bool (default false; opt-in separator below tile)',
+      'backgroundColor': 'string (hex)',
+      'collapsedBackgroundColor': 'string (hex)',
+      'iconColor': 'string (hex)',
+      'textColor': 'string (hex)',
+      'subtitleColor': 'string (hex)',
+      'dividerColor': 'string (hex)',
+      'tilePadding': 'number | object',
+      'childrenPadding': 'number | object',
+      'borderRadius': 'number',
+      'onExpansionChanged': 'action object (expanded in dataContext.tap)',
+      'semanticsLabel': 'string',
+    },
+  );
+
   static const otpInput = ComponentSchema(
     type: 'otpInput',
     requiredProperties: {},
@@ -673,6 +854,8 @@ class ComponentSchemas {
         return text;
       case 'button':
         return button;
+      case 'contactButton':
+        return contactButton;
       case 'card':
         return card;
       case 'spacer':
@@ -707,6 +890,10 @@ class ComponentSchemas {
         return tabs;
       case 'otpInput':
         return otpInput;
+      case 'dropdown':
+        return dropdown;
+      case 'expansionTile':
+        return expansionTile;
       case 'unsupported':
         return unsupported;
       default:
@@ -726,6 +913,7 @@ class ComponentSchemas {
       'gridView': gridView,
       'text': text,
       'button': button,
+      'contactButton': contactButton,
       'card': card,
       'spacer': spacer,
       'image': image,
@@ -743,6 +931,8 @@ class ComponentSchemas {
       'appDrawer': appDrawer,
       'tabs': tabs,
       'otpInput': otpInput,
+      'dropdown': dropdown,
+      'expansionTile': expansionTile,
       'unsupported': unsupported,
     };
   }

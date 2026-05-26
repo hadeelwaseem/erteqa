@@ -2,7 +2,7 @@
 
 ## AI must know
 
-- **27 component types** — all mapped in `ScreenRenderer._createDefaultRenderers` (including `unsupported` fallback).
+- **30 component types** — all mapped in `ScreenRenderer._createDefaultRenderers` (including `unsupported` fallback).
 - **Entry:** `ScreenRenderer.withPrimitives().render(screenConfig, context:, dataContext:)`.
 - **No domain logic** in renderers — only layout, styling, path resolution from `dataContext`.
 - New component type = enum + renderer + schema + register in `screen_renderer.dart`.
@@ -21,7 +21,8 @@
 | `text` | `text_renderer.dart` | Text + valuePath |
 | `textFormField` | `text_form_field_renderer.dart` | Form fields |
 | `form` | `form_renderer.dart` | Form grouping |
-| `button` | `button_renderer.dart` | Buttons |
+| `button` | `button_renderer.dart` | Buttons (optional `icon` + label row) |
+| `contactButton` | `contact_button_renderer.dart` | External contact CTAs (WhatsApp, tel, sms, …) |
 | `card` | `card_renderer.dart` | Material card |
 | `spacer` | `spacer_renderer.dart` | Fixed gap |
 | `image` | `image_renderer.dart` | Network/asset images |
@@ -37,6 +38,8 @@
 | `appDrawer` | `app_drawer_renderer.dart` | Side drawer (registers page chrome) |
 | `tabs` | `tabs_renderer.dart` | In-page segment tabs (not bottom shell) |
 | `otpInput` | `otp_input_renderer.dart` | Multi-box OTP + `FormStateStore` |
+| `dropdown` | `dropdown_renderer.dart` | Single-choice select (form + filters) |
+| `expansionTile` | `expansion_tile_renderer.dart` | Collapsible FAQ / detail sections |
 | `unsupported` | `unsupported_component_renderer.dart` | Unknown types |
 
 Enum: `lib/core/enums/generic_component_type.dart`.
@@ -100,6 +103,29 @@ File: `lib/features/variantscreen/data/repos/variant_repository.dart`.
   - **Search toolbar:** `row` + `container` with `expand: true`, `expandAxis: "horizontal"`.
   - **Auth forms:** `scroll: "none"` on short static pages (validator whitelist).
 - **Avoid:** `spacer` (legacy — use `gap` on column/row); nested `singleChildScrollView` (unwrapped at runtime); viewport centering under `scroll: vertical` without `expand` or `layout: centered`.
+
+## `dropdown` and `expansionTile` usage
+
+### `dropdown`
+
+| Context | JSON guidance |
+|---------|----------------|
+| **`row` filter / toolbar** | Hint-only (no `label`): engine uses compact `IntrinsicWidth` mode — safe in `row` without `container.expand`. Example: search sort on `/search`. |
+| **`column` / `form`** | Use `label` + `"isExpanded": true` for full-width fields. Example: language picker on `/settings`. |
+| **Height** | `isDense` defaults to `true`; tighten further with `padding` (`top`/`bottom` 4–8). |
+| **Items** | Static: `data.items[]`. Dynamic: `itemsPath` + optional `itemLabelPath` / `itemValuePath`. |
+| **Selection actions** | `tap` or `onChanged` — `dataContext['tap']` receives `{ value, index, label }`. |
+
+Do **not** put a labeled dropdown in a `row` without an explicit `width` or parent flex — use hint-only compact mode for inline filters.
+
+### `expansionTile`
+
+| Topic | Behavior |
+|-------|----------|
+| **Dividers** | Off by default (`showDivider: false`). Internal Material dividers are suppressed in the renderer. Set `"showDivider": true` only when stacking tiles and you want a separator below each tile. |
+| **Multiple open** | Each tile is independent; several may stay expanded. |
+| **Appearance** | Use `borderRadius`, `backgroundColor`, `tilePadding`, `childrenPadding` — not sibling `divider` nodes unless you want a section break (e.g. product page keeps a separate `divider` above the description tile). |
+| **Body** | `children[]` (or `child`) — rendered when expanded; `maintainState` defaults to `true`. |
 
 ## Related
 

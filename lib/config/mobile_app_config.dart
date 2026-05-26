@@ -17,6 +17,8 @@ class MobileAppConfig {
   final String apiBaseUrl;
   final String? tenantId;
   final String? tenantSlug;
+  final String? supportWhatsApp;
+  final String? supportPhone;
   final NavigationConfig navigation;
   final MobileThemeConfig theme;
 
@@ -31,6 +33,8 @@ class MobileAppConfig {
     required this.apiBaseUrl,
     this.tenantId,
     this.tenantSlug,
+    this.supportWhatsApp,
+    this.supportPhone,
     required this.navigation,
     required this.theme,
     required this.pageRoutes,
@@ -63,6 +67,8 @@ class MobileAppConfig {
       apiBaseUrl: app['apiBaseUrl'] as String? ?? '',
       tenantId: app['tenantId'] as String?,
       tenantSlug: app['tenantSlug'] as String?,
+      supportWhatsApp: app['supportWhatsApp'] as String?,
+      supportPhone: app['supportPhone'] as String?,
       navigation: navigation,
       theme: MobileThemeConfig.fromJson(
         json['theme'] as Map<String, dynamic>?,

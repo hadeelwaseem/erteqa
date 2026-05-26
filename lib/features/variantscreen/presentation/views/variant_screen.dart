@@ -484,6 +484,9 @@ class _VariantScreenState extends State<VariantScreen> {
         'tenantId': config.tenantId,
         'tenantSlug': config.tenantSlug,
         'bundleId': config.bundleId,
+        if (config.supportWhatsApp != null)
+          'supportWhatsApp': config.supportWhatsApp,
+        if (config.supportPhone != null) 'supportPhone': config.supportPhone,
       };
       merged[EngineTheme.contextKey] = EngineTheme.fromConfig(config.theme);
     }
