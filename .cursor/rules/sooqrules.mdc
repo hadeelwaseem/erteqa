@@ -105,7 +105,7 @@ Match JSON `requestUrl` to repo paths.
 
 ## Component types (29)
 
-`scaffold`, `singleChildScrollView`, `column`, `row`, `container`, `listView`, `gridView`, `text`, `textFormField`, `form`, `button`, `card`, `spacer`, `image`, `appBar`, `divider`, `icon`, `richtext`, `videoPlayer`, `stack`, `imageSlider`, `timer`, `progressIndicator`, `appDrawer`, `tabs`, `otpInput`, `dropdown`, `expansionTile`, `unsupported`
+`scaffold`, `singleChildScrollView`, `column`, `row`, `container`, `listView`, `gridView`, `text`, `textFormField`, `form`, `button`, `card`, `image`, `appBar`, `divider`, `sizedBox`, `icon`, `richtext`, `videoPlayer`, `stack`, `imageSlider`, `timer`, `progressIndicator`, `appDrawer`, `tabs`, `otpInput`, `dropdown`, `expansionTile`, `unsupported`
 
 → [docs/ai/03-engine.md](../../docs/ai/03-engine.md)
 

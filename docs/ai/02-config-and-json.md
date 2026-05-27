@@ -115,10 +115,23 @@ Each node in `body[]`:
 
 Optional accessibility on images: `semanticsLabel`, `alt` — see [builder-spec 10-accessibility-props](../engine/builder-specs/10-accessibility-props.md).
 
-### `divider` and `spacer`
+### `divider`, `sizedBox`, and spacing
 
 - **`divider`** — horizontal rule; `thickness`, `color`. Used rarely (e.g. form separators). Prefer theme-muted `color` from JSON.
-- **`spacer`** — flex gap inside `row`/`column` (`flex` prop). **Not used** in production config. Prefer `gap` on `column`/`row` or a fixed-height `container` instead of `spacer` under page roots with `MainAxisSize.min`.
+- **`sizedBox`** — fixed blank spacing or child constraint; `width` / `height` props. See [builder-spec 19-sized-box-spacing](../engine/builder-specs/19-sized-box-spacing.md).
+
+#### Spacing decision
+
+| Intent | JSON pattern |
+|--------|----------------|
+| Same gap between **all** siblings | `gap` on parent `row` / `column` (inserts `SizedBox` between every adjacent child) |
+| Push content to opposite ends | `mainAxisAlignment: "spaceBetween"` on `row`/`column`, or `container` with `expand: true` |
+| One fixed blank area | **`sizedBox`** with explicit `height` / `width` |
+| Different gaps between pairs | Nested sub-`row`/`column` with different `gap`, or `container.margin` on specific children |
+
+**Uniform `gap` limitation:** parent `gap` applies the same spacing between every sibling — there is no per-child `skipGap` or `gapBefore`. It never adds space before the first or after the last child.
+
+**Removed `spacer` type:** no longer a registered component. Stale JSON with `"type": "spacer"` fails at parse time with `Unsupported component type`. Use the patterns above instead.
 
 ## Navigation rules
 

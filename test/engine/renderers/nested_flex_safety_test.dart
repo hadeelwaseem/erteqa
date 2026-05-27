@@ -2,29 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sooq_merchant/config/component_config.dart';
 import 'package:sooq_merchant/core/enums/generic_component_type.dart';
-import 'package:sooq_merchant/engine/tree/renderers/column_renderer.dart';
 import 'package:sooq_merchant/engine/tree/renderers/container_renderer.dart';
 import 'package:sooq_merchant/engine/tree/renderers/row_renderer.dart';
 import 'package:sooq_merchant/engine/tree/renderers/text_renderer.dart';
-import 'package:sooq_merchant/engine/validation/layout_constraint_validator.dart';
 
 import 'renderer_test_utils.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  const validator = LayoutConstraintValidator();
-
-  test('validator catches spacer in min column before pump', () {
-    final tree = ComponentConfig(
-      type: GenericComponentType.column,
-      properties: const {'mainAxisSize': 'min'},
-      children: [ComponentConfig(type: GenericComponentType.spacer)],
-    );
-    expect(
-      validator.validate(tree).any((i) => i.code == 'spacer_in_min_column'),
-      isTrue,
-    );
-  });
 
   testWidgets('expand container in bounded row does not use viewport height', (
     tester,

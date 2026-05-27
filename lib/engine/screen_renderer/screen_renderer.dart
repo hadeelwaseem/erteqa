@@ -13,6 +13,7 @@ import '../component_renderer/component_renderer.dart';
 import '../tree/renderers/app_bar_renderer.dart';
 import '../tree/renderers/container_renderer.dart';
 import '../tree/renderers/divider_renderer.dart';
+import '../tree/renderers/sized_box_renderer.dart';
 import '../tree/renderers/icon_renderer.dart';
 import '../tree/renderers/row_renderer.dart';
 import '../tree/renderers/scaffold_renderer.dart';
@@ -20,7 +21,6 @@ import '../tree/renderers/single_child_scroll_view_renderer.dart';
 import '../tree/renderers/text_renderer.dart';
 import '../tree/renderers/text_form_field_renderer.dart';
 import '../tree/renderers/form_renderer.dart';
-import '../tree/renderers/spacer_renderer.dart';
 import '../tree/renderers/image_renderer.dart';
 import '../tree/renderers/list_view_renderer.dart';
 import '../tree/renderers/grid_view_renderer.dart';
@@ -92,10 +92,10 @@ class ScreenRenderer {
       GenericComponentType.button: ButtonRenderer(),
       GenericComponentType.contactButton: ContactButtonRenderer(),
       GenericComponentType.card: CardRenderer(),
-      GenericComponentType.spacer: SpacerRenderer(),
       GenericComponentType.image: ImageRenderer(),
       GenericComponentType.appBar: AppBarRenderer(),
       GenericComponentType.divider: DividerRenderer(),
+      GenericComponentType.sizedBox: SizedBoxRenderer(),
       GenericComponentType.icon: IconRenderer(),
       GenericComponentType.richtext: RichTextRenderer(),
       GenericComponentType.videoPlayer: VideoPlayerRenderer(),

@@ -6,48 +6,6 @@ import 'package:sooq_merchant/engine/validation/layout_constraint_validator.dart
 void main() {
   const validator = LayoutConstraintValidator();
 
-  test('flags spacer outside flex parent', () {
-    final root = ComponentConfig(
-      type: GenericComponentType.container,
-      child: ComponentConfig(type: GenericComponentType.spacer),
-    );
-    final issues = validator.validate(root);
-    expect(
-      issues.any((i) => i.code == 'spacer_outside_flex'),
-      isTrue,
-    );
-  });
-
-  test('flags spacer in min-height column', () {
-    final root = ComponentConfig(
-      type: GenericComponentType.column,
-      properties: const {'mainAxisSize': 'min'},
-      children: [
-        ComponentConfig(type: GenericComponentType.spacer),
-      ],
-    );
-    final issues = validator.validate(root);
-    expect(
-      issues.any((i) => i.code == 'spacer_in_min_column'),
-      isTrue,
-    );
-  });
-
-  test('allows spacer in max row', () {
-    final root = ComponentConfig(
-      type: GenericComponentType.row,
-      properties: const {'mainAxisSize': 'max'},
-      children: [
-        ComponentConfig(type: GenericComponentType.spacer),
-      ],
-    );
-    final issues = validator.validate(root);
-    expect(
-      issues.where((i) => i.code.startsWith('spacer')),
-      isEmpty,
-    );
-  });
-
   test('errors viewport center without expand under vertical scroll', () {
     final root = ComponentConfig(
       type: GenericComponentType.scaffold,
@@ -198,8 +156,21 @@ void main() {
 
   test('validateOrThrow throws on error severity', () {
     final root = ComponentConfig(
-      type: GenericComponentType.container,
-      child: ComponentConfig(type: GenericComponentType.spacer),
+      type: GenericComponentType.scaffold,
+      properties: const {'pageScroll': 'vertical'},
+      child: ComponentConfig(
+        type: GenericComponentType.column,
+        properties: const {
+          'mainAxisSize': 'max',
+          'mainAxisAlignment': 'center',
+        },
+        children: [
+          ComponentConfig(
+            type: GenericComponentType.text,
+            properties: {'value': 'x'},
+          ),
+        ],
+      ),
     );
     expect(
       () => validator.validateOrThrow(root),

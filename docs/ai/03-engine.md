@@ -24,10 +24,10 @@
 | `button` | `button_renderer.dart` | Buttons (optional `icon` + label row) |
 | `contactButton` | `contact_button_renderer.dart` | External contact CTAs (WhatsApp, tel, sms, …) |
 | `card` | `card_renderer.dart` | Material card |
-| `spacer` | `spacer_renderer.dart` | Fixed gap |
 | `image` | `image_renderer.dart` | Network/asset images |
 | `appBar` | `app_bar_renderer.dart` | Top bar |
 | `divider` | `divider_renderer.dart` | Divider line |
+| `sizedBox` | `sized_box_renderer.dart` | Fixed width/height gap |
 | `icon` | `icon_renderer.dart` | Material icons |
 | `richtext` | `rich_text_renderer.dart` | Rich text |
 | `videoPlayer` | `video_player_renderer.dart` | Video embed |
@@ -111,7 +111,7 @@ File: `lib/features/variantscreen/data/repos/variant_repository.dart`.
   - **Catalog:** `scroll: "vertical"` + `gridView`/`listView` with `enableInnerScroll: false` (outer page scroll only).
   - **Search toolbar:** `row` + `container` with `expand: true`, `expandAxis: "horizontal"`.
   - **Auth forms:** `scroll: "none"` on short static pages (validator whitelist).
-- **Avoid:** `spacer` (legacy — use `gap` on column/row); nested `singleChildScrollView` (unwrapped at runtime); viewport centering under `scroll: vertical` without `expand` or `layout: centered`.
+- **Avoid:** nested `singleChildScrollView` (unwrapped at runtime); viewport centering under `scroll: vertical` without `expand` or `layout: centered`. Do not use removed `type: spacer` — use `gap`, `mainAxisAlignment`, or `sizedBox`.
 
 ## `dropdown` and `expansionTile` usage
 

@@ -257,8 +257,8 @@ lib/features/<domain>/
 **Component dispatch:** Use `type` + `props` + `data` / `valuePath` / `urlPath`.  
 **Never** use `semanticType` as a renderer registry key. `semanticType` is documentation/metadata (e.g. `ProductList` on a `gridView`).
 
-**24 component types:**  
-`scaffold`, `singleChildScrollView`, `column`, `row`, `container`, `listView`, `gridView`, `text`, `textFormField`, `form`, `button`, `card`, `spacer`, `image`, `appBar`, `divider`, `icon`, `richtext`, `videoPlayer`, `stack`, `imageSlider`, `timer`, `progressIndicator`, `unsupported`
+**30 component types:**  
+`scaffold`, `singleChildScrollView`, `column`, `row`, `container`, `listView`, `gridView`, `text`, `textFormField`, `form`, `button`, `card`, `image`, `appBar`, `divider`, `sizedBox`, `icon`, `richtext`, `videoPlayer`, `stack`, `imageSlider`, `timer`, `progressIndicator`, `unsupported`
 
 Registry: `ScreenRenderer._createDefaultRenderers` in `lib/engine/screen_renderer/screen_renderer.dart`.
 

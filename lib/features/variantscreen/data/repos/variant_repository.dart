@@ -359,7 +359,8 @@ class AssetVariantRepository implements VariantRepository {
     if (properties['align'] != null) {
       properties['textAlign'] = properties['align'];
     }
-    if (rawType == 'spacer' && properties['size'] != null) {
+
+    if (rawType == 'sizedBox' && properties['size'] != null) {
       properties['height'] = properties['size'];
     }
 

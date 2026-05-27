@@ -292,7 +292,6 @@ Count **explicit** production-config keys that merchants/builders set, and wheth
 | `form` | Auth | Good | |
 | `button` | High | Good | `enabled`, theme `buttonMd` |
 | `card` | High | Good | Theme radius/surface |
-| `spacer` | 0 | N/A | Flex parent required |
 | `image` | Medium | Good | `EngineNetworkImage`; file message EN |
 | `appBar` | High | Good | Theme; fixed elevation |
 | `divider` | Low | Fair | No theme fallback |
@@ -359,7 +358,7 @@ flowchart LR
 
 ## 11. Test coverage (engine)
 
-**Present:** `column`, `row`, `scaffold`, `container`, `text`, `button`, `card`, `image`, `list_view`, `grid_view`, `form`, `text_form_field`, `app_bar`, `stack`, `timer`, `progress_indicator`, `image_slider`, `rich_text`, `spacer`, `request_ui_state`, `theme`, actions, `layout_constraint_validator`, `prod_layout_validator`, layout integration tests.
+**Present:** `column`, `row`, `scaffold`, `container`, `text`, `button`, `card`, `image`, `list_view`, `grid_view`, `form`, `text_form_field`, `app_bar`, `stack`, `timer`, `progress_indicator`, `image_slider`, `rich_text`, `request_ui_state`, `theme`, actions, `layout_constraint_validator`, `prod_layout_validator`, layout integration tests.
 
 **No dedicated renderer widget tests observed:** `video_player`, `divider`, `icon`, `otp_input`, `tabs`, `app_drawer`, `unsupported`.
 

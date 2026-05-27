@@ -69,6 +69,7 @@ Copy structure from [`_TEMPLATE.md`](_TEMPLATE.md).
 | [16-app-drawer-tabs-otp.md](16-app-drawer-tabs-otp.md) | Engine primitives | mixed | `appDrawer`, in-page `tabs`, `otpInput` (+ `openDrawer`/`closeDrawer` actions); OTP on `/auth/otp-reset` |
 | [17-appbar-layout-ui.md](17-appbar-layout-ui.md) | AppBar layout/UI | implemented-in-json | `appBar.elevation`, alpha/`transparent` `backgroundColor`; body-only SafeArea (engine default) |
 | [18-contact-button-open-contact.md](18-contact-button-open-contact.md) | Contact CTAs | implemented-in-json | `contactButton`, `button.icon`, `openUrl`/`openContact`, `app.supportWhatsApp`/`supportPhone` |
+| [19-sized-box-spacing.md](19-sized-box-spacing.md) | Layout spacing | ready-for-builder | `sizedBox` fixed width/height spacing (replaces empty `container` / removed `spacer`) |
 
 Update this table when adding a spec.
 

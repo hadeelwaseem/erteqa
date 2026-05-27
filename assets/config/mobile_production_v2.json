@@ -5042,8 +5042,11 @@
               "type": "divider"
             },
             {
-              "id": "cov-spacer-row",
+              "id": "cov-icon-pi-row",
               "type": "row",
+              "props": {
+                "mainAxisAlignment": "spaceBetween"
+              },
               "children": [
                 {
                   "id": "cov-icon",
@@ -5052,10 +5055,6 @@
                     "name": "favorite",
                     "color": "#1D4ED8"
                   }
-                },
-                {
-                  "id": "cov-spacer",
-                  "type": "spacer"
                 },
                 {
                   "id": "cov-pi",

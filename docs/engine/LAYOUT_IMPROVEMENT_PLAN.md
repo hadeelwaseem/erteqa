@@ -12,7 +12,7 @@
 | **Fewer foot-guns** | If a prop combination often fails in Flutter, don’t expose it — or auto-correct in one place (`VariantRepository`). |
 | **Presets over assembly** | Builders choose **page intent** (`scroll`, `layout`); engine injects a known-good shell instead of hand-wiring `expand` + `mainAxisSize`. |
 | **Fail before render** | Run layout rules when JSON is loaded (and in CI on prod config), not only `debugPrint` in debug builds. |
-| **One spacing primitive** | Prefer `gap` on `column`/`row`; treat `spacer` as legacy. |
+| **One spacing primitive** | Prefer `gap` on `column`/`row`; `spacer` type **removed** from engine. |
 | **No silent fixes** | Either apply a documented auto-fix at parse, or reject with a clear message — avoid “works differently in release”. |
 
 **Explicitly out of scope (over-engineering):**
@@ -52,24 +52,18 @@ Builder sets **one field** instead of remembering `scroll` + `expand` + `mainAxi
 
 ---
 
-### 2. `spacer` in `mainAxisSize: min` column (Medium)
+### 2. `spacer` in `mainAxisSize: min` column (Medium) — **Resolved**
 
-**Why we keep it:** `spacer` maps 1:1 to Flutter `Spacer()`, which is invalid outside flex with bounded main axis.
+**Was:** `spacer` mapped to Flutter `Spacer()`, invalid outside flex with bounded main axis.
 
-**Recommendation — don’t expose flex failure:**
-
-| Option | Choice |
+| Option | Status |
 |--------|--------|
-| A. Deprecate `spacer` in builder | **Preferred long-term** — document `gap` only; prod already uses 0× `spacer`. |
-| B. Safe renderer | **Quick win** — `SpacerRenderer`: if not inside `Row`/`Column` with valid flex, render `SizedBox(height: 16 * flex)` (or `width` in row) instead of `Spacer()`. |
+| A. Remove `spacer` from engine | **Done** — prod/demo JSON migrated; type rejected at parse; use `gap` / layout props. |
+| B. Safe renderer | **Removed** with type deletion. |
 
-Do **A + B**: safe renderer now (no overflow ever), deprecate in schema/docs, validator stays as backstop.
+**Files:** (deleted) `spacer_renderer.dart`; `docs/ai/02-config-and-json.md`, builder docs.
 
-**Do not:** Keep raw `Spacer()` and rely on validator warnings only.
-
-**Files:** `spacer_renderer.dart`, `docs/ai/03-engine.md`, builder docs.
-
-**Effort:** XS · **Risk reduction:** High for arbitrary JSON
+**Effort:** Done · **Risk reduction:** High for arbitrary JSON
 
 ---
 
@@ -222,7 +216,7 @@ flowchart LR
 | **1 — Quick safety** | Renderers only, no JSON change | Safe `spacer`; nested scroll unwrap in release; row stretch behavior fix | 0.5–1 day |
 | **2 — Parse gates** | Repository + tests | Validator on every load; prod JSON CI test (0 errors); `scroll:none` rules | 1 day |
 | **3 — Page presets** | Repository + builder-spec + prod JSON | `pages[].layout: centered`; migrate `/splash*` routes; builder-spec | 1–2 days |
-| **4 — Cleanup** | Docs + deprecation | Deprecate `spacer` / `singleChildScrollView` in docs; trim scaffold `minHeight` hack if presets prove enough; schema prune | 0.5 day |
+| **4 — Cleanup** | Docs + removal | Remove `spacer` from engine; deprecate `singleChildScrollView` in docs; trim scaffold `minHeight` hack if presets prove enough | 0.5 day — **`spacer` removal done** |
 
 **Total:** ~3–4 days focused work, split into 4 small PRs.
 
@@ -232,7 +226,7 @@ flowchart LR
 
 | File | Change |
 |------|--------|
-| [`spacer_renderer.dart`](../lib/engine/tree/renderers/spacer_renderer.dart) | Safe `SizedBox` fallback when flex invalid |
+| ~~`spacer_renderer.dart`~~ | **Removed** — use `gap` / layout props |
 | [`single_child_scroll_view_renderer.dart`](../lib/engine/tree/renderers/single_child_scroll_view_renderer.dart) | Unwrap nested scroll in release |
 | [`row_renderer.dart`](../lib/engine/tree/renderers/row_renderer.dart) | `SizedBox(width: ∞)` + honest alignment when unbounded |
 | [`variant_repository.dart`](../lib/features/variantscreen/data/repos/variant_repository.dart) | Call validator after parse; optional strict mode |
@@ -245,7 +239,7 @@ flowchart LR
 ## Builder contract (what we ask the website builder to do)
 
 1. Use **`pages[].scroll`**: `vertical` (default catalog) or `none` only with **`layout: centered`** or inner scroll.
-2. Use **`gap`** on `column`/`row` — stop shipping `spacer`.
+2. Use **`gap`** on `column`/`row` — `spacer` type removed from engine.
 3. Do not nest `singleChildScrollView` under normal pages.
 4. For full-screen centered splash: set **`layout: "centered"`** (once Phase 3 lands) instead of manual `expand` trees.
 5. For catalog: `gridView` / `listView` with **`enableInnerScroll: false`** (unchanged).

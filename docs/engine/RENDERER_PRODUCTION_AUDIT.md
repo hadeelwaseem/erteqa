@@ -38,7 +38,6 @@
 | `form` | `form_renderer.dart` | `formId`, child/children | **2** | auth pages | none |
 | `button` | `button_renderer.dart` | label, variant, colors, radius… | **37** | CTAs, navigation | none |
 | `card` | `card_renderer.dart` | elevation, radius, color, margin | **67** | product tiles | none |
-| `spacer` | `spacer_renderer.dart` | `flex` | **0** | unused | none |
 | `image` | `image_renderer.dart` | url, source, fit, placeholders | **11** | product cards | none |
 | `appBar` | `app_bar_renderer.dart` | title, backgroundColor, color | **20** | most pages | none |
 | `divider` | `divider_renderer.dart` | thickness, color | **1** | rare | none |
@@ -309,16 +308,12 @@ flowchart TB
 
 ---
 
-### spacer
+### spacer (removed)
 
-- **Production usage:** **0**.
-- **Findings:**
-  - 🟡 `width`/`height` mode (L26–30) not in schema; `flex` requires `Flex` parent.
-  - 🟡 Breaks inside `column` with `MainAxisSize.min` (page root).
-- **JSON-only fixes:** Use `gap` on column/row or fixed `container` height instead.
-- **Engine fixes:** Document; schema add `width`/`height`.
-- **Composition notes:** N/A in production.
-- **Priority:** **P2**
+- **Production usage:** **0** — type removed from engine.
+- **Replacement:** `gap` on column/row, `mainAxisAlignment: spaceBetween`, or fixed `container` height/width.
+- **Stale JSON:** `"type": "spacer"` rejected at parse (`Unsupported component type`).
+- **Priority:** **Done**
 
 ---
 
@@ -450,7 +445,7 @@ flowchart TB
 | **P2** | `singleChildScrollView` release nested-scroll guard | `singleChildScrollView` | engine | S |
 | **P2** | `Semantics` pass on interactive primitives | button, image, card, textFormField | engine | M |
 | **P2** | `container`: `EdgeInsetsDirectional` for RTL | `container` | engine | S |
-| **P2** | `spacer` / `divider` — document or deprecate unused | `spacer`, `divider` | docs | S |
+| **P2** | `divider` — document unused | `divider` | docs | S |
 
 ---
 

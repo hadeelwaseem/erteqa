@@ -435,9 +435,9 @@
             },
             {
               "id": "cfg-1-apps-demo-config-index-tsx-node-24",
-              "type": "spacer",
+              "type": "sizedBox",
               "props": {
-                "size": 16
+                "height": 16
               }
             },
             {
@@ -1008,9 +1008,9 @@
             },
             {
               "id": "cfg-2-apps-demo-config-server-tsx-node-16",
-              "type": "spacer",
+              "type": "sizedBox",
               "props": {
-                "size": 16
+                "height": 16
               }
             },
             {

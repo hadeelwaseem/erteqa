@@ -154,33 +154,6 @@ class LayoutConstraintValidator {
     final type = config.type;
     final props = config.properties;
 
-    if (type == GenericComponentType.spacer) {
-      if (parentFlexAxis == null) {
-        violations.add(
-          LayoutViolation(
-            path: path,
-            code: 'spacer_outside_flex',
-            message:
-                'spacer requires a Row/Column Flex parent; use gap on column/row '
-                'or fixed container height instead.',
-            severity: LayoutViolationSeverity.error,
-          ),
-        );
-      } else if (parentMainAxisSizeMin &&
-          parentFlexAxis == Axis.vertical) {
-        violations.add(
-          LayoutViolation(
-            path: path,
-            code: 'spacer_in_min_column',
-            message:
-                'spacer inside column with mainAxisSize min will overflow; '
-                'use gap or mainAxisSize max.',
-            severity: LayoutViolationSeverity.error,
-          ),
-        );
-      }
-    }
-
     if (type == GenericComponentType.container && props['expand'] == true) {
       if (insideScrollable &&
           pageScroll == 'vertical' &&

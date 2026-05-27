@@ -16,7 +16,7 @@ The engine uses a **synthetic page root** (`scaffold` → `column`) plus Flutter
 | Risk | Severity | Mitigation |
 |------|----------|------------|
 | Viewport centering expected under `scroll:vertical` without `container.expand` | High | Use canonical splash pattern; `LayoutConstraintValidator` warns in debug |
-| `spacer` in `mainAxisSize:min` column | Medium | Unused in prod; validator errors; use `gap` |
+| `spacer` in `mainAxisSize:min` column | Medium | **Resolved** — type removed; use `gap` / layout props |
 | `scroll:none` page with non-scrollable overflowing body | Medium | Validator warns; add inner scroll or keep body short |
 | Nested `singleChildScrollView` under scaffold scroll | Low–Medium | Debug assert only in renderer |
 | Row `stretch` silently becomes `center` when height unbounded | Low | **Fixed (Phase 1):** falls back to `start`; full-width row when parent width finite |

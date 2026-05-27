@@ -327,18 +327,6 @@ class ComponentSchemas {
     },
   );
 
-  /// Schema: Spacer — legacy; prefer [gap] on column/row. Safe renderer fallback at runtime.
-  static const spacer = ComponentSchema(
-    type: 'spacer',
-    requiredProperties: {},
-    optionalProperties: {'flex', 'width', 'height'},
-    propertyTypes: {
-      'flex': 'number (integer) — deprecated: use gap',
-      'width': 'number (fixed size bypasses flex)',
-      'height': 'number (fixed size bypasses flex)',
-    },
-  );
-
   /// Schema: Image - displays images from network, asset, or file sources.
   static const image = ComponentSchema(
     type: 'image',
@@ -406,6 +394,17 @@ class ComponentSchemas {
       'thickness': 'number (line stroke width)',
       'color': 'string (hex; from style.color)',
       'margin': 'number | object (from style.margin)',
+    },
+  );
+
+  /// Schema: SizedBox — fixed width/height gap or child constraint.
+  static const sizedBox = ComponentSchema(
+    type: 'sizedBox',
+    requiredProperties: {},
+    optionalProperties: {'width', 'height'},
+    propertyTypes: {
+      'width': 'number (logical px)',
+      'height': 'number (logical px)',
     },
   );
 
@@ -858,14 +857,14 @@ class ComponentSchemas {
         return contactButton;
       case 'card':
         return card;
-      case 'spacer':
-        return spacer;
       case 'image':
         return image;
       case 'appBar':
         return appBar;
       case 'divider':
         return divider;
+      case 'sizedBox':
+        return sizedBox;
       case 'icon':
         return icon;
       case 'richtext':
@@ -915,10 +914,10 @@ class ComponentSchemas {
       'button': button,
       'contactButton': contactButton,
       'card': card,
-      'spacer': spacer,
       'image': image,
       'appBar': appBar,
       'divider': divider,
+      'sizedBox': sizedBox,
       'icon': icon,
       'richtext': richtext,
       'textFormField': textFormField,

@@ -65,7 +65,15 @@ Optional `pages[].layout: "centered"` tells the mobile engine to build a full-vi
 **Validation rules for builder:**
 
 - Use `layout: centered` for full-screen splash / onboarding — not for catalog or long forms.
-- Prefer `gap` on `column`/`row` instead of `spacer` (legacy).
+- **Do not emit `type: spacer`** — removed from engine. Use spacing decision instead:
+
+| Intent | Use |
+|--------|-----|
+| Uniform sibling spacing | `gap` on `column`/`row` |
+| Push to opposite ends | `mainAxisAlignment: "spaceBetween"` or `container.expand` |
+| Fixed blank area | `sizedBox` with `height`/`width` |
+| Different gaps per pair | Nested `row`/`column` with different `gap`, or `container.margin` |
+
 - Do not nest `singleChildScrollView` under normal pages; use page `scroll: vertical` or inner list/grid scroll.
 
 **Pages wired in production (reference):**
