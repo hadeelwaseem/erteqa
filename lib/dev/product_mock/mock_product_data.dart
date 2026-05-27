@@ -285,6 +285,11 @@ class MockProductData {
       (p) => p.slug == slug,
       orElse: () => _products[0],
     );
+    final productNumber = min(
+      max(_products.indexOf(found) + 1, 1),
+      _products.length,
+    );
+    final detailImages = _detailImageSet(productNumber, found.primaryImageUrl);
     return ProductDetail.fromEnvelopeData({
       'productId': found.productId ?? found.id,
       'titleAr': found.titleAr,
@@ -300,9 +305,7 @@ class MockProductData {
         'displayPrice': found.displayPrice,
       },
       'inventory': {'stockStatus': 'IN_STOCK'},
-      'images': [
-        {'publicUrl': found.primaryImageUrl, 'isPrimary': true},
-      ],
+      'images': detailImages,
       'variants': [],
       'categories': [
         {
@@ -314,6 +317,33 @@ class MockProductData {
       'tags': [],
       'attributes': [],
     });
+  }
+
+  static List<Map<String, dynamic>> _detailImageSet(
+    int productNumber,
+    String? primaryImageUrl,
+  ) {
+    final primary = (primaryImageUrl ?? '').trim();
+    final candidates = <String>[
+      if (primary.isNotEmpty) primary,
+      _productImageUrl(productNumber + 1),
+      _productImageUrl(productNumber + 2),
+      _productImageUrl(productNumber + 3),
+    ];
+    final unique = <String>[];
+    for (final url in candidates) {
+      if (url.isEmpty) continue;
+      if (unique.contains(url)) continue;
+      unique.add(url);
+    }
+    return [
+      for (var i = 0; i < unique.length; i++)
+        {
+          'publicUrl': unique[i],
+          'isPrimary': i == 0,
+          'alt': 'Product ${productNumber.toString().padLeft(2, '0')} Image ${i + 1}',
+        },
+    ];
   }
 
   static List<Category> categories() => _categories;

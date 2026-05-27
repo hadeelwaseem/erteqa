@@ -1814,64 +1814,39 @@
             },
             "children": [
               {
-                "id": "product-hero-image",
-                "type": "image",
+                "id": "product-hero-gallery",
+                "type": "imageSlider",
                 "props": {
-                  "source": "network",
-                  "urlPath": "dataContext.requests.product-detail.data.primaryImageUrl",
-                  "url": "https://picsum.photos/seed/sooq-product-fallback/400/400",
+                  "imagesPath": "dataContext.requests.product-detail.data.images",
+                  "itemUrlPath": "publicUrl",
+                  "itemAltPath": "alt",
                   "aspectRatio": 1.5,
-                  "fit": "cover"
+                  "fit": "cover",
+                  "autoPlay": false,
+                  "showIndicators": true,
+                  "showIndicatorsWhenSingle": true,
+                  "indicatorPosition": "bottom",
+                  "indicatorColor": "#1D4ED8",
+                  "indicatorInactiveColor": "#CBD5E1",
+                  "indicatorStyle": "dot",
+                  "indicatorBottomPadding": 10,
+                  "borderRadius": 18,
+                  "enableFullscreenPreview": true,
+                  "showThumbnails": true,
+                  "showThumbnailsWhenSingle": true,
+                  "thumbnailSize": 64,
+                  "thumbnailGap": 8,
+                  "thumbnailBorderRadius": 10,
+                  "thumbnailBorderWidth": 2,
+                  "thumbnailActiveBorderColor": "#1D4ED8",
+                  "thumbnailInactiveBorderColor": "#E2E8F0"
                 },
                 "style": {
                   "padding": {
                     "left": 16,
                     "right": 16,
                     "top": 12,
-                    "bottom": 8
-                  }
-                }
-              },
-              {
-                "id": "product-gallery-strip",
-                "type": "listView",
-                "props": {
-                  "enableInnerScroll": false,
-                  "scrollDirection": "horizontal",
-                  "height": 72
-                },
-                "style": {
-                  "padding": {
-                    "left": 16,
                     "bottom": 12
-                  }
-                },
-                "itemBuilder": {
-                  "type": "repeat",
-                  "source": "dataContext.requests.product-detail.data.images",
-                  "item": {
-                    "id": "product-gallery-thumb",
-                    "type": "container",
-                    "style": {
-                      "margin": {
-                        "right": 8
-                      }
-                    },
-                    "child": {
-                      "id": "product-gallery-thumb-image",
-                      "type": "image",
-                      "props": {
-                        "source": "network",
-                        "urlPath": "item.publicUrl",
-                        "url": "https://picsum.photos/seed/sooq-product-fallback/400/400",
-                        "width": 64,
-                        "height": 64,
-                        "fit": "cover"
-                      },
-                      "style": {
-                        "borderRadius": 10
-                      }
-                    }
                   }
                 }
               },

@@ -88,6 +88,15 @@ File: `lib/features/variantscreen/data/repos/variant_repository.dart`.
 - `component_schemas.dart` — catalog aligned with `mobile_production_v2` (e.g. `valuePath`, `urlPath`, `gap`, `shadow`, `border`, `aspectRatio`, `variant`, `id`). Warns on unknown keys; does not block render. Button `onTap` is **runtime-injected** by `ScreenRenderer` from JSON `tap` — do not author `onTap` in JSON.
 - `layout_constraint_validator.dart` — parse-time layout rules on every `AssetVariantRepository.loadVariant`; CI via `test/engine/validation/prod_layout_validator_test.dart` (0 errors on prod pages).
 
+## `imageSlider` (PDP/gallery) notes
+
+- Supports static `images` and dynamic binding via `imagesPath` + `itemUrlPath` / `itemAltPath`.
+- Supports rounded media (`borderRadius`), fullscreen preview (`enableFullscreenPreview`), and thumbnail strip (`showThumbnails`).
+- Single-image behavior is explicit and backward-compatible:
+  - `showIndicatorsWhenSingle` (default `false`)
+  - `showThumbnailsWhenSingle` (default `false`)
+- If these single-image flags are omitted, old behavior remains (controls hidden for a one-image payload).
+
 ## Registry note
 
 `ComponentRegistry` may exist historically; **production path uses enum map in `ScreenRenderer`**, not string registry.

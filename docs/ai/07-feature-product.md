@@ -84,6 +84,12 @@ Mapper resolves `productId` from `item.slug` or `item.id`.
 - `AppLogger` for debug paths
 - Parse envelope in repo — widgets never parse raw JSON
 
+## Mock catalog behavior (dev mode)
+
+- File: `lib/dev/product_mock/mock_product_data.dart`.
+- `MockProductData.productDetail(slug)` now returns a multi-image `images[]` set (`publicUrl`, `isPrimary`, `alt`) instead of a single image only.
+- Purpose: validate PDP slider swipe, indicators, fullscreen preview, and thumbnail selection in mock mode.
+
 ## Adding a product endpoint
 
 1. Add/extend model in `data/models/`
