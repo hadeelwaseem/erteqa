@@ -63,6 +63,8 @@ Optional `drawerEdge: "end"` on the action when using `endDrawer`.
 
 **Placement:** Anywhere in `pages[].body`; last `appDrawer` wins if multiple.
 
+**Safe area:** The mobile engine wraps the drawer `child` in `SafeArea` automatically (status bar, notch, home indicator). Not configurable in JSON — do not add fixed top padding for system insets.
+
 ---
 
 ## 2. `tabs` (in-page)
@@ -152,6 +154,7 @@ Submit via existing button `cubitCall` `verifyOtp` + `requireValidForm` — **no
 |-------|------|
 | Renderers | `lib/engine/tree/renderers/app_drawer_renderer.dart`, `tabs_renderer.dart`, `otp_input_renderer.dart` |
 | Drawer wrap | `lib/engine/screen_renderer/screen_renderer.dart` |
+| Drawer safe area | `lib/engine/tree/renderers/app_drawer_renderer.dart` — `SafeArea` around drawer `child` (not in JSON) |
 | Actions | `lib/engine/actions/action_dispatcher.dart` (`openDrawer`, `closeDrawer`, `source: tap`) |
 
 ---

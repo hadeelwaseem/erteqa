@@ -34,7 +34,7 @@ class AppDrawerRenderer implements ComponentRenderer {
         ..drawer = Drawer(
           width: width,
           backgroundColor: backgroundColor,
-          child: drawerChild,
+          child: SafeArea(child: drawerChild),
         )
         ..drawerEdge = drawerEdge;
     }
