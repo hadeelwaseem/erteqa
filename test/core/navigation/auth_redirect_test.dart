@@ -47,8 +47,30 @@ void main() {
 
     test('logged-out user on protected route redirects to login', () {
       expect(
-        AuthRedirect.resolve(token: null, matchedLocation: '/checkout'),
+        AuthRedirect.resolve(token: null, matchedLocation: '/orders'),
         '/auth/login',
+      );
+    });
+
+    test('logged-out user may access checkout and order success routes', () {
+      expect(
+        AuthRedirect.resolve(token: null, matchedLocation: '/checkout'),
+        isNull,
+      );
+      expect(
+        AuthRedirect.resolve(token: null, matchedLocation: '/order/success'),
+        isNull,
+      );
+      expect(
+        AuthRedirect.resolve(token: null, matchedLocation: '/orders/track'),
+        isNull,
+      );
+      expect(
+        AuthRedirect.resolve(
+          token: null,
+          matchedLocation: '/orders/ord-mock-1001',
+        ),
+        isNull,
       );
     });
 

@@ -10,6 +10,18 @@ import 'package:sooq_merchant/core/feedback/app_messenger.dart';
 
 import 'package:sooq_merchant/config/mobile_app_config.dart';
 import 'package:sooq_merchant/core/utils/service_locator.dart';
+import 'package:sooq_merchant/core/utils/syp_formatter.dart';
+import 'package:sooq_merchant/features/commerce/cart/presentation/manager/cart_cubit/cart_cubit.dart';
+import 'package:sooq_merchant/features/commerce/cart/presentation/manager/cart_cubit/cart_state.dart';
+import 'package:sooq_merchant/features/commerce/checkout/presentation/manager/checkout_cubit/checkout_cubit.dart';
+import 'package:sooq_merchant/features/commerce/checkout/presentation/manager/checkout_cubit/checkout_state.dart';
+import 'package:sooq_merchant/features/commerce/data/models/customer_order.dart';
+import 'package:sooq_merchant/features/commerce/data/models/customer_shipment_status.dart';
+import 'package:sooq_merchant/features/commerce/data/models/enums/order_status.dart';
+import 'package:sooq_merchant/features/commerce/data/models/order_list_response.dart';
+import 'package:sooq_merchant/features/commerce/data/models/public_payment_method.dart';
+import 'package:sooq_merchant/features/commerce/order/presentation/manager/order_cubit/order_cubit.dart';
+import 'package:sooq_merchant/features/commerce/order/presentation/manager/order_cubit/order_state.dart';
 import 'package:sooq_merchant/engine/actions/action_dispatcher.dart';
 import 'package:sooq_merchant/engine/form/form_state_store.dart';
 import 'package:sooq_merchant/engine/requests/request_mapper.dart';
@@ -64,8 +76,27 @@ class _VariantScreenState extends State<VariantScreen> {
 
   static const _splashRoutes = {'/splash', '/splash-carousel'};
 
+  static const _checkoutRoutes = {
+    '/checkout',
+    '/checkout/address',
+    '/checkout/payment',
+    '/order/success',
+    '/order/failure',
+  };
+
+  static final _orderDetailRoutePattern = RegExp(r'^/orders/[^/]+$');
+
   bool get _isAuthRoute =>
       widget.pageRoute != null && _authRoutes.contains(widget.pageRoute);
+
+  bool get _isCheckoutRoute =>
+      widget.pageRoute != null && _checkoutRoutes.contains(widget.pageRoute);
+
+  bool get _isOrderRoute =>
+      widget.pageRoute != null &&
+      (widget.pageRoute == '/orders' ||
+          widget.pageRoute == '/orders/track' ||
+          _orderDetailRoutePattern.hasMatch(widget.pageRoute!));
 
   bool get _isSplashRoute =>
       widget.pageRoute != null && _splashRoutes.contains(widget.pageRoute);
@@ -141,34 +172,38 @@ class _VariantScreenState extends State<VariantScreen> {
     _ensurePageRequestsPrimed(pageRequestKeys);
     final renderContext = _buildRenderContext(mappedRequests: mappedRequests);
 
-    Widget content;
-    if (mappedRequests.isEmpty) {
-      content = ScreenRenderer.withPrimitives().render(
-        config,
-        context: context,
-        dataContext: renderContext,
-      );
-    } else {
-      final providers = <BlocProvider>[
-        if (EngineRequestMapper.needsProductCubit(mappedRequests))
-          BlocProvider<ProductCubit>(create: (_) => getIt<ProductCubit>()),
-        if (EngineRequestMapper.needsSearchCubit(mappedRequests))
-          BlocProvider<ProductSearchCubit>(
-            create: (_) => getIt<ProductSearchCubit>(),
-          ),
-        if (EngineRequestMapper.needsAutocompleteCubit(mappedRequests))
-          BlocProvider<ProductAutocompleteCubit>(
-            create: (_) => getIt<ProductAutocompleteCubit>(),
-          ),
-        if (EngineRequestMapper.needsProductDetailCubit(mappedRequests))
-          BlocProvider<ProductDetailCubit>(
-            create: (_) => getIt<ProductDetailCubit>(),
-          ),
-        if (EngineRequestMapper.needsCategoryCubit(mappedRequests))
-          BlocProvider<CategoryCubit>(create: (_) => getIt<CategoryCubit>()),
-      ];
+    final providers = <BlocProvider>[
+      if (EngineRequestMapper.needsProductCubit(mappedRequests))
+        BlocProvider<ProductCubit>(create: (_) => getIt<ProductCubit>()),
+      if (EngineRequestMapper.needsSearchCubit(mappedRequests))
+        BlocProvider<ProductSearchCubit>(
+          create: (_) => getIt<ProductSearchCubit>(),
+        ),
+      if (EngineRequestMapper.needsAutocompleteCubit(mappedRequests))
+        BlocProvider<ProductAutocompleteCubit>(
+          create: (_) => getIt<ProductAutocompleteCubit>(),
+        ),
+      if (EngineRequestMapper.needsProductDetailCubit(mappedRequests))
+        BlocProvider<ProductDetailCubit>(
+          create: (_) => getIt<ProductDetailCubit>(),
+        ),
+      if (EngineRequestMapper.needsCategoryCubit(mappedRequests))
+        BlocProvider<CategoryCubit>(create: (_) => getIt<CategoryCubit>()),
+      if (EngineRequestMapper.needsCheckoutCubit(mappedRequests))
+        BlocProvider<CheckoutCubit>.value(value: getIt<CheckoutCubit>()),
+      if (EngineRequestMapper.needsOrderCubit(mappedRequests))
+        BlocProvider<OrderCubit>.value(value: getIt<OrderCubit>()),
+    ];
 
-      content = MultiBlocProvider(
+    Widget buildContent(Map<String, dynamic> ctx) {
+      if (mappedRequests.isEmpty) {
+        return ScreenRenderer.withPrimitives().render(
+          config,
+          context: context,
+          dataContext: ctx,
+        );
+      }
+      return MultiBlocProvider(
         providers: providers,
         child: _ProductRequestHost(
           config: config,
@@ -177,7 +212,7 @@ class _VariantScreenState extends State<VariantScreen> {
           queryParams: widget.queryParams,
           mappedRequests: mappedRequests,
           pageRequestKeys: pageRequestKeys,
-          renderContext: renderContext,
+          renderContext: ctx,
           formStateStore: _formStateStore,
           onPreparePageRequests: () =>
               _ensurePageRequestsPrimed(pageRequestKeys),
@@ -193,6 +228,14 @@ class _VariantScreenState extends State<VariantScreen> {
           onCategoryTreeSuccess: _handleCategoryTreeSuccess,
           onCategorySuccess: _handleCategorySuccess,
           onCategoryFailure: _handleCategoryFailure,
+          onCheckoutPaymentMethodsSuccess: _handleCheckoutPaymentMethodsSuccess,
+          onCheckoutPaymentMethodsFailure: _handleCheckoutPaymentMethodsFailure,
+          onOrdersListSuccess: _handleOrdersListSuccess,
+          onOrdersListFailure: _handleOrdersListFailure,
+          onOrderDetailSuccess: _handleOrderDetailSuccess,
+          onOrderDetailFailure: _handleOrderDetailFailure,
+          onShipmentTrackSuccess: _handleShipmentTrackSuccess,
+          onShipmentTrackEmpty: _handleShipmentTrackEmpty,
         ),
       );
     }
@@ -200,7 +243,43 @@ class _VariantScreenState extends State<VariantScreen> {
     if (_isAuthRoute) {
       return BlocProvider<AuthCubit>.value(
         value: getIt<AuthCubit>(),
-        child: _AuthRequestHost(renderContext: renderContext, child: content),
+        child: _AuthRequestHost(
+          renderContext: renderContext,
+          child: buildContent(renderContext),
+        ),
+      );
+    }
+
+    Widget content = buildContent(renderContext);
+
+    if (_isCheckoutRoute && getIt.isRegistered<CheckoutCubit>()) {
+      content = _CheckoutRequestHost(
+        renderContext: renderContext,
+        child: _CheckoutHost(
+          baseRenderContext: renderContext,
+          childBuilder: (checkoutCtx) {
+            if (!_isAuthRoute && getIt.isRegistered<CartCubit>()) {
+              return _CartHost(
+                baseRenderContext: checkoutCtx,
+                childBuilder: buildContent,
+              );
+            }
+            return buildContent(checkoutCtx);
+          },
+        ),
+      );
+    } else if (_isOrderRoute && getIt.isRegistered<OrderCubit>()) {
+      content = _OrderRequestHost(
+        renderContext: renderContext,
+        child: _OrderHost(
+          baseRenderContext: renderContext,
+          childBuilder: buildContent,
+        ),
+      );
+    } else if (!_isAuthRoute && getIt.isRegistered<CartCubit>()) {
+      content = _CartHost(
+        baseRenderContext: renderContext,
+        childBuilder: buildContent,
       );
     }
 
@@ -359,6 +438,16 @@ class _VariantScreenState extends State<VariantScreen> {
       return;
     }
 
+    if (requestKey == 'product-detail' && getIt.isRegistered<CartCubit>()) {
+      final prices = <String, int>{};
+      for (final variant in detail.variants) {
+        final id = variant.variantId?.trim();
+        if (id == null || id.isEmpty) continue;
+        prices[id] = parseSypAmount(variant.price) ?? 0;
+      }
+      getIt<CartCubit>().setVariantPriceIndex(prices);
+    }
+
     setState(() {
       _requestResults[requestKey] = {'success': true, 'data': detail.toJson()};
       _loadingRequestKeys.remove(requestKey);
@@ -421,6 +510,161 @@ class _VariantScreenState extends State<VariantScreen> {
         'success': false,
         'message': message,
         'data': const <String, dynamic>{},
+      };
+      _loadingRequestKeys.remove(requestKey);
+    });
+  }
+
+  void _handleCheckoutPaymentMethodsSuccess(
+    String requestKey,
+    List<PublicPaymentMethod> methods,
+  ) {
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _requestResults[requestKey] = {
+        'success': true,
+        'data': methods
+            .map((method) {
+              final json = Map<String, dynamic>.from(method.toJson());
+              json['selectable'] = !method.requiresRedirect;
+              if (method.requiresRedirect) {
+                json['displayName'] = '${method.displayName} (قريباً)';
+              }
+              return json;
+            })
+            .toList(growable: false),
+      };
+      _loadingRequestKeys.remove(requestKey);
+    });
+  }
+
+  void _handleCheckoutPaymentMethodsFailure(
+    String requestKey,
+    String message,
+  ) {
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _requestResults[requestKey] = {
+        'success': false,
+        'message': message,
+        'data': const <dynamic>[],
+      };
+      _loadingRequestKeys.remove(requestKey);
+    });
+  }
+
+  void _handleOrdersListSuccess(
+    String requestKey,
+    OrderListResponse response,
+  ) {
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _requestResults[requestKey] = {
+        'success': response.success,
+        'message': response.message,
+        'data': response.data
+            .map((row) {
+              final json = Map<String, dynamic>.from(row.toJson());
+              json['totalFormatted'] = formatSyp(row.total);
+              json['orderStatusLabel'] = orderStatusLabel(row.orderStatus);
+              return json;
+            })
+            .toList(growable: false),
+        'meta': response.meta.toJson(),
+        'timestamp': response.timestamp,
+      };
+      _loadingRequestKeys.remove(requestKey);
+    });
+  }
+
+  void _handleOrdersListFailure(String requestKey, String message) {
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _requestResults[requestKey] = {
+        'success': false,
+        'message': message,
+        'data': const <dynamic>[],
+        'meta': const {
+          'hasNext': false,
+          'last': true,
+          'page': 0,
+          'totalPages': 0,
+        },
+        'timestamp': 0,
+      };
+      _loadingRequestKeys.remove(requestKey);
+    });
+  }
+
+  void _handleOrderDetailSuccess(String requestKey, CustomerOrder order) {
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _requestResults[requestKey] = {
+        'success': true,
+        'data': _enrichOrderJson(order),
+      };
+      _loadingRequestKeys.remove(requestKey);
+    });
+  }
+
+  void _handleOrderDetailFailure(String requestKey, String message) {
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _requestResults[requestKey] = {
+        'success': false,
+        'message': message,
+        'data': const <String, dynamic>{},
+      };
+      _loadingRequestKeys.remove(requestKey);
+    });
+  }
+
+  void _handleShipmentTrackSuccess(
+    String requestKey,
+    CustomerShipmentStatus shipment,
+  ) {
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _requestResults[requestKey] = {
+        'success': true,
+        'data': shipment.toJson(),
+      };
+      _loadingRequestKeys.remove(requestKey);
+    });
+  }
+
+  void _handleShipmentTrackEmpty(String requestKey, String message) {
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _requestResults[requestKey] = {
+        'success': true,
+        'data': null,
+        'empty': true,
+        'message': message,
       };
       _loadingRequestKeys.remove(requestKey);
     });
@@ -510,7 +754,362 @@ class _VariantScreenState extends State<VariantScreen> {
     if (productResult is Map<String, dynamic>) {
       merged['products'] = productResult['data'] ?? const <dynamic>[];
     }
+
+    if (getIt.isRegistered<CartCubit>()) {
+      applyCartToRenderContext(merged, getIt<CartCubit>().state);
+    }
+    if (getIt.isRegistered<CheckoutCubit>()) {
+      applyCheckoutToRenderContext(merged, getIt<CheckoutCubit>().state);
+    }
+    applyOrderToRenderContext(merged);
     return merged;
+  }
+}
+
+String orderStatusLabel(OrderStatus status) {
+  return switch (status) {
+    OrderStatus.pending => 'قيد الانتظار',
+    OrderStatus.confirmed => 'مؤكد',
+    OrderStatus.processing => 'قيد المعالجة',
+    OrderStatus.shipped => 'تم الشحن',
+    OrderStatus.delivered => 'تم التسليم',
+    OrderStatus.completed => 'مكتمل',
+    OrderStatus.cancelled => 'ملغي',
+    OrderStatus.returned => 'مرتجع',
+    OrderStatus.refunded => 'مسترد',
+    OrderStatus.failed => 'فشل',
+    OrderStatus.unknown => 'غير معروف',
+  };
+}
+
+Map<String, dynamic> _enrichOrderJson(CustomerOrder order) {
+  final json = Map<String, dynamic>.from(order.toJson());
+  json['totalFormatted'] = formatSyp(order.total);
+  json['subtotalFormatted'] = formatSyp(order.subtotal);
+  json['shippingCostFormatted'] = formatSyp(order.shippingCost);
+  json['discountAmountFormatted'] = formatSyp(order.discountAmount);
+  json['taxAmountFormatted'] = formatSyp(order.taxAmount);
+  json['orderStatusLabel'] = orderStatusLabel(order.orderStatus);
+  return json;
+}
+
+void applyOrderToRenderContext(Map<String, dynamic> merged) {
+  if (!getIt.isRegistered<OrderCubit>()) {
+    return;
+  }
+  final cubit = getIt<OrderCubit>();
+  merged['order'] = <String, dynamic>{
+    if (cubit.guestLookupError != null) 'guestLookupError': cubit.guestLookupError,
+    if (cubit.lastLookupOrderId != null)
+      'lastLookupOrderId': cubit.lastLookupOrderId,
+  };
+}
+
+void applyCartToRenderContext(
+  Map<String, dynamic> merged,
+  CartState state,
+) {
+  final cart = switch (state) {
+    CartLoaded(:final cart) => cart,
+    CartActionSuccess(:final cart) => cart,
+    CartFailureState(:final cart) => cart,
+    _ => null,
+  };
+
+  if (cart == null) {
+    merged['cart'] = <String, dynamic>{
+      'items': const <Map<String, dynamic>>[],
+      'itemCount': 0,
+      'subtotalSyp': 0,
+      'subtotalFormatted': formatSyp(0),
+      'isEmpty': true,
+    };
+    return;
+  }
+
+  merged['cart'] = <String, dynamic>{
+    'items': cart.items
+        .map((line) {
+          final json = Map<String, dynamic>.from(line.toJson());
+          json['unitPriceFormatted'] = formatSyp(line.unitPrice);
+          json['lineTotalFormatted'] = formatSyp(line.lineTotal);
+          return json;
+        })
+        .toList(),
+    'itemCount': cart.itemCount,
+    'subtotalSyp': cart.subtotalSyp,
+    'subtotalFormatted': formatSyp(cart.subtotalSyp),
+    'isEmpty': cart.isEmpty,
+  };
+}
+
+void applyCheckoutToRenderContext(
+  Map<String, dynamic> merged,
+  CheckoutState state,
+) {
+  final draft = switch (state) {
+    CheckoutLoaded(:final draft) => draft,
+    CheckoutLoading(:final draft) => draft,
+    CheckoutFailureState(:final draft) => draft,
+    CheckoutActionSuccess(:final draft) => draft,
+    _ => null,
+  };
+
+  if (draft == null) {
+    merged['checkout'] = <String, dynamic>{
+      'hasLocation': false,
+      'shippingCostSyp': 0,
+      'shippingCostFormatted': formatSyp(0),
+      'discountMessage': null,
+    };
+    return;
+  }
+
+  final quote = draft.shippingQuote;
+  final lastOrder = draft.lastOrder;
+  final lastOrderJson = lastOrder == null
+      ? null
+      : {
+          ...lastOrder.toJson(),
+          'totalFormatted': formatSyp(lastOrder.total),
+        };
+
+  merged['checkout'] = <String, dynamic>{
+    'draft': draft.toJson(),
+    'hasLocation': draft.hasLocation,
+    'shippingCostSyp': quote?.shippingCostSyp ?? 0,
+    'shippingCostFormatted': formatSyp(quote?.shippingCostSyp ?? 0),
+    'selectedPaymentMethod': draft.paymentMethod,
+    'discountMessage': draft.discountMessage,
+    if (lastOrderJson != null) 'lastOrder': lastOrderJson,
+  };
+}
+
+class _CartHost extends StatelessWidget {
+  const _CartHost({
+    required this.baseRenderContext,
+    required this.childBuilder,
+  });
+
+  final Map<String, dynamic> baseRenderContext;
+  final Widget Function(Map<String, dynamic> ctx) childBuilder;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<CartCubit, CartState>(
+      listenWhen: (previous, current) =>
+          current is CartFailureState || current is CartActionSuccess,
+      listener: (context, state) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!context.mounted) {
+            return;
+          }
+          final ctx = Map<String, dynamic>.from(baseRenderContext);
+          applyCartToRenderContext(ctx, state);
+          if (state is CartFailureState) {
+            AppMessenger.showError(
+              context,
+              state.message,
+              dataContext: ctx,
+            );
+          } else if (state is CartActionSuccess) {
+            final message = state.message?.trim();
+            if (message != null && message.isNotEmpty) {
+              AppMessenger.showSuccess(
+                context,
+                message,
+                dataContext: ctx,
+              );
+            }
+          }
+        });
+      },
+      buildWhen: (previous, current) =>
+          current is CartLoaded ||
+          current is CartActionSuccess ||
+          current is CartFailureState ||
+          current is CartLoading,
+      builder: (context, state) {
+        final ctx = Map<String, dynamic>.from(baseRenderContext);
+        applyCartToRenderContext(ctx, state);
+        return childBuilder(ctx);
+      },
+    );
+  }
+}
+
+class _CheckoutHost extends StatelessWidget {
+  const _CheckoutHost({
+    required this.baseRenderContext,
+    required this.childBuilder,
+  });
+
+  final Map<String, dynamic> baseRenderContext;
+  final Widget Function(Map<String, dynamic> ctx) childBuilder;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<CheckoutCubit, CheckoutState>(
+      listenWhen: (previous, current) => current is CheckoutFailureState,
+      listener: (context, state) {
+        // Hard failures are surfaced by [_CheckoutRequestHost] via AppMessenger.
+      },
+      buildWhen: (previous, current) =>
+          current is CheckoutLoaded ||
+          current is CheckoutLoading ||
+          current is CheckoutFailureState ||
+          current is CheckoutActionSuccess ||
+          current is CheckoutInitial,
+      builder: (context, state) {
+        final ctx = Map<String, dynamic>.from(baseRenderContext);
+        applyCheckoutToRenderContext(ctx, state);
+        if (getIt.isRegistered<CartCubit>()) {
+          applyCartToRenderContext(ctx, context.read<CartCubit>().state);
+        }
+        return childBuilder(ctx);
+      },
+    );
+  }
+}
+
+class _CheckoutRequestHost extends StatelessWidget {
+  const _CheckoutRequestHost({
+    required this.child,
+    required this.renderContext,
+  });
+
+  final Widget child;
+  final Map<String, dynamic> renderContext;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF1F5F9),
+      body: BlocListener<CheckoutCubit, CheckoutState>(
+        listenWhen: (previous, current) =>
+            current is CheckoutFailureState &&
+            current.paymentMethodsRequestKey == null,
+        listener: (context, state) {
+          if (state is! CheckoutFailureState) {
+            return;
+          }
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!context.mounted) {
+              return;
+            }
+            AppMessenger.showError(
+              context,
+              state.message,
+              dataContext: renderContext,
+            );
+          });
+        },
+        child: BlocBuilder<CheckoutCubit, CheckoutState>(
+          builder: (context, state) {
+            final isLoading = state is CheckoutLoading &&
+                (state.operation == 'saveAddress' ||
+                    state.operation == 'placeOrder');
+            return Stack(
+              children: [
+                child,
+                if (isLoading)
+                  const Positioned.fill(
+                    child: ColoredBox(
+                      color: Color(0x33FFFFFF),
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _OrderHost extends StatelessWidget {
+  const _OrderHost({
+    required this.baseRenderContext,
+    required this.childBuilder,
+  });
+
+  final Map<String, dynamic> baseRenderContext;
+  final Widget Function(Map<String, dynamic> ctx) childBuilder;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<OrderCubit, OrderState>(
+      listenWhen: (previous, current) => current is OrderGuestLookupUpdated,
+      listener: (context, state) {},
+      buildWhen: (previous, current) =>
+          current is OrderGuestLookupUpdated ||
+          current is OrderInitial ||
+          current is OrderLoading ||
+          current is OrderActionSuccess,
+      builder: (context, state) {
+        final ctx = Map<String, dynamic>.from(baseRenderContext);
+        applyOrderToRenderContext(ctx);
+        return childBuilder(ctx);
+      },
+    );
+  }
+}
+
+class _OrderRequestHost extends StatelessWidget {
+  const _OrderRequestHost({
+    required this.child,
+    required this.renderContext,
+  });
+
+  final Widget child;
+  final Map<String, dynamic> renderContext;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF1F5F9),
+      body: BlocListener<OrderCubit, OrderState>(
+        listenWhen: (previous, current) =>
+            current is OrderFailureState && !current.suppressMessenger,
+        listener: (context, state) {
+          if (state is! OrderFailureState) {
+            return;
+          }
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!context.mounted) {
+              return;
+            }
+            AppMessenger.showError(
+              context,
+              state.message,
+              dataContext: renderContext,
+            );
+          });
+        },
+        child: BlocBuilder<OrderCubit, OrderState>(
+          builder: (context, state) {
+            final isLoading = state is OrderLoading &&
+                (state.operation == 'cancelOrder' ||
+                    state.operation == 'loadOrderDetail' ||
+                    state.operation == 'openInvoice' ||
+                    state.operation == 'lookupGuest');
+            return Stack(
+              children: [
+                child,
+                if (isLoading)
+                  const Positioned.fill(
+                    child: ColoredBox(
+                      color: Color(0x33FFFFFF),
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
   }
 }
 
@@ -615,6 +1214,14 @@ class _ProductRequestHost extends StatefulWidget {
     required this.onCategoryTreeSuccess,
     required this.onCategorySuccess,
     required this.onCategoryFailure,
+    required this.onCheckoutPaymentMethodsSuccess,
+    required this.onCheckoutPaymentMethodsFailure,
+    required this.onOrdersListSuccess,
+    required this.onOrdersListFailure,
+    required this.onOrderDetailSuccess,
+    required this.onOrderDetailFailure,
+    required this.onShipmentTrackSuccess,
+    required this.onShipmentTrackEmpty,
   });
 
   final dynamic config;
@@ -657,6 +1264,19 @@ class _ProductRequestHost extends StatefulWidget {
   onCategoryTreeSuccess;
   final void Function(String requestKey, Category category) onCategorySuccess;
   final void Function(String requestKey, String message) onCategoryFailure;
+  final void Function(String requestKey, List<PublicPaymentMethod> methods)
+  onCheckoutPaymentMethodsSuccess;
+  final void Function(String requestKey, String message)
+  onCheckoutPaymentMethodsFailure;
+  final void Function(String requestKey, OrderListResponse response)
+  onOrdersListSuccess;
+  final void Function(String requestKey, String message) onOrdersListFailure;
+  final void Function(String requestKey, CustomerOrder order)
+  onOrderDetailSuccess;
+  final void Function(String requestKey, String message) onOrderDetailFailure;
+  final void Function(String requestKey, CustomerShipmentStatus shipment)
+  onShipmentTrackSuccess;
+  final void Function(String requestKey, String message) onShipmentTrackEmpty;
 
   @override
   State<_ProductRequestHost> createState() => _ProductRequestHostState();
@@ -743,6 +1363,40 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
   }
 
   bool _shouldHandleTerminalCategoryState(String requestKey) {
+    return _dispatchedRequestKeys.contains(requestKey) &&
+        _keysSeenLoadingThisSession.contains(requestKey);
+  }
+
+  static String? _requestKeyFromCheckoutState(CheckoutState state) {
+    return switch (state) {
+      CheckoutLoading(:final paymentMethodsRequestKey) =>
+        paymentMethodsRequestKey,
+      CheckoutLoaded(:final paymentMethodsRequestKey) =>
+        paymentMethodsRequestKey,
+      CheckoutFailureState(:final paymentMethodsRequestKey) =>
+        paymentMethodsRequestKey,
+      _ => null,
+    };
+  }
+
+  bool _shouldHandleTerminalCheckoutState(String requestKey) {
+    return _dispatchedRequestKeys.contains(requestKey) &&
+        _keysSeenLoadingThisSession.contains(requestKey);
+  }
+
+  static String? _requestKeyFromOrderState(OrderState state) {
+    return switch (state) {
+      OrderLoading(:final requestKey) => requestKey,
+      OrderListSuccess(:final requestKey) => requestKey,
+      OrderDetailSuccess(:final requestKey) => requestKey,
+      OrderShipmentSuccess(:final requestKey) => requestKey,
+      OrderShipmentEmpty(:final requestKey) => requestKey,
+      OrderFailureState(:final requestKey) => requestKey,
+      _ => null,
+    };
+  }
+
+  bool _shouldHandleTerminalOrderState(String requestKey) {
     return _dispatchedRequestKeys.contains(requestKey) &&
         _keysSeenLoadingThisSession.contains(requestKey);
   }
@@ -966,6 +1620,8 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
     ProductAutocompleteCubit? productAutocompleteCubit;
     ProductDetailCubit? productDetailCubit;
     CategoryCubit? categoryCubit;
+    CheckoutCubit? checkoutCubit;
+    OrderCubit? orderCubit;
 
     if (EngineRequestMapper.needsProductCubit(widget.mappedRequests)) {
       productCubit = context.read<ProductCubit>();
@@ -982,6 +1638,12 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
     if (EngineRequestMapper.needsCategoryCubit(widget.mappedRequests)) {
       categoryCubit = context.read<CategoryCubit>();
     }
+    if (EngineRequestMapper.needsCheckoutCubit(widget.mappedRequests)) {
+      checkoutCubit = context.read<CheckoutCubit>();
+    }
+    if (EngineRequestMapper.needsOrderCubit(widget.mappedRequests)) {
+      orderCubit = context.read<OrderCubit>();
+    }
 
     try {
       await EngineRequestMapper.dispatchRequests(
@@ -990,6 +1652,8 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
         productAutocompleteCubit: productAutocompleteCubit,
         productDetailCubit: productDetailCubit,
         categoryCubit: categoryCubit,
+        checkoutCubit: checkoutCubit,
+        orderCubit: orderCubit,
         tenantId: _resolveTenantIdForRequests(),
         requests: toDispatch,
         formValueFor: _formValueFor,
@@ -1219,6 +1883,105 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
               }
               _setRequestLoading(state.requestKey, false);
               widget.onCategoryFailure(state.requestKey, state.errMessage);
+            }
+          },
+        ),
+      );
+    }
+
+    if (EngineRequestMapper.needsCheckoutCubit(widget.mappedRequests)) {
+      listeners.add(
+        BlocListener<CheckoutCubit, CheckoutState>(
+          listenWhen: (previous, current) {
+            final key = _requestKeyFromCheckoutState(current);
+            return key != null && _isPageRequestKey(key);
+          },
+          listener: (context, state) {
+            final requestKey = _requestKeyFromCheckoutState(state);
+            if (requestKey == null) {
+              return;
+            }
+
+            if (state is CheckoutLoading &&
+                state.operation == 'loadPaymentMethods') {
+              _keysSeenLoadingThisSession.add(requestKey);
+              _setRequestLoading(requestKey, true);
+            } else if (state is CheckoutLoaded &&
+                state.paymentMethods != null &&
+                state.paymentMethodsRequestKey == requestKey) {
+              if (!_shouldHandleTerminalCheckoutState(requestKey)) {
+                return;
+              }
+              _setRequestLoading(requestKey, false);
+              widget.onCheckoutPaymentMethodsSuccess(
+                requestKey,
+                state.paymentMethods!,
+              );
+            } else if (state is CheckoutFailureState) {
+              if (!_shouldHandleTerminalCheckoutState(requestKey)) {
+                return;
+              }
+              _setRequestLoading(requestKey, false);
+              widget.onCheckoutPaymentMethodsFailure(
+                requestKey,
+                state.message,
+              );
+            }
+          },
+        ),
+      );
+    }
+
+    if (EngineRequestMapper.needsOrderCubit(widget.mappedRequests)) {
+      listeners.add(
+        BlocListener<OrderCubit, OrderState>(
+          listenWhen: (previous, current) {
+            final key = _requestKeyFromOrderState(current);
+            return key != null && _isPageRequestKey(key);
+          },
+          listener: (context, state) {
+            final requestKey = _requestKeyFromOrderState(state);
+            if (requestKey == null) {
+              return;
+            }
+
+            if (state is OrderLoading) {
+              _keysSeenLoadingThisSession.add(requestKey);
+              _setRequestLoading(requestKey, true);
+            } else if (state is OrderListSuccess) {
+              if (!_shouldHandleTerminalOrderState(requestKey)) {
+                return;
+              }
+              _setRequestLoading(requestKey, false);
+              widget.onOrdersListSuccess(requestKey, state.response);
+            } else if (state is OrderDetailSuccess) {
+              if (!_shouldHandleTerminalOrderState(requestKey)) {
+                return;
+              }
+              _setRequestLoading(requestKey, false);
+              widget.onOrderDetailSuccess(requestKey, state.order);
+            } else if (state is OrderShipmentSuccess) {
+              if (!_shouldHandleTerminalOrderState(requestKey)) {
+                return;
+              }
+              _setRequestLoading(requestKey, false);
+              widget.onShipmentTrackSuccess(requestKey, state.shipment);
+            } else if (state is OrderShipmentEmpty) {
+              if (!_shouldHandleTerminalOrderState(requestKey)) {
+                return;
+              }
+              _setRequestLoading(requestKey, false);
+              widget.onShipmentTrackEmpty(requestKey, state.message);
+            } else if (state is OrderFailureState) {
+              if (!_shouldHandleTerminalOrderState(requestKey)) {
+                return;
+              }
+              _setRequestLoading(requestKey, false);
+              if (state.operation == 'loadOrders') {
+                widget.onOrdersListFailure(requestKey, state.message);
+              } else {
+                widget.onOrderDetailFailure(requestKey, state.message);
+              }
             }
           },
         ),

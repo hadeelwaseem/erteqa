@@ -33,6 +33,11 @@ class RequestCancelledFailure extends Failure {
   const RequestCancelledFailure() : super('');
 }
 
+/// Shipment track 404 — order exists but no shipment yet (spec: empty embed, no toast).
+class ShipmentNotFoundFailure extends Failure {
+  const ShipmentNotFoundFailure() : super('Shipment not found');
+}
+
 class ServerFailure extends Failure {
   ServerFailure(super.errMessage);
 

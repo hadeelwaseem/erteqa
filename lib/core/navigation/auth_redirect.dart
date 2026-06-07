@@ -46,6 +46,18 @@ class AuthRedirect {
     if (RegExp(r'^/categories/[^/]+/products$').hasMatch(path)) {
       return true;
     }
+    if (path == '/orders/track') {
+      return true;
+    }
+    if (RegExp(r'^/orders/[^/]+$').hasMatch(path)) {
+      return true;
+    }
+    if (path.startsWith('/checkout')) {
+      return true;
+    }
+    if (path == '/order/success' || path == '/order/failure') {
+      return true;
+    }
     return false;
   }
 

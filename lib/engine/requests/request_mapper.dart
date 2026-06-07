@@ -1,6 +1,8 @@
 import 'package:sooq_merchant/config/component_config.dart';
 import 'package:sooq_merchant/config/screen_config.dart';
 import 'package:sooq_merchant/core/utils/app_logger.dart';
+import 'package:sooq_merchant/features/commerce/checkout/presentation/manager/checkout_cubit/checkout_cubit.dart';
+import 'package:sooq_merchant/features/commerce/order/presentation/manager/order_cubit/order_cubit.dart';
 import 'package:sooq_merchant/features/product/presentation/manager/category_cubit/category_cubit.dart';
 import 'package:sooq_merchant/features/product/presentation/manager/product_autocomplete_cubit/product_autocomplete_cubit.dart';
 import 'package:sooq_merchant/features/product/presentation/manager/product_cubit/product_cubit.dart';
@@ -72,6 +74,19 @@ class EngineRequestMapper {
             _isSingleCategoryRequest(request),
       );
 
+  static bool needsCheckoutCubit(List<EngineMappedRequest> requests) =>
+      requests.any(_isPaymentMethodsRequest);
+
+  static bool needsOrderCubit(List<EngineMappedRequest> requests) =>
+      requests.any(_isCustomerOrdersListRequest) ||
+      requests.any(_isCustomerOrderDetailRequest) ||
+      requests.any(_isShipmentTrackRequest);
+
+  static bool _isPaymentMethodsRequest(EngineMappedRequest request) {
+    final url = request.requestUrl?.toLowerCase() ?? '';
+    return url.contains('/public/payments/methods');
+  }
+
   static List<EngineMappedRequest> collectRequests(
     ScreenConfig config, {
     Map<String, String> routeParams = const {},
@@ -130,6 +145,8 @@ class EngineRequestMapper {
     ProductAutocompleteCubit? productAutocompleteCubit,
     ProductDetailCubit? productDetailCubit,
     CategoryCubit? categoryCubit,
+    CheckoutCubit? checkoutCubit,
+    OrderCubit? orderCubit,
     required String? tenantId,
     required List<EngineMappedRequest> requests,
     String? Function(String fieldId)? formValueFor,
@@ -142,9 +159,74 @@ class EngineRequestMapper {
       productAutocompleteCubit?.setTenantId(tenantId);
       productDetailCubit?.setTenantId(tenantId);
       categoryCubit?.setTenantId(tenantId);
+      checkoutCubit?.setTenantId(tenantId);
+      orderCubit?.setTenantId(tenantId);
     }
 
     for (final request in requests) {
+      if (_isCustomerOrdersListRequest(request)) {
+        if (orderCubit == null) continue;
+        final status = _parseOrderStatusQuery(request.requestUrl);
+        AppLogger.debug(
+          '[RequestMapper] dispatch orders list key=${request.key} '
+          'url=${request.requestUrl} page=${request.page} size=${request.size} '
+          'tenant=${tenantId ?? "not_set"}',
+        );
+        await orderCubit.loadOrders(
+          request.key,
+          page: request.page,
+          size: request.size,
+          status: status,
+        );
+        continue;
+      }
+
+      if (_isCustomerOrderDetailRequest(request)) {
+        if (orderCubit == null) continue;
+        final orderId = _parseOrderId(request.requestUrl);
+        if (orderId == null || orderId.isEmpty) {
+          continue;
+        }
+        AppLogger.debug(
+          '[RequestMapper] dispatch order detail key=${request.key} '
+          'orderId=$orderId url=${request.requestUrl} '
+          'tenant=${tenantId ?? "not_set"}',
+        );
+        await orderCubit.loadOrderDetail(
+          requestKey: request.key,
+          orderId: orderId,
+        );
+        continue;
+      }
+
+      if (_isShipmentTrackRequest(request)) {
+        if (orderCubit == null) continue;
+        final orderId = _parseOrderId(request.requestUrl);
+        if (orderId == null || orderId.isEmpty) {
+          continue;
+        }
+        AppLogger.debug(
+          '[RequestMapper] dispatch shipment track key=${request.key} '
+          'orderId=$orderId url=${request.requestUrl} '
+          'tenant=${tenantId ?? "not_set"}',
+        );
+        await orderCubit.loadShipmentTrack(
+          requestKey: request.key,
+          orderId: orderId,
+        );
+        continue;
+      }
+
+      if (_isPaymentMethodsRequest(request)) {
+        if (checkoutCubit == null) continue;
+        AppLogger.debug(
+          '[RequestMapper] dispatch payment methods key=${request.key} '
+          'url=${request.requestUrl} tenant=${tenantId ?? "not_set"}',
+        );
+        await checkoutCubit.loadPaymentMethods(request.key);
+        continue;
+      }
+
       if (_isCategoryProductsRequest(request)) {
         if (productCubit == null) continue;
         final slug = _parseCategorySlug(request.requestUrl);
@@ -559,6 +641,75 @@ class EngineRequestMapper {
       return null;
     }
     return _categoryProductsPattern.firstMatch(requestUrl)?.group(1);
+  }
+
+  static bool _isCustomerOrdersListRequest(EngineMappedRequest request) {
+    final url = request.requestUrl?.toLowerCase() ?? '';
+    if (url.isEmpty || !url.contains('/customer/orders')) {
+      return false;
+    }
+    if (url.contains('/cancel') || url.contains('/invoice')) {
+      return false;
+    }
+    return _parseOrderId(request.requestUrl) == null;
+  }
+
+  static bool _isCustomerOrderDetailRequest(EngineMappedRequest request) {
+    final url = request.requestUrl?.toLowerCase() ?? '';
+    if (url.isEmpty || !url.contains('/customer/orders/')) {
+      return false;
+    }
+    if (url.contains('/cancel') || url.contains('/invoice')) {
+      return false;
+    }
+    return _parseOrderId(request.requestUrl) != null;
+  }
+
+  static bool _isShipmentTrackRequest(EngineMappedRequest request) {
+    final url = request.requestUrl?.toLowerCase() ?? '';
+    return url.contains('/public/shipping/track/');
+  }
+
+  static String? _parseOrderId(String? requestUrl) {
+    if (requestUrl == null || requestUrl.isEmpty) {
+      return null;
+    }
+
+    final uri = Uri.tryParse(requestUrl);
+    if (uri == null) {
+      return null;
+    }
+
+    final segments = uri.pathSegments;
+    final ordersIndex = segments.lastIndexOf('orders');
+    if (ordersIndex >= 0 && ordersIndex < segments.length - 1) {
+      final id = segments[ordersIndex + 1];
+      if (id.isNotEmpty && id != 'cancel' && id != 'invoice') {
+        return id;
+      }
+    }
+
+    final trackIndex = segments.lastIndexOf('track');
+    if (trackIndex >= 0 && trackIndex < segments.length - 1) {
+      final id = segments[trackIndex + 1];
+      if (id.isNotEmpty) {
+        return id;
+      }
+    }
+
+    return null;
+  }
+
+  static String? _parseOrderStatusQuery(String? requestUrl) {
+    if (requestUrl == null || requestUrl.isEmpty) {
+      return null;
+    }
+    final uri = Uri.tryParse(requestUrl);
+    final status = uri?.queryParameters['status'];
+    if (status == null || status.isEmpty) {
+      return null;
+    }
+    return status;
   }
 
   static (int, int, String?) _parseListQuery(

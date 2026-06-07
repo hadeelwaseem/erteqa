@@ -22,6 +22,23 @@ import 'package:sooq_merchant/features/product/presentation/manager/product_auto
 import 'package:sooq_merchant/features/product/presentation/manager/product_cubit/product_cubit.dart';
 import 'package:sooq_merchant/features/product/presentation/manager/product_detail_cubit/product_detail_cubit.dart';
 import 'package:sooq_merchant/features/product/presentation/manager/product_search_cubit/product_search_cubit.dart';
+import 'package:sooq_merchant/features/commerce/cart/data/datasources/cart_local_storage.dart';
+import 'package:sooq_merchant/features/commerce/cart/data/repos/cart_repo.dart';
+import 'package:sooq_merchant/features/commerce/cart/data/repos/cart_repo_impl.dart';
+import 'package:sooq_merchant/features/commerce/cart/presentation/manager/cart_cubit/cart_cubit.dart';
+import 'package:sooq_merchant/features/commerce/checkout/data/datasources/checkout_session_store.dart';
+import 'package:sooq_merchant/features/commerce/checkout/data/repos/checkout_repo.dart';
+import 'package:sooq_merchant/features/commerce/checkout/data/repos/checkout_repo_impl.dart';
+import 'package:sooq_merchant/features/commerce/checkout/presentation/manager/checkout_cubit/checkout_cubit.dart';
+import 'package:sooq_merchant/features/commerce/order/presentation/manager/order_cubit/order_cubit.dart';
+import 'package:sooq_merchant/features/commerce/order/data/repos/order_repo.dart';
+import 'package:sooq_merchant/features/commerce/order/data/repos/order_repo_impl.dart';
+import 'package:sooq_merchant/features/commerce/shipping/data/repos/shipping_repo.dart';
+import 'package:sooq_merchant/features/commerce/shipping/data/repos/shipping_repo_impl.dart';
+import 'package:sooq_merchant/dev/commerce_mock/commerce_mock_config.dart';
+import 'package:sooq_merchant/dev/commerce_mock/mock_checkout_repo.dart';
+import 'package:sooq_merchant/dev/commerce_mock/mock_order_repo.dart';
+import 'package:sooq_merchant/dev/commerce_mock/mock_shipping_repo.dart';
 import 'package:sooq_merchant/features/variantscreen/data/repos/variant_repository.dart';
 
 GetIt getIt = GetIt.instance;
@@ -49,6 +66,11 @@ void setupServiceLocator({
   _resetIfRegistered<ProductDetailCubit>();
   _resetIfRegistered<CategoryCubit>();
   _resetIfRegistered<VariantRepository>();
+  _resetIfRegistered<CartRepo>();
+  _resetIfRegistered<CartCubit>();
+  _resetIfRegistered<CheckoutRepo>();
+  _resetIfRegistered<OrderRepo>();
+  _resetIfRegistered<ShippingRepo>();
 
   _registeredMobileAppConfig = mobileAppConfig;
 
@@ -140,6 +162,65 @@ void setupServiceLocator({
 
   getIt.registerLazySingleton<VariantRepository>(
     () => AssetVariantRepository(),
+  );
+
+  getIt.registerLazySingleton<CartRepo>(
+    () => CartRepoImpl(CartLocalStorage()),
+  );
+  getIt.registerLazySingleton<CartCubit>(
+    () => CartCubit(getIt<CartRepo>())..loadCart(),
+  );
+
+  getIt.registerLazySingleton<CheckoutSessionStore>(
+    () => CheckoutSessionStore(),
+  );
+
+  getIt.registerLazySingleton<CheckoutRepo>(() {
+    if (CommerceMockConfig.enabled) {
+      AppLogger.network(
+        'CommerceMockConfig.enabled=true — using MockCheckoutRepo (no HTTP)',
+      );
+      return MockCheckoutRepo();
+    }
+    return CheckoutRepoImpl(getIt<Dio>());
+  });
+
+  getIt.registerLazySingleton<CheckoutCubit>(
+    () => CheckoutCubit(
+      getIt<CheckoutRepo>(),
+      getIt<CheckoutSessionStore>(),
+      getIt<CartCubit>(),
+      getIt<TokenCubit>(),
+    )..loadDraft(),
+  );
+
+  getIt.registerLazySingleton<OrderRepo>(() {
+    if (CommerceMockConfig.enabled) {
+      AppLogger.network(
+        'CommerceMockConfig.enabled=true — using MockOrderRepo (no HTTP)',
+      );
+      return MockOrderRepo();
+    }
+    return OrderRepoImpl(getIt<Dio>());
+  });
+
+  getIt.registerLazySingleton<ShippingRepo>(() {
+    if (CommerceMockConfig.enabled) {
+      AppLogger.network(
+        'CommerceMockConfig.enabled=true — using MockShippingRepo (no HTTP)',
+      );
+      return MockShippingRepo();
+    }
+    return ShippingRepoImpl(getIt<Dio>());
+  });
+
+  getIt.registerLazySingleton<OrderCubit>(
+    () => OrderCubit(
+      getIt<OrderRepo>(),
+      getIt<CheckoutRepo>(),
+      getIt<ShippingRepo>(),
+      getIt<TokenCubit>(),
+    ),
   );
 }
 

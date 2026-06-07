@@ -8,8 +8,15 @@ import '../../core/navigation/auth_redirect.dart';
 import '../../core/network/network_config.dart';
 import '../../core/utils/api_service.dart';
 import '../../core/utils/app_logger.dart';
+import '../../core/utils/syp_formatter.dart';
 import '../../core/utils/service_locator.dart';
 import '../../features/auth/presentation/manager/auth_cubit/auth_cubit.dart';
+import '../../features/commerce/cart/presentation/manager/cart_cubit/cart_cubit.dart';
+import '../../features/commerce/cart/presentation/manager/cart_cubit/cart_state.dart';
+import '../../features/commerce/checkout/presentation/manager/checkout_cubit/checkout_cubit.dart';
+import '../../features/commerce/checkout/presentation/manager/checkout_cubit/checkout_state.dart';
+import '../../features/commerce/order/presentation/manager/order_cubit/order_cubit.dart';
+import '../../features/commerce/order/presentation/manager/order_cubit/order_state.dart';
 import '../engine_page_chrome.dart';
 import '../form/form_state_store.dart';
 import '../tree/parsers/data_context_path.dart';
@@ -294,10 +301,32 @@ class EngineActionDispatcher {
         itemValue = item['slug'];
       } else if (itemValue == null && key == 'categorySlug') {
         itemValue = item['slug'] ?? item['categoryId'];
+      } else if (itemValue == null && key == 'orderId') {
+        itemValue = item['orderId'];
       } else if (itemValue == null && key == 'id') {
-        itemValue = item['productId'];
+        itemValue = item['productId'] ?? item['orderId'];
       }
       if (itemValue != null) return itemValue.toString();
+    }
+
+    if (key == 'orderId') {
+      final order = dataContext['order'];
+      if (order is Map<String, dynamic>) {
+        final fromOrder = order['lastLookupOrderId'];
+        if (fromOrder != null && fromOrder.toString().trim().isNotEmpty) {
+          return fromOrder.toString();
+        }
+      }
+      final checkout = dataContext['checkout'];
+      if (checkout is Map<String, dynamic>) {
+        final lastOrder = checkout['lastOrder'];
+        if (lastOrder is Map<String, dynamic>) {
+          final id = lastOrder['orderId'];
+          if (id != null && id.toString().trim().isNotEmpty) {
+            return id.toString();
+          }
+        }
+      }
     }
 
     return null;
@@ -354,11 +383,38 @@ class EngineActionDispatcher {
       return;
     }
 
-    if (cubitName != 'auth') {
-      AppLogger.debug('[ActionDispatcher] Unsupported cubit: $cubitName');
-      return;
+    switch (cubitName) {
+      case 'auth':
+        await _handleAuthCubitCall(action, method: method, dataContext: dataContext);
+        return;
+      case 'cart':
+        await _handleCartCubitCall(action, method: method, dataContext: dataContext);
+        return;
+      case 'checkout':
+        await _handleCheckoutCubitCall(
+          action,
+          method: method,
+          dataContext: dataContext,
+        );
+        return;
+      case 'order':
+        await _handleOrderCubitCall(
+          action,
+          method: method,
+          dataContext: dataContext,
+        );
+        return;
+      default:
+        AppLogger.debug('[ActionDispatcher] Unsupported cubit: $cubitName');
+        return;
     }
+  }
 
+  Future<void> _handleAuthCubitCall(
+    Map<String, dynamic> action, {
+    required String method,
+    Map<String, dynamic>? dataContext,
+  }) async {
     final authCubit = getIt<AuthCubit>();
     final params = _resolveCubitParams(
       action['params'] as Map<String, dynamic>?,
@@ -419,6 +475,253 @@ class EngineActionDispatcher {
     }
   }
 
+  Future<void> _handleCartCubitCall(
+    Map<String, dynamic> action, {
+    required String method,
+    Map<String, dynamic>? dataContext,
+  }) async {
+    if (!getIt.isRegistered<CartCubit>()) {
+      AppLogger.debug('[ActionDispatcher] CartCubit not registered');
+      return;
+    }
+
+    final cartCubit = getIt<CartCubit>();
+    final params = _resolveCubitParams(
+      action['params'] as Map<String, dynamic>?,
+      dataContext: dataContext,
+    );
+
+    try {
+      switch (method) {
+        case 'addItem':
+          await cartCubit.addItem(
+            variantId: params['variantId']?.toString() ?? '',
+            productTitle: params['productTitle']?.toString() ?? '',
+            quantity: _parseIntParam(params['quantity'], fallback: 1) ?? 1,
+            variantTitle: params['variantTitle']?.toString(),
+            unitPrice: parseSypAmount(params['unitPrice']),
+            thumbnailUrl: params['thumbnailUrl']?.toString(),
+          );
+          break;
+        case 'updateQuantity':
+          await cartCubit.updateQuantity(
+            variantId: params['variantId']?.toString() ?? '',
+            quantity: _parseIntParam(params['quantity']),
+            delta: _parseIntParam(params['delta']),
+          );
+          break;
+        case 'removeItem':
+          await cartCubit.removeItem(
+            variantId: params['variantId']?.toString() ?? '',
+          );
+          break;
+        case 'clear':
+          await cartCubit.clear();
+          break;
+        case 'assertNotEmpty':
+          await cartCubit.assertNotEmpty();
+          break;
+        default:
+          AppLogger.debug('[ActionDispatcher] Unsupported cart method: $method');
+          return;
+      }
+
+      final state = cartCubit.state;
+      if (state is CartFailureState) {
+        final onFailure = action['onFailure'];
+        if (onFailure is Map<String, dynamic>) {
+          await dispatch(onFailure, dataContext: dataContext);
+        }
+        return;
+      }
+
+      if (state is CartLoaded || state is CartActionSuccess) {
+        final onSuccess = action['onSuccess'];
+        if (onSuccess is Map<String, dynamic>) {
+          await dispatch(onSuccess, dataContext: dataContext);
+        }
+      }
+    } catch (e) {
+      AppLogger.debug('[ActionDispatcher] cart cubitCall failed: $e');
+    }
+  }
+
+  Future<void> _handleCheckoutCubitCall(
+    Map<String, dynamic> action, {
+    required String method,
+    Map<String, dynamic>? dataContext,
+  }) async {
+    if (!getIt.isRegistered<CheckoutCubit>()) {
+      AppLogger.debug('[ActionDispatcher] CheckoutCubit not registered');
+      return;
+    }
+
+    final checkoutCubit = getIt<CheckoutCubit>();
+    final params = _resolveCubitParams(
+      action['params'] as Map<String, dynamic>?,
+      dataContext: dataContext,
+    );
+
+    try {
+      switch (method) {
+        case 'pickLocation':
+          await checkoutCubit.pickLocation(_context);
+          break;
+        case 'saveAddress':
+          await checkoutCubit.saveAddress(
+            recipientName: params['recipientName']?.toString() ?? '',
+            phone: params['phone']?.toString() ?? '',
+            addressLabel: params['addressLabel']?.toString(),
+            guestEmail: params['guestEmail']?.toString(),
+            notesCustomer: params['notesCustomer']?.toString(),
+          );
+          break;
+        case 'selectPaymentMethod':
+          await checkoutCubit.selectPaymentMethod(
+            providerCode: params['providerCode']?.toString() ??
+                params['value']?.toString() ??
+                '',
+          );
+          break;
+        case 'validateDiscount':
+          await checkoutCubit.validateDiscount(
+            code: params['code']?.toString() ?? '',
+          );
+          return;
+        case 'placeOrder':
+          if (getIt.isRegistered<CartCubit>()) {
+            await getIt<CartCubit>().assertNotEmpty();
+            final cartState = getIt<CartCubit>().state;
+            if (cartState is CartFailureState) {
+              final onFailure = action['onFailure'];
+              if (onFailure is Map<String, dynamic>) {
+                await dispatch(onFailure, dataContext: dataContext);
+              }
+              return;
+            }
+          }
+          await checkoutCubit.placeOrder();
+          break;
+        default:
+          AppLogger.debug(
+            '[ActionDispatcher] Unsupported checkout method: $method',
+          );
+          return;
+      }
+
+      if (method == 'validateDiscount') {
+        return;
+      }
+
+      final state = checkoutCubit.state;
+      if (state is CheckoutFailureState) {
+        final onFailure = action['onFailure'];
+        if (onFailure is Map<String, dynamic>) {
+          await dispatch(onFailure, dataContext: dataContext);
+        }
+        return;
+      }
+
+      if (state is CheckoutLoaded || state is CheckoutActionSuccess) {
+        final onSuccess = action['onSuccess'];
+        if (onSuccess is Map<String, dynamic>) {
+          await dispatch(onSuccess, dataContext: dataContext);
+        }
+      }
+    } catch (e) {
+      AppLogger.debug('[ActionDispatcher] checkout cubitCall failed: $e');
+    }
+  }
+
+  Future<void> _handleOrderCubitCall(
+    Map<String, dynamic> action, {
+    required String method,
+    Map<String, dynamic>? dataContext,
+  }) async {
+    if (!getIt.isRegistered<OrderCubit>()) {
+      AppLogger.debug('[ActionDispatcher] OrderCubit not registered');
+      return;
+    }
+
+    final orderCubit = getIt<OrderCubit>();
+    final params = _resolveCubitParams(
+      action['params'] as Map<String, dynamic>?,
+      dataContext: dataContext,
+    );
+
+    try {
+      switch (method) {
+        case 'lookupGuest':
+          await orderCubit.lookupGuest(
+            orderNumber: params['orderNumber']?.toString() ?? '',
+            email: params['email']?.toString() ?? '',
+          );
+          final lookupState = orderCubit.state;
+          if (lookupState is OrderGuestLookupUpdated &&
+              lookupState.lastLookupOrderId != null &&
+              lookupState.guestLookupError == null) {
+            final merged = Map<String, dynamic>.from(dataContext ?? {});
+            _mergeOrderSession(merged, orderCubit);
+            final onSuccess = action['onSuccess'];
+            if (onSuccess is Map<String, dynamic>) {
+              await dispatch(onSuccess, dataContext: merged);
+            }
+          }
+          return;
+        case 'cancelOrder':
+          await orderCubit.cancelOrder(
+            orderId: params['orderId']?.toString() ?? '',
+            reason: params['reason']?.toString(),
+          );
+          break;
+        case 'openInvoice':
+          await orderCubit.openInvoice(params['orderId']?.toString() ?? '');
+          return;
+        default:
+          AppLogger.debug(
+            '[ActionDispatcher] Unsupported order method: $method',
+          );
+          return;
+      }
+
+      final state = orderCubit.state;
+      if (state is OrderFailureState) {
+        final onFailure = action['onFailure'];
+        if (onFailure is Map<String, dynamic>) {
+          await dispatch(onFailure, dataContext: dataContext);
+        }
+        return;
+      }
+
+      if (state is OrderActionSuccess) {
+        final onSuccess = action['onSuccess'];
+        if (onSuccess is Map<String, dynamic>) {
+          await dispatch(onSuccess, dataContext: dataContext);
+        }
+      }
+    } catch (e) {
+      AppLogger.debug('[ActionDispatcher] order cubitCall failed: $e');
+    }
+  }
+
+  void _mergeOrderSession(Map<String, dynamic> ctx, OrderCubit cubit) {
+    ctx['order'] = <String, dynamic>{
+      if (cubit.guestLookupError != null) 'guestLookupError': cubit.guestLookupError,
+      if (cubit.lastLookupOrderId != null)
+        'lastLookupOrderId': cubit.lastLookupOrderId,
+    };
+    if (cubit.lastLookupOrderId != null) {
+      ctx['orderId'] = cubit.lastLookupOrderId;
+    }
+  }
+
+  int? _parseIntParam(dynamic raw, {int? fallback}) {
+    final parsed = parseSypAmount(raw);
+    if (parsed != null) return parsed;
+    if (fallback != null) return fallback;
+    return null;
+  }
+
   bool _isAuthSuccessState(AuthState state, String method) {
     return switch (method) {
       'requestOtp' => state is AuthOtpRequested,
@@ -431,7 +734,7 @@ class EngineActionDispatcher {
   Map<String, dynamic> _resolveCubitParams(
     Map<String, dynamic>? params, {
     Map<String, dynamic>? dataContext,
-    required AuthState authState,
+    AuthState? authState,
   }) {
     if (params == null || params.isEmpty) {
       return const {};
@@ -459,7 +762,32 @@ class EngineActionDispatcher {
             }
           }
         case 'authstate':
-          resolved[entry.key] = _readAuthStateField(authState, field);
+          if (authState != null) {
+            resolved[entry.key] = _readAuthStateField(authState, field);
+          }
+        case 'item':
+          if (field != null && dataContext != null) {
+            final item = dataContext['item'];
+            if (item is Map) {
+              resolved[entry.key] = item[field];
+            }
+          }
+        case 'routeparams':
+        case 'route_params':
+          if (field != null && dataContext != null) {
+            final routeParams = dataContext['routeParams'];
+            if (routeParams is Map) {
+              resolved[entry.key] = routeParams[field];
+            }
+          }
+        case 'datacontext':
+        case 'context':
+          if (field != null && field.isNotEmpty && dataContext != null) {
+            final path = field.startsWith('dataContext.')
+                ? field
+                : 'dataContext.$field';
+            resolved[entry.key] = resolveDataContextPath(dataContext, path);
+          }
         case 'tap':
           if (field != null && dataContext != null) {
             final tap = dataContext['tap'];

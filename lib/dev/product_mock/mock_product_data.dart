@@ -280,6 +280,57 @@ class MockProductData {
     );
   }
 
+  static List<Map<String, dynamic>> _variantsForProduct(
+    int productNumber,
+    double basePrice,
+  ) {
+    final defaultId = 'var-${productNumber.toString().padLeft(3, '0')}-default';
+    final defaultVariant = <String, dynamic>{
+      'variantId': defaultId,
+      'sku': 'SKU-$productNumber',
+      'price': basePrice,
+      'compareAtPrice': basePrice + 5,
+      'stockQty': 10 + productNumber,
+      'available': true,
+      'optionValues': <Map<String, dynamic>>[],
+    };
+
+    if (productNumber > 2) {
+      return [defaultVariant];
+    }
+
+    final multi = <Map<String, dynamic>>[
+      defaultVariant,
+      {
+        'variantId': 'var-${productNumber.toString().padLeft(3, '0')}-b',
+        'sku': 'SKU-$productNumber-B',
+        'price': basePrice + 10,
+        'compareAtPrice': basePrice + 15,
+        'stockQty': 5 + productNumber,
+        'available': true,
+        'optionValues': [
+          {'name': 'Size', 'value': 'M'},
+        ],
+      },
+    ];
+
+    if (productNumber == 1) {
+      multi.add({
+        'variantId': 'var-001-c',
+        'sku': 'SKU-1-C',
+        'price': basePrice + 20,
+        'compareAtPrice': basePrice + 25,
+        'stockQty': 3,
+        'available': true,
+        'optionValues': [
+          {'name': 'Size', 'value': 'L'},
+        ],
+      });
+    }
+
+    return multi;
+  }
+
   static ProductDetail productDetail(String slug) {
     final found = _products.firstWhere(
       (p) => p.slug == slug,
@@ -306,7 +357,7 @@ class MockProductData {
       },
       'inventory': {'stockStatus': 'IN_STOCK'},
       'images': detailImages,
-      'variants': [],
+      'variants': _variantsForProduct(productNumber, found.basePrice ?? 0),
       'categories': [
         {
           'categoryId': _categories[0].categoryId,
