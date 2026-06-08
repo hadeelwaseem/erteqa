@@ -122,6 +122,7 @@ Details: [`docs/ai/03-engine.md`](docs/ai/03-engine.md)
 | [docs/ai/10-file-index.md](docs/ai/10-file-index.md) | Full file map |
 | [docs/ai/11-testing.md](docs/ai/11-testing.md) | Tests |
 | [docs/ai/12-production-status.md](docs/ai/12-production-status.md) | Gaps vs implemented |
+| [docs/engine/web-to-mobile-converter/README.md](docs/engine/web-to-mobile-converter/README.md) | Web Puck JSON → mobile SDUI conversion rules |
 
 ---
 

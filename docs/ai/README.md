@@ -20,6 +20,7 @@ Canonical documentation for humans and AI assistants. **Read `AGENTS.md` at repo
 | [11-testing.md](11-testing.md) | Test layout and patterns |
 | [12-production-status.md](12-production-status.md) | Implemented vs gaps |
 | [13-ui-refactor-v2-summary.md](13-ui-refactor-v2-summary.md) | Production v2 JSON UI refactor changelog |
+| [../engine/web-to-mobile-converter/README.md](../engine/web-to-mobile-converter/README.md) | Web → mobile JSON converter rules (Erteqa Puck → SDUI) |
 
 ## Cursor integration
 
