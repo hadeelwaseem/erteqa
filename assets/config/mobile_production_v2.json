@@ -1595,8 +1595,165 @@
                 }
               },
               "tap": {
+                "type": "setPageState",
+                "values": {
+                  "selectedCategorySlug": {
+                    "source": "item",
+                    "field": "slug"
+                  }
+                },
+                "onSuccess": {
+                  "type": "reloadRequest",
+                  "requestKey": "category-products"
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "categories-products-title",
+          "type": "container",
+          "style": {
+            "padding": {
+              "left": 16,
+              "right": 16,
+              "top": 8,
+              "bottom": 8
+            }
+          },
+          "child": {
+            "id": "categories-products-title-text",
+            "type": "text",
+            "props": {
+              "value": "منتجات القسم",
+              "fontSize": 18,
+              "fontWeight": "bold",
+              "textAlign": "right",
+              "color": "#0F172A"
+            }
+          }
+        },
+        {
+          "id": "categories-products-grid",
+          "type": "gridView",
+          "props": {
+            "crossAxisCount": 2,
+            "mainAxisSpacing": 10,
+            "crossAxisSpacing": 10,
+            "childAspectRatio": 0.68,
+            "enableInnerScroll": false,
+            "data": {
+              "source": "collection",
+              "id": "categories-products-grid",
+              "requestKey": "category-products",
+              "requestUrl": "/api/v1/public/categories/:categorySlug/products?page=0&size=20",
+              "page": 0,
+              "size": 20,
+              "pathBindings": {
+                ":categorySlug": {
+                  "source": "pageState",
+                  "field": "selectedCategorySlug"
+                }
+              },
+              "primeFromRequest": {
+                "sourceRequestKey": "category-tree",
+                "itemField": "slug",
+                "pageStateKey": "selectedCategorySlug"
+              }
+            },
+            "emptyMessage": "لا توجد منتجات",
+            "errorMessage": "تعذر تحميل المنتجات"
+          },
+          "style": {
+            "padding": {
+              "left": 16,
+              "right": 16,
+              "bottom": 16
+            }
+          },
+          "itemBuilder": {
+            "type": "repeat",
+            "source": "dataContext.requests.category-products.data",
+            "item": {
+              "id": "categories-products-grid-item",
+              "type": "card",
+              "props": {
+                "color": "#FFFFFF",
+                "borderRadius": 10,
+                "elevation": 0
+              },
+              "child": {
+                "id": "categories-products-grid-item-content",
+                "type": "column",
+                "props": {
+                  "crossAxis": "stretch",
+                  "gap": 0
+                },
+                "children": [
+                  {
+                    "id": "categories-products-grid-item-image",
+                    "type": "image",
+                    "props": {
+                      "source": "network",
+                      "urlPath": "item.image",
+                      "url": "https://picsum.photos/seed/sooq-product-fallback/400/400",
+                      "aspectRatio": 1,
+                      "fit": "cover"
+                    }
+                  },
+                  {
+                    "id": "categories-products-grid-item-body",
+                    "type": "container",
+                    "style": {
+                      "padding": {
+                        "left": 8,
+                        "right": 8,
+                        "top": 6,
+                        "bottom": 8
+                      }
+                    },
+                    "child": {
+                      "id": "categories-products-grid-item-col",
+                      "type": "column",
+                      "props": {
+                        "crossAxis": "start",
+                        "gap": 2
+                      },
+                      "children": [
+                        {
+                          "id": "categories-products-grid-item-name",
+                          "type": "text",
+                          "props": {
+                            "valuePath": "item.name",
+                            "value": "",
+                            "fontSize": 14,
+                            "fontWeight": "semibold",
+                            "textAlign": "right",
+                            "color": "#0F172A",
+                            "maxLines": 2,
+                            "overflow": "ellipsis"
+                          }
+                        },
+                        {
+                          "id": "categories-products-grid-item-price",
+                          "type": "text",
+                          "props": {
+                            "valuePath": "item.price",
+                            "value": "--",
+                            "fontSize": 15,
+                            "fontWeight": "bold",
+                            "textAlign": "right",
+                            "color": "#1D4ED8"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "tap": {
                 "type": "navigate",
-                "route": "/categories/:categorySlug/products",
+                "route": "/product/details/:productId",
                 "navigation_type": "push"
               }
             }
@@ -1636,7 +1793,11 @@
             "id": "products-filter-tabs",
             "type": "tabs",
             "props": {
-              "selectedIndex": 0,
+              "selectedIndexPath": "pageState.filterTabIndex",
+              "itemsPath": "dataContext.requests.category-tree.data",
+              "itemLabelPath": "name",
+              "itemValuePath": "slug",
+              "flattenItems": "leaves",
               "spacing": 10,
               "runSpacing": 6,
               "activeColor": "#1D4ED8",
@@ -1644,20 +1805,32 @@
               "indicatorWidth": 3
             },
             "data": {
-              "items": [
+              "requestKey": "category-tree",
+              "requestUrl": "/api/v1/public/categories",
+              "staticItems": [
                 {
                   "title": "الكل",
-                  "index": 0
-                },
-                {
-                  "title": "عروض",
-                  "index": 1
-                },
-                {
-                  "title": "جديد",
-                  "index": 2
+                  "index": 0,
+                  "slug": ""
                 }
               ]
+            },
+            "tap": {
+              "type": "setPageState",
+              "values": {
+                "filterTabIndex": {
+                  "source": "tap",
+                  "field": "index"
+                },
+                "selectedCategorySlug": {
+                  "source": "tap",
+                  "field": "slug"
+                }
+              },
+              "onSuccess": {
+                "type": "reloadRequest",
+                "requestKey": "product-list"
+              }
             }
           }
         },
@@ -1674,9 +1847,16 @@
               "source": "collection",
               "id": "products-grid",
               "requestKey": "product-list",
-              "requestUrl": "/api/v1/public/products?page=0&size=20",
+              "requestUrl": "/api/v1/public/categories/:categorySlug/products?page=0&size=20",
+              "fallbackRequestUrl": "/api/v1/public/products?page=0&size=20",
               "page": 0,
-              "size": 20
+              "size": 20,
+              "pathBindings": {
+                ":categorySlug": {
+                  "source": "pageState",
+                  "field": "selectedCategorySlug"
+                }
+              }
             },
             "emptyMessage": "لا توجد منتجات",
             "errorMessage": "تعذر تحميل المنتجات"
@@ -4307,6 +4487,66 @@
       },
       "body": [
         {
+          "id": "orders-filter-tabs-wrap",
+          "type": "container",
+          "style": {
+            "padding": {
+              "left": 16,
+              "right": 16,
+              "top": 12,
+              "bottom": 8
+            }
+          },
+          "child": {
+            "id": "orders-filter-tabs",
+            "type": "tabs",
+            "props": {
+              "selectedIndexPath": "pageState.filterTabIndex",
+              "spacing": 10,
+              "runSpacing": 6,
+              "activeColor": "#1D4ED8",
+              "inactiveColor": "#64748B",
+              "indicatorWidth": 3
+            },
+            "data": {
+              "items": [
+                {
+                  "title": "الكل",
+                  "index": 0,
+                  "status": ""
+                },
+                {
+                  "title": "مؤكد",
+                  "index": 1,
+                  "status": "CONFIRMED"
+                },
+                {
+                  "title": "ملغي",
+                  "index": 2,
+                  "status": "CANCELLED"
+                }
+              ]
+            },
+            "tap": {
+              "type": "setPageState",
+              "values": {
+                "filterTabIndex": {
+                  "source": "tap",
+                  "field": "index"
+                },
+                "orderStatus": {
+                  "source": "tap",
+                  "field": "status"
+                }
+              },
+              "onSuccess": {
+                "type": "reloadRequest",
+                "requestKey": "my-orders"
+              }
+            }
+          }
+        },
+        {
           "id": "orders-list",
           "type": "listView",
           "props": {
@@ -4317,7 +4557,13 @@
               "requestKey": "my-orders",
               "requestUrl": "/api/v1/customer/orders?page=0&size=20",
               "page": 0,
-              "size": 20
+              "size": 20,
+              "queryBindings": {
+                "status": {
+                  "source": "pageState",
+                  "field": "orderStatus"
+                }
+              }
             },
             "emptyMessage": "لا توجد طلبات",
             "errorMessage": "تعذر تحميل الطلبات"

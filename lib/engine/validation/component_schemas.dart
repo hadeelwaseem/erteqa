@@ -152,6 +152,11 @@ class ComponentSchemas {
       'requestKey': 'string (matches VariantScreen request key)',
       'emptyMessage': 'string (localized empty state)',
       'errorMessage': 'string (localized error state)',
+      'data.queryBindings': 'object (query param bindings from pageState/form)',
+      'data.pathBindings': 'object (URL path placeholder bindings from pageState)',
+      'data.fallbackRequestUrl':
+          'string (browse URL when pathBindings are unresolved)',
+      'data.primeFromRequest': 'object (auto-select first row from source request)',
     },
   );
 
@@ -182,6 +187,11 @@ class ComponentSchemas {
       'requestKey': 'string (matches VariantScreen request key)',
       'emptyMessage': 'string (localized empty state)',
       'errorMessage': 'string (localized error state)',
+      'data.queryBindings': 'object (query param bindings from pageState/form)',
+      'data.pathBindings': 'object (URL path placeholder bindings from pageState)',
+      'data.fallbackRequestUrl':
+          'string (browse URL when pathBindings are unresolved)',
+      'data.primeFromRequest': 'object (auto-select first row from source request)',
     },
   );
 
@@ -674,6 +684,11 @@ class ComponentSchemas {
       'activeColor',
       'inactiveColor',
       'indicatorWidth',
+      'itemsPath',
+      'itemLabelPath',
+      'itemValuePath',
+      'flattenItems',
+      'scroll',
       'data',
       'tap',
     },
@@ -685,8 +700,14 @@ class ComponentSchemas {
       'activeColor': 'string (hex)',
       'inactiveColor': 'string (hex)',
       'indicatorWidth': 'number',
-      'data': 'object { items: [{ title, index }] }',
-      'tap': 'action object (cubitCall with source:tap index)',
+      'itemsPath': 'string (dataContext path to dynamic tab items)',
+      'itemLabelPath': 'string (field on each dynamic item for title)',
+      'itemValuePath': 'string (field on each dynamic item for tap metadata)',
+      'flattenItems': 'string (leaves | all) — expand nested category children',
+      'scroll': 'string (horizontal default | vertical for Wrap layout)',
+      'data':
+          'object { items?, staticItems?, requestKey?, requestUrl? } — staticItems prefix before itemsPath',
+      'tap': 'action object (setPageState, reloadRequest, navigate, ...)',
     },
   );
 

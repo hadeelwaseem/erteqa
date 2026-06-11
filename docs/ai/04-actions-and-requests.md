@@ -30,6 +30,8 @@ Omit `navigation_type` for default **clear stack** (`context.go`).
 | `openUrl` | Opens `url` or `urlPath` in external app (`url_launcher`) |
 | `openContact` | Builds URI from `channel` + `target` (string or `{source,field}`) — `whatsapp`, `tel`, `sms`, `email`, `url` |
 | `openDrawer` / `closeDrawer` | Page chrome drawer |
+| `setPageState` | Merge UI state into `pageState` (tab filters, selection); optional `onSuccess` chain |
+| `reloadRequest` | Re-dispatch cubit load for a `requestKey` using current `pageState` + `queryBindings` |
 
 Optional on navigate: `requireValidForm`, `formId` — validates `FormStateStore` before dispatch.
 
@@ -101,6 +103,34 @@ File: `lib/engine/requests/request_mapper.dart`.
 | `/api/v1/public/categories` (tree/list) | `CategoryCubit` |
 
 Results stored in `dataContext` under `requests.{requestKey}` for renderers/itemBuilder.
+
+### Tab-filtered lists (`pageState` + `reloadRequest`)
+
+Two tab patterns:
+
+**Static filter tabs** — fixed enum in JSON (not from list response). Example: `/orders` status.
+
+1. `tabs.data.items[]` with metadata (e.g. `status`)
+2. Tab `tap`: `setPageState` → `onSuccess.reloadRequest`
+3. List `queryBindings` maps pageState to query params
+
+**Dynamic tabs** — labels from API. Example: `/products` categories.
+
+1. `tabs.data` loads source request (e.g. `category-tree`) + optional `staticItems` prefix (الكل)
+2. `itemsPath` / `itemLabelPath` / `itemValuePath` build chips from `dataContext.requests.*.data`
+3. Tab `tap`: `setPageState(selectedCategorySlug)` → `reloadRequest`
+4. Grid uses `pathBindings` + `fallbackRequestUrl` when browse vs category URL differs
+
+Builder handoff: [`docs/engine/builder-specs/23-page-state-request-reload.md`](../engine/builder-specs/23-page-state-request-reload.md). References: `/orders`, `/products`, `/categories`.
+
+### Path-bound requests (`pathBindings` + `primeFromRequest`)
+
+For a master list + detail grid on one page (e.g. categories + category products):
+
+1. Master list loads via first `requestKey` (e.g. `category-tree`).
+2. Detail grid uses `requestUrl` with `:categorySlug` and `pathBindings` from `pageState.selectedCategorySlug`.
+3. `primeFromRequest` auto-selects the first master row on load and reloads the detail grid.
+4. Master row `tap`: `setPageState` from `item.slug` → `reloadRequest` for detail `requestKey`.
 
 ### itemBuilder repeat
 

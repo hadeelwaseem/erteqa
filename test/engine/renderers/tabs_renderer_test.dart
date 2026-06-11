@@ -84,7 +84,62 @@ void main() {
     await tester.pump();
 
     expect(capturedContext, isNotNull);
-    expect(capturedContext!['tap'], {'index': 2});
+    expect(capturedContext!['tap'], {'title': 'B', 'index': 2});
+  });
+
+  testWidgets('tab tap carries custom metadata from item JSON', (
+    tester,
+  ) async {
+    Map<String, dynamic>? capturedContext;
+    final dataContext = rendererDataContext();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) {
+            dataContext[EngineActionDispatcher.contextKey] =
+                _CapturingDispatcher(
+                  context: context,
+                  onDispatch: (ctx) => capturedContext = ctx,
+                );
+
+            return TabsRenderer().render(
+              ComponentConfig(
+                type: GenericComponentType.tabs,
+                properties: {
+                  'data': {
+                    'items': [
+                      {
+                        'title': 'All',
+                        'index': 0,
+                        'status': '',
+                      },
+                      {
+                        'title': 'Confirmed',
+                        'index': 1,
+                        'status': 'CONFIRMED',
+                      },
+                    ],
+                  },
+                  'tap': {'type': 'setPageState', 'values': {}},
+                },
+              ),
+              buildChild: (_) => const SizedBox.shrink(),
+              dataContext: dataContext,
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Confirmed'));
+    await tester.pump();
+
+    expect(capturedContext!['tap'], {
+      'title': 'Confirmed',
+      'index': 1,
+      'status': 'CONFIRMED',
+    });
   });
 
   testWidgets('selectedIndexPath reads from dataContext', (tester) async {
@@ -123,6 +178,147 @@ void main() {
     );
     final border = saleTab.decoration! as BoxDecoration;
     expect(border.border?.bottom.color, isNot(equals(Colors.transparent)));
+  });
+
+  testWidgets('itemsPath with staticItems prefix builds dynamic tab chips', (
+    tester,
+  ) async {
+    final dataContext = {
+      ...rendererDataContext(),
+      'requests': {
+        'category-tree': {
+          'data': [
+            {'name': 'Electronics', 'slug': 'electronics'},
+            {'name': 'Fashion', 'slug': 'fashion'},
+          ],
+        },
+      },
+    };
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: TabsRenderer().render(
+          ComponentConfig(
+            type: GenericComponentType.tabs,
+            properties: {
+              'itemsPath': 'dataContext.requests.category-tree.data',
+              'itemLabelPath': 'name',
+              'itemValuePath': 'slug',
+              'data': {
+                'staticItems': [
+                  {'title': 'All', 'index': 0, 'slug': ''},
+                ],
+              },
+            },
+          ),
+          buildChild: (_) => const SizedBox.shrink(),
+          dataContext: dataContext,
+        ),
+      ),
+    );
+
+    expect(find.text('All'), findsOneWidget);
+    expect(find.text('Electronics'), findsOneWidget);
+    expect(find.text('Fashion'), findsOneWidget);
+  });
+
+  testWidgets('dynamic tab tap includes slug metadata', (tester) async {
+    Map<String, dynamic>? capturedContext;
+    final dataContext = {
+      ...rendererDataContext(),
+      'requests': {
+        'category-tree': {
+          'data': [
+            {'name': 'Electronics', 'slug': 'electronics'},
+          ],
+        },
+      },
+    };
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) {
+            dataContext[EngineActionDispatcher.contextKey] =
+                _CapturingDispatcher(
+                  context: context,
+                  onDispatch: (ctx) => capturedContext = ctx,
+                );
+
+            return TabsRenderer().render(
+              ComponentConfig(
+                type: GenericComponentType.tabs,
+                properties: {
+                  'itemsPath': 'dataContext.requests.category-tree.data',
+                  'itemLabelPath': 'name',
+                  'itemValuePath': 'slug',
+                  'data': {
+                    'staticItems': [
+                      {'title': 'All', 'index': 0, 'slug': ''},
+                    ],
+                  },
+                  'tap': {'type': 'setPageState', 'values': {}},
+                },
+              ),
+              buildChild: (_) => const SizedBox.shrink(),
+              dataContext: dataContext,
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Electronics'));
+    await tester.pump();
+
+    expect(capturedContext!['tap']['slug'], 'electronics');
+    expect(capturedContext!['tap']['index'], 1);
+  });
+
+  testWidgets('flattenItems leaves expands nested categories', (tester) async {
+    final dataContext = {
+      ...rendererDataContext(),
+      'requests': {
+        'category-tree': {
+          'data': [
+            {
+              'name': 'Food',
+              'categoryId': 'food',
+              'children': [
+                {'name': 'Snacks', 'categoryId': 'snacks'},
+              ],
+            },
+          ],
+        },
+      },
+    };
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: TabsRenderer().render(
+          ComponentConfig(
+            type: GenericComponentType.tabs,
+            properties: {
+              'itemsPath': 'dataContext.requests.category-tree.data',
+              'itemLabelPath': 'name',
+              'itemValuePath': 'categoryId',
+              'flattenItems': 'leaves',
+              'data': {
+                'staticItems': [
+                  {'title': 'All', 'index': 0, 'categoryId': ''},
+                ],
+              },
+            },
+          ),
+          buildChild: (_) => const SizedBox.shrink(),
+          dataContext: dataContext,
+        ),
+      ),
+    );
+
+    expect(find.text('All'), findsOneWidget);
+    expect(find.text('Food'), findsNothing);
+    expect(find.text('Snacks'), findsOneWidget);
   });
 }
 

@@ -9,9 +9,44 @@ import 'package:sooq_merchant/features/product/presentation/manager/product_cubi
 import 'package:sooq_merchant/features/product/presentation/manager/product_detail_cubit/product_detail_cubit.dart';
 import 'package:sooq_merchant/features/product/presentation/manager/product_search_cubit/product_search_cubit.dart';
 
+class EnginePrimeFromRequest {
+  const EnginePrimeFromRequest({
+    required this.sourceRequestKey,
+    required this.itemField,
+    required this.pageStateKey,
+  });
+
+  final String sourceRequestKey;
+  final String itemField;
+  final String pageStateKey;
+
+  static EnginePrimeFromRequest? fromData(Map<String, dynamic>? data) {
+    if (data == null) {
+      return null;
+    }
+    final sourceRequestKey = data['sourceRequestKey'] as String?;
+    final itemField = data['itemField'] as String?;
+    final pageStateKey = data['pageStateKey'] as String?;
+    if (sourceRequestKey == null ||
+        sourceRequestKey.isEmpty ||
+        itemField == null ||
+        itemField.isEmpty ||
+        pageStateKey == null ||
+        pageStateKey.isEmpty) {
+      return null;
+    }
+    return EnginePrimeFromRequest(
+      sourceRequestKey: sourceRequestKey,
+      itemField: itemField,
+      pageStateKey: pageStateKey,
+    );
+  }
+}
+
 class EngineMappedRequest {
   final String key;
   final String? requestUrl;
+  final String? rawRequestUrl;
   final String? semanticType;
   final int page;
   final int size;
@@ -24,10 +59,17 @@ class EngineMappedRequest {
   final bool? inStockOnly;
   final String? include;
   final String? qField;
+  final Map<String, dynamic>? queryBindings;
+  final Map<String, dynamic>? pathBindings;
+  final bool deferInitialDispatch;
+  final EnginePrimeFromRequest? primeFromRequest;
+  final String? fallbackRequestUrl;
+  final Map<String, dynamic> sourceData;
 
   const EngineMappedRequest({
     required this.key,
     required this.requestUrl,
+    this.rawRequestUrl,
     required this.semanticType,
     required this.page,
     required this.size,
@@ -40,6 +82,12 @@ class EngineMappedRequest {
     this.inStockOnly,
     this.include,
     this.qField,
+    this.queryBindings,
+    this.pathBindings,
+    this.deferInitialDispatch = false,
+    this.primeFromRequest,
+    this.fallbackRequestUrl,
+    this.sourceData = const {},
   });
 }
 
@@ -87,6 +135,31 @@ class EngineRequestMapper {
     return url.contains('/public/payments/methods');
   }
 
+  /// URL candidates for classifying a mapped request (resolved + declared templates).
+  static Iterable<String> requestUrlCandidates(EngineMappedRequest request) sync* {
+    for (final url in [
+      request.requestUrl,
+      request.rawRequestUrl,
+      request.fallbackRequestUrl,
+    ]) {
+      if (url != null && url.isNotEmpty) {
+        yield url.toLowerCase();
+      }
+    }
+  }
+
+  static bool _urlMatchesAny(
+    EngineMappedRequest request,
+    bool Function(String url) predicate,
+  ) {
+    for (final url in requestUrlCandidates(request)) {
+      if (predicate(url)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   static List<EngineMappedRequest> collectRequests(
     ScreenConfig config, {
     Map<String, String> routeParams = const {},
@@ -103,11 +176,14 @@ class EngineRequestMapper {
     return mapped;
   }
 
-  /// Resolves `:param` placeholders in [url] using route and query parameters.
+  /// Resolves `:param` placeholders in [url] using route, query, and page state.
   static String? resolveRequestUrl(
     String? url, {
     Map<String, String> routeParams = const {},
     Map<String, String> queryParams = const {},
+    Map<String, dynamic> pageState = const {},
+    Map<String, dynamic>? pathBindings,
+    String? Function(String fieldId)? formValueFor,
   }) {
     if (url == null || url.isEmpty) {
       return url;
@@ -132,11 +208,287 @@ class EngineRequestMapper {
       return match.group(0) ?? '';
     });
 
+    if (pathBindings != null && pathBindings.isNotEmpty) {
+      final withPath = _applyPathBindings(
+        resolved,
+        bindings: pathBindings,
+        pageState: pageState,
+        formValueFor: formValueFor,
+      );
+      if (withPath == null) {
+        return null;
+      }
+      resolved = withPath;
+    }
+
     if (resolved.contains(':')) {
       return null;
     }
 
     return resolved;
+  }
+
+  static bool _hasActiveQueryBinding({
+    Map<String, dynamic> pageState = const {},
+    Map<String, dynamic>? bindings,
+    String? Function(String fieldId)? formValueFor,
+  }) {
+    if (bindings == null || bindings.isEmpty) {
+      return false;
+    }
+    for (final spec in bindings.values) {
+      final value = _resolveBindingValue(
+        spec,
+        pageState: pageState,
+        formValueFor: formValueFor,
+      );
+      if (value != null && value.toString().trim().isNotEmpty) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  static String? _resolveInitialRequestUrl({
+    required String? requestUrl,
+    required String? fallbackRequestUrl,
+    required Map<String, dynamic>? queryBindings,
+    required Map<String, dynamic>? pathBindings,
+  }) {
+    if (fallbackRequestUrl != null &&
+        fallbackRequestUrl.isNotEmpty &&
+        queryBindings != null &&
+        queryBindings.isNotEmpty &&
+        !_hasActiveQueryBinding(bindings: queryBindings)) {
+      return fallbackRequestUrl;
+    }
+    if ((requestUrl == null || requestUrl.isEmpty) &&
+        fallbackRequestUrl != null &&
+        fallbackRequestUrl.isNotEmpty) {
+      return fallbackRequestUrl;
+    }
+    return requestUrl;
+  }
+
+  /// Rebuilds [base] with runtime [pageState], [pathBindings], and [queryBindings].
+  static EngineMappedRequest buildRuntimeRequest(
+    EngineMappedRequest base, {
+    Map<String, dynamic> pageState = const {},
+    Map<String, String> routeParams = const {},
+    Map<String, String> queryParams = const {},
+    String? Function(String fieldId)? formValueFor,
+  }) {
+    final template = base.rawRequestUrl ?? base.requestUrl;
+    var resolved = resolveRequestUrl(
+      template,
+      routeParams: routeParams,
+      queryParams: queryParams,
+      pageState: pageState,
+      pathBindings: base.pathBindings,
+      formValueFor: formValueFor,
+    );
+    if (resolved == null || resolved.isEmpty || resolved.contains(':')) {
+      final fallback = base.fallbackRequestUrl;
+      if (fallback != null && fallback.isNotEmpty) {
+        resolved = fallback;
+      } else {
+        return EngineMappedRequest(
+          key: base.key,
+          requestUrl: null,
+          rawRequestUrl: base.rawRequestUrl ?? base.requestUrl,
+          semanticType: base.semanticType,
+          page: base.page,
+          size: base.size,
+          sort: base.sort,
+          q: base.q,
+          categoryId: base.categoryId,
+          tagId: base.tagId,
+          minPrice: base.minPrice,
+          maxPrice: base.maxPrice,
+          inStockOnly: base.inStockOnly,
+          include: base.include,
+          qField: base.qField,
+          queryBindings: base.queryBindings,
+          pathBindings: base.pathBindings,
+          deferInitialDispatch: base.deferInitialDispatch,
+          primeFromRequest: base.primeFromRequest,
+          fallbackRequestUrl: base.fallbackRequestUrl,
+          sourceData: base.sourceData,
+        );
+      }
+    }
+
+    if (base.fallbackRequestUrl != null &&
+        base.fallbackRequestUrl!.isNotEmpty &&
+        base.queryBindings != null &&
+        base.queryBindings!.isNotEmpty &&
+        !_hasActiveQueryBinding(
+          pageState: pageState,
+          bindings: base.queryBindings,
+          formValueFor: formValueFor,
+        )) {
+      resolved = base.fallbackRequestUrl;
+    }
+
+    if (resolved == null || resolved.isEmpty) {
+      return EngineMappedRequest(
+        key: base.key,
+        requestUrl: null,
+        rawRequestUrl: base.rawRequestUrl ?? base.requestUrl,
+        semanticType: base.semanticType,
+        page: base.page,
+        size: base.size,
+        sort: base.sort,
+        q: base.q,
+        categoryId: base.categoryId,
+        tagId: base.tagId,
+        minPrice: base.minPrice,
+        maxPrice: base.maxPrice,
+        inStockOnly: base.inStockOnly,
+        include: base.include,
+        qField: base.qField,
+        queryBindings: base.queryBindings,
+        pathBindings: base.pathBindings,
+        deferInitialDispatch: base.deferInitialDispatch,
+        primeFromRequest: base.primeFromRequest,
+        fallbackRequestUrl: base.fallbackRequestUrl,
+        sourceData: base.sourceData,
+      );
+    }
+
+    resolved = _applyQueryBindings(
+      resolved,
+      bindings: base.queryBindings,
+      pageState: pageState,
+      formValueFor: formValueFor,
+    );
+
+    final listQuery = _parseListQuery(resolved, base.sourceData);
+    final searchQuery = _parseSearchQuery(resolved, base.sourceData);
+    final include = _parseInclude(resolved, base.sourceData);
+
+    return EngineMappedRequest(
+      key: base.key,
+      requestUrl: resolved,
+      rawRequestUrl: base.rawRequestUrl ?? base.requestUrl,
+      semanticType: base.semanticType,
+      page: listQuery.$1,
+      size: listQuery.$2,
+      sort: listQuery.$3 ?? searchQuery.sort,
+      q: _resolveQuery(base, formValueFor) ?? searchQuery.q,
+      categoryId: searchQuery.categoryId,
+      tagId: searchQuery.tagId,
+      minPrice: searchQuery.minPrice,
+      maxPrice: searchQuery.maxPrice,
+      inStockOnly: searchQuery.inStockOnly,
+      include: include,
+      qField: base.qField,
+      queryBindings: base.queryBindings,
+      pathBindings: base.pathBindings,
+      deferInitialDispatch: base.deferInitialDispatch,
+      primeFromRequest: base.primeFromRequest,
+      fallbackRequestUrl: base.fallbackRequestUrl,
+      sourceData: base.sourceData,
+    );
+  }
+
+  static String? _applyPathBindings(
+    String url, {
+    Map<String, dynamic>? bindings,
+    Map<String, dynamic> pageState = const {},
+    String? Function(String fieldId)? formValueFor,
+  }) {
+    if (bindings == null || bindings.isEmpty) {
+      return url;
+    }
+
+    var resolved = url;
+    for (final entry in bindings.entries) {
+      final placeholder = entry.key.startsWith(':')
+          ? entry.key
+          : ':${entry.key}';
+      final value = _resolveBindingValue(
+        entry.value,
+        pageState: pageState,
+        formValueFor: formValueFor,
+      );
+      final text = value?.toString().trim() ?? '';
+      if (text.isEmpty) {
+        continue;
+      }
+      resolved = resolved.replaceAll(placeholder, text);
+    }
+
+    if (resolved.contains(':')) {
+      return null;
+    }
+    return resolved;
+  }
+
+  static String _applyQueryBindings(
+    String url, {
+    Map<String, dynamic>? bindings,
+    Map<String, dynamic> pageState = const {},
+    String? Function(String fieldId)? formValueFor,
+  }) {
+    if (bindings == null || bindings.isEmpty) {
+      return url;
+    }
+
+    final uri = Uri.parse(url);
+    final params = Map<String, String>.from(uri.queryParameters);
+
+    for (final entry in bindings.entries) {
+      final paramName = entry.key;
+      final spec = entry.value;
+      final value = _resolveBindingValue(
+        spec,
+        pageState: pageState,
+        formValueFor: formValueFor,
+      );
+      final text = value?.toString().trim() ?? '';
+      if (text.isEmpty) {
+        params.remove(paramName);
+      } else {
+        params[paramName] = text;
+      }
+    }
+
+    return uri.replace(queryParameters: params).toString();
+  }
+
+  static dynamic _resolveBindingValue(
+    dynamic spec, {
+    Map<String, dynamic> pageState = const {},
+    String? Function(String fieldId)? formValueFor,
+  }) {
+    if (spec == null) {
+      return null;
+    }
+    if (spec is! Map) {
+      final text = spec.toString().trim();
+      return text.isEmpty ? null : text;
+    }
+
+    final source = (spec['source'] as String?)?.toLowerCase();
+    final field = spec['field'] as String?;
+    switch (source) {
+      case 'pagestate':
+      case 'page_state':
+        if (field != null && field.isNotEmpty) {
+          return pageState[field];
+        }
+        return null;
+      case 'form':
+        if (field != null && formValueFor != null) {
+          return formValueFor(field);
+        }
+        return null;
+      case 'value':
+        return spec['value'];
+      default:
+        return spec['value'];
+    }
   }
 
   static Future<void> dispatchRequests({
@@ -268,16 +620,19 @@ class EngineRequestMapper {
       if (_isSearchRequest(request)) {
         if (productSearchCubit == null) continue;
         final q = _resolveQuery(request, formValueFor);
-        if (q == null || q.isEmpty) {
+        final hasCategoryFilter =
+            request.categoryId != null && request.categoryId!.isNotEmpty;
+        if ((q == null || q.isEmpty) && !hasCategoryFilter) {
           continue;
         }
         AppLogger.debug(
           '[RequestMapper] dispatch search key=${request.key} '
-          'url=${request.requestUrl} q=$q '
+          'url=${request.requestUrl} q=${q ?? ''} '
+          'categoryId=${request.categoryId ?? ''} '
           'tenant=${tenantId ?? "not_set"}',
         );
         productSearchCubit.search(
-          q: q,
+          q: q ?? '',
           categoryId: request.categoryId,
           tagId: request.tagId,
           minPrice: request.minPrice,
@@ -428,6 +783,24 @@ class EngineRequestMapper {
         data['requestKey'] as String? ?? data['requestId'] as String?;
     final nodeId = node.properties['id'] as String?;
     final qField = data['qField'] as String?;
+    final queryBindings = data['queryBindings'] is Map
+        ? Map<String, dynamic>.from(data['queryBindings'] as Map)
+        : null;
+    final pathBindings = data['pathBindings'] is Map
+        ? Map<String, dynamic>.from(data['pathBindings'] as Map)
+        : null;
+    final primeFromRequest = EnginePrimeFromRequest.fromData(
+      data['primeFromRequest'] is Map
+          ? Map<String, dynamic>.from(data['primeFromRequest'] as Map)
+          : null,
+    );
+    final fallbackRequestUrl = data['fallbackRequestUrl'] as String?;
+    final deferInitialDispatch = pathBindings != null &&
+        pathBindings.isNotEmpty &&
+        rawRequestUrl != null &&
+        rawRequestUrl.contains(':') &&
+        (requestUrl == null || requestUrl.isEmpty) &&
+        (fallbackRequestUrl == null || fallbackRequestUrl.isEmpty);
 
     if ((requestUrl == null || requestUrl.isEmpty) &&
         rawRequestUrl == null &&
@@ -437,19 +810,34 @@ class EngineRequestMapper {
 
     if (rawRequestUrl != null &&
         rawRequestUrl.contains(':') &&
-        (requestUrl == null || requestUrl.isEmpty)) {
+        (requestUrl == null || requestUrl.isEmpty) &&
+        (fallbackRequestUrl == null || fallbackRequestUrl.isEmpty) &&
+        !deferInitialDispatch) {
       return null;
     }
 
     final key = explicitKey ?? requestUrl ?? semanticType ?? nodeId ??
         _defaultProductRequestKey;
-    final listQuery = _parseListQuery(requestUrl, data);
-    final searchQuery = _parseSearchQuery(requestUrl, data);
-    final include = _parseInclude(requestUrl, data);
+    final effectiveRequestUrl = _resolveInitialRequestUrl(
+      requestUrl: requestUrl,
+      fallbackRequestUrl: fallbackRequestUrl,
+      queryBindings: queryBindings,
+      pathBindings: pathBindings,
+    );
+    final listQuery = _parseListQuery(
+      effectiveRequestUrl ?? rawRequestUrl,
+      data,
+    );
+    final searchQuery = _parseSearchQuery(
+      effectiveRequestUrl ?? rawRequestUrl,
+      data,
+    );
+    final include = _parseInclude(effectiveRequestUrl ?? rawRequestUrl, data);
 
     return EngineMappedRequest(
       key: key,
-      requestUrl: requestUrl,
+      requestUrl: effectiveRequestUrl,
+      rawRequestUrl: rawRequestUrl,
       semanticType: semanticType,
       page: listQuery.$1,
       size: listQuery.$2,
@@ -462,6 +850,12 @@ class EngineRequestMapper {
       inStockOnly: searchQuery.inStockOnly,
       include: include,
       qField: qField,
+      queryBindings: queryBindings,
+      pathBindings: pathBindings,
+      deferInitialDispatch: deferInitialDispatch,
+      primeFromRequest: primeFromRequest,
+      fallbackRequestUrl: fallbackRequestUrl,
+      sourceData: Map<String, dynamic>.from(data),
     );
   }
 
@@ -496,7 +890,9 @@ class EngineRequestMapper {
   }
 
   static bool _isCategoryProductsRequest(EngineMappedRequest request) {
-    final url = request.requestUrl?.toLowerCase() ?? '';
+    final url = request.requestUrl?.toLowerCase() ??
+        request.rawRequestUrl?.toLowerCase() ??
+        '';
     if (url.isEmpty) {
       return false;
     }
@@ -504,13 +900,17 @@ class EngineRequestMapper {
   }
 
   static bool _isSearchRequest(EngineMappedRequest request) {
-    final url = request.requestUrl?.toLowerCase() ?? '';
-    return url.contains('/public/products/search');
+    return _urlMatchesAny(
+      request,
+      (url) => url.contains('/public/products/search'),
+    );
   }
 
   static bool _isAutocompleteRequest(EngineMappedRequest request) {
-    final url = request.requestUrl?.toLowerCase() ?? '';
-    return url.contains('/public/products/autocomplete');
+    return _urlMatchesAny(
+      request,
+      (url) => url.contains('/public/products/autocomplete'),
+    );
   }
 
   static bool _isProductDetailRequest(EngineMappedRequest request) {

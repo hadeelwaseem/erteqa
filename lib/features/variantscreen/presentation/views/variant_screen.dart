@@ -24,6 +24,7 @@ import 'package:sooq_merchant/features/commerce/order/presentation/manager/order
 import 'package:sooq_merchant/features/commerce/order/presentation/manager/order_cubit/order_state.dart';
 import 'package:sooq_merchant/engine/actions/action_dispatcher.dart';
 import 'package:sooq_merchant/engine/form/form_state_store.dart';
+import 'package:sooq_merchant/engine/page/page_state_store.dart';
 import 'package:sooq_merchant/engine/requests/request_mapper.dart';
 import 'package:sooq_merchant/engine/theme/engine_theme.dart';
 import 'package:sooq_merchant/engine/tree/tree_engine.dart';
@@ -66,7 +67,9 @@ class VariantScreen extends StatefulWidget {
 
 class _VariantScreenState extends State<VariantScreen> {
   late final FormStateStore _formStateStore;
+  late final PageStateStore _pageStateStore;
   late final Map<String, dynamic> _dataContext;
+  List<EngineMappedRequest> _mappedRequests = const [];
   final Map<String, dynamic> _requestResults = <String, dynamic>{};
   final Set<String> _loadingRequestKeys = <String>{};
   final Set<String> _loadingMoreRequestKeys = <String>{};
@@ -105,7 +108,16 @@ class _VariantScreenState extends State<VariantScreen> {
   void initState() {
     super.initState();
     _formStateStore = FormStateStore();
-    _dataContext = {FormStateStore.contextKey: _formStateStore};
+    _pageStateStore = PageStateStore();
+    _pageStateStore.onChanged = () {
+      if (mounted) {
+        setState(() {});
+      }
+    };
+    _dataContext = {
+      FormStateStore.contextKey: _formStateStore,
+      PageStateStore.contextKey: _pageStateStore,
+    };
   }
 
   @override
@@ -114,6 +126,7 @@ class _VariantScreenState extends State<VariantScreen> {
     final dispatcher = EngineActionDispatcher(
       context: context,
       formState: _formStateStore,
+      pageStateStore: _pageStateStore,
       dataContext: _buildRenderContext(),
     );
     _dataContext[EngineActionDispatcher.contextKey] = dispatcher;
@@ -165,8 +178,12 @@ class _VariantScreenState extends State<VariantScreen> {
       routeParams: widget.routeParams,
       queryParams: widget.queryParams,
     );
+    _mappedRequests = mappedRequests;
     final pageRequestKeys = mappedRequests
-        .where((request) => request.qField == null)
+        .where(
+          (request) =>
+              request.qField == null && !request.deferInitialDispatch,
+        )
         .map((request) => request.key)
         .toSet();
     _ensurePageRequestsPrimed(pageRequestKeys);
@@ -214,6 +231,7 @@ class _VariantScreenState extends State<VariantScreen> {
           pageRequestKeys: pageRequestKeys,
           renderContext: ctx,
           formStateStore: _formStateStore,
+          pageStateStore: _pageStateStore,
           onPreparePageRequests: () =>
               _ensurePageRequestsPrimed(pageRequestKeys),
           onRequestLoadingChanged: _setRequestLoading,
@@ -305,6 +323,7 @@ class _VariantScreenState extends State<VariantScreen> {
       return;
     }
     _primedPageSignature = signature;
+    _pageStateStore.clear();
     for (final key in requestKeys) {
       _requestResults.remove(key);
     }
@@ -363,7 +382,9 @@ class _VariantScreenState extends State<VariantScreen> {
     setState(() {
       _requestResults[requestKey] = {
         'success': true,
-        'data': searchResult.toJson(),
+        'data': searchResult.products.map((item) => item.toJson()).toList(),
+        'meta': searchResult.meta.toJson(),
+        'timestamp': 0,
       };
       if (!isLoadMore) {
         _loadingRequestKeys.remove(requestKey);
@@ -484,6 +505,46 @@ class _VariantScreenState extends State<VariantScreen> {
       };
       _loadingRequestKeys.remove(requestKey);
     });
+
+    unawaited(
+      _tryPrimeFromSource(
+        sourceRequestKey: requestKey,
+        sourceRows: categories.map((item) => item.toJson()).toList(),
+      ),
+    );
+  }
+
+  Future<void> _tryPrimeFromSource({
+    required String sourceRequestKey,
+    required List<Map<String, dynamic>> sourceRows,
+  }) async {
+    if (sourceRows.isEmpty) {
+      return;
+    }
+
+    for (final request in _mappedRequests) {
+      final prime = request.primeFromRequest;
+      if (prime == null || prime.sourceRequestKey != sourceRequestKey) {
+        continue;
+      }
+
+      final current = _pageStateStore.values[prime.pageStateKey];
+      if (current != null && current.toString().trim().isNotEmpty) {
+        continue;
+      }
+
+      final firstRow = sourceRows.first;
+      final value = firstRow[prime.itemField];
+      if (value == null || value.toString().trim().isEmpty) {
+        continue;
+      }
+
+      _pageStateStore.update({prime.pageStateKey: value});
+      final reload = _pageStateStore.reloadRequest;
+      if (reload != null) {
+        await reload(request.key);
+      }
+    }
   }
 
   void _handleCategorySuccess(String requestKey, Category category) {
@@ -739,11 +800,14 @@ class _VariantScreenState extends State<VariantScreen> {
     };
     merged['initialRequestKeys'] = {
       for (final request in mappedRequests)
-        if (request.qField == null) request.key: true,
+        if (request.qField == null && !request.deferInitialDispatch)
+          request.key: true,
     };
     if (_requestResults.isNotEmpty) {
       merged['requests'] = _requestResults;
     }
+    merged[PageStateStore.contextKey] = _pageStateStore;
+    merged['pageState'] = _pageStateStore.snapshot();
     if (_loadingMoreRequestKeys.isNotEmpty) {
       merged['loadingMoreRequests'] = {
         for (final key in _loadingMoreRequestKeys) key: true,
@@ -1201,6 +1265,7 @@ class _ProductRequestHost extends StatefulWidget {
     required this.pageRequestKeys,
     required this.renderContext,
     required this.formStateStore,
+    required this.pageStateStore,
     required this.onPreparePageRequests,
     required this.onRequestLoadingChanged,
     required this.onProductSuccess,
@@ -1232,6 +1297,7 @@ class _ProductRequestHost extends StatefulWidget {
   final Set<String> pageRequestKeys;
   final Map<String, dynamic> renderContext;
   final FormStateStore formStateStore;
+  final PageStateStore pageStateStore;
   final VoidCallback onPreparePageRequests;
   final void Function(String requestKey, bool isLoading)
   onRequestLoadingChanged;
@@ -1407,18 +1473,55 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
     _routeSignature = _buildRouteSignature(widget.routeParams);
     _keysSeenLoadingThisSession.clear();
     _bindFormQueryListeners();
+    _registerPageStateReloadHandler();
     _scheduleDispatch();
     _scheduleLoadMoreCheck();
   }
 
   @override
   void dispose() {
+    widget.pageStateStore.reloadRequest = null;
     _queryDebounce?.cancel();
     for (final remove in _queryListenerRemovers.values) {
       remove();
     }
     _queryListenerRemovers.clear();
     super.dispose();
+  }
+
+  void _registerPageStateReloadHandler() {
+    widget.pageStateStore.reloadRequest = (String requestKey) async {
+      if (!mounted) {
+        return;
+      }
+      EngineMappedRequest? base;
+      for (final request in widget.mappedRequests) {
+        if (request.key == requestKey) {
+          base = request;
+          break;
+        }
+      }
+      if (base == null) {
+        return;
+      }
+
+      final runtime = EngineRequestMapper.buildRuntimeRequest(
+        base,
+        pageState: widget.pageStateStore.values,
+        routeParams: widget.routeParams,
+        queryParams: widget.queryParams,
+        formValueFor: _formValueFor,
+      );
+
+      final url = runtime.requestUrl;
+      if (url == null || url.isEmpty || url.contains(':')) {
+        return;
+      }
+
+      _keysSeenLoadingThisSession.add(requestKey);
+      widget.onRequestLoadingChanged(requestKey, true);
+      await _dispatchQueryRequest(runtime);
+    };
   }
 
   void _bindFormQueryListeners() {
@@ -1595,6 +1698,7 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
         .where(
           (request) =>
               request.qField == null &&
+              !request.deferInitialDispatch &&
               !_dispatchedRequestKeys.contains(request.key),
         )
         .toList(growable: false);
@@ -1615,6 +1719,24 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
       _isDispatching = true;
     }
 
+    final resolvedRequests = toDispatch
+        .map(
+          (request) => EngineRequestMapper.buildRuntimeRequest(
+            request,
+            pageState: widget.pageStateStore.values,
+            routeParams: widget.routeParams,
+            queryParams: widget.queryParams,
+            formValueFor: _formValueFor,
+          ),
+        )
+        .where(
+          (request) =>
+              request.requestUrl != null &&
+              request.requestUrl!.isNotEmpty &&
+              !request.requestUrl!.contains(':'),
+        )
+        .toList(growable: false);
+
     ProductCubit? productCubit;
     ProductSearchCubit? productSearchCubit;
     ProductAutocompleteCubit? productAutocompleteCubit;
@@ -1623,25 +1745,30 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
     CheckoutCubit? checkoutCubit;
     OrderCubit? orderCubit;
 
-    if (EngineRequestMapper.needsProductCubit(widget.mappedRequests)) {
+    final cubitRequests = [
+      ...widget.mappedRequests,
+      ...resolvedRequests,
+    ];
+
+    if (EngineRequestMapper.needsProductCubit(cubitRequests)) {
       productCubit = context.read<ProductCubit>();
     }
-    if (EngineRequestMapper.needsSearchCubit(widget.mappedRequests)) {
+    if (EngineRequestMapper.needsSearchCubit(cubitRequests)) {
       productSearchCubit = context.read<ProductSearchCubit>();
     }
-    if (EngineRequestMapper.needsAutocompleteCubit(widget.mappedRequests)) {
+    if (EngineRequestMapper.needsAutocompleteCubit(cubitRequests)) {
       productAutocompleteCubit = context.read<ProductAutocompleteCubit>();
     }
-    if (EngineRequestMapper.needsProductDetailCubit(widget.mappedRequests)) {
+    if (EngineRequestMapper.needsProductDetailCubit(cubitRequests)) {
       productDetailCubit = context.read<ProductDetailCubit>();
     }
-    if (EngineRequestMapper.needsCategoryCubit(widget.mappedRequests)) {
+    if (EngineRequestMapper.needsCategoryCubit(cubitRequests)) {
       categoryCubit = context.read<CategoryCubit>();
     }
-    if (EngineRequestMapper.needsCheckoutCubit(widget.mappedRequests)) {
+    if (EngineRequestMapper.needsCheckoutCubit(cubitRequests)) {
       checkoutCubit = context.read<CheckoutCubit>();
     }
-    if (EngineRequestMapper.needsOrderCubit(widget.mappedRequests)) {
+    if (EngineRequestMapper.needsOrderCubit(cubitRequests)) {
       orderCubit = context.read<OrderCubit>();
     }
 
@@ -1655,7 +1782,7 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
         checkoutCubit: checkoutCubit,
         orderCubit: orderCubit,
         tenantId: _resolveTenantIdForRequests(),
-        requests: toDispatch,
+        requests: resolvedRequests,
         formValueFor: _formValueFor,
       );
     } finally {

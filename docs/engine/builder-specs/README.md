@@ -73,6 +73,7 @@ Copy structure from [`_TEMPLATE.md`](_TEMPLATE.md).
 | [20-commerce-cart-cubit-call.md](20-commerce-cart-cubit-call.md) | Commerce Phase 1 | implemented-in-json | `cubitCall` `cubit: cart`; `cart.items` repeat binding; variant picker gate |
 | [21-commerce-checkout-cubit-call.md](21-commerce-checkout-cubit-call.md) | Commerce Phase 3 | implemented-in-json | `cubitCall` `cubit: checkout`; wizard routes; payment methods `requestUrl`; order success bindings |
 | [22-commerce-order-cubit-call.md](22-commerce-order-cubit-call.md) | Commerce Phase 4 | implemented-in-json | `cubitCall` `cubit: order`; my-orders list; order detail + shipment; guest track |
+| [23-page-state-request-reload.md](23-page-state-request-reload.md) | Engine orchestration | implemented-in-json | `pageState`, `setPageState`, `reloadRequest`, `queryBindings`; `/orders` status tabs |
 | [../web-to-mobile-converter/README.md](../web-to-mobile-converter/README.md) | Web → Mobile | reference | Full Erteqa web block → mobile SDUI conversion rules; complements builder-specs for cross-platform JSON |
 
 Update this table when adding a spec.

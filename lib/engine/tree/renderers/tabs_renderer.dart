@@ -10,7 +10,9 @@ import '../parsers/property_parsers.dart';
 /// In-page segment tabs (not bottom [navigation.tabs] shell).
 ///
 /// Controlled: [selectedIndex] or [selectedIndexPath] from [dataContext].
-/// Tab tap dispatches JSON [tap] with `dataContext['tap']['index']`.
+/// Static items: [data.items] or [data.staticItems]. Dynamic: [itemsPath]
+/// with optional [itemLabelPath] / [itemValuePath] (prefixed by staticItems).
+/// Tab tap dispatches JSON [tap] with the full item in `dataContext['tap']`.
 class TabsRenderer implements ComponentRenderer {
   @override
   Widget render(
@@ -19,8 +21,7 @@ class TabsRenderer implements ComponentRenderer {
     Map<String, dynamic>? dataContext,
   }) {
     final properties = config.properties;
-    final data = properties['data'];
-    final items = _parseItems(data);
+    final items = _resolveItems(properties, dataContext);
     if (items.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -45,17 +46,20 @@ class TabsRenderer implements ComponentRenderer {
 
     final tapAction = properties['tap'];
     final tapMap = tapAction is Map<String, dynamic> ? tapAction : null;
+    final scrollHorizontal = properties['scroll'] != 'vertical';
 
     return Builder(
       builder: (context) {
         final dispatcher = _resolveDispatcher(dataContext, context);
 
-        return Wrap(
-          spacing: spacing,
-          runSpacing: runSpacing,
-          children: [
-            for (final item in items)
-              _TabChip(
+        final chips = [
+          for (final item in items)
+            Padding(
+              padding: EdgeInsets.only(
+                right: scrollHorizontal ? spacing : 0,
+                bottom: scrollHorizontal ? 0 : runSpacing,
+              ),
+              child: _TabChip(
                 title: item.title,
                 isActive: item.index == selectedIndex,
                 activeColor: activeColor,
@@ -67,11 +71,27 @@ class TabsRenderer implements ComponentRenderer {
                         final merged = Map<String, dynamic>.from(
                           dataContext ?? <String, dynamic>{},
                         );
-                        merged['tap'] = {'index': item.index};
+                        merged['tap'] = Map<String, dynamic>.from(item.payload);
                         dispatcher.dispatch(tapMap, dataContext: merged);
                       },
               ),
-          ],
+            ),
+        ];
+
+        if (scrollHorizontal) {
+          return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: chips,
+            ),
+          );
+        }
+
+        return Wrap(
+          spacing: spacing,
+          runSpacing: runSpacing,
+          children: chips,
         );
       },
     );
@@ -98,25 +118,163 @@ class TabsRenderer implements ComponentRenderer {
     return 0;
   }
 
-  List<_TabItem> _parseItems(dynamic data) {
-    if (data is! Map) return const [];
-    final rawItems = data['items'];
+  List<_TabItem> _resolveItems(
+    Map<String, dynamic> properties,
+    Map<String, dynamic>? dataContext,
+  ) {
+    final data = properties['data'];
+    final staticPrefix = _parseStaticItems(
+      data is Map ? data['staticItems'] : null,
+      startIndex: 0,
+    );
+    if (staticPrefix.isEmpty && data is Map && data['items'] is List) {
+      return _parseStaticItems(data['items'], startIndex: 0);
+    }
+
+    final itemsPath = properties['itemsPath'] as String?;
+    if (itemsPath != null && itemsPath.isNotEmpty) {
+      final raw = resolveDataContextPath(dataContext, itemsPath);
+      final dynamicItems = _mapDynamicItems(
+        raw,
+        properties,
+        startIndex: staticPrefix.length,
+      );
+      return [...staticPrefix, ...dynamicItems];
+    }
+
+    if (staticPrefix.isNotEmpty) {
+      return staticPrefix;
+    }
+
+    if (data is Map && data['items'] is List) {
+      return _parseStaticItems(data['items'], startIndex: 0);
+    }
+    return const [];
+  }
+
+  List<_TabItem> _parseStaticItems(
+    dynamic rawItems, {
+    required int startIndex,
+  }) {
     if (rawItems is! List) return const [];
 
     final result = <_TabItem>[];
     for (var i = 0; i < rawItems.length; i++) {
       final entry = rawItems[i];
       if (entry is! Map) continue;
-      final title = entry['title']?.toString() ?? '';
-      final indexRaw = entry['index'];
+      final map = Map<String, dynamic>.from(entry);
+      final title = map['title']?.toString() ?? '';
+      final indexRaw = map['index'];
       final index = indexRaw is int
           ? indexRaw
           : indexRaw is num
           ? indexRaw.toInt()
-          : i;
-      result.add(_TabItem(title: title, index: index));
+          : startIndex + i;
+      map['index'] = index;
+      result.add(_TabItem(title: title, index: index, payload: map));
     }
     return result;
+  }
+
+  List<_TabItem> _mapDynamicItems(
+    dynamic raw,
+    Map<String, dynamic> properties, {
+    required int startIndex,
+  }) {
+    if (raw is! List) return const [];
+
+    final flattenMode = properties['flattenItems'] as String?;
+    final rows = flattenMode == 'leaves' || flattenMode == 'all'
+        ? _flattenCategoryRows(raw, leavesOnly: flattenMode == 'leaves')
+        : raw.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
+
+    final labelPath = properties['itemLabelPath'] as String?;
+    final valuePath = properties['itemValuePath'] as String?;
+    final valueField = valuePath?.isNotEmpty == true ? valuePath! : 'slug';
+
+    final result = <_TabItem>[];
+    for (var i = 0; i < rows.length; i++) {
+      final map = rows[i];
+      final label = _readItemField(map, labelPath, const [
+        'name',
+        'nameAr',
+        'title',
+        'label',
+      ]);
+      final value = _readItemField(map, valuePath, const [
+        'slug',
+        'value',
+        'id',
+        'categoryId',
+      ]);
+      if (value.isEmpty) continue;
+
+      final index = startIndex + result.length;
+      map['title'] = label.isEmpty ? value : label;
+      map['index'] = index;
+      map[valueField] = value;
+      result.add(
+        _TabItem(
+          title: map['title'] as String,
+          index: index,
+          payload: map,
+        ),
+      );
+    }
+    return result;
+  }
+
+  /// Expands nested category `children` for API-driven tabs.
+  List<Map<String, dynamic>> _flattenCategoryRows(
+    List<dynamic> raw, {
+    required bool leavesOnly,
+  }) {
+    final flat = <Map<String, dynamic>>[];
+
+    void walk(Map<String, dynamic> map) {
+      final children = map['children'];
+      final childMaps = children is List
+          ? children
+              .whereType<Map>()
+              .map((child) => Map<String, dynamic>.from(child))
+              .toList()
+          : const <Map<String, dynamic>>[];
+
+      if (leavesOnly && childMaps.isNotEmpty) {
+        for (final child in childMaps) {
+          walk(child);
+        }
+        return;
+      }
+
+      flat.add(map);
+      for (final child in childMaps) {
+        walk(child);
+      }
+    }
+
+    for (final entry in raw) {
+      if (entry is Map) {
+        walk(Map<String, dynamic>.from(entry));
+      }
+    }
+    return flat;
+  }
+
+  String _readItemField(
+    Map<dynamic, dynamic> entry,
+    String? explicitPath,
+    List<String> fallbacks,
+  ) {
+    if (explicitPath != null && explicitPath.isNotEmpty) {
+      final v = entry[explicitPath]?.toString().trim() ?? '';
+      if (v.isNotEmpty) return v;
+    }
+    for (final key in fallbacks) {
+      final v = entry[key]?.toString().trim() ?? '';
+      if (v.isNotEmpty) return v;
+    }
+    return '';
   }
 
   EngineActionDispatcher? _resolveDispatcher(
@@ -134,10 +292,15 @@ class TabsRenderer implements ComponentRenderer {
 }
 
 class _TabItem {
-  const _TabItem({required this.title, required this.index});
+  const _TabItem({
+    required this.title,
+    required this.index,
+    required this.payload,
+  });
 
   final String title;
   final int index;
+  final Map<String, dynamic> payload;
 }
 
 class _TabChip extends StatelessWidget {

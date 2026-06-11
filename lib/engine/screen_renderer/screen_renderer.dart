@@ -39,6 +39,7 @@ import '../tree/renderers/unsupported_component_renderer.dart';
 import '../actions/action_dispatcher.dart';
 import '../engine_page_chrome.dart';
 import '../form/form_state_store.dart';
+import '../page/page_state_store.dart';
 import '../validation/layout_constraint_validator.dart';
 
 /// Recursively renders a tree-based [ScreenConfig] into a widget tree.
@@ -289,6 +290,8 @@ class ScreenRenderer {
     final created = EngineActionDispatcher(
       context: context,
       formState: dataContext?[FormStateStore.contextKey] as FormStateStore?,
+      pageStateStore:
+          dataContext?[PageStateStore.contextKey] as PageStateStore?,
     );
     dataContext?[EngineActionDispatcher.contextKey] = created;
     return created;
@@ -310,6 +313,8 @@ class ScreenRenderer {
     dataContext[EngineActionDispatcher.contextKey] = EngineActionDispatcher(
       context: context,
       formState: dataContext[FormStateStore.contextKey] as FormStateStore?,
+      pageStateStore:
+          dataContext[PageStateStore.contextKey] as PageStateStore?,
     );
   }
 

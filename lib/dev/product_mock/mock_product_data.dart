@@ -155,6 +155,23 @@ class MockProductData {
     );
   }
 
+  /// Mock catalog: product-N belongs to category cat-NNN (cycles across categories).
+  static String categoryIdForProduct(Product product) {
+    final n = int.tryParse(product.slug?.replaceFirst('product-', '') ?? '') ?? 1;
+    final catIndex = ((n - 1) % _categories.length) + 1;
+    return 'cat-${catIndex.toString().padLeft(3, '0')}';
+  }
+
+  static String categorySlugForProduct(Product product) {
+    final catId = categoryIdForProduct(product);
+    return _categories
+        .firstWhere(
+          (c) => c.categoryId == catId,
+          orElse: () => _categories.first,
+        )
+        .slug!;
+  }
+
   static ProductListResponse productList({
     required int page,
     required int size,
@@ -209,6 +226,19 @@ class MockProductData {
           .toList();
     }
 
+    if (categoryId != null && categoryId.isNotEmpty) {
+      filtered = filtered
+          .where((p) => categoryIdForProduct(p) == categoryId)
+          .toList();
+    }
+
+    if (tagId != null && tagId.isNotEmpty) {
+      filtered = filtered.where((_) => false).toList();
+    }
+
+    if (inStockOnly == true) {
+      filtered = filtered.where((p) => p.isAvailable == true).toList();
+    }
     if (minPrice != null) {
       filtered = filtered
           .where((p) => (p.basePrice as num).toDouble() >= minPrice)

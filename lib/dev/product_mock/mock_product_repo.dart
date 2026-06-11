@@ -57,11 +57,7 @@ class MockProductRepo implements ProductRepo {
         size: ProductMockConfig.sampleProductCount,
       );
       final filtered = all.data
-          .where(
-            (p) => (p.slug ?? '').contains(
-              categorySlug.replaceAll('category-', 'product-'),
-            ),
-          )
+          .where((p) => MockProductData.categorySlugForProduct(p) == categorySlug)
           .toList();
       final total = filtered.length;
       final totalPages = (total / size).ceil();
@@ -104,7 +100,9 @@ class MockProductRepo implements ProductRepo {
     String? tenantId,
     CancelToken? cancelToken,
   }) async {
-    AppLogger.network('[MOCK] searchProducts q=$q page=$page size=$size');
+    AppLogger.network(
+      '[MOCK] searchProducts q=${q ?? ''} categoryId=${categoryId ?? ''} page=$page size=$size',
+    );
     await _delay();
     try {
       final resp = MockProductData.search(

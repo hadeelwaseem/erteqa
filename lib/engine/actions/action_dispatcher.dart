@@ -19,6 +19,7 @@ import '../../features/commerce/order/presentation/manager/order_cubit/order_cub
 import '../../features/commerce/order/presentation/manager/order_cubit/order_state.dart';
 import '../engine_page_chrome.dart';
 import '../form/form_state_store.dart';
+import '../page/page_state_store.dart';
 import '../tree/parsers/data_context_path.dart';
 import 'action_value_resolver.dart';
 import 'contact_uri_builder.dart';
@@ -29,13 +30,16 @@ class EngineActionDispatcher {
   EngineActionDispatcher({
     required BuildContext context,
     FormStateStore? formState,
+    PageStateStore? pageStateStore,
     Map<String, dynamic>? dataContext,
   })  : _context = context,
         _formState = formState,
+        _pageStateStore = pageStateStore,
         _dataContext = dataContext;
 
   final BuildContext _context;
   final FormStateStore? _formState;
+  final PageStateStore? _pageStateStore;
   final Map<String, dynamic>? _dataContext;
 
   VoidCallback? resolveTap(
@@ -88,10 +92,69 @@ class EngineActionDispatcher {
       case 'openContact':
         await _handleOpenContact(action, dataContext: mergedContext);
         return;
+      case 'setPageState':
+        await _handleSetPageState(action, dataContext: mergedContext);
+        return;
+      case 'reloadRequest':
+        await _handleReloadRequest(action);
+        return;
       default:
         AppLogger.debug('[ActionDispatcher] Unsupported action type: $type');
         return;
     }
+  }
+
+  Future<void> _handleSetPageState(
+    Map<String, dynamic> action, {
+    Map<String, dynamic>? dataContext,
+  }) async {
+    final store = _pageStateStore ??
+        (dataContext?[PageStateStore.contextKey] as PageStateStore?);
+    if (store == null) {
+      AppLogger.debug('[ActionDispatcher] setPageState: no PageStateStore');
+      return;
+    }
+
+    final values = action['values'];
+    if (values is! Map) {
+      AppLogger.debug('[ActionDispatcher] setPageState: missing values map');
+      return;
+    }
+
+    final patch = <String, dynamic>{};
+    for (final entry in values.entries) {
+      final resolved = _resolveCubitParams(
+        {entry.key: entry.value},
+        dataContext: dataContext,
+      );
+      patch[entry.key] = resolved.containsKey(entry.key)
+          ? resolved[entry.key]
+          : null;
+    }
+    store.update(patch);
+
+    final onSuccess = action['onSuccess'];
+    if (onSuccess is Map<String, dynamic>) {
+      await dispatch(onSuccess, dataContext: dataContext);
+    }
+  }
+
+  Future<void> _handleReloadRequest(Map<String, dynamic> action) async {
+    final requestKey = action['requestKey'] as String?;
+    if (requestKey == null || requestKey.isEmpty) {
+      AppLogger.debug('[ActionDispatcher] reloadRequest: missing requestKey');
+      return;
+    }
+
+    final reload = _pageStateStore?.reloadRequest;
+    if (reload == null) {
+      AppLogger.debug(
+        '[ActionDispatcher] reloadRequest: no handler for $requestKey',
+      );
+      return;
+    }
+
+    await reload(requestKey);
   }
 
   bool _passesAuthGate(
@@ -793,6 +856,23 @@ class EngineActionDispatcher {
             final tap = dataContext['tap'];
             if (tap is Map && tap.containsKey(field)) {
               resolved[entry.key] = tap[field];
+            }
+          }
+        case 'pagestate':
+        case 'page_state':
+          if (field != null) {
+            final store = _pageStateStore ??
+                (dataContext?[PageStateStore.contextKey] as PageStateStore?);
+            if (store != null && store.values.containsKey(field)) {
+              resolved[entry.key] = store.values[field];
+            } else if (dataContext != null) {
+              final fromContext = resolveDataContextPath(
+                dataContext,
+                field.startsWith('pageState.') ? field : 'pageState.$field',
+              );
+              if (fromContext != null) {
+                resolved[entry.key] = fromContext;
+              }
             }
           }
         case 'value':
