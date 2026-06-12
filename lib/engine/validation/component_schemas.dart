@@ -49,6 +49,7 @@ class ComponentSchemas {
       'expandAxis',
       'shadow',
       'border',
+      'visibleWhen',
       'child', // Not in properties map, but allowed in ComponentConfig
     },
     propertyTypes: {
@@ -62,6 +63,8 @@ class ComponentSchemas {
       'expandAxis': 'string (horizontal|vertical|both)',
       'shadow': 'string (sm|md|lg|xl|none)',
       'border': 'object {width, color}',
+      'visibleWhen':
+          'object {source: form|pageState, field: string, when: isEmpty|nonEmpty}',
     },
   );
 
@@ -102,6 +105,7 @@ class ComponentSchemas {
       'textDirection',
       'gap',
       'padding',
+      'visibleWhen',
       'children', // Not in properties, but in ComponentConfig
     },
     propertyTypes: {
@@ -110,6 +114,8 @@ class ComponentSchemas {
       'crossAxisAlignment': 'string (start|center|end|stretch|baseline)',
       'gap': 'number',
       'padding': 'number | object',
+      'visibleWhen':
+          'object {source: form|pageState, field: string, when: isEmpty|nonEmpty}',
     },
   );
 
@@ -375,6 +381,10 @@ class ComponentSchemas {
       'menuIcon',
       'menuAction',
       'trailingIcon',
+      'trailingIconActive',
+      'trailingIconInactive',
+      'trailingIconActivePath',
+      'trailingActiveColor',
       'trailingAction',
       'titleAlign',
       'height',
@@ -391,6 +401,12 @@ class ComponentSchemas {
       'menuIcon': 'string (icon name)',
       'menuAction': 'action object (default openDrawer)',
       'trailingIcon': 'string (icon name)',
+      'trailingIconActive': 'string (icon when active path is true; default favorite)',
+      'trailingIconInactive':
+          'string (icon when active path is false; default favorite_outline)',
+      'trailingIconActivePath':
+          'string (boolean dataContext path, e.g. wishlist.isCurrentProductFavorite)',
+      'trailingActiveColor': 'string (hex icon color when active)',
       'trailingAction': 'action object',
     },
   );
@@ -450,6 +466,8 @@ class ComponentSchemas {
       'suffixText',
       'prefixIcon',
       'suffixIcon',
+      'clearable',
+      'clearIcon',
       'controllerId',
       'initialValue',
       'value',
@@ -500,6 +518,8 @@ class ComponentSchemas {
       'suffixText': 'string',
       'prefixIcon': 'string',
       'suffixIcon': 'string',
+      'clearable': 'bool (suffix clear button when non-empty)',
+      'clearIcon': 'string (default close)',
       'controllerId': 'string',
       'initialValue': 'string',
       'value': 'string',

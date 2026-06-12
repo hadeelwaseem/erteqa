@@ -207,11 +207,17 @@ class AssetVariantRepository implements VariantRepository {
 
     final children = <ComponentConfig>[if (appBar != null) appBar, ...bodyNodes];
 
+    final resolvedPagePadding = resolvePagePadding(
+      selectedPage,
+      json['theme'] as Map<String, dynamic>?,
+    );
+
     // scroll:none / layout:centered need max-height root column for expand/flex children.
     final rootColumnProps = <String, dynamic>{
       'crossAxisAlignment': 'stretch',
       'safeAreaBody': true,
       if (pageScroll == 'none' || isCenteredLayout) 'mainAxisSize': 'max',
+      if (resolvedPagePadding != null) 'pagePadding': resolvedPagePadding,
     };
 
     final root = ComponentConfig(
@@ -559,4 +565,29 @@ class AssetVariantRepository implements VariantRepository {
       _validateComponentJson(child, path: '$path.child');
     }
   }
+}
+
+/// Resolves [pages].padding for engine injection as root column [pagePadding].
+///
+/// Returns `null` when no inset should be applied (`padding: 0`).
+/// When [padding] is omitted, defaults to [theme].spacing.md (fallback 16).
+Object? resolvePagePadding(
+  Map<String, dynamic> page,
+  Map<String, dynamic>? theme,
+) {
+  if (!page.containsKey('padding')) {
+    return _defaultPagePaddingFromTheme(theme);
+  }
+  final raw = page['padding'];
+  if (raw == 0) return null;
+  return raw;
+}
+
+double _defaultPagePaddingFromTheme(Map<String, dynamic>? theme) {
+  final spacing = theme?['spacing'];
+  if (spacing is Map) {
+    final md = spacing['md'];
+    if (md is num) return md.toDouble();
+  }
+  return 16.0;
 }

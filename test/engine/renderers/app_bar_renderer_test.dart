@@ -327,4 +327,43 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets('trailingIconActivePath toggles icon and active color',
+      (tester) async {
+    final renderer = AppBarRenderer();
+    final config = ComponentConfig(
+      type: GenericComponentType.appBar,
+      properties: {
+        'title': 'Product',
+        'trailingIconActive': 'favorite',
+        'trailingIconInactive': 'favorite_outline',
+        'trailingIconActivePath': 'wishlist.isCurrentProductFavorite',
+        'trailingActiveColor': '#E11D48',
+        'trailingAction': {'type': 'noop'},
+      },
+    );
+
+    final router = GoRouter(
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, state) => Scaffold(
+            body: renderer.render(
+              config,
+              buildChild: (_) => const SizedBox.shrink(),
+              dataContext: {
+                ...rendererDataContext(),
+                'wishlist': {'isCurrentProductFavorite': true},
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+
+    final icon = tester.widget<Icon>(find.byIcon(Icons.favorite));
+    expect(icon.color, const Color(0xFFE11D48));
+  });
 }

@@ -349,6 +349,14 @@ class PropertyParsers {
         return Icons.settings;
       case 'search':
         return Icons.search;
+      case 'close':
+      case 'clear':
+        return Icons.close;
+      case 'cancel':
+        return Icons.cancel;
+      case 'delete':
+      case 'delete_outline':
+        return Icons.delete_outline;
       case 'cart':
       case 'shopping_cart':
         return Icons.shopping_cart;

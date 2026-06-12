@@ -88,8 +88,8 @@ class MockProductData {
       primaryThumbnailUrl: _productThumbnailUrl(n),
       basePrice: basePrice,
       compareAtPrice: compareAt,
-      currencyCode: 'AED',
-      displayPrice: '$basePrice AED',
+      currencyCode: 'SYR',
+      displayPrice: '$basePrice SYR',
       discountPercentage: hasDiscount ? 10.0 : 0.0,
       hasDiscount: hasDiscount,
       variantCount: 1,
@@ -157,7 +157,8 @@ class MockProductData {
 
   /// Mock catalog: product-N belongs to category cat-NNN (cycles across categories).
   static String categoryIdForProduct(Product product) {
-    final n = int.tryParse(product.slug?.replaceFirst('product-', '') ?? '') ?? 1;
+    final n =
+        int.tryParse(product.slug?.replaceFirst('product-', '') ?? '') ?? 1;
     final catIndex = ((n - 1) % _categories.length) + 1;
     return 'cat-${catIndex.toString().padLeft(3, '0')}';
   }
@@ -422,7 +423,8 @@ class MockProductData {
         {
           'publicUrl': unique[i],
           'isPrimary': i == 0,
-          'alt': 'Product ${productNumber.toString().padLeft(2, '0')} Image ${i + 1}',
+          'alt':
+              'Product ${productNumber.toString().padLeft(2, '0')} Image ${i + 1}',
         },
     ];
   }

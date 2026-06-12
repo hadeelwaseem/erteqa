@@ -6,6 +6,7 @@ import '../../../core/utils/icon_registry.dart';
 import '../../actions/action_dispatcher.dart';
 import '../../component_renderer/component_renderer.dart';
 import '../../theme/engine_theme.dart';
+import '../parsers/data_context_path.dart';
 import '../parsers/property_parsers.dart';
 
 /// Renders a top app bar row with optional back, menu, title, and trailing icon.
@@ -16,6 +17,9 @@ import '../parsers/property_parsers.dart';
 /// - `menuIcon` (string) — Material icon name, default `menu`
 /// - `menuAction` (action map) — defaults to `{ type: openDrawer }`
 /// - `trailingIcon` (string) — secondary icon on the visual left (e.g. notifications)
+/// - `trailingIconActive` / `trailingIconInactive` — toggle pair when [trailingIconActivePath] is set
+/// - `trailingIconActivePath` (string) — boolean path in dataContext for active icon state
+/// - `trailingActiveColor` (string) — icon color when active path is true
 /// - `trailingAction` (action map)
 /// - `titleAlign` (string) — `start` (default) | `center` | `end`
 ///   `start`/`end` follow app text direction (RTL → title on the right by default).
@@ -58,6 +62,13 @@ class AppBarRenderer implements ComponentRenderer {
         ? properties['menuAction'] as Map<String, dynamic>
         : const {'type': 'openDrawer'};
     final trailingIconName = properties['trailingIcon'] as String?;
+    final trailingIconActiveName =
+        properties['trailingIconActive'] as String? ?? 'favorite';
+    final trailingIconInactiveName =
+        properties['trailingIconInactive'] as String? ?? 'favorite_outline';
+    final trailingIconActivePath =
+        properties['trailingIconActivePath'] as String?;
+    final trailingActiveColorHex = properties['trailingActiveColor'] as String?;
     final trailingAction = properties['trailingAction'] as Map<String, dynamic>?;
     final titleAlignRaw =
         (properties['titleAlign'] as String?)?.toLowerCase() ?? 'start';
@@ -75,17 +86,33 @@ class AppBarRenderer implements ComponentRenderer {
         final dispatcher = _resolveDispatcher(dataContext, context);
 
         Widget leftSlot;
-        if (trailingIconName != null && trailingIconName.isNotEmpty) {
+        final hasToggleTrailing = trailingIconActivePath != null &&
+            trailingIconActivePath.isNotEmpty;
+        final resolvedTrailingIcon = hasToggleTrailing
+            ? _resolveToggleTrailingIcon(
+                dataContext: dataContext,
+                activePath: trailingIconActivePath,
+                activeIcon: trailingIconActiveName,
+                inactiveIcon: trailingIconInactiveName,
+              )
+            : trailingIconName;
+        final resolvedTrailingColor = hasToggleTrailing &&
+                _resolveToggleActive(dataContext, trailingIconActivePath)
+            ? PropertyParsers.parseColor(trailingActiveColorHex) ??
+                foregroundColor
+            : foregroundColor;
+
+        if (resolvedTrailingIcon != null && resolvedTrailingIcon.isNotEmpty) {
           leftSlot = _iconButton(
-            icon: IconRegistry.resolve(trailingIconName),
-            color: foregroundColor,
+            icon: IconRegistry.resolve(resolvedTrailingIcon),
+            color: resolvedTrailingColor,
             onPressed: trailingAction == null || dispatcher == null
                 ? null
                 : () => dispatcher.dispatch(
                       trailingAction,
                       dataContext: dataContext,
                     ),
-            semanticLabel: 'Action',
+            semanticLabel: hasToggleTrailing ? 'Favorite' : 'Action',
           );
         } else {
           leftSlot = const SizedBox(width: _minTapTarget);
@@ -223,5 +250,30 @@ class AppBarRenderer implements ComponentRenderer {
     );
     dataContext?[EngineActionDispatcher.contextKey] = dispatcher;
     return dispatcher;
+  }
+
+  bool _resolveToggleActive(
+    Map<String, dynamic>? dataContext,
+    String activePath,
+  ) {
+    final value = resolveDataContextPath(dataContext, activePath);
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+    if (value is String) {
+      final normalized = value.trim().toLowerCase();
+      return normalized == 'true' || normalized == '1';
+    }
+    return false;
+  }
+
+  String _resolveToggleTrailingIcon({
+    required Map<String, dynamic>? dataContext,
+    required String activePath,
+    required String activeIcon,
+    required String inactiveIcon,
+  }) {
+    return _resolveToggleActive(dataContext, activePath)
+        ? activeIcon
+        : inactiveIcon;
   }
 }

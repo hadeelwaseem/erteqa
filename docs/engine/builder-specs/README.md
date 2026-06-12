@@ -74,6 +74,8 @@ Copy structure from [`_TEMPLATE.md`](_TEMPLATE.md).
 | [21-commerce-checkout-cubit-call.md](21-commerce-checkout-cubit-call.md) | Commerce Phase 3 | implemented-in-json | `cubitCall` `cubit: checkout`; wizard routes; payment methods `requestUrl`; order success bindings |
 | [22-commerce-order-cubit-call.md](22-commerce-order-cubit-call.md) | Commerce Phase 4 | implemented-in-json | `cubitCall` `cubit: order`; my-orders list; order detail + shipment; guest track |
 | [23-page-state-request-reload.md](23-page-state-request-reload.md) | Engine orchestration | implemented-in-json | `pageState`, `setPageState`, `reloadRequest`, `queryBindings`; `/orders` status tabs |
+| [24-visible-when.md](24-visible-when.md) | Home inline search | implemented-in-json | `props.visibleWhen` — show/hide nodes by form or pageState field (`isEmpty` / `nonEmpty`) |
+| [25-page-padding.md](25-page-padding.md) | Layout / UI consistency | implemented-in-json | `pages[].padding` — default `theme.spacing.md` (16) body inset; `0` for full-bleed |
 | [../web-to-mobile-converter/README.md](../web-to-mobile-converter/README.md) | Web → Mobile | reference | Full Erteqa web block → mobile SDUI conversion rules; complements builder-specs for cross-platform JSON |
 
 Update this table when adding a spec.

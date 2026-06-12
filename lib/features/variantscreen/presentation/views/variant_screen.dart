@@ -13,6 +13,8 @@ import 'package:sooq_merchant/core/utils/service_locator.dart';
 import 'package:sooq_merchant/core/utils/syp_formatter.dart';
 import 'package:sooq_merchant/features/commerce/cart/presentation/manager/cart_cubit/cart_cubit.dart';
 import 'package:sooq_merchant/features/commerce/cart/presentation/manager/cart_cubit/cart_state.dart';
+import 'package:sooq_merchant/features/commerce/wishlist/presentation/manager/wishlist_cubit/wishlist_cubit.dart';
+import 'package:sooq_merchant/features/commerce/wishlist/presentation/manager/wishlist_cubit/wishlist_state.dart';
 import 'package:sooq_merchant/features/commerce/checkout/presentation/manager/checkout_cubit/checkout_cubit.dart';
 import 'package:sooq_merchant/features/commerce/checkout/presentation/manager/checkout_cubit/checkout_state.dart';
 import 'package:sooq_merchant/features/commerce/data/models/customer_order.dart';
@@ -220,7 +222,8 @@ class _VariantScreenState extends State<VariantScreen> {
           dataContext: ctx,
         );
       }
-      return MultiBlocProvider(
+      return _EnginePageRequestLayer(
+        mappedRequests: mappedRequests,
         providers: providers,
         child: _ProductRequestHost(
           config: config,
@@ -254,6 +257,7 @@ class _VariantScreenState extends State<VariantScreen> {
           onOrderDetailFailure: _handleOrderDetailFailure,
           onShipmentTrackSuccess: _handleShipmentTrackSuccess,
           onShipmentTrackEmpty: _handleShipmentTrackEmpty,
+          onRequestResultCleared: _handleRequestResultCleared,
         ),
       );
     }
@@ -276,13 +280,7 @@ class _VariantScreenState extends State<VariantScreen> {
         child: _CheckoutHost(
           baseRenderContext: renderContext,
           childBuilder: (checkoutCtx) {
-            if (!_isAuthRoute && getIt.isRegistered<CartCubit>()) {
-              return _CartHost(
-                baseRenderContext: checkoutCtx,
-                childBuilder: buildContent,
-              );
-            }
-            return buildContent(checkoutCtx);
+            return _wrapCommerceHosts(checkoutCtx, buildContent);
           },
         ),
       );
@@ -294,11 +292,10 @@ class _VariantScreenState extends State<VariantScreen> {
           childBuilder: buildContent,
         ),
       );
-    } else if (!_isAuthRoute && getIt.isRegistered<CartCubit>()) {
-      content = _CartHost(
-        baseRenderContext: renderContext,
-        childBuilder: buildContent,
-      );
+    } else if (!_isAuthRoute &&
+        (getIt.isRegistered<CartCubit>() ||
+            getIt.isRegistered<WishlistCubit>())) {
+      content = _wrapCommerceHosts(renderContext, buildContent);
     }
 
     if (_isSplashRoute) {
@@ -309,6 +306,31 @@ class _VariantScreenState extends State<VariantScreen> {
     }
 
     return content;
+  }
+
+  Widget _wrapCommerceHosts(
+    Map<String, dynamic> renderContext,
+    Widget Function(Map<String, dynamic> ctx) childBuilder,
+  ) {
+    Widget wrapCart(Map<String, dynamic> ctx) {
+      if (getIt.isRegistered<CartCubit>()) {
+        return _CartHost(
+          baseRenderContext: ctx,
+          childBuilder: childBuilder,
+        );
+      }
+      return childBuilder(ctx);
+    }
+
+    if (getIt.isRegistered<WishlistCubit>()) {
+      return _WishlistHost(
+        baseRenderContext: renderContext,
+        routeParams: widget.routeParams,
+        childBuilder: wrapCart,
+      );
+    }
+
+    return wrapCart(renderContext);
   }
 
   String _pageSignature() =>
@@ -339,6 +361,17 @@ class _VariantScreenState extends State<VariantScreen> {
       } else {
         _loadingRequestKeys.remove(requestKey);
       }
+    });
+  }
+
+  void _handleRequestResultCleared(String requestKey) {
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _requestResults.remove(requestKey);
+      _loadingRequestKeys.remove(requestKey);
+      _loadingMoreRequestKeys.remove(requestKey);
     });
   }
 
@@ -822,6 +855,13 @@ class _VariantScreenState extends State<VariantScreen> {
     if (getIt.isRegistered<CartCubit>()) {
       applyCartToRenderContext(merged, getIt<CartCubit>().state);
     }
+    if (getIt.isRegistered<WishlistCubit>()) {
+      applyWishlistToRenderContext(
+        merged,
+        getIt<WishlistCubit>().state,
+        widget.routeParams,
+      );
+    }
     if (getIt.isRegistered<CheckoutCubit>()) {
       applyCheckoutToRenderContext(merged, getIt<CheckoutCubit>().state);
     }
@@ -866,6 +906,30 @@ void applyOrderToRenderContext(Map<String, dynamic> merged) {
     if (cubit.guestLookupError != null) 'guestLookupError': cubit.guestLookupError,
     if (cubit.lastLookupOrderId != null)
       'lastLookupOrderId': cubit.lastLookupOrderId,
+  };
+}
+
+void applyWishlistToRenderContext(
+  Map<String, dynamic> merged,
+  WishlistState state,
+  Map<String, String> routeParams,
+) {
+  final wishlist = switch (state) {
+    WishlistLoaded(:final wishlist) => wishlist,
+    WishlistActionSuccess(:final wishlist) => wishlist,
+    WishlistFailureState(:final wishlist) => wishlist,
+    _ => null,
+  };
+
+  final productIds = wishlist?.productIds ?? const <String>[];
+  final currentProductId = routeParams['productId']?.trim();
+
+  merged['wishlist'] = <String, dynamic>{
+    'productIds': productIds,
+    'count': productIds.length,
+    'isCurrentProductFavorite': currentProductId != null &&
+        currentProductId.isNotEmpty &&
+        productIds.contains(currentProductId),
   };
 }
 
@@ -947,6 +1011,61 @@ void applyCheckoutToRenderContext(
     'discountMessage': draft.discountMessage,
     if (lastOrderJson != null) 'lastOrder': lastOrderJson,
   };
+}
+
+class _WishlistHost extends StatelessWidget {
+  const _WishlistHost({
+    required this.baseRenderContext,
+    required this.routeParams,
+    required this.childBuilder,
+  });
+
+  final Map<String, dynamic> baseRenderContext;
+  final Map<String, String> routeParams;
+  final Widget Function(Map<String, dynamic> ctx) childBuilder;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<WishlistCubit, WishlistState>(
+      listenWhen: (previous, current) =>
+          current is WishlistFailureState || current is WishlistActionSuccess,
+      listener: (context, state) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!context.mounted) {
+            return;
+          }
+          final ctx = Map<String, dynamic>.from(baseRenderContext);
+          applyWishlistToRenderContext(ctx, state, routeParams);
+          if (state is WishlistFailureState) {
+            AppMessenger.showError(
+              context,
+              state.message,
+              dataContext: ctx,
+            );
+          } else if (state is WishlistActionSuccess) {
+            final message = state.message?.trim();
+            if (message != null && message.isNotEmpty) {
+              AppMessenger.showSuccess(
+                context,
+                message,
+                dataContext: ctx,
+              );
+            }
+          }
+        });
+      },
+      buildWhen: (previous, current) =>
+          current is WishlistLoaded ||
+          current is WishlistActionSuccess ||
+          current is WishlistFailureState ||
+          current is WishlistLoading,
+      builder: (context, state) {
+        final ctx = Map<String, dynamic>.from(baseRenderContext);
+        applyWishlistToRenderContext(ctx, state, routeParams);
+        return childBuilder(ctx);
+      },
+    );
+  }
 }
 
 class _CartHost extends StatelessWidget {
@@ -1255,6 +1374,59 @@ class _AuthRequestHost extends StatelessWidget {
   }
 }
 
+/// Keeps [MultiBlocProvider] alive across [VariantScreen] rebuilds so focus /
+/// IME are not torn down when request payloads update (e.g. home lists load).
+class _EnginePageRequestLayer extends StatefulWidget {
+  const _EnginePageRequestLayer({
+    required this.mappedRequests,
+    required this.providers,
+    required this.child,
+  });
+
+  final List<EngineMappedRequest> mappedRequests;
+  final List<BlocProvider> providers;
+  final Widget child;
+
+  @override
+  State<_EnginePageRequestLayer> createState() =>
+      _EnginePageRequestLayerState();
+}
+
+class _EnginePageRequestLayerState extends State<_EnginePageRequestLayer> {
+  late List<BlocProvider> _providers;
+  late String _layerSignature;
+
+  @override
+  void initState() {
+    super.initState();
+    _layerSignature = _signatureFor(widget.mappedRequests);
+    _providers = widget.providers;
+  }
+
+  @override
+  void didUpdateWidget(covariant _EnginePageRequestLayer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final nextSignature = _signatureFor(widget.mappedRequests);
+    if (nextSignature != _layerSignature) {
+      _layerSignature = nextSignature;
+      _providers = widget.providers;
+    }
+  }
+
+  static String _signatureFor(List<EngineMappedRequest> requests) {
+    final keys = requests.map((request) => request.key).toList()..sort();
+    return keys.join('|');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiBlocProvider(
+      providers: _providers,
+      child: widget.child,
+    );
+  }
+}
+
 class _ProductRequestHost extends StatefulWidget {
   const _ProductRequestHost({
     required this.config,
@@ -1287,6 +1459,7 @@ class _ProductRequestHost extends StatefulWidget {
     required this.onOrderDetailFailure,
     required this.onShipmentTrackSuccess,
     required this.onShipmentTrackEmpty,
+    required this.onRequestResultCleared,
   });
 
   final dynamic config;
@@ -1343,6 +1516,7 @@ class _ProductRequestHost extends StatefulWidget {
   final void Function(String requestKey, CustomerShipmentStatus shipment)
   onShipmentTrackSuccess;
   final void Function(String requestKey, String message) onShipmentTrackEmpty;
+  final void Function(String requestKey) onRequestResultCleared;
 
   @override
   State<_ProductRequestHost> createState() => _ProductRequestHostState();
@@ -1544,6 +1718,19 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
     _queryDebounce?.cancel();
     _queryDebounce = Timer(const Duration(milliseconds: 300), () {
       if (!mounted) {
+        return;
+      }
+      final fieldId = request.qField;
+      if (fieldId == null || fieldId.isEmpty) {
+        return;
+      }
+      final q = _formValueFor(fieldId);
+      if (q == null || q.isEmpty) {
+        for (final mapped in widget.mappedRequests) {
+          if (mapped.qField == fieldId) {
+            widget.onRequestResultCleared(mapped.key);
+          }
+        }
         return;
       }
       unawaited(_dispatchQueryRequest(request));

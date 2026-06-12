@@ -26,11 +26,23 @@
     "shellExcludeRoutes": ["/splash", "/auth/login", "..."],
     "tabs": [{ "id", "label", "icon", "route" }]
   },
-  "pages": [{ "id", "route", "title", "background", "scroll", "appBar?", "body": [] }]
+  "pages": [{ "id", "route", "title", "background", "scroll", "padding?", "appBar?", "body": [] }]
 }
 ```
 
 Parsed by `MobileAppConfig.fromJson` in `lib/config/mobile_app_config.dart`.
+
+### Page `padding`
+
+Each page in `pages[]` may set `"padding"`:
+
+| Value | Behavior |
+|-------|----------|
+| Omitted | Engine applies `theme.spacing.md` (default 16px) around body content below `appBar` |
+| `0` | Full-bleed body — no page inset (splash/carousel) |
+| number or per-side object | Explicit override |
+
+Mapped to root column `pagePadding` (engine-only bridge). See [builder-spec 25-page-padding](../engine/builder-specs/25-page-padding.md).
 
 ### Theme runtime bridge
 

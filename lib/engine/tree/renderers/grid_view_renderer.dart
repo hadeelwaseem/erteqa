@@ -313,8 +313,10 @@ class GridViewRenderer implements ComponentRenderer {
         dataContext: dataContext,
         itemsEmpty: true,
       );
-      if (phase != RequestBoundListPhase.ready &&
-          phase != RequestBoundListPhase.none) {
+      if (phase == RequestBoundListPhase.none) {
+        return const SizedBox.shrink();
+      }
+      if (phase != RequestBoundListPhase.ready) {
         final requestMap = requestMapForKey(dataContext, requestKey);
         final message = switch (phase) {
           RequestBoundListPhase.error => resolveDisplayMessage(

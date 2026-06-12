@@ -4,6 +4,7 @@ class FormStateStore {
   static const contextKey = '_engineFormState';
 
   final Map<String, TextEditingController> _controllers = {};
+  final Map<String, FocusNode> _focusNodes = {};
   final Map<String, String> _values = {};
   final Map<String, GlobalKey<FormState>> _formKeys = {};
 
@@ -19,6 +20,10 @@ class FormStateStore {
       _values[key] = initialValue;
     }
     return controller;
+  }
+
+  FocusNode focusNodeFor(String key) {
+    return _focusNodes.putIfAbsent(key, FocusNode.new);
   }
 
   void updateValue(String key, String value) {
@@ -44,7 +49,11 @@ class FormStateStore {
     for (final controller in _controllers.values) {
       controller.dispose();
     }
+    for (final focusNode in _focusNodes.values) {
+      focusNode.dispose();
+    }
     _controllers.clear();
+    _focusNodes.clear();
     _values.clear();
     _formKeys.clear();
   }

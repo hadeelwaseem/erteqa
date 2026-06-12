@@ -205,4 +205,83 @@ void main() {
     }
     expect(find.text('body'), findsOneWidget);
   });
+
+  testWidgets('pagePadding insets body below appBar not the appBar', (tester) async {
+    final columnRenderer = ColumnRenderer();
+    final textRenderer = TextRenderer();
+
+    Widget buildChild(ComponentConfig child) {
+      switch (child.type) {
+        case GenericComponentType.appBar:
+          return const SizedBox(
+            height: 48,
+            child: ColoredBox(
+              color: Color(0xFF1D4ED8),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text('Page title'),
+              ),
+            ),
+          );
+        case GenericComponentType.text:
+          return textRenderer.render(
+            child,
+            buildChild: (_) => const SizedBox.shrink(),
+            dataContext: rendererDataContext(),
+          );
+        default:
+          return const SizedBox.shrink();
+      }
+    }
+
+    final config = ComponentConfig(
+      type: GenericComponentType.column,
+      properties: const {
+        'safeAreaBody': true,
+        'pagePadding': 16,
+      },
+      children: [
+        ComponentConfig(
+          type: GenericComponentType.appBar,
+          properties: {'title': 'Page title'},
+        ),
+        ComponentConfig(
+          type: GenericComponentType.text,
+          properties: {'value': 'body content'},
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            height: 400,
+            width: 400,
+            child: columnRenderer.render(
+              config,
+              buildChild: buildChild,
+              dataContext: rendererDataContext(),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final pagePaddingFinder = find.byWidgetPredicate(
+      (widget) =>
+          widget is Padding &&
+          widget.padding == const EdgeInsetsDirectional.all(16),
+    );
+    expect(pagePaddingFinder, findsOneWidget);
+
+    expect(
+      find.ancestor(of: find.text('Page title'), matching: pagePaddingFinder),
+      findsNothing,
+    );
+    expect(
+      find.ancestor(of: find.text('body content'), matching: pagePaddingFinder),
+      findsOneWidget,
+    );
+  });
 }

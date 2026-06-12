@@ -41,6 +41,7 @@ import '../engine_page_chrome.dart';
 import '../form/form_state_store.dart';
 import '../page/page_state_store.dart';
 import '../validation/layout_constraint_validator.dart';
+import '../visibility/visible_when.dart';
 
 /// Recursively renders a tree-based [ScreenConfig] into a widget tree.
 ///
@@ -220,7 +221,7 @@ class ScreenRenderer {
             crossAxisSpacing: config.crossAxisSpacing,
             dataContextOverride: config.dataContextOverride,
           );
-    final widget = renderer.render(
+    var widget = renderer.render(
       renderConfig,
       buildChild: (c) => _buildComponent(
         c,
@@ -231,6 +232,14 @@ class ScreenRenderer {
       ),
       dataContext: _withPath(mergedContext, path),
     );
+    final visibleWhen = config.properties['visibleWhen'];
+    if (visibleWhen != null) {
+      widget = wrapWithVisibleWhen(
+        child: widget,
+        dataContext: mergedContext,
+        visibleWhenRaw: visibleWhen,
+      );
+    }
     if (onTap == null ||
         config.type == GenericComponentType.button ||
         config.type == GenericComponentType.contactButton ||

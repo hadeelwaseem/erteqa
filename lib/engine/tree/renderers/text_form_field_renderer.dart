@@ -34,6 +34,8 @@ class TextFormFieldRenderer implements ComponentRenderer {
     final suffixText = properties['suffixText'] as String?;
     final prefixIconName = properties['prefixIcon'] as String?;
     final suffixIconName = properties['suffixIcon'] as String?;
+    final clearable = properties['clearable'] == true;
+    final clearIconName = properties['clearIcon'] as String? ?? 'close';
 
     final autofocus = properties['autofocus'] == true;
     final enabled = properties['enabled'] != false;
@@ -146,111 +148,130 @@ class TextFormFieldRenderer implements ComponentRenderer {
       controller = TextEditingController(text: initialValue ?? '');
     }
 
-    return Builder(
-      builder: (context) {
-        final dispatcher = _resolveDispatcher(dataContext, context);
+    Widget buildField(BuildContext context) {
+      final dispatcher = _resolveDispatcher(dataContext, context);
 
-        final decoration = _buildDecoration(
-          theme: theme,
-          label: label,
-          hint: hint,
-          helper: helper,
-          error: validator == null ? error : null,
-          prefixText: prefixText,
-          suffixText: suffixText,
-          prefixIconName: prefixIconName,
+      final decoration = _buildDecoration(
+        theme: theme,
+        label: label,
+        hint: hint,
+        helper: helper,
+        error: validator == null ? error : null,
+        prefixText: prefixText,
+        suffixText: suffixText,
+        prefixIconName: prefixIconName,
+        suffixIcon: _buildSuffixIcon(
           suffixIconName: suffixIconName,
-          borderRadius: borderRadius,
-          fillColor: color,
-          border: border,
-          contentPadding: contentPadding,
-        );
-
-        final field = TextFormField(
+          clearable: clearable,
+          clearIconName: clearIconName,
           controller: controller,
-          autofocus: autofocus,
-          enabled: enabled,
-          readOnly: readOnly,
-          obscureText: obscureText,
-          autocorrect: autocorrect,
-          enableSuggestions: enableSuggestions,
-          expands: expands,
-          keyboardType: keyboardType,
-          textInputAction: textInputAction,
-          textCapitalization: textCapitalization,
-          textDirection: textDirection,
-          textAlign: textAlign ?? TextAlign.start,
-          inputFormatters: inputFormatters,
-          maxLines: expands ? null : (maxLines ?? 1),
-          minLines: expands ? null : minLines,
-          maxLength: maxLength,
-          autovalidateMode: hasValidation
-              ? AutovalidateMode.onUserInteraction
-              : AutovalidateMode.disabled,
-          decoration: decoration,
-          validator: validator,
-          onChanged: (value) {
-            if (formState != null && controllerKey.isNotEmpty) {
-              formState.updateValue(controllerKey, value);
-            }
-            if (onChangedAction != null && dispatcher != null) {
-              dispatcher.dispatch(
-                onChangedAction,
-                value: value,
-                fieldId: fieldId,
-              );
-            }
-          },
-          onFieldSubmitted: (value) {
-            if (formState != null && controllerKey.isNotEmpty) {
-              formState.updateValue(controllerKey, value);
-            }
-            if (onSubmittedAction != null && dispatcher != null) {
-              dispatcher.dispatch(
-                onSubmittedAction,
-                value: value,
-                fieldId: fieldId,
-              );
-            }
-          },
-        );
+          formState: formState,
+          controllerKey: controllerKey,
+          theme: theme,
+        ),
+        borderRadius: borderRadius,
+        fillColor: color,
+        border: border,
+        contentPadding: contentPadding,
+      );
 
-        final needsMaterial =
-            context.findAncestorWidgetOfExactType<Material>() == null;
-        final fieldWidget = needsMaterial
-            ? Material(type: MaterialType.transparency, child: field)
-            : field;
+      final field = TextFormField(
+        key: ValueKey('engine_tff_$effectiveKey'),
+        controller: controller,
+        focusNode: formState?.focusNodeFor(effectiveKey),
+        autofocus: autofocus,
+        enabled: enabled,
+        readOnly: readOnly,
+        obscureText: obscureText,
+        autocorrect: autocorrect,
+        enableSuggestions: enableSuggestions,
+        expands: expands,
+        keyboardType: keyboardType,
+        textInputAction: textInputAction,
+        textCapitalization: textCapitalization,
+        textDirection: textDirection,
+        textAlign: textAlign ?? TextAlign.start,
+        inputFormatters: inputFormatters,
+        maxLines: expands ? null : (maxLines ?? 1),
+        minLines: expands ? null : minLines,
+        maxLength: maxLength,
+        autovalidateMode: hasValidation
+            ? AutovalidateMode.onUserInteraction
+            : AutovalidateMode.disabled,
+        decoration: decoration,
+        validator: validator,
+        onChanged: (value) {
+          if (formState != null && controllerKey.isNotEmpty) {
+            formState.updateValue(controllerKey, value);
+          }
+          if (onChangedAction != null && dispatcher != null) {
+            dispatcher.dispatch(
+              onChangedAction,
+              value: value,
+              fieldId: fieldId,
+            );
+          }
+        },
+        onFieldSubmitted: (value) {
+          if (formState != null && controllerKey.isNotEmpty) {
+            formState.updateValue(controllerKey, value);
+          }
+          if (onSubmittedAction != null && dispatcher != null) {
+            dispatcher.dispatch(
+              onSubmittedAction,
+              value: value,
+              fieldId: fieldId,
+            );
+          }
+        },
+      );
 
-        Widget result = fieldWidget;
-        if (shadow != null) {
-          final radius =
-              borderRadius ?? BorderRadius.circular(theme?.radiusMd ?? 12);
-          result = DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: radius,
-              boxShadow: [shadow],
-            ),
-            child: result,
-          );
-        }
-        if (margin != null || width != null || height != null) {
-          result = Container(
-            width: width,
-            height: height,
-            margin: margin,
-            child: result,
-          );
-        }
+      final needsMaterial =
+          context.findAncestorWidgetOfExactType<Material>() == null;
+      final fieldWidget = needsMaterial
+          ? Material(type: MaterialType.transparency, child: field)
+          : field;
 
-        return Semantics(
-          textField: true,
-          enabled: enabled,
-          label: label,
-          hint: hint,
+      Widget result = fieldWidget;
+      if (shadow != null) {
+        final radius =
+            borderRadius ?? BorderRadius.circular(theme?.radiusMd ?? 12);
+        result = DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: radius,
+            boxShadow: [shadow],
+          ),
           child: result,
         );
-      },
-    );
+      }
+      if (margin != null || width != null || height != null) {
+        result = Container(
+          width: width,
+          height: height,
+          margin: margin,
+          child: result,
+        );
+      }
+
+      return Semantics(
+        textField: true,
+        enabled: enabled,
+        label: label,
+        hint: hint,
+        child: result,
+      );
+    }
+
+    if (clearable) {
+      return ListenableBuilder(
+        listenable: controller,
+        builder: (context, _) => Builder(
+          builder: (context) => buildField(context),
+        ),
+      );
+    }
+
+    return Builder(builder: buildField);
   }
 
   InputDecoration _buildDecoration({
@@ -262,14 +283,13 @@ class TextFormFieldRenderer implements ComponentRenderer {
     required String? prefixText,
     required String? suffixText,
     required String? prefixIconName,
-    required String? suffixIconName,
+    required Widget? suffixIcon,
     required BorderRadius? borderRadius,
     required Color? fillColor,
     required Border? border,
     required EdgeInsets? contentPadding,
   }) {
     final prefixIcon = _tapTargetIcon(prefixIconName);
-    final suffixIcon = _tapTargetIcon(suffixIconName);
 
     final radius =
         borderRadius ?? BorderRadius.circular(theme?.radiusMd ?? 12);
@@ -341,6 +361,44 @@ class TextFormFieldRenderer implements ComponentRenderer {
         child: Icon(PropertyParsers.parseIconData(iconName)),
       ),
     );
+  }
+
+  Widget? _buildSuffixIcon({
+    required String? suffixIconName,
+    required bool clearable,
+    required String clearIconName,
+    required TextEditingController controller,
+    required FormStateStore? formState,
+    required String controllerKey,
+    required EngineTheme? theme,
+  }) {
+    if (clearable && controller.text.isNotEmpty) {
+      final iconColor = theme?.mutedColor ?? const Color(0xFF475569);
+      return SizedBox(
+        width: _minTapTarget,
+        height: _minTapTarget,
+        child: IconButton(
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(
+            minWidth: _minTapTarget,
+            minHeight: _minTapTarget,
+          ),
+          icon: Icon(
+            PropertyParsers.parseIconData(clearIconName),
+            size: 22,
+            color: iconColor,
+          ),
+          tooltip: 'مسح',
+          onPressed: () {
+            controller.clear();
+            if (formState != null && controllerKey.isNotEmpty) {
+              formState.updateValue(controllerKey, '');
+            }
+          },
+        ),
+      );
+    }
+    return _tapTargetIcon(suffixIconName);
   }
 
   FormStateStore? _formStateFrom(Map<String, dynamic>? dataContext) {

@@ -33,6 +33,9 @@ class ColumnRenderer implements ComponentRenderer {
     final padding = PropertyParsers.parseEdgeInsetsDirectional(
       config.properties['padding'],
     );
+    final pagePadding = PropertyParsers.parseEdgeInsetsDirectional(
+      config.properties['pagePadding'],
+    );
     final safeAreaBody = config.properties['safeAreaBody'] == true;
 
     if (safeAreaBody && children.isNotEmpty) {
@@ -50,6 +53,7 @@ class ColumnRenderer implements ComponentRenderer {
           gap: gap,
           wantsFlex: wantsFlex,
           padding: padding,
+          pagePadding: pagePadding,
         );
       }
       if (!hasAppBar) {
@@ -64,7 +68,7 @@ class ColumnRenderer implements ComponentRenderer {
             textDirection: textDirection,
             gap: gap,
             wantsFlex: wantsFlex,
-            padding: padding,
+            padding: pagePadding ?? padding,
           ),
         );
       }
@@ -96,6 +100,7 @@ class ColumnRenderer implements ComponentRenderer {
     required double gap,
     required bool wantsFlex,
     required EdgeInsetsDirectional? padding,
+    required EdgeInsetsDirectional? pagePadding,
   }) {
     final appBarWidget = buildChild(appBarConfig);
     final bodyColumn = _renderColumn(
@@ -110,7 +115,10 @@ class ColumnRenderer implements ComponentRenderer {
       wantsFlex: wantsFlex,
       padding: null,
     );
-    final safeBody = SafeArea(top: false, child: bodyColumn);
+    Widget safeBody = SafeArea(top: false, child: bodyColumn);
+    if (pagePadding != null) {
+      safeBody = Padding(padding: pagePadding, child: safeBody);
+    }
 
     Widget buildSplitColumn({required bool useExpanded}) {
       return Column(

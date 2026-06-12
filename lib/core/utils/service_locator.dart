@@ -26,6 +26,10 @@ import 'package:sooq_merchant/features/commerce/cart/data/datasources/cart_local
 import 'package:sooq_merchant/features/commerce/cart/data/repos/cart_repo.dart';
 import 'package:sooq_merchant/features/commerce/cart/data/repos/cart_repo_impl.dart';
 import 'package:sooq_merchant/features/commerce/cart/presentation/manager/cart_cubit/cart_cubit.dart';
+import 'package:sooq_merchant/features/commerce/wishlist/data/datasources/wishlist_local_storage.dart';
+import 'package:sooq_merchant/features/commerce/wishlist/data/repos/wishlist_repo.dart';
+import 'package:sooq_merchant/features/commerce/wishlist/data/repos/wishlist_repo_impl.dart';
+import 'package:sooq_merchant/features/commerce/wishlist/presentation/manager/wishlist_cubit/wishlist_cubit.dart';
 import 'package:sooq_merchant/features/commerce/checkout/data/datasources/checkout_session_store.dart';
 import 'package:sooq_merchant/features/commerce/checkout/data/repos/checkout_repo.dart';
 import 'package:sooq_merchant/features/commerce/checkout/data/repos/checkout_repo_impl.dart';
@@ -68,6 +72,8 @@ void setupServiceLocator({
   _resetIfRegistered<VariantRepository>();
   _resetIfRegistered<CartRepo>();
   _resetIfRegistered<CartCubit>();
+  _resetIfRegistered<WishlistRepo>();
+  _resetIfRegistered<WishlistCubit>();
   _resetIfRegistered<CheckoutRepo>();
   _resetIfRegistered<OrderRepo>();
   _resetIfRegistered<ShippingRepo>();
@@ -169,6 +175,13 @@ void setupServiceLocator({
   );
   getIt.registerLazySingleton<CartCubit>(
     () => CartCubit(getIt<CartRepo>())..loadCart(),
+  );
+
+  getIt.registerLazySingleton<WishlistRepo>(
+    () => WishlistRepoImpl(WishlistLocalStorage()),
+  );
+  getIt.registerLazySingleton<WishlistCubit>(
+    () => WishlistCubit(getIt<WishlistRepo>())..load(),
   );
 
   getIt.registerLazySingleton<CheckoutSessionStore>(

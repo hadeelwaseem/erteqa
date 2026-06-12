@@ -213,4 +213,47 @@ void main() {
     );
     expect(networkImage.url, productUrl);
   });
+
+  testWidgets(
+    'deferred qField request with phase none does not show emptyMessage',
+    (tester) async {
+      const requestKey = 'search-results';
+      final renderer = GridViewRenderer();
+      final config = ComponentConfig(
+        type: GenericComponentType.gridView,
+        crossAxisCount: 2,
+        properties: {
+          'enableInnerScroll': false,
+          'data': {
+            'requestKey': requestKey,
+            'requestUrl': '/api/v1/public/products/search',
+            'qField': 'searchQuery',
+          },
+          'emptyMessage': 'لا توجد منتجات',
+        },
+        itemBuilder: ItemBuilderConfig(
+          source: 'dataContext.requests.$requestKey.data',
+          item: ComponentConfig(
+            type: GenericComponentType.text,
+            properties: {'valuePath': 'item.name'},
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: renderer.render(
+              config,
+              buildChild: (c) => _buildChild(c, rendererDataContext()),
+              dataContext: rendererDataContext(),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('لا توجد منتجات'), findsNothing);
+      expect(find.byType(GridView), findsNothing);
+    },
+  );
 }

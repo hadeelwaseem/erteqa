@@ -11,6 +11,7 @@ import 'package:sooq_merchant/core/utils/constants.dart';
 import 'package:sooq_merchant/core/cubits/shared_preferences_cubit/shared_preferences_cubit.dart';
 import 'package:sooq_merchant/core/cubits/token_cubit/token_cubit.dart';
 import 'package:sooq_merchant/features/commerce/cart/presentation/manager/cart_cubit/cart_cubit.dart';
+import 'package:sooq_merchant/features/commerce/wishlist/presentation/manager/wishlist_cubit/wishlist_cubit.dart';
 import 'package:sooq_merchant/features/commerce/checkout/presentation/manager/checkout_cubit/checkout_cubit.dart';
 import 'package:sooq_merchant/features/commerce/order/presentation/manager/order_cubit/order_cubit.dart';
 import 'package:sooq_merchant/core/utils/app_logger.dart';
@@ -118,6 +119,7 @@ class SOOQApp extends StatelessWidget {
         BlocProvider.value(value: tokenCubit),
         BlocProvider.value(value: sharedPreferencesCubit),
         BlocProvider.value(value: getIt<CartCubit>()),
+        BlocProvider.value(value: getIt<WishlistCubit>()),
         BlocProvider.value(value: getIt<CheckoutCubit>()),
         BlocProvider.value(value: getIt<OrderCubit>()),
       ],

@@ -1,4 +1,4 @@
-# Builder spec: textFormField textDirection
+# Builder spec: textFormField textDirection and clearable
 
 > **Phase:** UI fixes — phone / numeric input  
 > **Status:** `implemented-in-json`  
@@ -18,6 +18,7 @@
 | Item | Exists in prod JSON? | Evidence |
 |------|----------------------|----------|
 | `props.textDirection` on `textFormField` | Yes | `auth-login-phone`, `address-field-phone` |
+| `props.clearable` / `clearIcon` | Yes | `home-search-field` |
 
 ---
 
@@ -45,6 +46,29 @@
 
 - Use `ltr` + `left` for phone and E.164-style fields.
 - Omit or use `rtl` + `right` for Arabic name/address copy.
+
+### textFormField.clearable
+
+**JSON shape:**
+
+```json
+{
+  "type": "textFormField",
+  "props": {
+    "id": "homeSearchQuery",
+    "prefixIcon": "search",
+    "clearable": true,
+    "clearIcon": "close"
+  }
+}
+```
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `clearable` | bool | false | Shows a tappable suffix icon when the field has text; clears input on tap |
+| `clearIcon` | string | `close` | Icon name (`close`, `clear`, `delete`, …) |
+
+In RTL layouts the clear icon appears on the visual left (suffix), opposite `prefixIcon`.
 
 ---
 

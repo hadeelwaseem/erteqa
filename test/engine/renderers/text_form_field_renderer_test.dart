@@ -320,4 +320,48 @@ void main() {
 
     expect(find.text('هذا الحقل مطلوب'), findsOneWidget);
   });
+
+  testWidgets('clearable shows suffix clear icon and clears field on tap', (
+    tester,
+  ) async {
+    final renderer = TextFormFieldRenderer();
+    final store = FormStateStore();
+    store.controllerFor('homeSearchQuery').text = 'phone';
+    store.updateValue('homeSearchQuery', 'phone');
+    final config = ComponentConfig(
+      type: GenericComponentType.textFormField,
+      properties: {
+        'id': 'homeSearchQuery',
+        'clearable': true,
+        'clearIcon': 'close',
+      },
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Form(
+            key: store.formKeyFor('f'),
+            child: renderer.render(
+              config,
+              buildChild: (_) => const SizedBox.shrink(),
+              dataContext: {
+                ...formRendererDataContext(),
+                FormStateStore.contextKey: store,
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byIcon(Icons.close), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.close));
+    await tester.pump();
+
+    expect(store.controllerFor('homeSearchQuery').text, isEmpty);
+    expect(store.valueFor('homeSearchQuery'), '');
+    expect(find.byIcon(Icons.close), findsNothing);
+  });
 }

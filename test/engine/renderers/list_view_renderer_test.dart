@@ -95,4 +95,49 @@ void main() {
     expect(find.text('No items available'), findsNothing);
     expect(find.text('لا توجد عناصر'), findsNothing);
   });
+
+  testWidgets(
+    'deferred qField request with phase none does not show emptyMessage',
+    (tester) async {
+      final renderer = ListViewRenderer();
+      final config = ComponentConfig(
+        type: GenericComponentType.listView,
+        properties: {
+          'enableInnerScroll': false,
+          'data': {
+            'requestKey': 'search-autocomplete',
+            'requestUrl': '/api/v1/public/products/autocomplete',
+            'qField': 'searchQuery',
+          },
+          'emptyMessage': 'لا توجد اقتراحات',
+        },
+        itemBuilder: ItemBuilderConfig(
+          source: 'dataContext.requests.search-autocomplete.data.products',
+          item: ComponentConfig(
+            type: GenericComponentType.text,
+            properties: {'valuePath': 'item.name', 'value': ''},
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: renderer.render(
+              config,
+              buildChild: (c) => TextRenderer().render(
+                c,
+                buildChild: (_) => const SizedBox.shrink(),
+                dataContext: rendererDataContext(),
+              ),
+              dataContext: rendererDataContext(),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('لا توجد اقتراحات'), findsNothing);
+      expect(find.byType(ListView), findsNothing);
+    },
+  );
 }

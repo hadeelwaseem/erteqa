@@ -77,6 +77,12 @@ class ListViewRenderer implements ComponentRenderer {
       );
     }
 
+    if (phase == RequestBoundListPhase.none &&
+        requestKey != null &&
+        requestKey.isNotEmpty) {
+      return const SizedBox.shrink();
+    }
+
     if (phase == RequestBoundListPhase.error ||
         phase == RequestBoundListPhase.empty) {
       final requestMap = requestKey == null

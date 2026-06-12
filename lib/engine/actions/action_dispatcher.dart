@@ -17,6 +17,8 @@ import '../../features/commerce/checkout/presentation/manager/checkout_cubit/che
 import '../../features/commerce/checkout/presentation/manager/checkout_cubit/checkout_state.dart';
 import '../../features/commerce/order/presentation/manager/order_cubit/order_cubit.dart';
 import '../../features/commerce/order/presentation/manager/order_cubit/order_state.dart';
+import '../../features/commerce/wishlist/presentation/manager/wishlist_cubit/wishlist_cubit.dart';
+import '../../features/commerce/wishlist/presentation/manager/wishlist_cubit/wishlist_state.dart';
 import '../engine_page_chrome.dart';
 import '../form/form_state_store.dart';
 import '../page/page_state_store.dart';
@@ -467,6 +469,13 @@ class EngineActionDispatcher {
           dataContext: dataContext,
         );
         return;
+      case 'wishlist':
+        await _handleWishlistCubitCall(
+          action,
+          method: method,
+          dataContext: dataContext,
+        );
+        return;
       default:
         AppLogger.debug('[ActionDispatcher] Unsupported cubit: $cubitName');
         return;
@@ -606,6 +615,75 @@ class EngineActionDispatcher {
       }
     } catch (e) {
       AppLogger.debug('[ActionDispatcher] cart cubitCall failed: $e');
+    }
+  }
+
+  Future<void> _handleWishlistCubitCall(
+    Map<String, dynamic> action, {
+    required String method,
+    Map<String, dynamic>? dataContext,
+  }) async {
+    if (!getIt.isRegistered<WishlistCubit>()) {
+      AppLogger.debug('[ActionDispatcher] WishlistCubit not registered');
+      return;
+    }
+
+    final wishlistCubit = getIt<WishlistCubit>();
+    final params = _resolveCubitParams(
+      action['params'] as Map<String, dynamic>?,
+      dataContext: dataContext,
+    );
+
+    try {
+      switch (method) {
+        case 'toggle':
+          await wishlistCubit.toggle(
+            productId: params['productId']?.toString() ?? '',
+            productTitle: params['productTitle']?.toString() ?? '',
+            thumbnailUrl: params['thumbnailUrl']?.toString(),
+            displayPrice: params['displayPrice']?.toString(),
+          );
+          break;
+        case 'add':
+          await wishlistCubit.add(
+            productId: params['productId']?.toString() ?? '',
+            productTitle: params['productTitle']?.toString() ?? '',
+            thumbnailUrl: params['thumbnailUrl']?.toString(),
+            displayPrice: params['displayPrice']?.toString(),
+          );
+          break;
+        case 'remove':
+          await wishlistCubit.remove(
+            productId: params['productId']?.toString() ?? '',
+          );
+          break;
+        case 'clear':
+          await wishlistCubit.clear();
+          break;
+        default:
+          AppLogger.debug(
+            '[ActionDispatcher] Unsupported wishlist method: $method',
+          );
+          return;
+      }
+
+      final state = wishlistCubit.state;
+      if (state is WishlistFailureState) {
+        final onFailure = action['onFailure'];
+        if (onFailure is Map<String, dynamic>) {
+          await dispatch(onFailure, dataContext: dataContext);
+        }
+        return;
+      }
+
+      if (state is WishlistLoaded || state is WishlistActionSuccess) {
+        final onSuccess = action['onSuccess'];
+        if (onSuccess is Map<String, dynamic>) {
+          await dispatch(onSuccess, dataContext: dataContext);
+        }
+      }
+    } catch (e) {
+      AppLogger.debug('[ActionDispatcher] wishlist cubitCall failed: $e');
     }
   }
 

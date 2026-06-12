@@ -25,6 +25,42 @@ Reference page: `/product/details/:productId` (`product-details-appbar`).
 | `props.backgroundColor` transparent on `appBar` | Yes | Same node — `"backgroundColor": "#00000000"` |
 | `props.backgroundColor` `#AARRGGBB` elsewhere on `appBar` | No | Only product details uses alpha today |
 | `transparent` literal on `appBar` | No | Engine supports; builder may expose as preset |
+| Toggle trailing icon (favorites) | Yes | Product details — `trailingIconActivePath` + wishlist cubit |
+
+---
+
+### 3. AppBar toggle trailing icon (favorites)
+
+**Applies to:** `type` = `appBar` on pages that expose wishlist state in `dataContext`
+
+```json
+{
+  "type": "appBar",
+  "props": {
+    "trailingIconActive": "favorite",
+    "trailingIconInactive": "favorite_outline",
+    "trailingIconActivePath": "wishlist.isCurrentProductFavorite",
+    "trailingActiveColor": "#E11D48",
+    "trailingAction": {
+      "type": "cubitCall",
+      "cubit": "wishlist",
+      "method": "toggle",
+      "params": {
+        "productId": { "source": "routeparams", "field": "productId" },
+        "productTitle": { "source": "datacontext", "field": "requests.product-detail.data.name" }
+      }
+    }
+  }
+}
+```
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| `trailingIconActive` | string | no | `favorite` | Icon when active path is true |
+| `trailingIconInactive` | string | no | `favorite_outline` | Icon when active path is false |
+| `trailingIconActivePath` | string | when toggling | — | Boolean path in render context |
+| `trailingActiveColor` | string (hex) | no | `foregroundColor` | Icon color when favorited |
+| `trailingAction` | action | yes | — | Typically `cubitCall` wishlist `toggle` |
 
 ---
 

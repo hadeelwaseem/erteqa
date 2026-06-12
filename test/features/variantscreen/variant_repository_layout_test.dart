@@ -61,4 +61,61 @@ void main() {
     expect(home.root.properties['pageLayout'], isNull);
     expect(home.root.properties['pageScroll'], 'vertical');
   });
+
+  test('/checkout defaults pagePadding to theme spacing md', () async {
+    final config = await repository.loadVariant(
+      'mobile_production_v2',
+      pageRoute: '/checkout',
+    );
+
+    expect(config.root.child?.properties['pagePadding'], 16.0);
+  });
+
+  test('/product/details defaults pagePadding to theme spacing md', () async {
+    final config = await repository.loadVariant(
+      'mobile_production_v2',
+      pageRoute: '/product/details/:productId',
+    );
+
+    expect(config.root.child?.properties['pagePadding'], 16.0);
+  });
+
+  test('/splash with padding 0 omits pagePadding', () async {
+    final config = await repository.loadVariant(
+      'mobile_production_v2',
+      pageRoute: '/splash',
+    );
+
+    expect(config.root.child?.properties.containsKey('pagePadding'), isFalse);
+  });
+
+  test('resolvePagePadding uses theme md when omitted', () {
+    expect(
+      resolvePagePadding(<String, dynamic>{}, {'spacing': {'md': 20}}),
+      20.0,
+    );
+  });
+
+  test('resolvePagePadding returns null for explicit zero', () {
+    expect(
+      resolvePagePadding(<String, dynamic>{'padding': 0}, null),
+      isNull,
+    );
+  });
+
+  test('resolvePagePadding honors custom override', () {
+    expect(
+      resolvePagePadding(<String, dynamic>{'padding': 24}, null),
+      24,
+    );
+    expect(
+      resolvePagePadding(
+        <String, dynamic>{
+          'padding': {'left': 12, 'right': 12, 'top': 8, 'bottom': 8},
+        },
+        null,
+      ),
+      isA<Map<String, dynamic>>(),
+    );
+  });
 }

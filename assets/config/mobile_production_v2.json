@@ -264,7 +264,8 @@
             ]
           }
         }
-      ]
+      ],
+      "padding": 0
     },
     {
       "id": "page-splash-carousel",
@@ -354,7 +355,8 @@
             ]
           }
         }
-      ]
+      ],
+      "padding": 0
     },
     {
       "id": "page-auth-login",
@@ -385,154 +387,145 @@
               "mainAxisSize": "max"
             },
             "child": {
-          "id": "auth-login-form",
-          "type": "form",
-          "props": {
-            "id": "otp-request-form",
-            "formId": "otp-request-form"
-          },
-          "child": {
-            "id": "auth-login-column",
-            "type": "column",
-            "props": {
-              "crossAxis": "stretch",
-              "gap": 16
-            },
-            "style": {
-              "padding": {
-                "left": 16,
-                "right": 16,
-                "top": 16,
-                "bottom": 16
-              }
-            },
-            "children": [
-              {
-                "id": "auth-login-logo",
-                "type": "image",
-                "props": {
-                  "source": "asset",
-                  "url": "assets/icons/app_logo.png",
-                  "width": 120,
-                  "height": 120,
-                  "fit": "contain",
-                  "alt": "SOOQ"
-                }
+              "id": "auth-login-form",
+              "type": "form",
+              "props": {
+                "id": "otp-request-form",
+                "formId": "otp-request-form"
               },
-              {
-                "id": "auth-login-heading",
-                "type": "text",
+              "child": {
+                "id": "auth-login-column",
+                "type": "column",
                 "props": {
-                  "value": "أدخل رقم جوالك",
-                  "fontSize": 24,
-                  "fontWeight": "bold",
-                  "textAlign": "right",
-                  "color": "#0F172A"
-                }
-              },
-
-              {
-                "id": "auth-login-subheading",
-                "type": "text",
-                "props": {
-                  "value": "سنرسل رمز التحقق عبر واتساب",
-                  "fontSize": 14,
-                  "textAlign": "right",
-                  "color": "#475569"
-                }
-              },
-              {
-                "id": "auth-login-phone",
-                "type": "textFormField",
-                "props": {
-                  "id": "phone",
-                  "label": "رقم الجوال",
-                  "hint": "963935237452+",
-                  "keyboardType": "phone",
-                  "textDirection": "ltr",
-                  "textAlign": "left",
-                  "validateRequired": true,
-                  "validatePhone": true,
-                  "requiredMessage": "هذا الحقل مطلوب"
+                  "crossAxis": "stretch",
+                  "gap": 16
                 },
-                "style": {
-                  "padding": {
-                    "left": 12,
-                    "right": 12,
-                    "top": 6,
-                    "bottom": 6
-                  },
-                  "background": "#F8FAFC",
-                  "borderRadius": 10,
-                  "border": {
-                    "width": 1,
-                    "color": "#E2E8F0"
-                  }
-                }
-              },
-              {
-                "id": "auth-login-fullname",
-                "type": "textFormField",
-                "props": {
-                  "id": "fullName",
-                  "label": "الاسم (اختياري)",
-                  "textAlign": "right"
-                },
-                "style": {
-                  "padding": {
-                    "left": 12,
-                    "right": 12,
-                    "top": 6,
-                    "bottom": 6
-                  },
-                  "background": "#F8FAFC",
-                  "borderRadius": 10,
-                  "border": {
-                    "width": 1,
-                    "color": "#E2E8F0"
-                  }
-                }
-              },
-              {
-                "id": "auth-login-submit",
-                "type": "button",
-                "props": {
-                  "label": "إرسال الرمز",
-                  "variant": "filled",
-                  "borderRadius": 12,
-                  "alignment": "center",
-                  "fullWidth": true
-                },
-                "tap": {
-                  "type": "cubitCall",
-                  "cubit": "auth",
-                  "method": "requestOtp",
-                  "requireValidForm": true,
-                  "formId": "otp-request-form",
-                  "params": {
-                    "phone": {
-                      "source": "form",
-                      "field": "phone"
-                    },
-                    "fullName": {
-                      "source": "form",
-                      "field": "fullName"
-                    },
-                    "tenantSlug": {
-                      "source": "app",
-                      "field": "tenantSlug"
+                "children": [
+                  {
+                    "id": "auth-login-logo",
+                    "type": "image",
+                    "props": {
+                      "source": "asset",
+                      "url": "assets/icons/app_logo.png",
+                      "width": 120,
+                      "height": 120,
+                      "fit": "contain",
+                      "alt": "SOOQ"
                     }
                   },
-                  "onSuccess": {
-                    "type": "navigate",
-                    "route": "/auth/otp-reset",
-                    "navigation_type": "clear_stack"
+                  {
+                    "id": "auth-login-heading",
+                    "type": "text",
+                    "props": {
+                      "value": "أدخل رقم جوالك",
+                      "fontSize": 24,
+                      "fontWeight": "bold",
+                      "textAlign": "right",
+                      "color": "#0F172A"
+                    }
+                  },
+                  {
+                    "id": "auth-login-subheading",
+                    "type": "text",
+                    "props": {
+                      "value": "سنرسل رمز التحقق عبر واتساب",
+                      "fontSize": 14,
+                      "textAlign": "right",
+                      "color": "#475569"
+                    }
+                  },
+                  {
+                    "id": "auth-login-phone",
+                    "type": "textFormField",
+                    "props": {
+                      "id": "phone",
+                      "label": "رقم الجوال",
+                      "hint": "963935237452+",
+                      "keyboardType": "phone",
+                      "textDirection": "ltr",
+                      "textAlign": "left",
+                      "validateRequired": true,
+                      "validatePhone": true,
+                      "requiredMessage": "هذا الحقل مطلوب"
+                    },
+                    "style": {
+                      "padding": {
+                        "left": 12,
+                        "right": 12,
+                        "top": 6,
+                        "bottom": 6
+                      },
+                      "background": "#F8FAFC",
+                      "borderRadius": 10,
+                      "border": {
+                        "width": 1,
+                        "color": "#E2E8F0"
+                      }
+                    }
+                  },
+                  {
+                    "id": "auth-login-fullname",
+                    "type": "textFormField",
+                    "props": {
+                      "id": "fullName",
+                      "label": "الاسم (اختياري)",
+                      "textAlign": "right"
+                    },
+                    "style": {
+                      "padding": {
+                        "left": 12,
+                        "right": 12,
+                        "top": 6,
+                        "bottom": 6
+                      },
+                      "background": "#F8FAFC",
+                      "borderRadius": 10,
+                      "border": {
+                        "width": 1,
+                        "color": "#E2E8F0"
+                      }
+                    }
+                  },
+                  {
+                    "id": "auth-login-submit",
+                    "type": "button",
+                    "props": {
+                      "label": "إرسال الرمز",
+                      "variant": "filled",
+                      "borderRadius": 12,
+                      "alignment": "center",
+                      "fullWidth": true
+                    },
+                    "tap": {
+                      "type": "cubitCall",
+                      "cubit": "auth",
+                      "method": "requestOtp",
+                      "requireValidForm": true,
+                      "formId": "otp-request-form",
+                      "params": {
+                        "phone": {
+                          "source": "form",
+                          "field": "phone"
+                        },
+                        "fullName": {
+                          "source": "form",
+                          "field": "fullName"
+                        },
+                        "tenantSlug": {
+                          "source": "app",
+                          "field": "tenantSlug"
+                        }
+                      },
+                      "onSuccess": {
+                        "type": "navigate",
+                        "route": "/auth/otp-reset",
+                        "navigation_type": "clear_stack"
+                      }
+                    }
                   }
-                }
+                ]
               }
-            ]
-          }
-        }
+            }
           }
         }
       ]
@@ -566,135 +559,132 @@
               "mainAxisSize": "max"
             },
             "child": {
-          "id": "auth-otp-form",
-          "type": "form",
-          "props": {
-            "id": "otp-verify-form",
-            "formId": "otp-verify-form"
-          },
-          "child": {
-            "id": "auth-otp-column",
-            "type": "column",
-            "props": {
-              "crossAxis": "stretch",
-              "gap": 16
-            },
-            "style": {
-              "padding": 16
-            },
-            "children": [
-              {
-                "id": "auth-otp-logo",
-                "type": "image",
-                "props": {
-                  "source": "asset",
-                  "url": "assets/icons/app_logo.png",
-                  "width": 120,
-                  "height": 120,
-                  "fit": "contain",
-                  "alt": "SOOQ"
-                }
+              "id": "auth-otp-form",
+              "type": "form",
+              "props": {
+                "id": "otp-verify-form",
+                "formId": "otp-verify-form"
               },
-              {
-                "id": "auth-otp-heading",
-                "type": "text",
+              "child": {
+                "id": "auth-otp-column",
+                "type": "column",
                 "props": {
-                  "value": "أدخل رمز التحقق المكون من 6 أرقام",
-                  "fontSize": 16,
-                  "textAlign": "right",
-                  "color": "#0F172A"
-                }
-              },
-              {
-                "id": "auth-otp-code",
-                "type": "otpInput",
-                "props": {
-                  "fieldId": "otpCode",
-                  "length": 6,
-                  "autofocus": true,
-                  "textDirection": "ltr",
-                  "validateRequired": true,
-                  "validateMinLength": 6,
-                  "validateMaxLength": 6,
-                  "requiredMessage": "هذا الحقل مطلوب"
+                  "crossAxis": "stretch",
+                  "gap": 16
                 },
-                "style": {
-                  "background": "#FFFFFF",
-                  "borderRadius": 12,
-                  "border": {
-                    "width": 1,
-                    "color": "#94A3B8"
-                  }
-                }
-              },
-              {
-                "id": "auth-otp-submit",
-                "type": "button",
-                "props": {
-                  "label": "تأكيد وتسجيل الدخول",
-                  "borderRadius": 12,
-                  "variant": "filled",
-                  "fullWidth": true
-                },
-                "tap": {
-                  "type": "cubitCall",
-                  "cubit": "auth",
-                  "method": "verifyOtp",
-                  "requireValidForm": true,
-                  "formId": "otp-verify-form",
-                  "params": {
-                    "phone": {
-                      "source": "authState",
-                      "field": "phone"
-                    },
-                    "otpCode": {
-                      "source": "form",
-                      "field": "otpCode"
-                    },
-                    "tenantSlug": {
-                      "source": "app",
-                      "field": "tenantSlug"
+                "children": [
+                  {
+                    "id": "auth-otp-logo",
+                    "type": "image",
+                    "props": {
+                      "source": "asset",
+                      "url": "assets/icons/app_logo.png",
+                      "width": 120,
+                      "height": 120,
+                      "fit": "contain",
+                      "alt": "SOOQ"
                     }
                   },
-                  "onSuccess": {
-                    "type": "navigate",
-                    "route": "/home",
-                    "navigation_type": "clear_stack"
-                  }
-                }
-              },
-              {
-                "id": "auth-otp-resend",
-                "type": "button",
-                "props": {
-                  "label": "إعادة إرسال الرمز",
-                  "variant": "text",
-                  "textColor": "#1D4ED8",
-                  "alignment": "center"
-                },
-                "tap": {
-                  "type": "cubitCall",
-                  "cubit": "auth",
-                  "method": "requestOtp",
-                  "params": {
-                    "phone": {
-                      "source": "authState",
-                      "field": "phone"
+                  {
+                    "id": "auth-otp-heading",
+                    "type": "text",
+                    "props": {
+                      "value": "أدخل رمز التحقق المكون من 6 أرقام",
+                      "fontSize": 16,
+                      "textAlign": "right",
+                      "color": "#0F172A"
+                    }
+                  },
+                  {
+                    "id": "auth-otp-code",
+                    "type": "otpInput",
+                    "props": {
+                      "fieldId": "otpCode",
+                      "length": 6,
+                      "autofocus": true,
+                      "textDirection": "ltr",
+                      "validateRequired": true,
+                      "validateMinLength": 6,
+                      "validateMaxLength": 6,
+                      "requiredMessage": "هذا الحقل مطلوب"
                     },
-                    "fullName": {
-                      "source": "authState",
-                      "field": "fullName"
+                    "style": {
+                      "background": "#FFFFFF",
+                      "borderRadius": 12,
+                      "border": {
+                        "width": 1,
+                        "color": "#94A3B8"
+                      }
+                    }
+                  },
+                  {
+                    "id": "auth-otp-submit",
+                    "type": "button",
+                    "props": {
+                      "label": "تأكيد وتسجيل الدخول",
+                      "borderRadius": 12,
+                      "variant": "filled",
+                      "fullWidth": true
                     },
-                    "tenantSlug": {
-                      "source": "app",
-                      "field": "tenantSlug"
+                    "tap": {
+                      "type": "cubitCall",
+                      "cubit": "auth",
+                      "method": "verifyOtp",
+                      "requireValidForm": true,
+                      "formId": "otp-verify-form",
+                      "params": {
+                        "phone": {
+                          "source": "authState",
+                          "field": "phone"
+                        },
+                        "otpCode": {
+                          "source": "form",
+                          "field": "otpCode"
+                        },
+                        "tenantSlug": {
+                          "source": "app",
+                          "field": "tenantSlug"
+                        }
+                      },
+                      "onSuccess": {
+                        "type": "navigate",
+                        "route": "/home",
+                        "navigation_type": "clear_stack"
+                      }
+                    }
+                  },
+                  {
+                    "id": "auth-otp-resend",
+                    "type": "button",
+                    "props": {
+                      "label": "إعادة إرسال الرمز",
+                      "variant": "text",
+                      "textColor": "#1D4ED8",
+                      "alignment": "center"
+                    },
+                    "tap": {
+                      "type": "cubitCall",
+                      "cubit": "auth",
+                      "method": "requestOtp",
+                      "params": {
+                        "phone": {
+                          "source": "authState",
+                          "field": "phone"
+                        },
+                        "fullName": {
+                          "source": "authState",
+                          "field": "fullName"
+                        },
+                        "tenantSlug": {
+                          "source": "app",
+                          "field": "tenantSlug"
+                        }
+                      }
                     }
                   }
-                }
+                ]
               }
-            ]
-          }
-        }
+            }
           }
         }
       ]
@@ -940,431 +930,145 @@
           }
         },
         {
-          "id": "home-search-entry",
+          "id": "home-search-field-wrap",
           "type": "container",
           "style": {
             "margin": {
-              "left": 16,
-              "right": 16,
-              "top": 12,
               "bottom": 12
-            },
-            "padding": 12,
-            "background": "#F8FAFC",
-            "borderRadius": 10,
-            "border": {
-              "width": 1,
-              "color": "#E2E8F0"
-            }
-          },
-          "tap": {
-            "type": "navigate",
-            "route": "/search"
-          },
-          "child": {
-            "id": "home-search-entry-row",
-            "type": "row",
-            "props": {
-              "crossAxis": "center",
-              "mainAxis": "start",
-              "mainAxisSize": "min",
-              "gap": 8
-            },
-            "children": [
-              {
-                "id": "home-search-entry-icon",
-                "type": "icon",
-                "props": {
-                  "name": "search",
-                  "size": 22,
-                  "color": "#475569"
-                }
-              },
-              {
-                "id": "home-search-entry-text-wrap",
-                "type": "container",
-                "props": {
-                  "expand": true,
-                  "expandAxis": "horizontal"
-                },
-                "child": {
-                  "id": "home-search-entry-text",
-                  "type": "text",
-                  "props": {
-                    "value": "ابحث عن منتجاتك المفضلة…",
-                    "fontSize": 14,
-                    "textAlign": "right",
-                    "color": "#475569"
-                  }
-                }
-              }
-            ]
-          }
-        },
-        {
-          "id": "home-hero-section",
-          "type": "container",
-          "style": {
-            "margin": {
-              "left": 16,
-              "right": 16,
-              "bottom": 12
-            },
-            "padding": 20,
-            "background": "#0F172A",
-            "borderRadius": 14,
-            "shadow": "lg"
-          },
-          "child": {
-            "id": "home-hero-column",
-            "type": "column",
-            "props": {
-              "crossAxis": "start",
-              "gap": 10
-            },
-            "children": [
-              {
-                "id": "home-hero-kicker",
-                "type": "container",
-                "style": {
-                  "padding": {
-                    "left": 8,
-                    "right": 8,
-                    "top": 4,
-                    "bottom": 4
-                  },
-                  "background": "#1D4ED8",
-                  "borderRadius": 8
-                },
-                "child": {
-                  "id": "home-hero-kicker-text",
-                  "type": "text",
-                  "props": {
-                    "value": "تخفيضات الصيف",
-                    "fontSize": 12,
-                    "fontWeight": "semibold",
-                    "textAlign": "right",
-                    "color": "#FFFFFF"
-                  }
-                }
-              },
-              {
-                "id": "home-hero-title",
-                "type": "text",
-                "props": {
-                  "value": "خصومات حتى 60%",
-                  "fontSize": 24,
-                  "fontWeight": "bold",
-                  "textAlign": "right",
-                  "color": "#FFFFFF"
-                }
-              },
-              {
-                "id": "home-hero-description",
-                "type": "richtext",
-                "props": {
-                  "value": "<p>أفضل العروض على الإلكترونيات والأزياء والمنزل.</p>",
-                  "color": "#E2E8F0"
-                }
-              },
-              {
-                "id": "home-hero-cta",
-                "type": "button",
-                "props": {
-                  "label": "تسوق الآن",
-                  "variant": "filled",
-                  "fullWidth": true
-                },
-                "tap": {
-                  "type": "navigate",
-                  "route": "/products",
-                  "navigation_type": "push"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "id": "home-categories-header",
-          "type": "container",
-          "style": {
-            "padding": {
-              "left": 16,
-              "right": 16,
-              "top": 12,
-              "bottom": 8
             }
           },
           "child": {
-            "id": "home-categories-header-row",
-            "type": "row",
+            "id": "home-search-field",
+            "type": "textFormField",
             "props": {
-              "mainAxis": "spaceBetween",
-              "crossAxis": "center"
+              "id": "homeSearchQuery",
+              "hint": "ابحث عن منتجاتك المفضلة…",
+              "textAlign": "right",
+              "prefixIcon": "search",
+              "clearable": true,
+              "clearIcon": "close"
             },
-            "children": [
-              {
-                "id": "home-categories-header-title",
-                "type": "text",
-                "props": {
-                  "value": "الأقسام",
-                  "fontSize": 20,
-                  "fontWeight": "bold",
-                  "textAlign": "right",
-                  "color": "#0F172A"
-                }
-              },
-              {
-                "id": "home-categories-header-action",
-                "type": "button",
-                "props": {
-                  "label": "عرض الكل",
-                  "variant": "text",
-                  "textColor": "#1D4ED8"
-                },
-                "tap": {
-                  "type": "navigate",
-                  "route": "/categories/browse",
-                  "navigation_type": "push"
-                }
+            "style": {
+              "background": "#F8FAFC",
+              "borderRadius": 10,
+              "border": {
+                "width": 1,
+                "color": "#E2E8F0"
               }
-            ]
+            }
           }
         },
         {
-          "id": "home-categories-strip",
+          "id": "home-search-autocomplete-list",
           "type": "listView",
           "props": {
-            "scrollDirection": "horizontal",
-            "height": 130,
             "enableInnerScroll": false,
             "data": {
               "source": "collection",
-              "id": "home-categories-strip",
-              "requestKey": "home-categories",
-              "requestUrl": "/api/v1/public/categories"
+              "id": "home-search-autocomplete",
+              "requestKey": "home-search-autocomplete",
+              "requestUrl": "/api/v1/public/products/autocomplete",
+              "qField": "homeSearchQuery"
             },
-            "emptyMessage": "لا توجد أقسام",
-            "errorMessage": "تعذر تحميل الأقسام"
-          },
-          "style": {
-            "padding": {
-              "left": 16,
-              "right": 16,
-              "bottom": 8
-            }
+            "emptyMessage": "لا توجد اقتراحات",
+            "errorMessage": "تعذر تحميل الاقتراحات"
           },
           "itemBuilder": {
             "type": "repeat",
-            "source": "dataContext.requests.home-categories.data",
+            "source": "dataContext.requests.home-search-autocomplete.data.products",
             "item": {
-              "id": "home-categories-strip-item",
-              "type": "container",
-              "props": {
-                "width": 110
-              },
-              "style": {
-                "margin": {
-                  "right": 10
-                }
-              },
-              "child": {
-                "id": "home-categories-strip-item-content",
-                "type": "column",
-                "props": {
-                  "crossAxis": "stretch",
-                  "gap": 6
-                },
-                "children": [
-                  {
-                    "id": "home-categories-strip-item-image",
-                    "type": "image",
-                    "props": {
-                      "source": "network",
-                      "urlPath": "item.imageUrl",
-                      "url": "https://picsum.photos/seed/sooq-category-fallback/400/400",
-                      "width": 110,
-                      "height": 80,
-                      "fit": "cover"
-                    },
-                    "style": {
-                      "borderRadius": 10
-                    }
-                  },
-                  {
-                    "id": "home-categories-strip-item-name",
-                    "type": "text",
-                    "props": {
-                      "valuePath": "item.name",
-                      "value": "",
-                      "fontSize": 12,
-                      "fontWeight": "semibold",
-                      "textAlign": "center",
-                      "color": "#0F172A",
-                      "maxLines": 1,
-                      "overflow": "ellipsis"
-                    }
-                  }
-                ]
-              },
-              "tap": {
-                "type": "navigate",
-                "route": "/categories/:categorySlug/products",
-                "navigation_type": "push"
-              }
-            }
-          }
-        },
-        {
-          "id": "home-categories-grid",
-          "type": "gridView",
-          "props": {
-            "crossAxisCount": 2,
-            "mainAxisSpacing": 10,
-            "crossAxisSpacing": 10,
-            "childAspectRatio": 0.75,
-            "enableInnerScroll": false,
-            "data": {
-              "source": "collection",
-              "id": "home-categories-grid",
-              "requestKey": "home-categories",
-              "requestUrl": "/api/v1/public/categories"
-            },
-            "emptyMessage": "لا توجد أقسام",
-            "errorMessage": "تعذر تحميل الأقسام"
-          },
-          "style": {
-            "padding": {
-              "left": 16,
-              "right": 16,
-              "bottom": 12
-            }
-          },
-          "itemBuilder": {
-            "type": "repeat",
-            "source": "dataContext.requests.home-categories.data",
-            "item": {
-              "id": "home-categories-grid-item",
+              "id": "home-search-ac-item",
               "type": "card",
               "props": {
                 "color": "#FFFFFF",
                 "borderRadius": 10,
                 "elevation": 0
               },
+              "style": {
+                "margin": {
+                  "bottom": 6
+                }
+              },
               "child": {
-                "id": "home-categories-grid-item-content",
-                "type": "column",
-                "props": {
-                  "crossAxis": "stretch",
-                  "gap": 0
+                "id": "home-search-ac-row-wrap",
+                "type": "container",
+                "style": {
+                  "padding": 10
                 },
-                "children": [
-                  {
-                    "id": "home-categories-grid-item-image",
-                    "type": "image",
-                    "props": {
-                      "source": "network",
-                      "urlPath": "item.imageUrl",
-                      "url": "https://picsum.photos/seed/sooq-category-fallback/400/400",
-                      "aspectRatio": 1,
-                      "fit": "cover"
-                    }
+                "child": {
+                  "id": "home-search-ac-row",
+                  "type": "row",
+                  "props": {
+                    "gap": 10,
+                    "crossAxis": "center"
                   },
-                  {
-                    "id": "home-categories-grid-item-body",
-                    "type": "container",
-                    "style": {
-                      "padding": {
-                        "left": 8,
-                        "right": 8,
-                        "top": 6,
-                        "bottom": 8
+                  "children": [
+                    {
+                      "id": "home-search-ac-thumb",
+                      "type": "image",
+                      "props": {
+                        "source": "network",
+                        "urlPath": "item.image",
+                        "url": "https://picsum.photos/seed/sooq-product-fallback/400/400",
+                        "width": 40,
+                        "height": 40,
+                        "fit": "cover"
+                      },
+                      "style": {
+                        "borderRadius": 8
                       }
                     },
-                    "child": {
-                      "id": "home-categories-grid-item-col",
-                      "type": "column",
+                    {
+                      "id": "home-search-ac-name",
+                      "type": "text",
                       "props": {
-                        "crossAxis": "start",
-                        "gap": 2
-                      },
-                      "children": [
-                        {
-                          "id": "home-categories-grid-item-name",
-                          "type": "text",
-                          "props": {
-                            "valuePath": "item.name",
-                            "value": "",
-                            "fontSize": 14,
-                            "fontWeight": "semibold",
-                            "textAlign": "right",
-                            "color": "#0F172A",
-                            "maxLines": 2,
-                            "overflow": "ellipsis"
-                          }
-                        }
-                      ]
+                        "valuePath": "item.name",
+                        "value": "",
+                        "fontSize": 14,
+                        "textAlign": "right"
+                      }
                     }
-                  }
-                ]
+                  ]
+                }
               },
               "tap": {
                 "type": "navigate",
-                "route": "/categories/:categorySlug/products",
+                "route": "/product/details/:productId",
                 "navigation_type": "push"
               }
             }
           }
         },
         {
-          "id": "home-featured-header",
+          "id": "home-search-results-header",
           "type": "container",
+          "props": {
+            "visibleWhen": {
+              "source": "form",
+              "field": "homeSearchQuery",
+              "when": "nonEmpty"
+            }
+          },
           "style": {
             "padding": {
-              "left": 16,
-              "right": 16,
               "top": 12,
               "bottom": 8
             }
           },
           "child": {
-            "id": "home-featured-header-row",
-            "type": "row",
+            "id": "home-search-results-header-title",
+            "type": "text",
             "props": {
-              "mainAxis": "spaceBetween",
-              "crossAxis": "center"
-            },
-            "children": [
-              {
-                "id": "home-featured-header-title",
-                "type": "text",
-                "props": {
-                  "value": "منتجات مميزة",
-                  "fontSize": 20,
-                  "fontWeight": "bold",
-                  "textAlign": "right",
-                  "color": "#0F172A"
-                }
-              },
-              {
-                "id": "home-featured-header-action",
-                "type": "button",
-                "props": {
-                  "label": "عرض كل المنتجات",
-                  "variant": "text",
-                  "textColor": "#1D4ED8"
-                },
-                "tap": {
-                  "type": "navigate",
-                  "route": "/products",
-                  "navigation_type": "push"
-                }
-              }
-            ]
+              "value": "نتائج البحث",
+              "fontSize": 20,
+              "fontWeight": "bold",
+              "textAlign": "right",
+              "color": "#0F172A"
+            }
           }
         },
         {
-          "id": "home-featured-grid",
+          "id": "home-search-results-grid",
           "type": "gridView",
           "props": {
             "crossAxisCount": 2,
@@ -1374,27 +1078,21 @@
             "enableInnerScroll": false,
             "data": {
               "source": "collection",
-              "id": "home-featured-grid",
-              "requestKey": "home-featured-products",
-              "requestUrl": "/api/v1/public/products?page=0&size=6",
+              "id": "home-search-results-grid",
+              "requestKey": "home-search-results",
+              "requestUrl": "/api/v1/public/products/search",
+              "qField": "homeSearchQuery",
               "page": 0,
-              "size": 6
+              "size": 20
             },
             "emptyMessage": "لا توجد منتجات",
             "errorMessage": "تعذر تحميل المنتجات"
           },
-          "style": {
-            "padding": {
-              "left": 16,
-              "right": 16,
-              "bottom": 16
-            }
-          },
           "itemBuilder": {
             "type": "repeat",
-            "source": "dataContext.requests.home-featured-products.data",
+            "source": "dataContext.requests.home-search-results.data",
             "item": {
-              "id": "home-featured-grid-item",
+              "id": "home-search-results-grid-item",
               "type": "card",
               "props": {
                 "color": "#FFFFFF",
@@ -1402,7 +1100,7 @@
                 "elevation": 0
               },
               "child": {
-                "id": "home-featured-grid-item-content",
+                "id": "home-search-results-grid-item-content",
                 "type": "column",
                 "props": {
                   "crossAxis": "stretch",
@@ -1410,7 +1108,7 @@
                 },
                 "children": [
                   {
-                    "id": "home-featured-grid-item-image",
+                    "id": "home-search-results-grid-item-image",
                     "type": "image",
                     "props": {
                       "source": "network",
@@ -1421,7 +1119,7 @@
                     }
                   },
                   {
-                    "id": "home-featured-grid-item-body",
+                    "id": "home-search-results-grid-item-body",
                     "type": "container",
                     "style": {
                       "padding": {
@@ -1432,7 +1130,7 @@
                       }
                     },
                     "child": {
-                      "id": "home-featured-grid-item-col",
+                      "id": "home-search-results-grid-item-col",
                       "type": "column",
                       "props": {
                         "crossAxis": "start",
@@ -1440,7 +1138,7 @@
                       },
                       "children": [
                         {
-                          "id": "home-featured-grid-item-name",
+                          "id": "home-search-results-grid-item-name",
                           "type": "text",
                           "props": {
                             "valuePath": "item.name",
@@ -1454,7 +1152,7 @@
                           }
                         },
                         {
-                          "id": "home-featured-grid-item-price",
+                          "id": "home-search-results-grid-item-price",
                           "type": "text",
                           "props": {
                             "valuePath": "item.price",
@@ -1477,6 +1175,461 @@
               }
             }
           }
+        },
+        {
+          "id": "home-browse-content",
+          "type": "column",
+          "props": {
+            "crossAxis": "stretch",
+            "gap": 12,
+            "visibleWhen": {
+              "source": "form",
+              "field": "homeSearchQuery",
+              "when": "isEmpty"
+            }
+          },
+          "children": [
+            {
+              "id": "home-hero-section",
+              "type": "container",
+              "style": {
+                "padding": 20,
+                "background": "#0F172A",
+                "borderRadius": 14,
+                "shadow": "lg"
+              },
+              "child": {
+                "id": "home-hero-column",
+                "type": "column",
+                "props": {
+                  "crossAxis": "start",
+                  "gap": 10
+                },
+                "children": [
+                  {
+                    "id": "home-hero-kicker",
+                    "type": "container",
+                    "style": {
+                      "padding": {
+                        "left": 8,
+                        "right": 8,
+                        "top": 4,
+                        "bottom": 4
+                      },
+                      "background": "#1D4ED8",
+                      "borderRadius": 8
+                    },
+                    "child": {
+                      "id": "home-hero-kicker-text",
+                      "type": "text",
+                      "props": {
+                        "value": "تخفيضات الصيف",
+                        "fontSize": 12,
+                        "fontWeight": "semibold",
+                        "textAlign": "right",
+                        "color": "#FFFFFF"
+                      }
+                    }
+                  },
+                  {
+                    "id": "home-hero-title",
+                    "type": "text",
+                    "props": {
+                      "value": "خصومات حتى 60%",
+                      "fontSize": 24,
+                      "fontWeight": "bold",
+                      "textAlign": "right",
+                      "color": "#FFFFFF"
+                    }
+                  },
+                  {
+                    "id": "home-hero-description",
+                    "type": "richtext",
+                    "props": {
+                      "value": "<p>أفضل العروض على الإلكترونيات والأزياء والمنزل.</p>",
+                      "color": "#E2E8F0"
+                    }
+                  },
+                  {
+                    "id": "home-hero-cta",
+                    "type": "button",
+                    "props": {
+                      "label": "تسوق الآن",
+                      "variant": "filled",
+                      "fullWidth": true
+                    },
+                    "tap": {
+                      "type": "navigate",
+                      "route": "/products",
+                      "navigation_type": "push"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "id": "home-categories-header",
+              "type": "container",
+              "child": {
+                "id": "home-categories-header-row",
+                "type": "row",
+                "props": {
+                  "mainAxis": "spaceBetween",
+                  "crossAxis": "center"
+                },
+                "children": [
+                  {
+                    "id": "home-categories-header-title",
+                    "type": "text",
+                    "props": {
+                      "value": "الأقسام",
+                      "fontSize": 20,
+                      "fontWeight": "bold",
+                      "textAlign": "right",
+                      "color": "#0F172A"
+                    }
+                  },
+                  {
+                    "id": "home-categories-header-action",
+                    "type": "button",
+                    "props": {
+                      "label": "عرض الكل",
+                      "variant": "text",
+                      "textColor": "#1D4ED8"
+                    },
+                    "tap": {
+                      "type": "navigate",
+                      "route": "/categories/browse",
+                      "navigation_type": "push"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "id": "home-categories-strip",
+              "type": "listView",
+              "props": {
+                "scrollDirection": "horizontal",
+                "height": 130,
+                "enableInnerScroll": false,
+                "data": {
+                  "source": "collection",
+                  "id": "home-categories-strip",
+                  "requestKey": "home-categories",
+                  "requestUrl": "/api/v1/public/categories"
+                },
+                "emptyMessage": "لا توجد أقسام",
+                "errorMessage": "تعذر تحميل الأقسام"
+              },
+              "itemBuilder": {
+                "type": "repeat",
+                "source": "dataContext.requests.home-categories.data",
+                "item": {
+                  "id": "home-categories-strip-item",
+                  "type": "container",
+                  "props": {
+                    "width": 110
+                  },
+                  "style": {
+                    "margin": {
+                      "right": 10
+                    }
+                  },
+                  "child": {
+                    "id": "home-categories-strip-item-content",
+                    "type": "column",
+                    "props": {
+                      "crossAxis": "stretch",
+                      "gap": 6
+                    },
+                    "children": [
+                      {
+                        "id": "home-categories-strip-item-image",
+                        "type": "image",
+                        "props": {
+                          "source": "network",
+                          "urlPath": "item.imageUrl",
+                          "url": "https://picsum.photos/seed/sooq-category-fallback/400/400",
+                          "width": 110,
+                          "height": 80,
+                          "fit": "cover"
+                        },
+                        "style": {
+                          "borderRadius": 10
+                        }
+                      },
+                      {
+                        "id": "home-categories-strip-item-name",
+                        "type": "text",
+                        "props": {
+                          "valuePath": "item.name",
+                          "value": "",
+                          "fontSize": 12,
+                          "fontWeight": "semibold",
+                          "textAlign": "center",
+                          "color": "#0F172A",
+                          "maxLines": 1,
+                          "overflow": "ellipsis"
+                        }
+                      }
+                    ]
+                  },
+                  "tap": {
+                    "type": "navigate",
+                    "route": "/categories/:categorySlug/products",
+                    "navigation_type": "push"
+                  }
+                }
+              }
+            },
+            {
+              "id": "home-categories-grid",
+              "type": "gridView",
+              "props": {
+                "crossAxisCount": 2,
+                "mainAxisSpacing": 10,
+                "crossAxisSpacing": 10,
+                "childAspectRatio": 0.75,
+                "enableInnerScroll": false,
+                "data": {
+                  "source": "collection",
+                  "id": "home-categories-grid",
+                  "requestKey": "home-categories",
+                  "requestUrl": "/api/v1/public/categories"
+                },
+                "emptyMessage": "لا توجد أقسام",
+                "errorMessage": "تعذر تحميل الأقسام"
+              },
+              "style": {
+                "padding": {
+                  "bottom": 12
+                }
+              },
+              "itemBuilder": {
+                "type": "repeat",
+                "source": "dataContext.requests.home-categories.data",
+                "item": {
+                  "id": "home-categories-grid-item",
+                  "type": "card",
+                  "props": {
+                    "color": "#FFFFFF",
+                    "borderRadius": 10,
+                    "elevation": 0
+                  },
+                  "child": {
+                    "id": "home-categories-grid-item-content",
+                    "type": "column",
+                    "props": {
+                      "crossAxis": "stretch",
+                      "gap": 0
+                    },
+                    "children": [
+                      {
+                        "id": "home-categories-grid-item-image",
+                        "type": "image",
+                        "props": {
+                          "source": "network",
+                          "urlPath": "item.imageUrl",
+                          "url": "https://picsum.photos/seed/sooq-category-fallback/400/400",
+                          "aspectRatio": 1,
+                          "fit": "cover"
+                        }
+                      },
+                      {
+                        "id": "home-categories-grid-item-body",
+                        "type": "container",
+                        "style": {
+                          "padding": {
+                            "left": 8,
+                            "right": 8,
+                            "top": 6,
+                            "bottom": 8
+                          }
+                        },
+                        "child": {
+                          "id": "home-categories-grid-item-col",
+                          "type": "column",
+                          "props": {
+                            "crossAxis": "start",
+                            "gap": 2
+                          },
+                          "children": [
+                            {
+                              "id": "home-categories-grid-item-name",
+                              "type": "text",
+                              "props": {
+                                "valuePath": "item.name",
+                                "value": "",
+                                "fontSize": 14,
+                                "fontWeight": "semibold",
+                                "textAlign": "right",
+                                "color": "#0F172A",
+                                "maxLines": 2,
+                                "overflow": "ellipsis"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "tap": {
+                    "type": "navigate",
+                    "route": "/categories/:categorySlug/products",
+                    "navigation_type": "push"
+                  }
+                }
+              }
+            },
+            {
+              "id": "home-featured-header",
+              "type": "container",
+              "child": {
+                "id": "home-featured-header-row",
+                "type": "row",
+                "props": {
+                  "mainAxis": "spaceBetween",
+                  "crossAxis": "center"
+                },
+                "children": [
+                  {
+                    "id": "home-featured-header-title",
+                    "type": "text",
+                    "props": {
+                      "value": "منتجات مميزة",
+                      "fontSize": 20,
+                      "fontWeight": "bold",
+                      "textAlign": "right",
+                      "color": "#0F172A"
+                    }
+                  },
+                  {
+                    "id": "home-featured-header-action",
+                    "type": "button",
+                    "props": {
+                      "label": "عرض كل المنتجات",
+                      "variant": "text",
+                      "textColor": "#1D4ED8"
+                    },
+                    "tap": {
+                      "type": "navigate",
+                      "route": "/products",
+                      "navigation_type": "push"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "id": "home-featured-grid",
+              "type": "gridView",
+              "props": {
+                "crossAxisCount": 2,
+                "mainAxisSpacing": 10,
+                "crossAxisSpacing": 10,
+                "childAspectRatio": 0.68,
+                "enableInnerScroll": false,
+                "data": {
+                  "source": "collection",
+                  "id": "home-featured-grid",
+                  "requestKey": "home-featured-products",
+                  "requestUrl": "/api/v1/public/products?page=0&size=6",
+                  "page": 0,
+                  "size": 6
+                },
+                "emptyMessage": "لا توجد منتجات",
+                "errorMessage": "تعذر تحميل المنتجات"
+              },
+              "itemBuilder": {
+                "type": "repeat",
+                "source": "dataContext.requests.home-featured-products.data",
+                "item": {
+                  "id": "home-featured-grid-item",
+                  "type": "card",
+                  "props": {
+                    "color": "#FFFFFF",
+                    "borderRadius": 10,
+                    "elevation": 0
+                  },
+                  "child": {
+                    "id": "home-featured-grid-item-content",
+                    "type": "column",
+                    "props": {
+                      "crossAxis": "stretch",
+                      "gap": 0
+                    },
+                    "children": [
+                      {
+                        "id": "home-featured-grid-item-image",
+                        "type": "image",
+                        "props": {
+                          "source": "network",
+                          "urlPath": "item.image",
+                          "url": "https://picsum.photos/seed/sooq-product-fallback/400/400",
+                          "aspectRatio": 1,
+                          "fit": "cover"
+                        }
+                      },
+                      {
+                        "id": "home-featured-grid-item-body",
+                        "type": "container",
+                        "style": {
+                          "padding": {
+                            "left": 8,
+                            "right": 8,
+                            "top": 6,
+                            "bottom": 8
+                          }
+                        },
+                        "child": {
+                          "id": "home-featured-grid-item-col",
+                          "type": "column",
+                          "props": {
+                            "crossAxis": "start",
+                            "gap": 2
+                          },
+                          "children": [
+                            {
+                              "id": "home-featured-grid-item-name",
+                              "type": "text",
+                              "props": {
+                                "valuePath": "item.name",
+                                "value": "",
+                                "fontSize": 14,
+                                "fontWeight": "semibold",
+                                "textAlign": "right",
+                                "color": "#0F172A",
+                                "maxLines": 2,
+                                "overflow": "ellipsis"
+                              }
+                            },
+                            {
+                              "id": "home-featured-grid-item-price",
+                              "type": "text",
+                              "props": {
+                                "valuePath": "item.price",
+                                "value": "--",
+                                "fontSize": 15,
+                                "fontWeight": "bold",
+                                "textAlign": "right",
+                                "color": "#1D4ED8"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "tap": {
+                    "type": "navigate",
+                    "route": "/product/details/:productId",
+                    "navigation_type": "push"
+                  }
+                }
+              }
+            }
+          ]
         }
       ]
     },
@@ -1511,9 +1664,6 @@
             },
             "emptyMessage": "لا توجد أقسام",
             "errorMessage": "تعذر تحميل الأقسام"
-          },
-          "style": {
-            "padding": 16
           },
           "itemBuilder": {
             "type": "repeat",
@@ -1615,9 +1765,7 @@
           "type": "container",
           "style": {
             "padding": {
-              "left": 16,
-              "right": 16,
-              "top": 8,
+              "top": 12,
               "bottom": 8
             }
           },
@@ -1663,13 +1811,6 @@
             },
             "emptyMessage": "لا توجد منتجات",
             "errorMessage": "تعذر تحميل المنتجات"
-          },
-          "style": {
-            "padding": {
-              "left": 16,
-              "right": 16,
-              "bottom": 16
-            }
           },
           "itemBuilder": {
             "type": "repeat",
@@ -1783,8 +1924,6 @@
           "type": "container",
           "style": {
             "padding": {
-              "left": 16,
-              "right": 16,
               "top": 12,
               "bottom": 8
             }
@@ -1860,13 +1999,6 @@
             },
             "emptyMessage": "لا توجد منتجات",
             "errorMessage": "تعذر تحميل المنتجات"
-          },
-          "style": {
-            "padding": {
-              "left": 16,
-              "right": 16,
-              "bottom": 16
-            }
           },
           "itemBuilder": {
             "type": "repeat",
@@ -1971,7 +2103,34 @@
           "title": "تفاصيل المنتج",
           "backgroundColor": "#00000000",
           "elevation": 0,
-          "foregroundColor": "#0F172A"
+          "foregroundColor": "#0F172A",
+          "trailingIconActive": "favorite",
+          "trailingIconInactive": "favorite_outline",
+          "trailingIconActivePath": "wishlist.isCurrentProductFavorite",
+          "trailingActiveColor": "#E11D48",
+          "trailingAction": {
+            "type": "cubitCall",
+            "cubit": "wishlist",
+            "method": "toggle",
+            "params": {
+              "productId": {
+                "source": "routeparams",
+                "field": "productId"
+              },
+              "productTitle": {
+                "source": "datacontext",
+                "field": "requests.product-detail.data.name"
+              },
+              "thumbnailUrl": {
+                "source": "datacontext",
+                "field": "requests.product-detail.data.primaryImageUrl"
+              },
+              "displayPrice": {
+                "source": "datacontext",
+                "field": "requests.product-detail.data.displayPrice"
+              }
+            }
+          }
         }
       },
       "body": [
@@ -2022,205 +2181,215 @@
                   "thumbnailBorderWidth": 2,
                   "thumbnailActiveBorderColor": "#1D4ED8",
                   "thumbnailInactiveBorderColor": "#E2E8F0"
-                },
-                "style": {
-                  "padding": {
-                    "left": 16,
-                    "right": 16,
-                    "top": 12,
-                    "bottom": 12
-                  }
                 }
               },
               {
-                "id": "product-info-block",
-                "type": "container",
-                "style": {
-                  "padding": {
-                    "left": 16,
-                    "right": 16,
-                    "bottom": 8
-                  }
-                },
-                "child": {
-                  "id": "product-info-col",
-                  "type": "column",
-                  "props": {
-                    "gap": 8,
-                    "crossAxis": "start"
-                  },
-                  "children": [
-                    {
-                      "id": "product-info-name",
-                      "type": "text",
-                      "props": {
-                        "valuePath": "dataContext.requests.product-detail.data.name",
-                        "value": "",
-                        "fontSize": 22,
-                        "fontWeight": "bold",
-                        "textAlign": "right",
-                        "color": "#0F172A"
-                      }
-                    },
-                    {
-                      "id": "product-info-price",
-                      "type": "text",
-                      "props": {
-                        "valuePath": "dataContext.requests.product-detail.data.displayPrice",
-                        "value": "",
-                        "fontSize": 22,
-                        "fontWeight": "bold",
-                        "textAlign": "right",
-                        "color": "#1D4ED8"
-                      }
-                    },
-                    {
-                      "id": "product-info-stock",
-                      "type": "text",
-                      "props": {
-                        "valuePath": "dataContext.requests.product-detail.data.inventory.stockStatus",
-                        "value": "",
-                        "fontSize": 14,
-                        "textAlign": "right",
-                        "color": "#475569"
-                      }
-                    }
-                  ]
-                }
-              },
-              {
-                "id": "product-divider",
-                "type": "divider",
-                "style": {
-                  "height": 1,
-                  "margin": {
-                    "left": 16,
-                    "right": 16
-                  },
-                  "color": "#E5E7EB"
-                }
-              },
-         
-              {
-                "id": "product-desc-expansion",
-                "type": "expansionTile",
+                "id": "product-content-col",
+                "type": "column",
                 "props": {
-                  "title": "الوصف",
-                  "initiallyExpanded": true,
-                  "maintainState": true,
-                  "showDivider": false
+                  "crossAxis": "stretch",
+                  "gap": 16
                 },
                 "children": [
                   {
-                    "id": "product-desc",
-                    "type": "text",
+                    "id": "product-info-block",
+                    "type": "card",
                     "props": {
-                      "valuePath": "dataContext.requests.product-detail.data.description",
-                      "value": "",
-                      "fontSize": 14,
-                      "textAlign": "right",
-                      "color": "#475569"
+                      "color": "#FFFFFF",
+                      "borderRadius": 12,
+                      "elevation": 0
+                    },
+                    "child": {
+                      "id": "product-info-inner",
+                      "type": "container",
+                      "style": {
+                        "padding": {
+                          "left": 16,
+                          "right": 16,
+                          "top": 16,
+                          "bottom": 16
+                        }
+                      },
+                      "child": {
+                        "id": "product-info-col",
+                        "type": "column",
+                        "props": {
+                          "gap": 8,
+                          "crossAxis": "start"
+                        },
+                        "children": [
+                          {
+                            "id": "product-info-name",
+                            "type": "text",
+                            "props": {
+                              "valuePath": "dataContext.requests.product-detail.data.name",
+                              "value": "",
+                              "fontSize": 22,
+                              "fontWeight": "bold",
+                              "textAlign": "right",
+                              "color": "#0F172A"
+                            }
+                          },
+                          {
+                            "id": "product-info-price-row",
+                            "type": "row",
+                            "props": {
+                              "gap": 8,
+                              "crossAxis": "center"
+                            },
+                            "children": [
+                              {
+                                "id": "product-info-price",
+                                "type": "text",
+                                "props": {
+                                  "valuePath": "dataContext.requests.product-detail.data.displayPrice",
+                                  "value": "",
+                                  "fontSize": 26,
+                                  "fontWeight": "bold",
+                                  "textAlign": "right",
+                                  "color": "#1D4ED8"
+                                }
+                              },
+                              {
+                                "id": "product-info-compare-price",
+                                "type": "text",
+                                "props": {
+                                  "valuePath": "dataContext.requests.product-detail.data.pricing.displayCompareAt",
+                                  "value": "",
+                                  "fontSize": 14,
+                                  "textAlign": "right",
+                                  "color": "#94A3B8"
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "id": "product-info-stock",
+                            "type": "text",
+                            "props": {
+                              "valuePath": "dataContext.requests.product-detail.data.inventory.stockStatus",
+                              "value": "",
+                              "fontSize": 14,
+                              "textAlign": "right",
+                              "color": "#475569"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "id": "product-desc-card",
+                    "type": "card",
+                    "props": {
+                      "color": "#FFFFFF",
+                      "borderRadius": 12,
+                      "elevation": 0
+                    },
+                    "child": {
+                      "id": "product-desc-expansion",
+                      "type": "expansionTile",
+                      "props": {
+                        "title": "الوصف",
+                        "initiallyExpanded": true,
+                        "maintainState": true,
+                        "showDivider": false,
+                        "backgroundColor": "#FFFFFF",
+                        "collapsedBackgroundColor": "#FFFFFF"
+                      },
+                      "children": [
+                        {
+                          "id": "product-desc",
+                          "type": "text",
+                          "props": {
+                            "valuePath": "dataContext.requests.product-detail.data.description",
+                            "value": "",
+                            "fontSize": 14,
+                            "textAlign": "right",
+                            "color": "#475569"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "product-cta-block",
+                    "type": "container",
+                    "child": {
+                      "id": "product-variant-form",
+                      "type": "form",
+                      "props": {
+                        "id": "product-variant-form",
+                        "formId": "product-variant-form"
+                      },
+                      "child": {
+                        "id": "product-cta-col",
+                        "type": "column",
+                        "props": {
+                          "gap": 10,
+                          "crossAxis": "stretch"
+                        },
+                        "children": [
+                          {
+                            "id": "product-variant-dropdown",
+                            "type": "dropdown",
+                            "props": {
+                              "id": "selectedVariantId",
+                              "label": "اختر الخيار",
+                              "validateRequired": true,
+                              "itemsPath": "dataContext.requests.product-detail.data.variants",
+                              "itemValuePath": "variantId",
+                              "itemLabelPath": "sku"
+                            }
+                          },
+                          {
+                            "id": "product-add-cart",
+                            "type": "button",
+                            "props": {
+                              "label": "أضف إلى السلة",
+                              "variant": "filled",
+                              "fullWidth": true
+                            },
+                            "tap": {
+                              "type": "cubitCall",
+                              "cubit": "cart",
+                              "method": "addItem",
+                              "requireValidForm": true,
+                              "formId": "product-variant-form",
+                              "params": {
+                                "variantId": {
+                                  "source": "form",
+                                  "field": "selectedVariantId"
+                                },
+                                "quantity": {
+                                  "value": 1
+                                },
+                                "productTitle": {
+                                  "source": "datacontext",
+                                  "field": "requests.product-detail.data.name"
+                                },
+                                "thumbnailUrl": {
+                                  "source": "datacontext",
+                                  "field": "requests.product-detail.data.primaryImageUrl"
+                                }
+                              },
+                              "onSuccess": {
+                                "type": "navigate",
+                                "route": "/cart",
+                                "navigation_type": "push"
+                              }
+                            }
+                          }
+                        ]
+                      }
                     }
                   }
                 ]
-              },
-              {
-                "id": "product-cta-block",
-                "type": "container",
-                "style": {
-                  "padding": {
-                    "left": 16,
-                    "right": 16,
-                    "bottom": 24
-                  }
-                },
-                "child": {
-                  "id": "product-variant-form",
-                  "type": "form",
-                  "props": {
-                    "id": "product-variant-form",
-                    "formId": "product-variant-form"
-                  },
-                  "child": {
-                    "id": "product-cta-col",
-                    "type": "column",
-                    "props": {
-                      "gap": 10,
-                      "crossAxis": "stretch"
-                    },
-                    "children": [
-                      {
-                        "id": "product-variant-dropdown",
-                        "type": "dropdown",
-                        "props": {
-                          "id": "selectedVariantId",
-                          "label": "اختر الخيار",
-                          "validateRequired": true,
-                          "itemsPath": "dataContext.requests.product-detail.data.variants",
-                          "itemValuePath": "variantId",
-                          "itemLabelPath": "sku"
-                        }
-                      },
-                      {
-                        "id": "product-add-cart",
-                        "type": "button",
-                        "props": {
-                          "label": "أضف إلى السلة",
-                          "variant": "filled",
-                          "fullWidth": true
-                        },
-                        "tap": {
-                          "type": "cubitCall",
-                          "cubit": "cart",
-                          "method": "addItem",
-                          "requireValidForm": true,
-                          "formId": "product-variant-form",
-                          "params": {
-                            "variantId": {
-                              "source": "form",
-                              "field": "selectedVariantId"
-                            },
-                            "quantity": {
-                              "value": 1
-                            },
-                            "productTitle": {
-                              "source": "datacontext",
-                              "field": "requests.product-detail.data.name"
-                            },
-                            "thumbnailUrl": {
-                              "source": "datacontext",
-                              "field": "requests.product-detail.data.primaryImageUrl"
-                            }
-                          },
-                          "onSuccess": {
-                            "type": "navigate",
-                            "route": "/cart",
-                            "navigation_type": "push"
-                          }
-                        }
-                      },
-                    {
-                      "id": "product-add-wishlist",
-                      "type": "button",
-                      "props": {
-                        "label": "أضف إلى المفضلة",
-                        "variant": "outlined",
-                        "fullWidth": true
-                      },
-                      "tap": {
-                        "type": "navigate",
-                        "route": "/wishlist",
-                        "navigation_type": "push"
-                      }
-                    }
-                  ]
-                }
               }
-            }
-          ]
+            ]
+          }
         }
-      }
-    ]
+      ]
     },
     {
       "id": "page-category-products",
@@ -2250,10 +2419,8 @@
           },
           "style": {
             "padding": {
-              "left": 16,
-              "right": 16,
               "top": 12,
-              "bottom": 4
+              "bottom": 8
             }
           },
           "child": {
@@ -2288,13 +2455,6 @@
             },
             "emptyMessage": "لا توجد منتجات",
             "errorMessage": "تعذر تحميل المنتجات"
-          },
-          "style": {
-            "padding": {
-              "left": 16,
-              "right": 16,
-              "bottom": 16
-            }
           },
           "itemBuilder": {
             "type": "repeat",
@@ -2408,11 +2568,8 @@
           "id": "search-field-wrap",
           "type": "container",
           "style": {
-            "padding": {
-              "left": 16,
-              "right": 16,
-              "top": 12,
-              "bottom": 8
+            "margin": {
+              "bottom": 12
             }
           },
           "child": {
@@ -2449,13 +2606,6 @@
             },
             "emptyMessage": "لا توجد اقتراحات",
             "errorMessage": "تعذر تحميل الاقتراحات"
-          },
-          "style": {
-            "padding": {
-              "left": 16,
-              "right": 16,
-              "bottom": 8
-            }
           },
           "itemBuilder": {
             "type": "repeat",
@@ -2528,8 +2678,6 @@
           "type": "container",
           "style": {
             "padding": {
-              "left": 16,
-              "right": 16,
               "top": 12,
               "bottom": 8
             }
@@ -2599,18 +2747,12 @@
               "id": "search-results-grid",
               "requestKey": "search-results",
               "requestUrl": "/api/v1/public/products/search",
+              "qField": "searchQuery",
               "page": 0,
               "size": 20
             },
             "emptyMessage": "لا توجد منتجات",
             "errorMessage": "تعذر تحميل المنتجات"
-          },
-          "style": {
-            "padding": {
-              "left": 16,
-              "right": 16,
-              "bottom": 16
-            }
           },
           "itemBuilder": {
             "type": "repeat",
@@ -2735,14 +2877,6 @@
           "props": {
             "crossAxis": "stretch",
             "gap": 12
-          },
-          "style": {
-            "padding": {
-              "left": 16,
-              "right": 16,
-              "top": 12,
-              "bottom": 8
-            }
           },
           "children": [
             {
@@ -3185,12 +3319,8 @@
           },
           "style": {
             "margin": {
-              "left": 16,
-              "right": 16,
-              "top": 8,
-              "bottom": 24
-            },
-            "padding": 16
+              "top": 8
+            }
           },
           "child": {
             "id": "cart-checkout-col",
@@ -3390,9 +3520,6 @@
             "gap": 10,
             "crossAxis": "stretch"
           },
-          "style": {
-            "padding": 16
-          },
           "children": [
             {
               "id": "checkout-step-address",
@@ -3402,11 +3529,6 @@
                 "borderRadius": 10,
                 "elevation": 0
               },
-              "style": {
-                "margin": {
-                  "bottom": 8
-                }
-              },
               "tap": {
                 "type": "navigate",
                 "route": "/checkout/address",
@@ -3415,9 +3537,6 @@
               "child": {
                 "id": "checkout-step-address-inner",
                 "type": "container",
-                "style": {
-                  "padding": 16
-                },
                 "child": {
                   "id": "checkout-step-address-row",
                   "type": "row",
@@ -3457,11 +3576,6 @@
                 "borderRadius": 10,
                 "elevation": 0
               },
-              "style": {
-                "margin": {
-                  "bottom": 8
-                }
-              },
               "tap": {
                 "type": "navigate",
                 "route": "/checkout/payment",
@@ -3470,9 +3584,6 @@
               "child": {
                 "id": "checkout-step-payment-inner",
                 "type": "container",
-                "style": {
-                  "padding": 16
-                },
                 "child": {
                   "id": "checkout-step-payment-row",
                   "type": "row",
@@ -3554,9 +3665,6 @@
           "type": "form",
           "props": {
             "formId": "checkout-address-form"
-          },
-          "style": {
-            "padding": 16
           },
           "child": {
             "id": "address-form-col",
@@ -3698,9 +3806,6 @@
             "emptyMessage": "لا توجد وسائل دفع",
             "errorMessage": "تعذر تحميل وسائل الدفع"
           },
-          "style": {
-            "padding": 16
-          },
           "itemBuilder": {
             "type": "repeat",
             "source": "dataContext.requests.payment-methods.data",
@@ -3775,9 +3880,6 @@
             "gap": 10,
             "crossAxis": "stretch"
           },
-          "style": {
-            "padding": 16
-          },
           "children": [
             {
               "id": "payment-confirm",
@@ -3817,9 +3919,6 @@
         {
           "id": "order-success-root",
           "type": "container",
-          "style": {
-            "padding": 24
-          },
           "child": {
             "id": "order-success-col",
             "type": "column",
@@ -3954,9 +4053,6 @@
         {
           "id": "order-failure-root",
           "type": "container",
-          "style": {
-            "padding": 24
-          },
           "child": {
             "id": "order-failure-col",
             "type": "column",
@@ -4035,10 +4131,7 @@
           "style": {
             "padding": 20,
             "margin": {
-              "left": 16,
-              "right": 16,
-              "top": 12,
-              "bottom": 8
+              "bottom": 12
             },
             "background": "#FFFFFF",
             "borderRadius": 14
@@ -4079,14 +4172,8 @@
           "id": "profile-menu",
           "type": "column",
           "props": {
-            "gap": 0,
+            "gap": 8,
             "crossAxis": "stretch"
-          },
-          "style": {
-            "padding": {
-              "left": 16,
-              "right": 16
-            }
           },
           "children": [
             {
@@ -4096,11 +4183,6 @@
                 "color": "#FFFFFF",
                 "borderRadius": 10,
                 "elevation": 0
-              },
-              "style": {
-                "margin": {
-                  "bottom": 8
-                }
               },
               "tap": {
                 "type": "navigate",
@@ -4173,11 +4255,6 @@
                 "borderRadius": 10,
                 "elevation": 0
               },
-              "style": {
-                "margin": {
-                  "bottom": 8
-                }
-              },
               "tap": {
                 "type": "navigate",
                 "route": "/wishlist",
@@ -4247,11 +4324,6 @@
                 "color": "#FFFFFF",
                 "borderRadius": 10,
                 "elevation": 0
-              },
-              "style": {
-                "margin": {
-                  "bottom": 8
-                }
               },
               "tap": {
                 "type": "navigate",
@@ -4323,11 +4395,6 @@
                 "borderRadius": 10,
                 "elevation": 0
               },
-              "style": {
-                "margin": {
-                  "bottom": 8
-                }
-              },
               "tap": {
                 "type": "navigate",
                 "route": "/settings",
@@ -4397,11 +4464,6 @@
                 "color": "#FFFFFF",
                 "borderRadius": 10,
                 "elevation": 0
-              },
-              "style": {
-                "margin": {
-                  "bottom": 8
-                }
               },
               "tap": {
                 "type": "navigate",
@@ -4491,8 +4553,6 @@
           "type": "container",
           "style": {
             "padding": {
-              "left": 16,
-              "right": 16,
               "top": 12,
               "bottom": 8
             }
@@ -4567,9 +4627,6 @@
             },
             "emptyMessage": "لا توجد طلبات",
             "errorMessage": "تعذر تحميل الطلبات"
-          },
-          "style": {
-            "padding": 16
           },
           "itemBuilder": {
             "type": "repeat",
@@ -4674,9 +4731,6 @@
               "requestUrl": "/api/v1/customer/orders/:orderId"
             },
             "errorMessage": "تعذر تحميل الطلب"
-          },
-          "style": {
-            "padding": 16
           },
           "child": {
             "id": "order-detail-col",
@@ -4951,9 +5005,6 @@
         {
           "id": "guest-order-track-root",
           "type": "container",
-          "style": {
-            "padding": 16
-          },
           "child": {
             "id": "guest-order-track-col",
             "type": "column",
@@ -5083,13 +5134,6 @@
             "emptyMessage": "لا توجد منتجات",
             "errorMessage": "تعذر تحميل المنتجات"
           },
-          "style": {
-            "padding": {
-              "left": 16,
-              "right": 16,
-              "bottom": 16
-            }
-          },
           "itemBuilder": {
             "type": "repeat",
             "source": "dataContext.requests.wishlist-products.data",
@@ -5203,9 +5247,6 @@
           "props": {
             "enableInnerScroll": false
           },
-          "style": {
-            "padding": 16
-          },
           "children": [
             {
               "id": "notification-1",
@@ -5264,11 +5305,6 @@
                 "color": "#FFFFFF",
                 "borderRadius": 10,
                 "elevation": 0
-              },
-              "style": {
-                "margin": {
-                  "bottom": 8
-                }
               },
               "child": {
                 "id": "notification-2-inner",
@@ -5334,9 +5370,6 @@
           "props": {
             "gap": 10,
             "crossAxis": "stretch"
-          },
-          "style": {
-            "padding": 16
           },
           "children": [
             {
@@ -5433,9 +5466,6 @@
           "props": {
             "gap": 10,
             "crossAxis": "stretch"
-          },
-          "style": {
-            "padding": 16
           },
           "children": [
             {
@@ -5570,7 +5600,6 @@
           "id": "state-empty-root",
           "type": "container",
           "style": {
-            "padding": 24,
             "expand": true
           },
           "child": {
@@ -5642,7 +5671,6 @@
           "id": "state-error-root",
           "type": "container",
           "style": {
-            "padding": 24,
             "expand": true
           },
           "child": {
@@ -5716,9 +5744,6 @@
           "props": {
             "gap": 12,
             "crossAxis": "stretch"
-          },
-          "style": {
-            "padding": 16
           },
           "children": [
             {
@@ -5812,7 +5837,9 @@
           "id": "coverage-intro",
           "type": "container",
           "style": {
-            "padding": 16
+            "padding": {
+              "bottom": 12
+            }
           },
           "child": {
             "id": "coverage-intro-text",
@@ -5830,8 +5857,6 @@
           "type": "container",
           "style": {
             "padding": {
-              "left": 16,
-              "right": 16,
               "top": 12,
               "bottom": 8
             }
@@ -5881,23 +5906,11 @@
             "fontWeight": "bold",
             "textAlign": "right",
             "color": "#0F172A"
-          },
-          "style": {
-            "padding": {
-              "left": 16,
-              "right": 16
-            }
           }
         },
         {
           "id": "cov-product-sample",
           "type": "container",
-          "style": {
-            "padding": {
-              "left": 16,
-              "right": 16
-            }
-          },
           "child": {
             "id": "cov-product-tile",
             "type": "card",
@@ -5985,12 +5998,6 @@
         {
           "id": "cov-category-sample",
           "type": "container",
-          "style": {
-            "padding": {
-              "left": 16,
-              "right": 16
-            }
-          },
           "child": {
             "id": "cov-category-tile",
             "type": "card",
@@ -6069,12 +6076,6 @@
           "props": {
             "formId": "coverage-demo-form"
           },
-          "style": {
-            "padding": {
-              "left": 16,
-              "right": 16
-            }
-          },
           "child": {
             "id": "cov-form-col",
             "type": "column",
@@ -6110,12 +6111,6 @@
           "props": {
             "gap": 8,
             "crossAxis": "stretch"
-          },
-          "style": {
-            "padding": {
-              "left": 16,
-              "right": 16
-            }
           },
           "children": [
             {
