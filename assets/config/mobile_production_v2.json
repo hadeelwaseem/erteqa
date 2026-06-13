@@ -4175,7 +4175,8 @@
               "bottom": 12
             },
             "background": "#FFFFFF",
-            "borderRadius": 14
+            "borderRadius": 14,
+            "shadow": "lg"
           },
           "child": {
             "id": "profile-header-col",
@@ -4223,7 +4224,7 @@
               "props": {
                 "color": "#FFFFFF",
                 "borderRadius": 10,
-                "elevation": 0
+                "elevation": 4
               },
               "tap": {
                 "type": "navigate",
@@ -4294,7 +4295,7 @@
               "props": {
                 "color": "#FFFFFF",
                 "borderRadius": 10,
-                "elevation": 0
+                "elevation": 4
               },
               "tap": {
                 "type": "navigate",
@@ -4364,7 +4365,7 @@
               "props": {
                 "color": "#FFFFFF",
                 "borderRadius": 10,
-                "elevation": 0
+                "elevation": 4
               },
               "tap": {
                 "type": "navigate",
@@ -4434,7 +4435,7 @@
               "props": {
                 "color": "#FFFFFF",
                 "borderRadius": 10,
-                "elevation": 0
+                "elevation": 4
               },
               "tap": {
                 "type": "navigate",
@@ -4504,7 +4505,7 @@
               "props": {
                 "color": "#FFFFFF",
                 "borderRadius": 10,
-                "elevation": 0
+                "elevation": 4
               },
               "tap": {
                 "type": "navigate",
@@ -4583,7 +4584,7 @@
         "type": "appBar",
         "props": {
           "title": "سجل الطلبات",
-          "elevation": 0
+          "elevation": 1
         },
         "style": {
           "background": "#FFFFFF"
@@ -4679,7 +4680,7 @@
               "props": {
                 "color": "#FFFFFF",
                 "borderRadius": 10,
-                "elevation": 0
+                "elevation": 1
               },
               "style": {
                 "margin": {
@@ -4758,7 +4759,7 @@
         "type": "appBar",
         "props": {
           "title": "تفاصيل الطلب",
-          "elevation": 0
+          "elevation": 1
         },
         "style": {
           "background": "#FFFFFF"

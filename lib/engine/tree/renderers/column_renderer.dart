@@ -198,6 +198,18 @@ class ColumnRenderer implements ComponentRenderer {
     }
 
     if (!wantsFlex) {
+      if (mainAxisSize == MainAxisSize.max) {
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            return _wrapScrollableWhenBounded(
+              column: buildColumn(useExpanded: false),
+              constraints: constraints,
+              mainAxisSize: mainAxisSize,
+              mainAxisAlignment: mainAxisAlignment,
+            );
+          },
+        );
+      }
       return buildColumn(useExpanded: false);
     }
 
@@ -215,6 +227,35 @@ class ColumnRenderer implements ComponentRenderer {
           child: buildColumn(useExpanded: true),
         );
       },
+    );
+  }
+
+  /// When a max-height column centers content inside a bounded viewport (e.g.
+  /// auth forms under the keyboard), allow vertical scroll instead of overflow.
+  static Widget _wrapScrollableWhenBounded({
+    required Widget column,
+    required BoxConstraints constraints,
+    required MainAxisSize mainAxisSize,
+    required MainAxisAlignment mainAxisAlignment,
+  }) {
+    if (mainAxisSize != MainAxisSize.max || !constraints.maxHeight.isFinite) {
+      return column;
+    }
+
+    final needsMinHeight = mainAxisAlignment != MainAxisAlignment.start &&
+        mainAxisAlignment != MainAxisAlignment.end;
+
+    Widget scrollChild = column;
+    if (needsMinHeight) {
+      scrollChild = ConstrainedBox(
+        constraints: BoxConstraints(minHeight: constraints.maxHeight),
+        child: column,
+      );
+    }
+
+    return SingleChildScrollView(
+      physics: const ClampingScrollPhysics(),
+      child: scrollChild,
     );
   }
 

@@ -254,5 +254,67 @@ void main() {
       );
       expect(find.text('أدخل رقم جوالك'), findsOneWidget);
     });
+
+    testWidgets('center column scrolls when content exceeds keyboard viewport', (
+      tester,
+    ) async {
+      const keyboardViewport = Size(360, 408);
+
+      ComponentConfig sizedBox(double height) => ComponentConfig(
+            type: GenericComponentType.container,
+            properties: {'height': height},
+          );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(size: keyboardViewport),
+            child: SizedBox(
+              width: keyboardViewport.width,
+              height: keyboardViewport.height,
+              child: buildLayoutTree(
+                ComponentConfig(
+                  type: GenericComponentType.scaffold,
+                  properties: const {'pageScroll': 'none'},
+                  child: ComponentConfig(
+                    type: GenericComponentType.column,
+                    properties: const {
+                      'mainAxisSize': 'max',
+                      'crossAxisAlignment': 'stretch',
+                    },
+                    children: [
+                      ComponentConfig(
+                        type: GenericComponentType.container,
+                        properties: const {'expand': true},
+                        child: ComponentConfig(
+                          type: GenericComponentType.column,
+                          properties: const {
+                            'mainAxisSize': 'max',
+                            'mainAxisAlignment': 'center',
+                            'crossAxisAlignment': 'stretch',
+                            'gap': 16,
+                          },
+                          children: [
+                            sizedBox(120),
+                            sizedBox(41),
+                            sizedBox(24),
+                            sizedBox(48),
+                            sizedBox(48),
+                            sizedBox(56),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(find.byType(SingleChildScrollView), findsWidgets);
+    });
   });
 }
