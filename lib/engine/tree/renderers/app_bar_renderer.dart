@@ -6,6 +6,7 @@ import '../../../core/utils/icon_registry.dart';
 import '../../actions/action_dispatcher.dart';
 import '../../component_renderer/component_renderer.dart';
 import '../../theme/engine_theme.dart';
+import '../../theme/shadow_parser.dart';
 import '../parsers/data_context_path.dart';
 import '../parsers/property_parsers.dart';
 
@@ -75,7 +76,7 @@ class AppBarRenderer implements ComponentRenderer {
     final titleCenter = titleAlignRaw == 'center';
     final titleTextAlign = PropertyParsers.parseTextAlign(titleAlignRaw);
     final barHeight = PropertyParsers.parseDouble(properties['height']);
-    final elevation = PropertyParsers.parseDouble(properties['elevation']) ?? 1.0;
+    final elevation = _resolveElevation(properties, theme);
 
     return Builder(
       builder: (context) {
@@ -275,5 +276,19 @@ class AppBarRenderer implements ComponentRenderer {
     return _resolveToggleActive(dataContext, activePath)
         ? activeIcon
         : inactiveIcon;
+  }
+
+  static double _resolveElevation(
+    Map<String, dynamic> properties,
+    EngineTheme? theme,
+  ) {
+    if (properties.containsKey('elevation')) {
+      return PropertyParsers.parseDouble(properties['elevation']) ?? 1.0;
+    }
+    final preset = theme?.defaultShadowPreset('appBar');
+    if (preset != null) {
+      return ShadowParser.materialElevationForPreset(preset) ?? 1.0;
+    }
+    return 1.0;
   }
 }

@@ -148,6 +148,42 @@ void main() {
     expect(semantics.hasFlag(SemanticsFlag.isButton), isTrue);
   });
 
+  testWidgets('shadow lg wraps filled button with BoxShadow decoration', (
+    tester,
+  ) async {
+    final renderer = ButtonRenderer();
+    final config = ComponentConfig(
+      type: GenericComponentType.button,
+      properties: {
+        'label': 'CTA',
+        'variant': 'filled',
+        'borderRadius': 12,
+        'fullWidth': true,
+        'shadow': 'lg',
+        'onTap': () {},
+      },
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          backgroundColor: const Color(0xFFF1F5F9),
+          body: renderer.render(
+            config,
+            buildChild: (_) => const SizedBox.shrink(),
+            dataContext: rendererDataContext(),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(DecoratedBox), findsOneWidget);
+    final decorated = tester.widget<DecoratedBox>(find.byType(DecoratedBox));
+    final decoration = decorated.decoration as BoxDecoration;
+    expect(decoration.boxShadow, isNotNull);
+    expect(decoration.boxShadow!.single.blurRadius, 24);
+  });
+
   testWidgets('Semantics enabled false when button disabled', (tester) async {
     final renderer = ButtonRenderer();
     final config = ComponentConfig(

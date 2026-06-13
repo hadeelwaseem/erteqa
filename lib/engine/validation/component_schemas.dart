@@ -257,6 +257,7 @@ class ComponentSchemas {
       'iconSize',
       'iconGap',
       'enabled',
+      'shadow',
       'onTap', // Runtime-injected from tap; not authored in JSON
     },
     propertyTypes: {
@@ -267,6 +268,7 @@ class ComponentSchemas {
       'iconSize': 'number',
       'iconGap': 'number',
       'enabled': 'bool',
+      'shadow': 'string (sm|md|lg|xl|none)',
       'backgroundColor': 'string (hex)',
       'textColor': 'string (hex)',
       'borderRadius': 'number',
@@ -330,7 +332,6 @@ class ComponentSchemas {
       'elevation',
       'borderRadius',
       'color',
-      'shadowColor',
       'margin',
       'child', // Not in properties, but in ComponentConfig
     },
@@ -338,7 +339,6 @@ class ComponentSchemas {
       'elevation': 'number',
       'borderRadius': 'number',
       'color': 'string (hex)',
-      'shadowColor': 'string (hex)',
       'margin': 'number | object',
     },
   );

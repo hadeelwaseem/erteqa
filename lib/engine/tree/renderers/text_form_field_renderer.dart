@@ -6,6 +6,7 @@ import '../../actions/action_dispatcher.dart';
 import '../../component_renderer/component_renderer.dart';
 import '../../form/form_state_store.dart';
 import '../../theme/engine_theme.dart';
+import '../../theme/shadow_parser.dart';
 import '../parsers/property_parsers.dart';
 
 /// Default required-field message when JSON omits [requiredMessage].
@@ -96,7 +97,11 @@ class TextFormFieldRenderer implements ComponentRenderer {
     final width = PropertyParsers.parseDouble(properties['width']);
     final height = PropertyParsers.parseDouble(properties['height']);
     final border = _parseBorder(properties['border'], dataContext);
-    final shadow = _parseShadow(properties['shadow']);
+    final shadow = ShadowParser.resolveBoxShadowPreset(
+      properties,
+      dataContext,
+      componentType: 'textFormField',
+    );
 
     final theme = EngineTheme.fromDataContext(dataContext);
     final hasValidation = _hasValidation(
@@ -514,38 +519,6 @@ class TextFormFieldRenderer implements ComponentRenderer {
   bool _isPassword(String value) {
     final regex = RegExp(r'^(?=.*[A-Za-z])(?=.*\d).{8,}$');
     return regex.hasMatch(value);
-  }
-
-  BoxShadow? _parseShadow(dynamic v) {
-    if (v == null || v == 'none') return null;
-    switch (v) {
-      case 'sm':
-        return const BoxShadow(
-          color: Color(0x1A000000),
-          blurRadius: 4,
-          offset: Offset(0, 1),
-        );
-      case 'md':
-        return const BoxShadow(
-          color: Color(0x26000000),
-          blurRadius: 8,
-          offset: Offset(0, 2),
-        );
-      case 'lg':
-        return const BoxShadow(
-          color: Color(0x33000000),
-          blurRadius: 16,
-          offset: Offset(0, 4),
-        );
-      case 'xl':
-        return const BoxShadow(
-          color: Color(0x40000000),
-          blurRadius: 24,
-          offset: Offset(0, 8),
-        );
-      default:
-        return null;
-    }
   }
 
   Border? _parseBorder(dynamic v, Map<String, dynamic>? dataContext) {

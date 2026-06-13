@@ -7,6 +7,7 @@ class MobileThemeConfig {
   final Map<String, double> radius;
   final Map<String, double> spacing;
   final ThemeButtons buttons;
+  final ThemeDefaultShadows defaultShadows;
 
   const MobileThemeConfig({
     required this.mode,
@@ -15,6 +16,7 @@ class MobileThemeConfig {
     required this.radius,
     required this.spacing,
     required this.buttons,
+    required this.defaultShadows,
   });
 
   factory MobileThemeConfig.fromJson(Map<String, dynamic>? json) {
@@ -33,6 +35,9 @@ class MobileThemeConfig {
       spacing: _parseDoubleMap(json['spacing']),
       buttons: ThemeButtons.fromJson(
         json['buttons'] as Map<String, dynamic>?,
+      ),
+      defaultShadows: ThemeDefaultShadows.fromJson(
+        json['defaultShadows'] as Map<String, dynamic>?,
       ),
     );
   }
@@ -57,6 +62,7 @@ class MobileThemeConfig {
           'xl': 36,
         },
         buttons: ThemeButtons.defaults(),
+        defaultShadows: ThemeDefaultShadows.empty(),
       );
 
   double typographyScale(String key) =>
@@ -91,6 +97,29 @@ class MobileThemeConfig {
       ),
     );
   }
+}
+
+/// Optional theme defaults for shadow presets when component props are omitted.
+class ThemeDefaultShadows {
+  final Map<String, String> presets;
+
+  const ThemeDefaultShadows(this.presets);
+
+  factory ThemeDefaultShadows.empty() => const ThemeDefaultShadows({});
+
+  factory ThemeDefaultShadows.fromJson(Map<String, dynamic>? json) {
+    if (json == null || json.isEmpty) return ThemeDefaultShadows.empty();
+    final map = <String, String>{};
+    for (final entry in json.entries) {
+      final value = entry.value;
+      if (value is String && value.isNotEmpty) {
+        map[entry.key] = value;
+      }
+    }
+    return ThemeDefaultShadows(map);
+  }
+
+  String? presetFor(String componentType) => presets[componentType];
 }
 
 class ThemeColors {

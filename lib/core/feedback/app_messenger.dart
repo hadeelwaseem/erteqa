@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:sooq_merchant/engine/theme/engine_theme.dart';
+import 'package:sooq_merchant/engine/theme/shadow_tokens.dart';
 
 enum AppMessageKind { error, success, info, warning }
 
@@ -324,13 +325,7 @@ class _AppMessageBannerState extends State<_AppMessageBanner>
                       width: 4,
                     ),
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.12),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+                  boxShadow: const [ShadowTokens.lg],
                 ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../config/component_config.dart';
 import '../../component_renderer/component_renderer.dart';
 import '../../theme/engine_theme.dart';
+import '../../theme/shadow_parser.dart';
 import '../parsers/property_parsers.dart';
 import 'button_label_row.dart';
 
@@ -151,6 +152,21 @@ class ButtonRenderer implements ComponentRenderer {
 
     if (alignment != null) {
       wrapped = Align(alignment: alignment, child: wrapped);
+    }
+
+    final shadow = ShadowParser.resolveBoxShadowPreset(
+      config.properties,
+      dataContext,
+      componentType: 'button',
+    );
+    if (shadow != null) {
+      wrapped = DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: borderRadius,
+          boxShadow: [shadow],
+        ),
+        child: wrapped,
+      );
     }
 
     return Semantics(

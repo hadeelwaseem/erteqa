@@ -49,6 +49,10 @@ class EngineTheme {
 
   double typographyScale(String key) => config.typographyScale(key);
 
+  /// Theme default shadow preset for [componentType] when node props are omitted.
+  String? defaultShadowPreset(String componentType) =>
+      config.defaultShadows.presetFor(componentType);
+
   /// Muted border for inputs — matches prod auth field borders (#E2E8F0).
   Color get inputBorderColor {
     final muted = mutedColor;

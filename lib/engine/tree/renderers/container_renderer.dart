@@ -6,6 +6,7 @@ import '../../request_ui_state.dart';
 import '../../skeleton/request_bound_skeleton.dart';
 import '../../skeleton/skeleton_item_factory.dart';
 import '../../theme/engine_theme.dart';
+import '../../theme/shadow_parser.dart';
 import '../parsers/property_parsers.dart';
 
 /// Renders a container node with optional background, padding, margin,
@@ -44,7 +45,11 @@ class ContainerRenderer implements ComponentRenderer {
     );
     final width = PropertyParsers.parseDouble(config.properties['width']);
     final height = PropertyParsers.parseDouble(config.properties['height']);
-    final shadow = _parseShadow(config.properties['shadow']);
+    final shadow = ShadowParser.resolveBoxShadowPreset(
+      config.properties,
+      dataContext,
+      componentType: 'container',
+    );
     final border = _parseBorder(config.properties['border'], dataContext);
 
     final requestKey = resolveRequestKey(config.properties);
@@ -231,38 +236,6 @@ class ContainerRenderer implements ComponentRenderer {
     }
     final media = MediaQuery.sizeOf(context);
     return media.height.clamp(0.0, double.infinity);
-  }
-
-  BoxShadow? _parseShadow(dynamic v) {
-    if (v == null || v == 'none') return null;
-    switch (v) {
-      case 'sm':
-        return const BoxShadow(
-          color: Color(0x1A000000),
-          blurRadius: 4,
-          offset: Offset(0, 1),
-        );
-      case 'md':
-        return const BoxShadow(
-          color: Color(0x26000000),
-          blurRadius: 8,
-          offset: Offset(0, 2),
-        );
-      case 'lg':
-        return const BoxShadow(
-          color: Color(0x33000000),
-          blurRadius: 16,
-          offset: Offset(0, 4),
-        );
-      case 'xl':
-        return const BoxShadow(
-          color: Color(0x40000000),
-          blurRadius: 24,
-          offset: Offset(0, 8),
-        );
-      default:
-        return null;
-    }
   }
 
   Border? _parseBorder(dynamic v, Map<String, dynamic>? dataContext) {
