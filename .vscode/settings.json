@@ -14,5 +14,6 @@
         "ConvertFrom-Json": true,
         "Out-Null": true,
         "flutter": true
-    }
+    },
+    "java.configuration.updateBuildConfiguration": "interactive"
 }

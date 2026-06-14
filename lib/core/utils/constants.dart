@@ -9,10 +9,6 @@ const kBaseUrl = 'https://sooq.up.railway.app';
 final kBaseUrlAsset = kBaseUrl.split('/api')[0];
 
 // const kWebSocketUrl = 'ws://jaramana-clinic-center.onrender.com/ws';
-
-const kAppName = 'SOOQ';
-
-//TODO: Need Updates
 const Color primaryColor = Color(0xff4A4BB3);
 const Color secondaryColor = Color(0xff4A4BB3);
 const Color scaffoldColor = Color(0xFFF0F0F0);

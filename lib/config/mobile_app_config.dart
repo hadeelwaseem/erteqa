@@ -6,7 +6,7 @@ import 'navigation_config.dart';
 /// Contains the app identity, navigation config, and all known page routes.
 /// Pages are NOT pre-parsed here — they are loaded on demand by [VariantRepository].
 ///
-/// Usage: load once at startup via [AppConfigLoader], pass into router setup.
+/// Usage: load once at startup via [ConfigPipeline], pass into router setup.
 class MobileAppConfig {
   /// The JSON file identifier (used as variantId when loading pages).
   final String variantId;

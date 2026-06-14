@@ -43,17 +43,21 @@ import 'package:sooq_merchant/dev/commerce_mock/commerce_mock_config.dart';
 import 'package:sooq_merchant/dev/commerce_mock/mock_checkout_repo.dart';
 import 'package:sooq_merchant/dev/commerce_mock/mock_order_repo.dart';
 import 'package:sooq_merchant/dev/commerce_mock/mock_shipping_repo.dart';
+import 'package:sooq_merchant/engine/config_pipeline_result.dart';
 import 'package:sooq_merchant/features/variantscreen/data/repos/variant_repository.dart';
 
 GetIt getIt = GetIt.instance;
 
 MobileAppConfig? _registeredMobileAppConfig;
+ConfigPipelineResult? _registeredPipelineResult;
 
 MobileAppConfig? get registeredMobileAppConfig => _registeredMobileAppConfig;
+ConfigPipelineResult? get registeredPipelineResult => _registeredPipelineResult;
 
 void setupServiceLocator({
   NetworkConfig? networkConfig,
   MobileAppConfig? mobileAppConfig,
+  ConfigPipelineResult? pipelineResult,
 }) {
   _resetIfRegistered<NetworkConfig>();
   _resetIfRegistered<AuthTokenStorage>();
@@ -79,6 +83,7 @@ void setupServiceLocator({
   _resetIfRegistered<ShippingRepo>();
 
   _registeredMobileAppConfig = mobileAppConfig;
+  _registeredPipelineResult = pipelineResult;
 
   final resolvedNetworkConfig =
       networkConfig ??

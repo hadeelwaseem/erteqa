@@ -7,10 +7,8 @@ import '../config/mobile_app_config.dart';
 
 /// Loads and parses the top-level mobile app JSON config from assets.
 ///
-/// Call once at startup before router setup:
-/// ```dart
-/// final config = await AppConfigLoader.load('mobile_component_flow_demo');
-/// ```
+/// **Deprecated:** Prefer [ConfigPipeline.initialize] for startup.
+/// This helper remains for direct variant-id loading in tests and tooling.
 ///
 /// This reads the JSON only for top-level metadata (navigation, pages routes).
 /// Individual page bodies are loaded on demand by [AssetVariantRepository].

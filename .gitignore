@@ -43,3 +43,9 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Per-merchant build artifacts (CI-generated; not committed)
+assets/config/bootstrap.json
+assets/config/mobile-config.json
+assets/icons/merchant_icon.png
+merchant-build.json

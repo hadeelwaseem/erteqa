@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sooq_merchant/core/network/network_config.dart';
-import 'package:sooq_merchant/core/utils/constants.dart';
 import 'package:sooq_merchant/core/cubits/shared_preferences_cubit/shared_preferences_cubit.dart';
 import 'package:sooq_merchant/core/cubits/token_cubit/token_cubit.dart';
 import 'package:sooq_merchant/features/commerce/cart/presentation/manager/cart_cubit/cart_cubit.dart';
@@ -21,12 +20,8 @@ import 'package:sooq_merchant/core/utils/app_router.dart';
 import 'package:sooq_merchant/core/utils/service_locator.dart';
 import 'package:sooq_merchant/core/utils/size_config.dart';
 import 'package:sooq_merchant/config/mobile_app_config.dart';
-import 'package:sooq_merchant/engine/app_config_loader.dart';
+import 'package:sooq_merchant/engine/config_pipeline.dart';
 import 'package:sooq_merchant/engine/theme/engine_theme.dart';
-
-/// The JSON file that drives the app.
-/// Change this to switch to a different config at any time.
-const _kActiveConfig = 'mobile_production_v2';
 
 void main() async {
   // 1. Initialize Flutter bindings
@@ -39,8 +34,10 @@ void main() async {
     return true;
   }());
 
-  // 2. Load mobile app config before DI (base URL + tenant)
-  final mobileConfig = await AppConfigLoader.load(_kActiveConfig);
+  // 2. Load bootstrap + full config before DI (base URL + tenant)
+  final pipelineResult = await ConfigPipeline.initialize();
+  final mobileConfig = pipelineResult.mobileAppConfig;
+  final bootstrap = pipelineResult.bootstrap;
 
   // 3. Setup Dependency Injection
   if (AuthMockConfig.enabled) {
@@ -50,11 +47,14 @@ void main() async {
   }
   setupServiceLocator(
     networkConfig: NetworkConfig.fromAppConfig(
-      apiBaseUrl: mobileConfig?.apiBaseUrl,
-      tenantId: mobileConfig?.tenantId,
-      tenantSlug: mobileConfig?.tenantSlug,
+      apiBaseUrl: bootstrap.apiBaseUrl.isNotEmpty
+          ? bootstrap.apiBaseUrl
+          : mobileConfig?.apiBaseUrl,
+      tenantId: bootstrap.tenantId ?? mobileConfig?.tenantId,
+      tenantSlug: bootstrap.tenantSlug ?? mobileConfig?.tenantSlug,
     ),
     mobileAppConfig: mobileConfig,
+    pipelineResult: pipelineResult,
   );
 
   // 4. System UI

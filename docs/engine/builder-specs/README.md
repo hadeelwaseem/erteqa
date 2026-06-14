@@ -77,6 +77,7 @@ Copy structure from [`_TEMPLATE.md`](_TEMPLATE.md).
 | [24-visible-when.md](24-visible-when.md) | Home inline search | implemented-in-json | `props.visibleWhen` — show/hide nodes by form or pageState field (`isEmpty` / `nonEmpty`) |
 | [25-page-padding.md](25-page-padding.md) | Layout / UI consistency | implemented-in-json | `pages[].padding` — default `theme.spacing.md` (16) body inset; `0` for full-bleed |
 | [26-default-shadows.md](26-default-shadows.md) | Shadow cleanup P2 | ready-for-builder | `theme.defaultShadows` — optional preset defaults per component type when node props omitted |
+| [27-bootstrap-config.md](27-bootstrap-config.md) | Build pipeline | ready-for-builder | Bootstrap JSON + merchant build manifest; `configMode`, native identity injection |
 | [../web-to-mobile-converter/README.md](../web-to-mobile-converter/README.md) | Web → Mobile | reference | Full Erteqa web block → mobile SDUI conversion rules; complements builder-specs for cross-platform JSON |
 
 Update this table when adding a spec.
