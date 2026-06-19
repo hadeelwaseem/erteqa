@@ -14,8 +14,8 @@
 `lib/features/variantscreen/data/repos/variant_repository.dart`
 
 - Interface: `VariantRepository`
-- Implementation: `AssetVariantRepository`
-- Loads `assets/config/{variantId}.json`
+- **Normal app path:** `JsonVariantRepository` — in-memory session JSON from `ConfigPipeline` (`rawConfigJson`)
+- **Dev / tests:** `AssetVariantRepository` — loads `assets/config/{variantId}.json` per request (e.g. `/variant/:id` route)
 - Selects page by `pageRoute` (preferred) or page `id`
 - Builds `ScreenConfig` with scaffold root (appBar + body normalization)
 

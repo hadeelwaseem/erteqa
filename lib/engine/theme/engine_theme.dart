@@ -148,14 +148,14 @@ class EngineTheme {
     );
 
     final family = config.typography.fontFamily.trim().toLowerCase();
-    if (family == 'tajawal') {
+    if (family == 'tajawal' && GoogleFonts.config.allowRuntimeFetching) {
       try {
         return base.copyWith(
           textTheme: GoogleFonts.tajawalTextTheme(base.textTheme),
           primaryTextTheme: GoogleFonts.tajawalTextTheme(base.primaryTextTheme),
         );
       } catch (_) {
-        // Offline / test / font fetch failure — fall back to family name.
+        // Sync fetch failure — fall through to fontFamily apply below.
       }
     }
 

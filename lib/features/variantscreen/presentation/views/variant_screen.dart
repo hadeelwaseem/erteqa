@@ -818,6 +818,7 @@ class _VariantScreenState extends State<VariantScreen> {
     final config = widget.mobileAppConfig;
     if (config != null) {
       merged['app'] = <String, dynamic>{
+        'name': config.appName,
         'apiBaseUrl': config.apiBaseUrl,
         'tenantId': config.tenantId,
         'tenantSlug': config.tenantSlug,

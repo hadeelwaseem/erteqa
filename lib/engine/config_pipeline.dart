@@ -1,25 +1,36 @@
 import 'package:flutter/foundation.dart';
+import 'package:meta/meta.dart';
 
 import '../config/bootstrap_config.dart';
 import '../config/config_mode.dart';
+import '../config/config_source.dart';
 import '../config/local_asset_config_source.dart';
 import '../config/mobile_app_config.dart';
+import '../config/session_config_resolver.dart';
 import 'config_pipeline_result.dart';
 
-/// Orchestrates bootstrap → full config → [MobileAppConfig] at startup.
+/// Orchestrates bootstrap → render JSON → [MobileAppConfig] at startup.
 class ConfigPipeline {
   ConfigPipeline._();
 
   /// Loads bootstrap, resolves config source, and parses [MobileAppConfig].
-  ///
-  /// Returns a result with null [ConfigPipelineResult.mobileAppConfig] on failure
-  /// so startup can proceed with a safe fallback (same as legacy [AppConfigLoader]).
-  static Future<ConfigPipelineResult> initialize() async {
+  static Future<ConfigPipelineResult> initialize() {
+    return initializeWith();
+  }
+
+  @visibleForTesting
+  static Future<ConfigPipelineResult> initializeWith({
+    AppConfigSource? sourceOverride,
+    BootstrapConfig? bootstrapOverride,
+    SessionConfigResolver? resolverOverride,
+  }) async {
     BootstrapConfig bootstrap;
     try {
-      bootstrap = await LocalAssetConfigSource.loadBootstrap(
-        allowLocalFallback: kDebugMode,
-      );
+      bootstrap =
+          bootstrapOverride ??
+          await LocalAssetConfigSource.loadBootstrap(
+            allowLocalFallback: kDebugMode,
+          );
     } catch (e, st) {
       debugPrint('[ConfigPipeline] ❌ Failed to load bootstrap: $e\n$st');
       return ConfigPipelineResult(
@@ -31,40 +42,84 @@ class ConfigPipeline {
           bundleId: '',
           apiBaseUrl: '',
         ),
+        loadError: 'Failed to load bootstrap: $e',
       );
     }
 
-    if (bootstrap.configMode != ConfigMode.local) {
-      debugPrint(
-        '[ConfigPipeline] ❌ Config mode "${bootstrap.configMode.toJson()}" '
-        'is not implemented yet (Sprint 1 supports local only).',
-      );
-      return ConfigPipelineResult(bootstrap: bootstrap);
+    if (sourceOverride != null) {
+      return _initializeWithSourceOverride(bootstrap, sourceOverride);
     }
 
+    final resolver = resolverOverride ?? SessionConfigResolver();
     try {
-      final source = LocalAssetConfigSource();
-      final rawJson = await source.loadFullConfig(bootstrap);
-      final mobileConfig = MobileAppConfig.fromJson(
-        rawJson,
-        bootstrap.variantId,
+      final SessionConfigResult? resolved;
+      if (bootstrap.configMode == ConfigMode.local) {
+        resolved = await resolver.resolveLocal(bootstrap);
+      } else {
+        resolved = await resolver.resolve(bootstrap);
+      }
+
+      if (resolved == null) {
+        return ConfigPipelineResult(
+          bootstrap: bootstrap,
+          loadError: 'Failed to load valid app configuration.',
+        );
+      }
+
+      final mobileConfig = MobileAppConfig.fromBootstrapAndRender(
+        bootstrap: bootstrap,
+        renderJson: resolved.renderJson,
       );
       debugPrint(
         '[ConfigPipeline] ✅ Loaded config: ${mobileConfig.appName} '
         '(${mobileConfig.navigation.tabs.length} tabs, '
         '${mobileConfig.pageRoutes.length} pages, '
         'mode=${bootstrap.configMode.toJson()}, '
+        'source=${resolved.sessionSource.name}, '
         'variant=${bootstrap.variantId})',
       );
       return ConfigPipelineResult(
         bootstrap: bootstrap,
         mobileAppConfig: mobileConfig,
-        rawConfigJson: rawJson,
-        usedRemoteConfig: false,
+        rawConfigJson: resolved.renderJson,
+        sessionSource: resolved.sessionSource,
+        usedRemoteConfig: bootstrap.configMode != ConfigMode.local,
       );
     } catch (e, st) {
       debugPrint('[ConfigPipeline] ❌ Failed to load full config: $e\n$st');
-      return ConfigPipelineResult(bootstrap: bootstrap);
+      return ConfigPipelineResult(
+        bootstrap: bootstrap,
+        loadError: e.toString(),
+      );
+    }
+  }
+
+  static Future<ConfigPipelineResult> _initializeWithSourceOverride(
+    BootstrapConfig bootstrap,
+    AppConfigSource source,
+  ) async {
+    try {
+      final renderJson = await source.loadFullConfig(bootstrap);
+      final mobileConfig = MobileAppConfig.fromBootstrapAndRender(
+        bootstrap: bootstrap,
+        renderJson: renderJson,
+      );
+      debugPrint(
+        '[ConfigPipeline] ✅ Loaded config (sourceOverride): '
+        '${mobileConfig.appName}',
+      );
+      return ConfigPipelineResult(
+        bootstrap: bootstrap,
+        mobileAppConfig: mobileConfig,
+        rawConfigJson: renderJson,
+        usedRemoteConfig: bootstrap.configMode != ConfigMode.local,
+      );
+    } catch (e, st) {
+      debugPrint('[ConfigPipeline] ❌ Failed to load full config: $e\n$st');
+      return ConfigPipelineResult(
+        bootstrap: bootstrap,
+        loadError: e.toString(),
+      );
     }
   }
 }

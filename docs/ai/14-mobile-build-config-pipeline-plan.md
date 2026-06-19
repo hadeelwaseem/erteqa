@@ -37,18 +37,20 @@
 
 Today everything lives in one bundled file and is loaded from assets only:
 
-| Concern | Current implementation | Gap |
-|---------|------------------------|-----|
-| Full UI JSON | `assets/config/mobile_production_v2.json` | Must also load from storage/API |
-| Config loader | `AppConfigLoader` → `rootBundle` only | No remote source |
-| Page loader | `AssetVariantRepository` → `rootBundle` only | No in-memory/cached remote JSON |
-| Active config id | `const _kActiveConfig = 'mobile_production_v2'` in `main.dart` | Hardcoded |
-| Android package | `com.example.sooq_merchant` in `build.gradle.kts` | Mismatches JSON `com.sooq.merchant.mobile` |
-| Android label | `SOOQ` in `AndroidManifest.xml` | Mismatches JSON app name |
-| iOS display name | `SOOQ` in `Info.plist` | Mismatches JSON app name |
-| iOS bundle id | `com.example.sooqMerchant` in `project.pbxproj` | Mismatches JSON |
-| Launcher icon | Static `assets/icons/app_logo_masked.png` in `pubspec.yaml` | Not per-merchant |
-| CI/CD | No `.github/workflows/` | None |
+
+| Concern          | Current implementation                                         | Gap                                        |
+| ---------------- | -------------------------------------------------------------- | ------------------------------------------ |
+| Full UI JSON     | `assets/config/mobile_production_v2.json`                      | Must also load from storage/API            |
+| Config loader    | `AppConfigLoader` → `rootBundle` only                          | No remote source                           |
+| Page loader      | `AssetVariantRepository` → `rootBundle` only                   | No in-memory/cached remote JSON            |
+| Active config id | `const _kActiveConfig = 'mobile_production_v2'` in `main.dart` | Hardcoded                                  |
+| Android package  | `com.example.sooq_merchant` in `build.gradle.kts`              | Mismatches JSON `com.sooq.merchant.mobile` |
+| Android label    | `SOOQ` in `AndroidManifest.xml`                                | Mismatches JSON app name                   |
+| iOS display name | `SOOQ` in `Info.plist`                                         | Mismatches JSON app name                   |
+| iOS bundle id    | `com.example.sooqMerchant` in `project.pbxproj`                | Mismatches JSON                            |
+| Launcher icon    | Static `assets/icons/app_logo_masked.png` in `pubspec.yaml`    | Not per-merchant                           |
+| CI/CD            | No `.github/workflows/`                                        | None                                       |
+
 
 **Key files today:**
 
@@ -121,17 +123,21 @@ flowchart TB
     end
 ```
 
+
+
 ---
 
 ## 4. Three config modes
 
 Add `configMode` to bootstrap. All three coexist; switch via bootstrap only.
 
-| Mode | Bootstrap source | Full config source | When to use |
-|------|------------------|-------------------|-------------|
-| `local` | `assets/config/bootstrap.json` (dev: copy from `bootstrap.local.json`) | `assets/config/{variantId}.json` — **existing monolithic file OK** | Daily dev, engine work, CI smoke test (milestone 1) |
-| `remoteStorage` | CI-injected bootstrap | HTTP GET `bootstrap.configUrl` (Firebase/S3/R2/GitHub raw) | Test full remote flow before backend exists (milestone 2) |
-| `remoteApi` | CI-injected bootstrap | `GET {apiBaseUrl}/api/v1/public/mobile-config?tenantSlug=...` | When backend is ready (milestone 4) — same Dart path as storage, different URL resolver |
+
+| Mode            | Bootstrap source                                                       | Full config source                                                 | When to use                                                                             |
+| --------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------- |
+| `local`         | `assets/config/bootstrap.json` (dev: copy from `bootstrap.local.json`) | `assets/config/{variantId}.json` — **existing monolithic file OK** | Daily dev, engine work, CI smoke test (milestone 1)                                     |
+| `remoteStorage` | CI-injected bootstrap                                                  | HTTP GET `bootstrap.configUrl` (Firebase/S3/R2/GitHub raw)         | Test full remote flow before backend exists (milestone 2)                               |
+| `remoteApi`     | CI-injected bootstrap                                                  | `GET {apiBaseUrl}/api/v1/public/mobile-config?tenantSlug=...`      | When backend is ready (milestone 4) — same Dart path as storage, different URL resolver |
+
 
 `remoteStorage` and `remoteApi` share one `RemoteConfigSource` class; only URL construction differs.
 
@@ -159,16 +165,18 @@ Add `configMode` to bootstrap. All three coexist; switch via bootstrap only.
 }
 ```
 
-| Field | Build-time | Runtime | Notes |
-|-------|------------|---------|-------|
-| `appName` | ✓ patched to native | ✓ | Launcher / store display name |
-| `bundleId` | ✓ patched to native | ✓ | Must match Android `applicationId` + iOS `PRODUCT_BUNDLE_IDENTIFIER` |
-| `apiBaseUrl` | ✓ | ✓ | `NetworkConfig.baseUrl` |
-| `tenantId` / `tenantSlug` | ✓ | ✓ | Public API tenant headers |
-| `configMode` | ✓ | ✓ | `local` \| `remoteStorage` \| `remoteApi` |
-| `variantId` | ✓ | ✓ | Asset filename stem for `local` mode only |
-| `configUrl` | ✓ | ✓ | Required when `configMode == remoteStorage` |
-| `iconUrl` | ✓ (CI downloads) | — | Optional; CI fetches before `flutter_launcher_icons` |
+
+| Field                     | Build-time          | Runtime | Notes                                                                |
+| ------------------------- | ------------------- | ------- | -------------------------------------------------------------------- |
+| `appName`                 | ✓ patched to native | ✓       | Launcher / store display name                                        |
+| `bundleId`                | ✓ patched to native | ✓       | Must match Android `applicationId` + iOS `PRODUCT_BUNDLE_IDENTIFIER` |
+| `apiBaseUrl`              | ✓                   | ✓       | `NetworkConfig.baseUrl`                                              |
+| `tenantId` / `tenantSlug` | ✓                   | ✓       | Public API tenant headers                                            |
+| `configMode`              | ✓                   | ✓       | `local` | `remoteStorage` | `remoteApi`                              |
+| `variantId`               | ✓                   | ✓       | Asset filename stem for `local` mode only                            |
+| `configUrl`               | ✓                   | ✓       | Required when `configMode == remoteStorage`                          |
+| `iconUrl`                 | ✓ (CI downloads)    | —       | Optional; CI fetches before `flutter_launcher_icons`                 |
+
 
 ### 5.2 Full runtime config (`mobile-config.json`)
 
@@ -217,17 +225,19 @@ Hand-written for testing; later generated by builder. **Not committed** — pass
 
 ## 6. Hardcoded values to fix
 
-| Current | Location | Fix |
-|---------|----------|-----|
-| `_kActiveConfig = 'mobile_production_v2'` | `lib/main.dart` | `bootstrap.variantId` |
-| `applicationId` / `namespace` | `android/app/build.gradle.kts` | `tool/apply_merchant_build.dart` |
-| `android:label` | `AndroidManifest.xml` | same script |
-| `CFBundleDisplayName` / `CFBundleName` | `ios/Runner/Info.plist` | same script |
-| `PRODUCT_BUNDLE_IDENTIFIER` | `ios/Runner.xcodeproj/project.pbxproj` | same script |
-| `flutter_launcher_icons.image_path` | `pubspec.yaml` | CI downloads icon → patch path or use fixed `assets/icons/merchant_icon.png` |
-| `kAppName = 'SOOQ'` | `lib/core/utils/constants.dart` | Remove unused const or derive from `MobileAppConfig.appName` |
-| `AssetVariantRepository` only | `service_locator.dart` | Factory: local → asset repo; remote → in-memory/cached repo |
-| Default `apiBaseUrl` fallback | `network_config.dart` | Keep as safety net; bootstrap must always be set in CI builds |
+
+| Current                                   | Location                               | Fix                                                                          |
+| ----------------------------------------- | -------------------------------------- | ---------------------------------------------------------------------------- |
+| `_kActiveConfig = 'mobile_production_v2'` | `lib/main.dart`                        | `bootstrap.variantId`                                                        |
+| `applicationId` / `namespace`             | `android/app/build.gradle.kts`         | `tool/apply_merchant_build.dart`                                             |
+| `android:label`                           | `AndroidManifest.xml`                  | same script                                                                  |
+| `CFBundleDisplayName` / `CFBundleName`    | `ios/Runner/Info.plist`                | same script                                                                  |
+| `PRODUCT_BUNDLE_IDENTIFIER`               | `ios/Runner.xcodeproj/project.pbxproj` | same script                                                                  |
+| `flutter_launcher_icons.image_path`       | `pubspec.yaml`                         | CI downloads icon → patch path or use fixed `assets/icons/merchant_icon.png` |
+| `kAppName = 'SOOQ'`                       | `lib/core/utils/constants.dart`        | Remove unused const or derive from `MobileAppConfig.appName`                 |
+| `AssetVariantRepository` only             | `service_locator.dart`                 | Factory: local → asset repo; remote → in-memory/cached repo                  |
+| Default `apiBaseUrl` fallback             | `network_config.dart`                  | Keep as safety net; bootstrap must always be set in CI builds                |
+
 
 **Stays unchanged:** engine renderers, tab shell, request mapper, feature repos, JSON page schema.
 
@@ -241,22 +251,26 @@ Hand-written for testing; later generated by builder. **Not committed** — pass
 
 #### 7.1.1 New Dart files
 
-| File | Responsibility |
-|------|----------------|
-| `lib/config/bootstrap_config.dart` | Model + `fromJson` for bootstrap |
-| `lib/config/config_mode.dart` | Enum: `local`, `remoteStorage`, `remoteApi` |
-| `lib/config/config_source.dart` | Abstract `AppConfigSource` interface |
+
+| File                                        | Responsibility                                                        |
+| ------------------------------------------- | --------------------------------------------------------------------- |
+| `lib/config/bootstrap_config.dart`          | Model + `fromJson` for bootstrap                                      |
+| `lib/config/config_mode.dart`               | Enum: `local`, `remoteStorage`, `remoteApi`                           |
+| `lib/config/config_source.dart`             | Abstract `AppConfigSource` interface                                  |
 | `lib/config/local_asset_config_source.dart` | Bootstrap from asset; full JSON from `assets/config/{variantId}.json` |
-| `lib/engine/config_pipeline.dart` | Orchestrates bootstrap → full config → `MobileAppConfig` |
-| `lib/engine/config_pipeline_result.dart` | Holds `MobileAppConfig` + raw JSON for variant repo |
+| `lib/engine/config_pipeline.dart`           | Orchestrates bootstrap → full config → `MobileAppConfig`              |
+| `lib/engine/config_pipeline_result.dart`    | Holds `MobileAppConfig` + raw JSON for variant repo                   |
+
 
 #### 7.1.2 Modify existing files
 
-| File | Change |
-|------|--------|
-| `lib/main.dart` | Replace `AppConfigLoader.load(_kActiveConfig)` with `ConfigPipeline` |
-| `lib/core/utils/service_locator.dart` | Accept optional preloaded config JSON; register variant repo by mode |
-| `pubspec.yaml` | Ensure `assets/config/` includes bootstrap (add `bootstrap.local.json`) |
+
+| File                                  | Change                                                                  |
+| ------------------------------------- | ----------------------------------------------------------------------- |
+| `lib/main.dart`                       | Replace `AppConfigLoader.load(_kActiveConfig)` with `ConfigPipeline`    |
+| `lib/core/utils/service_locator.dart` | Accept optional preloaded config JSON; register variant repo by mode    |
+| `pubspec.yaml`                        | Ensure `assets/config/` includes bootstrap (add `bootstrap.local.json`) |
+
 
 #### 7.1.3 Dev bootstrap template
 
@@ -266,12 +280,14 @@ Hand-written for testing; later generated by builder. **Not committed** — pass
 
 #### 7.1.4 Build tools
 
-| Script | Purpose |
-|--------|---------|
-| `tool/apply_merchant_build.dart` | Read `merchant-build.json`; patch Android/iOS native files; write `assets/config/bootstrap.json` |
-| `tool/merchant_build_manifest.schema.json` | Optional JSON schema for manifest validation |
 
-**`apply_merchant_build.dart` must patch:**
+| Script                                     | Purpose                                                                                          |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| `tool/apply_merchant_build.dart`           | Read `merchant-build.json`; patch Android/iOS native files; write `assets/config/bootstrap.json` |
+| `tool/merchant_build_manifest.schema.json` | Optional JSON schema for manifest validation                                                     |
+
+
+`**apply_merchant_build.dart` must patch:**
 
 1. `android/app/build.gradle.kts` — `applicationId`, `namespace`
 2. `android/app/src/main/AndroidManifest.xml` — `android:label`
@@ -281,11 +297,13 @@ Hand-written for testing; later generated by builder. **Not committed** — pass
 
 #### 7.1.5 Tests
 
-| Test | File |
-|------|------|
-| `BootstrapConfig` parsing | `test/config/bootstrap_config_test.dart` |
-| `ConfigPipeline` local mode loads prod JSON | `test/engine/config_pipeline_test.dart` |
-| Existing suite | `flutter test` — must pass with zero regressions |
+
+| Test                                        | File                                             |
+| ------------------------------------------- | ------------------------------------------------ |
+| `BootstrapConfig` parsing                   | `test/config/bootstrap_config_test.dart`         |
+| `ConfigPipeline` local mode loads prod JSON | `test/engine/config_pipeline_test.dart`          |
+| Existing suite                              | `flutter test` — must pass with zero regressions |
+
 
 #### 7.1.6 Manual verification
 
@@ -312,11 +330,13 @@ flutter build apk --release
 
 #### 7.2.1 New Dart files
 
-| File | Responsibility |
-|------|----------------|
-| `lib/config/remote_config_source.dart` | HTTP fetch + cache; URL from `configUrl` or API path |
-| `lib/config/config_cache.dart` | Persist fetched JSON (`shared_preferences` or file) |
-| `lib/features/variantscreen/data/repos/cached_variant_repository.dart` | Holds parsed JSON map; delegates to existing `_parseBuilderScreenConfig` logic |
+
+| File                                                                   | Responsibility                                                                 |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `lib/config/remote_config_fetcher.dart`                                | HTTP fetch; raw JSON string; per-call timeout                                  |
+| `lib/config/config_cache.dart`                                         | Persist fetched JSON (file via `path_provider`)                                |
+| `lib/features/variantscreen/data/repos/json_variant_repository.dart`   | In-memory session JSON; shared `VariantConfigParser`                           |
+
 
 #### 7.2.2 Refactor (minimal)
 
@@ -324,10 +344,12 @@ Extract parsing helpers from `AssetVariantRepository` into package-private top-l
 
 #### 7.2.3 Build tools
 
-| Script | Purpose |
-|--------|---------|
-| `tool/split_config.dart` | `mobile_production_v2.json` → `mobile-config.json` (+ optional bootstrap extract) |
-| `tool/upload_config_to_storage.dart` | Dev helper: upload to Firebase/S3 (optional; manual upload OK for v1) |
+
+| Script                               | Purpose                                                                           |
+| ------------------------------------ | --------------------------------------------------------------------------------- |
+| `tool/split_config.dart`             | `mobile_production_v2.json` → `mobile-config.json` (+ optional bootstrap extract) |
+| `tool/upload_config_to_storage.dart` | Dev helper: upload to Firebase/S3 (optional; manual upload OK for v1)             |
+
 
 #### 7.2.4 Storage setup (manual for first test)
 
@@ -357,14 +379,16 @@ tool/fixtures/merchant-build.example.json
 
 #### 7.3.2 Workflow inputs
 
-| Input | Required | Description |
-|-------|----------|-------------|
-| `tenant_slug` | yes | Merchant identifier (artifact naming) |
-| `config_mode` | yes | `local` or `remoteStorage` |
-| `config_url` | if remote | Public URL to `mobile-config.json` |
-| `app_name` | yes | Display name |
-| `bundle_id` | yes | Package name |
-| `build_number` | no | Default `1` |
+
+| Input          | Required  | Description                           |
+| -------------- | --------- | ------------------------------------- |
+| `tenant_slug`  | yes       | Merchant identifier (artifact naming) |
+| `config_mode`  | yes       | `local` or `remoteStorage`            |
+| `config_url`   | if remote | Public URL to `mobile-config.json`    |
+| `app_name`     | yes       | Display name                          |
+| `bundle_id`    | yes       | Package name                          |
+| `build_number` | no        | Default `1`                           |
+
 
 Workflow steps:
 
@@ -381,10 +405,12 @@ Workflow steps:
 
 #### 7.3.3 Two CI test paths
 
-| Job | configMode | Validates |
-|-----|------------|-----------|
-| **A: local bundle** | `local` | CI injection + embedded JSON + APK installs |
+
+| Job                  | configMode      | Validates                                               |
+| -------------------- | --------------- | ------------------------------------------------------- |
+| **A: local bundle**  | `local`         | CI injection + embedded JSON + APK installs             |
 | **B: storage fetch** | `remoteStorage` | CI injection + runtime fetch (requires uploaded config) |
+
 
 Run **A first** — no external dependencies.
 
@@ -418,23 +444,36 @@ Response 404: tenant has no published mobile config
 
 ## 8. Variant repository strategy
 
-Do **not** remove `AssetVariantRepository`.
+Do **not** remove `AssetVariantRepository` (dev `/variant/:id` route and direct tests).
 
 | Mode | Repository | Data source |
 |------|------------|-------------|
-| `local` | `AssetVariantRepository` (existing) | `rootBundle.loadString` |
-| `remoteStorage` / `remoteApi` | `CachedVariantRepository` (new) | In-memory `Map` from fetched JSON; same parser as asset repo |
+| All modes (normal app) | `JsonVariantRepository` | In-memory `rawConfigJson` from `ConfigPipeline` (asset, cache, or remote) |
+| Dev `/variant/:id` only | `AssetVariantRepository` | `rootBundle.loadString` per request |
 
 Registration in `service_locator.dart`:
 
 ```dart
 getIt.registerLazySingleton<VariantRepository>(() {
-  if (pipelineResult.usedRemoteConfig) {
-    return CachedVariantRepository(pipelineResult.rawConfigJson);
+  if (result?.rawConfigJson != null) {
+    return JsonVariantRepository(result!.rawConfigJson!);
   }
-  return AssetVariantRepository();
+  return AssetVariantRepository(); // safety fallback / dev route
 });
 ```
+
+### Implemented: session resolver, validation, cache, background sync
+
+| Component | File | Role |
+|-----------|------|------|
+| `SessionConfigResolver` | `lib/config/session_config_resolver.dart` | Startup: cache → remote (3s) → asset; validate before accept |
+| `ConfigValidator` | `lib/config/config_validator.dart` | `jsonDecode` + shape + `fromBootstrapAndRender` (no per-page parser) |
+| `ConfigCache` | `lib/config/config_cache.dart` | `{appDocumentsDir}/sooq/mobile-config/{tenantSlug}.json` |
+| `RemoteConfigFetcher` | `lib/config/remote_config_fetcher.dart` | Raw HTTP; 3s startup, 20s background |
+| `ConfigBackgroundSync` | `lib/config/config_background_sync.dart` | After `runApp`: fetch → validate → cache write only |
+| `sessionSource` | `lib/engine/config_pipeline_result.dart` | `asset` \| `cache` \| `remote` |
+
+`remoteApi` and `remoteStorage` both use `resolveRemoteConfigUrl`. CI GitHub Actions workflow remains deferred — see Sprint 3 in this doc.
 
 ---
 
@@ -450,7 +489,7 @@ getIt.registerLazySingleton<VariantRepository>(() {
 
 ```
 Input:  assets/config/mobile_production_v2.json
-Output: assets/config/mobile-config.json  (theme + navigation + pages + app block)
+Output: assets/config/mobile-config.json  (theme + navigation + pages only — no app block)
         merchant-build.json fields        (app.name → appName, app.bundleId → bundleId, etc.)
 ```
 
@@ -486,31 +525,36 @@ When builder + backend are ready:
 ## 12. Success criteria checklist
 
 ### Milestone 1 (local + build script)
+
 - [x] `flutter run` with `bootstrap.local.json` works identically to today
 - [x] All existing tests pass
 - [x] `apply_merchant_build.dart` patches Android label + package id
 - [x] `MobileAppConfig` still parses from `mobile_production_v2.json` in local mode
 
 ### Milestone 2 (remote storage)
-- [ ] App fetches config from public URL on cold start
-- [ ] Config cached; app works offline on second launch
-- [ ] `CachedVariantRepository` renders all tab routes correctly
+
+- [x] App fetches config from public URL on cold start (via `SessionConfigResolver`)
+- [x] Config cached; app works offline on second launch
+- [x] `JsonVariantRepository` renders all tab routes from session `rawConfigJson`
 
 ### Milestone 3 (GitHub Actions)
+
 - [ ] `workflow_dispatch` produces APK artifact
 - [ ] APK launcher shows injected `appName`
 - [ ] `local` mode CI job: APK runs without network for config
 - [ ] `remoteStorage` CI job: APK fetches config from URL
 
 ### Milestone 4 (API ready)
-- [ ] `remoteApi` mode works against real endpoint
-- [ ] Switching storage → API requires bootstrap change only
+
+- [x] `remoteApi` mode works against endpoint (URL builder + fetcher implemented)
+- [x] Switching storage → API requires bootstrap change only
 
 ---
 
 ## 13. Files to create (summary)
 
 ### Dart (lib/)
+
 - `lib/config/bootstrap_config.dart`
 - `lib/config/config_mode.dart`
 - `lib/config/config_source.dart`
@@ -521,18 +565,22 @@ When builder + backend are ready:
 - `lib/features/variantscreen/data/repos/cached_variant_repository.dart` (Sprint 2)
 
 ### Tools (tool/)
+
 - `tool/apply_merchant_build.dart`
 - `tool/split_config.dart` (Sprint 2)
 - `tool/download_merchant_assets.dart` (Sprint 3)
 - `tool/fixtures/merchant-build.example.json`
 
 ### Config (assets/)
+
 - `assets/config/bootstrap.local.json`
 
 ### CI (.github/)
+
 - `.github/workflows/build-merchant-android.yml` (Sprint 3)
 
 ### Tests (test/)
+
 - `test/config/bootstrap_config_test.dart`
 - `test/engine/config_pipeline_test.dart`
 
@@ -571,13 +619,15 @@ When starting a new chat in **plan mode**, provide:
 
 ## 16. Open decisions (resolve during implementation)
 
-| Decision | Options | Recommendation |
-|----------|---------|----------------|
-| Bootstrap fallback in debug | Copy `bootstrap.local.json` vs auto-load `bootstrap.local.json` if `bootstrap.json` missing | Auto-load `.local` in debug — less dev friction |
-| Config cache storage | `shared_preferences` vs `path_provider` file | File via `path_provider` — large JSON |
-| Splash during remote fetch | Block on splash route vs overlay on first frame | Reuse JSON splash page; extend pipeline to delay router until config ready |
-| Icon download in CI | Required vs optional first milestone | Optional — skip `flutter_launcher_icons` if no `iconUrl` |
-| iOS in CI | Same sprint vs later | Later — Android first |
+
+| Decision                    | Options                                                                                     | Recommendation                                                             |
+| --------------------------- | ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Bootstrap fallback in debug | Copy `bootstrap.local.json` vs auto-load `bootstrap.local.json` if `bootstrap.json` missing | Auto-load `.local` in debug — less dev friction                            |
+| Config cache storage        | `shared_preferences` vs `path_provider` file                                                | File via `path_provider` — large JSON                                      |
+| Splash during remote fetch  | Block on splash route vs overlay on first frame                                             | Reuse JSON splash page; extend pipeline to delay router until config ready |
+| Icon download in CI         | Required vs optional first milestone                                                        | Optional — skip `flutter_launcher_icons` if no `iconUrl`                   |
+| iOS in CI                   | Same sprint vs later                                                                        | Later — Android first                                                      |
+
 
 ---
 

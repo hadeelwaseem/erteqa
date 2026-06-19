@@ -2,23 +2,50 @@
 
 ## AI must know
 
-- **Primary config:** `assets/config/mobile_production_v2.json` (~4700 lines, schemaVersion `1.0`).
-- **Top-level keys:** `schemaVersion`, `app`, `theme`, `navigation`, `pages`.
+- **Two-layer config:** **bootstrap** (`assets/config/bootstrap.json` or `bootstrap.local.json`) holds merchant identity; **render JSON** (`assets/config/mobile_production_v2.json` or remote `mobile-config.json`) holds UI only.
+- **Primary render config:** `assets/config/mobile_production_v2.json` (~4700 lines, schemaVersion `1.0`).
+- **Render top-level keys:** `schemaVersion`, `theme`, `navigation`, `pages` — **no `app` block** (identity is bootstrap-only).
 - **Pages are not separate files** — one JSON file; `VariantRepository` selects by `pageRoute` or `id`.
-- **Changing merchant UI** = edit JSON + hot restart; rarely need Dart unless new component type or binding.
+- **Changing merchant UI** = edit render JSON + hot restart; rarely need Dart unless new component type or binding.
 
-## Top-level schema
+## Bootstrap schema (build-time)
 
 ```json
 {
   "schemaVersion": "1.0",
-  "app": {
-    "name": "SOOQ Merchant Mobile",
-    "bundleId": "com.sooq.merchant.mobile",
-    "apiBaseUrl": "https://...",
-    "tenantId": "uuid",
-    "tenantSlug": "merchant-slug"
-  },
+  "configMode": "local",
+  "variantId": "mobile_production_v2",
+  "appName": "SOOQ Merchant Mobile",
+  "bundleId": "com.sooq.merchant.mobile",
+  "apiBaseUrl": "https://...",
+  "tenantId": "uuid",
+  "tenantSlug": "merchant-slug",
+  "configUrl": null,
+  "iconUrl": null
+}
+```
+
+Parsed by `BootstrapConfig` in `lib/config/bootstrap_config.dart`. See [builder-spec 27-bootstrap-config](../engine/builder-specs/27-bootstrap-config.md).
+
+## Runtime config flow (implemented)
+
+```
+ConfigPipeline.initialize()
+  → SessionConfigResolver (cache → remote 3s → asset, or local asset + validate)
+  → ConfigPipelineResult.rawConfigJson (fixed for entire app session)
+  → JsonVariantRepository via DI (all modes when rawConfigJson is set)
+  → VariantConfigParser per page on demand
+```
+
+- **`sessionSource`** on `ConfigPipelineResult`: `asset` | `cache` | `remote` — which source won at startup.
+- **Background sync** (`ConfigBackgroundSync` after `runApp`): remote modes only; fetches with 20s timeout, validates, writes disk cache for **next launch** — never updates in-memory config, router, or DI mid-session.
+- **Disk cache path:** `{appDocumentsDir}/sooq/mobile-config/{tenantSlug}.json`
+
+## Render JSON schema (UI)
+
+```json
+{
+  "schemaVersion": "1.0",
   "theme": { "mode", "colors", "typography", "radius", "spacing", "buttons" },
   "navigation": {
     "type": "tabs",
@@ -30,7 +57,7 @@
 }
 ```
 
-Parsed by `MobileAppConfig.fromJson` in `lib/config/mobile_app_config.dart`.
+Parsed via `MobileAppConfig.fromBootstrapAndRender` in `lib/config/mobile_app_config.dart` (identity from bootstrap, UI from render JSON). Legacy remote JSON may still include an `app` block — it is **ignored** at runtime.
 
 ### Page `padding`
 
@@ -173,17 +200,13 @@ Optional accessibility on images: `semanticsLabel`, `alt` — see [builder-spec 
 
 ## Switching config variant
 
-Change in `lib/main.dart`:
+**Local dev:** edit `assets/config/bootstrap.local.json` (`variantId`, tenant, `apiBaseUrl`) or copy to `bootstrap.json`. Render UI lives in `assets/config/mobile_production_v2.json` (no top-level `app` block).
 
-```dart
-const _kActiveConfig = 'mobile_production_v2';
-```
+Startup loads both via `ConfigPipeline.initialize()` — see [14-mobile-build-config-pipeline-plan.md](14-mobile-build-config-pipeline-plan.md).
 
-Loads `assets/config/mobile_production_v2.json` via `AppConfigLoader`.
+## Legacy: simple screen JSON (dev route only)
 
-## Legacy: simple screen JSON
-
-Still supported by `AssetVariantRepository` for standalone files:
+Still supported by [AssetVariantRepository](../../lib/features/variantscreen/data/repos/variant_repository.dart) for the `/variant/:id` dev route and direct tests — **not** the normal tab-shell path (that uses `JsonVariantRepository`).
 
 ```json
 { "id": "page-id", "pageName": "Name", "root": { "type": "scaffold", "child": { ... } } }

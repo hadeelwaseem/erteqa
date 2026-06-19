@@ -44,6 +44,7 @@ import 'package:sooq_merchant/dev/commerce_mock/mock_checkout_repo.dart';
 import 'package:sooq_merchant/dev/commerce_mock/mock_order_repo.dart';
 import 'package:sooq_merchant/dev/commerce_mock/mock_shipping_repo.dart';
 import 'package:sooq_merchant/engine/config_pipeline_result.dart';
+import 'package:sooq_merchant/features/variantscreen/data/repos/json_variant_repository.dart';
 import 'package:sooq_merchant/features/variantscreen/data/repos/variant_repository.dart';
 
 GetIt getIt = GetIt.instance;
@@ -171,9 +172,13 @@ void setupServiceLocator({
     () => CategoryCubit(getIt<ProductRepo>()),
   );
 
-  getIt.registerLazySingleton<VariantRepository>(
-    () => AssetVariantRepository(),
-  );
+  getIt.registerLazySingleton<VariantRepository>(() {
+    final result = _registeredPipelineResult;
+    if (result?.rawConfigJson != null) {
+      return JsonVariantRepository(result!.rawConfigJson!);
+    }
+    return AssetVariantRepository();
+  });
 
   getIt.registerLazySingleton<CartRepo>(
     () => CartRepoImpl(CartLocalStorage()),

@@ -9,11 +9,11 @@
 
 ## Startup sequence
 
-1. `AppConfigLoader.load(variantId)` → `MobileAppConfig?`
-2. `setupServiceLocator(networkConfig:, mobileAppConfig:)`
+1. `ConfigPipeline.initialize()` → `ConfigPipelineResult` (`rawConfigJson`, `sessionSource`)
+2. `launchSooqMerchantApp(pipelineResult)` → `setupServiceLocator` (registers `JsonVariantRepository` when `rawConfigJson` is set)
 3. `SharedPreferencesCubit.setup()`, `TokenCubit.fetchSavedToken()`
 4. `AppRouter.setupRouter(tokenCubit:, mobileConfig:)`
-5. `runApp(SOOQApp(router:))`
+5. `runApp(SOOQApp(router:))` then `ConfigBackgroundSync.scheduleIfNeeded` (remote modes only)
 
 ## Service locator registrations
 
@@ -28,7 +28,7 @@
 | `AuthRepo` / `AuthCubit` | singleton | |
 | `ProductRepo` | singleton | |
 | `ProductCubit`, `ProductSearchCubit`, etc. | factory | New instance per provider |
-| `VariantRepository` | singleton | `AssetVariantRepository` |
+| `VariantRepository` | singleton | `JsonVariantRepository` when `rawConfigJson` set; else `AssetVariantRepository` (dev fallback) |
 
 Access: `getIt<T>()` from `service_locator.dart`.
 

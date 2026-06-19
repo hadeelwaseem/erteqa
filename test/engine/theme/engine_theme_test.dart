@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:sooq_merchant/config/models/mobile_theme_config.dart';
 import 'package:sooq_merchant/engine/theme/engine_theme.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUpAll(() {
+    GoogleFonts.config.allowRuntimeFetching = false;
+  });
 
   final config = MobileThemeConfig.fromJson({
     'colors': {'text': '#0F172A', 'primary': '#1D4ED8'},
@@ -50,7 +55,9 @@ void main() {
     expect(themeData.scaffoldBackgroundColor, const Color(0xFFF1F5F9));
   });
 
-  test('toThemeData with Tajawal config does not throw', () {
-    expect(() => EngineTheme.toThemeData(config), returnsNormally);
+  test('toThemeData with Tajawal config uses fontFamily apply when fetching disabled', () {
+    final themeData = EngineTheme.toThemeData(config);
+    expect(themeData.useMaterial3, isTrue);
+    expect(themeData.textTheme.bodyMedium?.fontFamily, 'Tajawal');
   });
 }

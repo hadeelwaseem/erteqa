@@ -112,6 +112,7 @@ class ExpansionTileRenderer implements ComponentRenderer {
                     color: iconColor,
                   )
                 : null,
+
             initiallyExpanded: initiallyExpanded,
             maintainState: maintainState,
             enabled: enabled,

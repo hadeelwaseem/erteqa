@@ -1,17 +1,16 @@
 # 02 — Mobile Output Schema
 
-Full **`MobileAppConfig`** envelope required for production. Parsed by `MobileAppConfig.fromJson` (`lib/config/mobile_app_config.dart`).
+**Render JSON** (local asset or remote upload) for production UI. Parsed with bootstrap via `MobileAppConfig.fromBootstrapAndRender` (`lib/config/mobile_app_config.dart`). Identity is **not** in this file — see bootstrap / merchant-build manifest.
 
 Reference: [docs/ai/02-config-and-json.md](../../ai/02-config-and-json.md), [assets/config/mobile_production_v2.json](../../../assets/config/mobile_production_v2.json).
 
 ---
 
-## Top-level envelope
+## Top-level envelope (render JSON)
 
 ```json
 {
   "schemaVersion": "1.0",
-  "app": { },
   "theme": { },
   "navigation": { },
   "pages": [ ]
@@ -21,26 +20,25 @@ Reference: [docs/ai/02-config-and-json.md](../../ai/02-config-and-json.md), [ass
 | Key | Required | Source in conversion |
 |-----|----------|---------------------|
 | `schemaVersion` | yes | Always `"1.0"` |
-| `app` | yes | Tenant/deployment config (not from web blocks) + optional merge from deployment |
 | `theme` | yes | [04-theme-and-root-mapping.md](04-theme-and-root-mapping.md) |
 | `navigation` | yes | [05-navigation-and-routes.md](05-navigation-and-routes.md) |
 | `pages` | yes | One entry per converted web page |
 
-### `app` object
+### Merchant identity (bootstrap / CI manifest — not in render JSON)
 
 ```json
 {
-  "name": "SOOQ Merchant Mobile",
+  "appName": "SOOQ Merchant Mobile",
   "bundleId": "com.sooq.merchant.mobile",
   "apiBaseUrl": "https://sooq.up.railway.app",
   "tenantId": "uuid",
-  "tenantSlug": "merchant-slug",
-  "supportWhatsApp": "963...",
-  "supportPhone": "963..."
+  "tenantSlug": "merchant-slug"
 }
 ```
 
-**Rule:** Converter must accept `app` as **injectable defaults** (from deployment manifest). Web `root.props` does not contain tenant UUID — never invent `tenantId`.
+**Rule:** Converter / builder outputs **render JSON** for storage. Deployment manifest (bootstrap) carries tenant identity. Web `root.props` does not contain tenant UUID — never invent `tenantId` in render JSON.
+
+**Contacts (`supportWhatsApp`, `supportPhone`):** deferred — not in render JSON or bootstrap in current sprint. Reintroduce via follow-up spec (`theme.merchant` or bootstrap fields).
 
 ---
 

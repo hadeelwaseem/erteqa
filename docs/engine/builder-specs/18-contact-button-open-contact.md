@@ -14,7 +14,7 @@ The mobile engine supports:
 1. **`button`** optional `icon` / `iconPosition` / `iconGap` — label + Material icon with any standard `tap` (`navigate`, `cubitCall`, `apiCall`, …).
 2. **`contactButton`** — channel-specific external CTAs (WhatsApp, tel, sms, email, url) with auto-disable when `target` / `targetPath` is empty.
 3. **`tap` actions** `openUrl` and `openContact` — launch external apps via `url_launcher`.
-4. **`app.supportWhatsApp`** / **`app.supportPhone`** — merchant contact targets in JSON `app` block.
+4. **`app.supportWhatsApp`** / **`app.supportPhone`** — merchant contact targets injected at runtime into `dataContext['app']` (source TBD; contacts temporarily removed from render JSON and bootstrap — follow-up sprint).
 
 ---
 
@@ -26,7 +26,7 @@ The mobile engine supports:
 |------|----------------------|----------|
 | `type: contactButton` | Yes | `/support` — `support-whatsapp-cta`, `support-call-cta` |
 | `tap.type: openContact` | Yes | Same nodes |
-| `app.supportWhatsApp` / `app.supportPhone` | Yes | `app` block |
+| `app.supportWhatsApp` / `app.supportPhone` | Deferred | Previously in render `app` block; removed until `theme.merchant` or bootstrap contact fields are added |
 | `button.icon` | No (optional) | Use on any page when needed |
 
 ---
@@ -99,6 +99,8 @@ The mobile engine supports:
 Optional on both: `requireAuth: true`, `onUnauthenticated: { tap map }`.
 
 ### 4. App-level contact fields
+
+**Status:** Deferred. Contact numbers are not in render JSON or bootstrap in the current sprint. When reintroduced, they will populate `dataContext['app'].supportWhatsApp` / `supportPhone` (e.g. via `theme.merchant` or bootstrap fields). Until then, `contactButton` nodes with `targetPath: app.supportWhatsApp` auto-disable gracefully.
 
 ```json
 "app": {

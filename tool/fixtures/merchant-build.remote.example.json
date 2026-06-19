@@ -1,0 +1,13 @@
+{
+  "appName": "Anas Golden Store",
+  "bundleId": "com.anasgoldenmer.shop",
+  "apiBaseUrl": "https://sooq.up.railway.app",
+  "tenantId": "3fc183e8-ac80-4b2a-8bf1-4cd6ac6ffcb1",
+  "tenantSlug": "anasgoldenmer",
+  "configMode": "remoteStorage",
+  "variantId": "mobile_production_v2",
+  "configUrl": "https://YOUR_SUPABASE_PUBLIC_URL/mobile-config.json",
+  "iconUrl": null,
+  "version": "1.0.0",
+  "buildNumber": 1
+}

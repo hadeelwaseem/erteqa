@@ -1,12 +1,13 @@
+import 'bootstrap_config.dart';
 import 'models/mobile_theme_config.dart';
 import 'navigation_config.dart';
 
-/// Top-level parsed model of the mobile JSON file.
+/// Top-level parsed model combining bootstrap identity + render UI JSON.
 ///
-/// Contains the app identity, navigation config, and all known page routes.
-/// Pages are NOT pre-parsed here — they are loaded on demand by [VariantRepository].
+/// **Identity** (`appName`, `bundleId`, `apiBaseUrl`, tenant) comes from
+/// [BootstrapConfig]. **UI** (`theme`, `navigation`, `pages`) comes from render JSON.
 ///
-/// Usage: load once at startup via [ConfigPipeline], pass into router setup.
+/// Pages are NOT pre-parsed here — loaded on demand by [VariantRepository].
 class MobileAppConfig {
   /// The JSON file identifier (used as variantId when loading pages).
   final String variantId;
@@ -40,10 +41,61 @@ class MobileAppConfig {
     required this.pageRoutes,
   });
 
+  factory MobileAppConfig.fromBootstrapAndRender({
+    required BootstrapConfig bootstrap,
+    required Map<String, dynamic> renderJson,
+  }) {
+    final navJson = renderJson['navigation'] as Map<String, dynamic>? ?? {};
+    final pages =
+        (renderJson['pages'] as List?)?.whereType<Map<String, dynamic>>() ??
+        [];
+    final navigation = NavigationConfig.fromJson(navJson);
+    final routes = pages
+        .map((p) => p['route'] as String?)
+        .whereType<String>()
+        .where((r) => r.isNotEmpty)
+        .toList();
+    for (final aliasRoute in navigation.routeAliases.keys) {
+      if (!routes.contains(aliasRoute)) {
+        routes.add(aliasRoute);
+      }
+    }
+
+    return MobileAppConfig(
+      variantId: bootstrap.variantId,
+      schemaVersion: renderJson['schemaVersion'] as String? ?? '1.0',
+      appName: bootstrap.appName,
+      bundleId: bootstrap.bundleId,
+      apiBaseUrl: bootstrap.apiBaseUrl,
+      tenantId: bootstrap.tenantId,
+      tenantSlug: bootstrap.tenantSlug,
+      supportWhatsApp: null,
+      supportPhone: null,
+      navigation: navigation,
+      theme: MobileThemeConfig.fromJson(
+        renderJson['theme'] as Map<String, dynamic>?,
+      ),
+      pageRoutes: routes,
+    );
+  }
+
+  /// Monolithic legacy JSON with optional `app` block (tests/tooling only).
+  ///
+  /// **Deprecated:** Use [fromBootstrapAndRender]. When [bootstrap] is passed,
+  /// any `json['app']` block is ignored.
+  @Deprecated('Use MobileAppConfig.fromBootstrapAndRender')
   factory MobileAppConfig.fromJson(
     Map<String, dynamic> json,
-    String variantId,
-  ) {
+    String variantId, {
+    BootstrapConfig? bootstrap,
+  }) {
+    if (bootstrap != null) {
+      return MobileAppConfig.fromBootstrapAndRender(
+        bootstrap: bootstrap,
+        renderJson: json,
+      );
+    }
+
     final app = json['app'] as Map<String, dynamic>? ?? {};
     final navJson = json['navigation'] as Map<String, dynamic>? ?? {};
     final pages = (json['pages'] as List?)?.whereType<Map<String, dynamic>>() ?? [];

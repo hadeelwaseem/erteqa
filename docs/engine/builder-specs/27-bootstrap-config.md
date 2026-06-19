@@ -1,7 +1,7 @@
 # Builder spec: Bootstrap & merchant build manifest
 
-> **Phase:** Mobile build pipeline — Sprint 1  
-> **Status:** `ready-for-builder`  
+> **Phase:** Mobile build pipeline — Sprint 1–3  
+> **Status:** `implemented-in-json` (local + remoteStorage + remoteApi + disk cache + background sync)  
 > **Active config:** `mobile_production_v2` (full UI JSON unchanged)  
 > **Created:** 2026-06-13  
 
@@ -9,7 +9,9 @@
 
 ## Summary
 
-The mobile app now supports a **two-layer config model**: a small **bootstrap** JSON injected at build time (merchant identity + config loading mode) and the existing **full UI config** (`schemaVersion`, `app`, `theme`, `navigation`, `pages`). Bootstrap is **not** part of `mobile_production_v2.json`; CI or the builder generates it per merchant before APK build.
+The mobile app uses a **two-layer config model**: a small **bootstrap** JSON injected at build time (merchant identity + config loading mode) and a **render JSON** (`schemaVersion`, `theme`, `navigation`, `pages` only). Bootstrap is **not** part of `mobile_production_v2.json`; CI or the builder generates it per merchant before APK build.
+
+**Identity** (`appName`, `bundleId`, `apiBaseUrl`, tenant) lives in bootstrap only. **UI** (theme, navigation, pages) lives in render JSON. There is no top-level `app` block in render JSON.
 
 ---
 
@@ -24,7 +26,7 @@ The mobile app now supports a **two-layer config model**: a small **bootstrap** 
 | `configUrl` | No | Remote storage URL (Sprint 2+) |
 | `iconUrl` | No | CI icon download (Sprint 3+) |
 
-Full UI JSON shape is unchanged. Bootstrap duplicates a subset of `app` identity for native patching and network headers before full config load.
+Full UI JSON shape: render-only (`theme`, `navigation`, `pages`). Bootstrap holds identity fields previously duplicated in the `app` block.
 
 ---
 
@@ -85,7 +87,7 @@ Example: [`tool/fixtures/merchant-build.example.json`](../../../tool/fixtures/me
 |------|-------------------|----------------|
 | `local` | Bundled `assets/config/{variantId}.json` | Set `variantId`; no upload needed for CI smoke test |
 | `remoteStorage` | HTTP GET `configUrl` | Upload split `mobile-config.json` to CDN; set URL in manifest |
-| `remoteApi` | `GET {apiBaseUrl}/api/v1/public/mobile-config?tenantSlug=...` | Backend publishes config; set `configMode` only (Sprint 4) |
+| `remoteApi` | `GET {apiBaseUrl}/api/v1/public/mobile-config?tenantSlug=...` | Backend publishes config; set `configMode` only |
 
 ---
 
@@ -94,18 +96,46 @@ Example: [`tool/fixtures/merchant-build.example.json`](../../../tool/fixtures/me
 | File | Role |
 |------|------|
 | `lib/config/bootstrap_config.dart` | Bootstrap model |
-| `lib/config/local_asset_config_source.dart` | Asset loading |
+| `lib/config/local_asset_config_source.dart` | Bundled asset loading |
+| `lib/config/remote_config_fetcher.dart` | Raw HTTP fetch (3s startup, 20s background) |
+| `lib/config/remote_config_source.dart` | `AppConfigSource` wrapper over fetcher |
+| `lib/config/session_config_resolver.dart` | Startup: cache → remote → asset |
+| `lib/config/config_validator.dart` | Validate-before-accept |
+| `lib/config/config_cache.dart` | Disk cache file per merchant |
+| `lib/config/config_background_sync.dart` | Post-`runApp` cache refresh (remote modes) |
+| `lib/features/variantscreen/data/repos/json_variant_repository.dart` | In-memory page JSON (SSOT) |
 | `lib/engine/config_pipeline.dart` | Startup orchestration |
+| `tool/split_config.dart` | Prod JSON → upload-ready `mobile-config.json` |
 | `tool/apply_merchant_build.dart` | Manifest → bootstrap + native patches |
 
 **Plan:** [`docs/ai/14-mobile-build-config-pipeline-plan.md`](../../ai/14-mobile-build-config-pipeline-plan.md)
 
 ---
 
+## Disk cache
+
+- **Path:** `{appDocumentsDir}/sooq/mobile-config/{tenantSlug}.json` (falls back to `variantId` if slug absent)
+- **Write:** Only after `ConfigValidator` passes (startup remote win or background sync)
+- **Read:** First priority at startup for remote modes
+- **Delete:** Corrupt/invalid cache removed at startup; resolver falls through to remote then asset
+
+---
+
+## Background sync
+
+- **When:** After `runApp()` in `launch_sooq_merchant_app.dart`, remote modes only (`remoteStorage`, `remoteApi`)
+- **Timeout:** 20 seconds (non-blocking `unawaited` Future)
+- **Effect:** Updates disk cache only — **next launch** uses new config; never mutates in-memory `rawConfigJson`, router, or DI mid-session
+
+---
+
 ## Validation
 
-- Sprint 1: `configMode` must be `local`; other modes fail fast with logged error.
-- Bootstrap `apiBaseUrl` / tenant fields take precedence over full JSON `app` block for `NetworkConfig`.
+- All modes: validate before accept via `ConfigValidator` (`jsonDecode` + minimal shape + `fromBootstrapAndRender`).
+- `configMode: local` — bundled asset via `variantId`; `sessionSource: asset`.
+- `configMode: remoteStorage` — cache → HTTP GET `configUrl` (3s) → bundled asset fallback.
+- `configMode: remoteApi` — cache → `GET /api/v1/public/mobile-config?tenantSlug=...` (3s) → bundled asset fallback.
+- Legacy `app` block in fetched JSON is ignored; identity comes from bootstrap only.
 
 ---
 

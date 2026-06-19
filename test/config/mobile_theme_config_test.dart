@@ -1,4 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sooq_merchant/config/bootstrap_config.dart';
+import 'package:sooq_merchant/config/config_mode.dart';
 import 'package:sooq_merchant/config/mobile_app_config.dart';
 import 'package:sooq_merchant/config/models/mobile_theme_config.dart';
 
@@ -51,11 +53,19 @@ void main() {
     });
   });
 
-  test('MobileAppConfig includes theme from json', () {
-    final config = MobileAppConfig.fromJson(
-      {
+  test('MobileAppConfig includes theme from render JSON', () {
+    const bootstrap = BootstrapConfig(
+      schemaVersion: '1.0',
+      configMode: ConfigMode.local,
+      variantId: 'test',
+      appName: 'Test',
+      bundleId: 'x',
+      apiBaseUrl: 'https://x',
+    );
+    final config = MobileAppConfig.fromBootstrapAndRender(
+      bootstrap: bootstrap,
+      renderJson: {
         'schemaVersion': '1.0',
-        'app': {'name': 'Test', 'bundleId': 'x', 'apiBaseUrl': 'https://x'},
         'theme': {
           'colors': {'primary': '#1D4ED8', 'text': '#0F172A'},
           'typography': {'fontFamily': 'Tajawal'},
@@ -64,7 +74,6 @@ void main() {
         'navigation': {'type': 'tabs', 'initialRoute': '/', 'tabs': []},
         'pages': [],
       },
-      'test',
     );
 
     expect(config.theme.typography.fontFamily, 'Tajawal');
