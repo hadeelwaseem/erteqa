@@ -48,4 +48,5 @@ app.*.map.json
 assets/config/bootstrap.json
 assets/config/mobile-config.json
 assets/icons/merchant_icon.png
+tools/seed_anas_store.config.json
 merchant-build.json

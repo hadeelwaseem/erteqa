@@ -1,0 +1,3517 @@
+{
+    "info": {
+        "_postman_id": "73f1eaa1-52b4-4d74-9615-4f92908d059a",
+        "name": "SOOQ",
+        "description": "Complete API collection for ShopEngine e-commerce platform.\n\n**Setup:** Merchant: Request OTP (optional `X-Tenant-Slug` for returning login) → Verify OTP → GET Store Settings (`isConfigured`) → PUT Store Settings (`storeName`, `slug`, `primaryCurrencyCode`) + optional branding; slug check via GET `/admin/store/settings/check-slug`. **Merchant OTP:** one store per owner phone is stored on `tenant.owner_phone`; omit `X-Tenant-Slug` to resolve by phone (or provision). Tokens refresh via Refresh Token. Customer: Customer Request OTP (needs tenant) → Customer Verify OTP. STR store settings now update the existing tenant config row only and expose a persisted `configured` flag after the merchant supplies store identity details. Variables update automatically where scripts are attached.\n\n**Modules:** AUTH, STR (Store Settings), PRD (Product), ORD (Order), PAY (Payment), SHP (Shipping), APP (Mobile App Builder)\n\n**Product Create/Update**: uses multipart/form-data — `product` part holds the JSON body (Content-Type: application/json), `files` part holds optional images.\n\nLast updated: 2026-05-14",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{access_token}}",
+                "type": "string"
+            }
+        ]
+    },
+    "item": [
+        {
+            "name": "AUTH",
+            "description": "Authentication, sessions, TOTP, tenant management",
+            "item": [
+                {
+                    "name": "Public",
+                    "item": [
+                        {
+                            "name": "Request OTP",
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "X-Tenant-Slug",
+                                        "value": "{{tenant_slug}}",
+                                        "description": "Omit to resolve tenant by owner phone (one store per phone); set to log into a specific store by slug."
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"phone\": \"{{phone}}\",\n  \"fullName\": \"Demo Merchant\"\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/auth/otp/request"
+                            }
+                        },
+                        {
+                            "name": "Verify OTP",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                                            "const r = pm.response.json();",
+                                            "if (r?.data?.accessToken) pm.collectionVariables.set('access_token', r.data.accessToken);",
+                                            "if (r?.data?.refreshToken) pm.collectionVariables.set('refresh_token', r.data.refreshToken);",
+                                            "if (r?.data?.tenantId) pm.collectionVariables.set('tenant_id', r.data.tenantId);",
+                                            "if (r?.data?.userId) pm.collectionVariables.set('user_id', r.data.userId);",
+                                            "if (r?.data?.tenantSlug) pm.collectionVariables.set('tenant_slug', r.data.tenantSlug);"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "X-Tenant-Slug",
+                                        "value": "{{tenant_slug}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"phone\": \"{{phone}}\",\n  \"otpCode\": \"{{otp_code}}\",\n  \"totpCode\": null,\n  \"backupCode\": null\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/auth/otp/verify"
+                            }
+                        },
+                        {
+                            "name": "Refresh Token",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                                            "const r = pm.response.json();",
+                                            "if (r?.data?.accessToken) pm.collectionVariables.set('access_token', r.data.accessToken);",
+                                            "if (r?.data?.refreshToken) pm.collectionVariables.set('refresh_token', r.data.refreshToken);",
+                                            "if (r?.data?.tenantId) pm.collectionVariables.set('tenant_id', r.data.tenantId);",
+                                            "if (r?.data?.userId) pm.collectionVariables.set('user_id', r.data.userId);",
+                                            "if (r?.data?.tenantSlug) pm.collectionVariables.set('tenant_slug', r.data.tenantSlug);"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/auth/refresh"
+                            }
+                        },
+                        {
+                            "name": "Google OAuth Login",
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"idToken\": \"{{google_id_token}}\",\n  \"email\": \"owner@example.com\",\n  \"fullName\": \"Shop Owner\",\n  \"role\": \"OWNER\"\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/auth/oauth/google"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Customer Mobile",
+                    "item": [
+                        {
+                            "name": "Customer Request OTP",
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"phone\": \"{{phone}}\",\n  \"tenantSlug\": \"{{tenant_slug}}\",\n  \"fullName\": \"Sara Ali\"\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/customer/auth/otp/request"
+                            }
+                        },
+                        {
+                            "name": "Customer Verify OTP",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                                            "const r = pm.response.json();",
+                                            "if (r?.data?.accessToken) pm.collectionVariables.set('access_token', r.data.accessToken);",
+                                            "if (r?.data?.refreshToken) pm.collectionVariables.set('refresh_token', r.data.refreshToken);",
+                                            "if (r?.data?.tenantId) pm.collectionVariables.set('tenant_id', r.data.tenantId);",
+                                            "if (r?.data?.userId) pm.collectionVariables.set('user_id', r.data.userId);",
+                                            "if (r?.data?.tenantSlug) pm.collectionVariables.set('tenant_slug', r.data.tenantSlug);"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"phone\": \"{{phone}}\",\n  \"tenantSlug\": \"{{tenant_slug}}\",\n  \"otpCode\": \"{{otp_code}}\"\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/customer/auth/otp/verify"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Sessions & Security",
+                    "item": [
+                        {
+                            "name": "List Sessions",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/auth/sessions"
+                            }
+                        },
+                        {
+                            "name": "Revoke Session",
+                            "request": {
+                                "method": "POST",
+                                "url": "{{base_url}}/api/v1/auth/sessions/{{session_jti}}/revoke"
+                            }
+                        },
+                        {
+                            "name": "Setup TOTP",
+                            "request": {
+                                "method": "POST",
+                                "url": "{{base_url}}/api/v1/auth/totp/setup"
+                            }
+                        },
+                        {
+                            "name": "Enable TOTP",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{ \"code\": \"{{totp_code}}\" }"
+                                },
+                                "url": "{{base_url}}/api/v1/auth/totp/enable"
+                            }
+                        },
+                        {
+                            "name": "Disable TOTP",
+                            "request": {
+                                "method": "POST",
+                                "url": "{{base_url}}/api/v1/auth/totp/disable"
+                            }
+                        },
+                        {
+                            "name": "Request Phone Change",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{ \"newPhone\": \"{{new_phone}}\" }"
+                                },
+                                "url": "{{base_url}}/api/v1/auth/phone/change/request"
+                            }
+                        },
+                        {
+                            "name": "Verify Phone Change",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{ \"newPhone\": \"{{new_phone}}\", \"otpCode\": \"{{otp_code}}\" }"
+                                },
+                                "url": "{{base_url}}/api/v1/auth/phone/change/verify"
+                            }
+                        },
+                        {
+                            "name": "List Audit Logs",
+                            "request": {
+                                "method": "GET",
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/auth/audit-logs?action=&actorUserId=&fromDate=&toDate=",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "auth",
+                                        "audit-logs"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "action",
+                                            "value": "",
+                                            "description": "Optional. Examples: CREATE, UPDATE, DELETE"
+                                        },
+                                        {
+                                            "key": "actorUserId",
+                                            "value": "",
+                                            "description": "Optional UUID"
+                                        },
+                                        {
+                                            "key": "fromDate",
+                                            "value": "",
+                                            "description": "Optional ISO date YYYY-MM-DD"
+                                        },
+                                        {
+                                            "key": "toDate",
+                                            "value": "",
+                                            "description": "Optional ISO date YYYY-MM-DD"
+                                        }
+                                    ]
+                                },
+                                "description": "Requires OWNER, MANAGER, or PLATFORM_ADMIN. All query params optional."
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Tenant Management",
+                    "item": [
+                        {
+                            "name": "Check Slug Availability",
+                            "request": {
+                                "method": "GET",
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/admin/store/settings/check-slug?slug={{tenant_slug}}",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "admin",
+                                        "store",
+                                        "settings",
+                                        "check-slug"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "slug",
+                                            "value": "{{tenant_slug}}"
+                                        }
+                                    ]
+                                },
+                                "description": "Requires Bearer token with role OWNER or MANAGER. Returns boolean in standard envelope."
+                            }
+                        },
+                        {
+                            "name": "Upload Store Logo (Media)",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                                            "const r = pm.response.json();",
+                                            "if (Array.isArray(r?.data) && r.data.length > 0) pm.collectionVariables.set('media_asset_id', r.data[0]);"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [],
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "files",
+                                            "type": "file",
+                                            "src": []
+                                        }
+                                    ]
+                                },
+                                "url": "{{base_url}}/api/v1/media/upload",
+                                "description": "Multipart upload (Content-Type set automatically). `files` is an array; one file is fine. Response.data[0] is the asset UUID — use its URL in **`PUT /admin/store/settings`** `logoUrl`. Requires Bearer JWT for the authenticated merchant."
+                            }
+                        },
+                        {
+                            "name": "Update Store Settings (identity)",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                                            "const r = pm.response.json();",
+                                            "if (r?.data?.slug) pm.collectionVariables.set('tenant_slug', r.data.slug);",
+                                            "if (r?.data?.tenantId) pm.collectionVariables.set('tenant_id', r.data.tenantId);"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "PUT",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"storeName\": \"My Store\",\n  \"slug\": \"my-store\",\n  \"primaryCurrencyCode\": \"SYP\",\n  \"logoUrl\": \"https://cdn.example.com/logo.png\",\n  \"profileNameEn\": \"My Store\",\n  \"themeCode\": \"modern\"\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/admin/store/settings",
+                                "description": "Send storeName + slug + primaryCurrencyCode together to finish onboarding (`configured=true`). `themeCode` selects the storefront template (FE registry key — lowercase, hyphenated; FE falls back to `default` on unknown values). Requires JWT role OWNER or MANAGER."
+                            }
+                        },
+                        {
+                            "name": "Update Store Status",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"status\": \"ACTIVE\",\n  \"maintenanceMessage\": null,\n  \"storePassword\": null\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/auth/stores/{{target_tenant_id}}/status",
+                                "description": "status ∈ {ACTIVE, MAINTENANCE, PASSWORD_PROTECTED, PAUSED, CLOSED}. `maintenanceMessage` is shown to customers when MAINTENANCE/PAUSED. `storePassword` (4-100 chars) is required when status=PASSWORD_PROTECTED."
+                            }
+                        },
+                        {
+                            "name": "Update Rate Limit",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{ \"requestsPerMinute\": 120 }"
+                                },
+                                "url": "{{base_url}}/api/v1/auth/stores/{{target_tenant_id}}/rate-limit"
+                            }
+                        },
+                        {
+                            "name": "List Platform Tenants",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/auth/platform/tenants"
+                            }
+                        },
+                        {
+                            "name": "Disable Tenant",
+                            "request": {
+                                "method": "POST",
+                                "url": "{{base_url}}/api/v1/auth/platform/tenants/{{target_tenant_id}}/disable"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "STR (Store)",
+            "description": "Store identity, settings, staff, and public storefront bootstrap",
+            "item": [
+                {
+                    "name": "Public - Storefront Bootstrap",
+                    "item": [
+                        {
+                            "name": "Resolve Store by Slug",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "const r = pm.response.json();",
+                                            "if (r?.data?.tenantId) pm.collectionVariables.set('tenant_id', r.data.tenantId);",
+                                            "if (r?.data?.themeCode) pm.collectionVariables.set('theme_code', r.data.themeCode);"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "GET",
+                                "header": [],
+                                "url": "{{base_url}}/api/v1/public/stores/by-slug/{{tenant_slug}}"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "PRD (Product)",
+            "description": "Product CRUD, variants, categories, tags, images, inventory, collections, import, storefront",
+            "item": [
+                {
+                    "name": "Admin - Products",
+                    "item": [
+                        {
+                            "name": "Create Product (full)",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "const r = pm.response.json(); if (r?.data?.product?.productId) pm.collectionVariables.set('product_id', r.data.product.productId);"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [],
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "product",
+                                            "type": "text",
+                                            "contentType": "application/json",
+                                            "value": "{\n  \"titleAr\": \"قميص قطني كلاسيكي\",\n  \"titleEn\": \"Classic Cotton Shirt\",\n  \"descriptionAr\": \"قميص رجالي قطني 100%\",\n  \"descriptionEn\": \"Men's 100% cotton shirt\",\n  \"slug\": \"classic-cotton-shirt-test\",\n  \"basePrice\": 85000,\n  \"compareAtPrice\": 120000,\n  \"currencyCode\": \"SYP\",\n  \"status\": \"DRAFT\",\n  \"seoTitle\": \"قميص قطني - متجر سوق\",\n  \"seoDescription\": \"اشتري قميص قطني بأفضل سعر\",\n  \"allowOversell\": false,\n  \"defaultCategoryId\": \"{{category_id}}\",\n  \"categoryIds\": [\"{{category_id}}\"],\n  \"tagIds\": [\"{{tag_id}}\"],\n  \"options\": [\n    {\n      \"optionNameAr\": \"المقاس\", \"optionNameEn\": \"Size\", \"sortOrder\": 0,\n      \"values\": [\n        { \"valueAr\": \"S\", \"valueEn\": \"S\", \"sortOrder\": 0 },\n        { \"valueAr\": \"M\", \"valueEn\": \"M\", \"sortOrder\": 1 },\n        { \"valueAr\": \"L\", \"valueEn\": \"L\", \"sortOrder\": 2 }\n      ]\n    },\n    {\n      \"optionNameAr\": \"اللون\", \"optionNameEn\": \"Color\", \"sortOrder\": 1,\n      \"values\": [\n        { \"valueAr\": \"أحمر\", \"valueEn\": \"Red\", \"colorHex\": \"#CC0000\", \"sortOrder\": 0 },\n        { \"valueAr\": \"أزرق\", \"valueEn\": \"Blue\", \"colorHex\": \"#0066CC\", \"sortOrder\": 1 }\n      ]\n    }\n  ],\n  \"variantOverrides\": {\n    \"S-Red\": { \"sku\": \"SHIRT-S-RED\", \"price\": 85000, \"stockQty\": 25, \"isActive\": true },\n    \"M-Blue\": { \"sku\": \"SHIRT-M-BLU\", \"price\": 90000, \"stockQty\": 10, \"isActive\": true }\n  }\n}",
+                                            "description": "Product JSON body. Edit this to change product fields. Do NOT change Content-Type."
+                                        },
+                                        {
+                                            "key": "files",
+                                            "type": "file",
+                                            "src": [],
+                                            "description": "Optional. One or more image files. The first selected file becomes the primary image. Server stores files, prepends UUIDs to product.mediaAssetIds."
+                                        }
+                                    ]
+                                },
+                                "url": "{{base_url}}/api/v1/admin/products"
+                            }
+                        },
+                        {
+                            "name": "Create Simple Product",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "const r = pm.response.json(); if (r?.data?.product?.productId) pm.collectionVariables.set('product_id', r.data.product.productId);"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [],
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "product",
+                                            "type": "text",
+                                            "contentType": "application/json",
+                                            "value": "{\n  \"titleAr\": \"منتج بسيط\",\n  \"titleEn\": \"Simple Product\",\n  \"slug\": \"simple-product-test\",\n  \"basePrice\": 50000,\n  \"currencyCode\": \"SYP\",\n  \"status\": \"DRAFT\",\n  \"allowOversell\": false\n}",
+                                            "description": "Product JSON body."
+                                        },
+                                        {
+                                            "key": "files",
+                                            "type": "file",
+                                            "src": [],
+                                            "description": "Optional. Image files for this product."
+                                        }
+                                    ]
+                                },
+                                "url": "{{base_url}}/api/v1/admin/products"
+                            }
+                        },
+                        {
+                            "name": "Create Category (with templateKey — Phase 5)",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    { "key": "Content-Type", "value": "application/json" }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"nameAr\": \"ملابس\",\n  \"nameEn\": \"Clothing\",\n  \"slug\": \"clothing-phase5\",\n  \"isActive\": true,\n  \"templateKey\": \"clothing\"\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/admin/categories",
+                                "description": "Phase 5 — seeds Size/Color/Material attribute definitions scoped to the new category. Discover available template keys via GET /admin/categories/templates."
+                            }
+                        },
+                        {
+                            "name": "List Category Templates (Phase 5)",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/categories/templates",
+                                "description": "Returns the built-in starter templates available for the templateKey field on POST /admin/categories. Use to populate a frontend dropdown."
+                            }
+                        },
+                        {
+                            "name": "Update Product (explicit mediaAssets/attributes — Phase 4)",
+                            "request": {
+                                "method": "PUT",
+                                "header": [],
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "product",
+                                            "type": "text",
+                                            "contentType": "application/json",
+                                            "value": "{\n  \"titleAr\": \"قميص (Phase 4 update)\",\n  \"titleEn\": \"Shirt (Phase 4 update)\",\n  \"slug\": \"phase1-cotton-shirt\",\n  \"basePrice\": 90000,\n  \"currencyCode\": \"SYP\",\n  \"status\": \"ACTIVE\",\n  \"allowOversell\": false,\n  \"mediaAssets\": { \"clear\": true },\n  \"attributesUpdate\": { \"clear\": true }\n}",
+                                            "description": "Phase 4 explicit wrappers — clears all media and all attribute values in one PUT. Send '{set: [...]}' to replace exactly, or omit the wrapper entirely to leave images/attributes unchanged."
+                                        }
+                                    ]
+                                },
+                                "url": "{{base_url}}/api/v1/admin/products/{{product_id}}"
+                            }
+                        },
+                        {
+                            "name": "Create Product (inline variants — Phase 2)",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "const r = pm.response.json(); if (r?.data?.product?.productId) pm.collectionVariables.set('product_id', r.data.product.productId);"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [],
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "product",
+                                            "type": "text",
+                                            "contentType": "application/json",
+                                            "value": "{\n  \"titleAr\": \"قميص قطني (Phase 2)\",\n  \"titleEn\": \"Cotton Shirt (Phase 2 demo)\",\n  \"slug\": \"phase2-cotton-shirt\",\n  \"basePrice\": 85000,\n  \"currencyCode\": \"SYP\",\n  \"status\": \"DRAFT\",\n  \"allowOversell\": false,\n  \"categories\": [{ \"nameEn\": \"Shirts\" }],\n  \"tags\": [{ \"name\": \"Summer\" }],\n  \"variants\": [\n    { \"attributes\": { \"Size\": \"S\", \"Color\": \"Red\" }, \"sku\": \"SHIRT-S-RED\", \"price\": 85000, \"stockQty\": 25 },\n    { \"attributes\": { \"Size\": \"M\", \"Color\": \"Red\" }, \"stockQty\": 10 },\n    { \"attributes\": { \"Size\": \"S\", \"Color\": \"Blue\" } }\n  ]\n}",
+                                            "description": "Phase 2 inline variant list — no combo keys, no Cartesian product to subtract. Backend derives Size & Color axes from the union of variants' 'attributes'. Optional fields (sku, price, stockQty, isActive) fall back to defaults."
+                                        },
+                                        {
+                                            "key": "files",
+                                            "type": "file",
+                                            "src": [],
+                                            "description": "Optional image files."
+                                        }
+                                    ]
+                                },
+                                "url": "{{base_url}}/api/v1/admin/products"
+                            }
+                        },
+                        {
+                            "name": "Create Product (inline tags & categories — Phase 1)",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "const r = pm.response.json(); if (r?.data?.product?.productId) pm.collectionVariables.set('product_id', r.data.product.productId);"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [],
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "product",
+                                            "type": "text",
+                                            "contentType": "application/json",
+                                            "value": "{\n  \"titleAr\": \"قميص قطني (تجربة Phase 1)\",\n  \"titleEn\": \"Cotton Shirt (Phase 1 demo)\",\n  \"slug\": \"phase1-cotton-shirt\",\n  \"basePrice\": 85000,\n  \"currencyCode\": \"SYP\",\n  \"status\": \"DRAFT\",\n  \"allowOversell\": false,\n  \"categories\": [\n    { \"nameAr\": \"قمصان\", \"nameEn\": \"Shirts\" }\n  ],\n  \"defaultCategory\": { \"nameEn\": \"Shirts\" },\n  \"tags\": [\n    { \"name\": \"Summer\" },\n    { \"name\": \"New Arrival\" }\n  ]\n}",
+                                            "description": "Phase 1 inline shape — no pre-flight category/tag creation needed. The server looks up by slug and creates missing entries in the same transaction."
+                                        },
+                                        {
+                                            "key": "files",
+                                            "type": "file",
+                                            "src": [],
+                                            "description": "Optional image files."
+                                        }
+                                    ]
+                                },
+                                "url": "{{base_url}}/api/v1/admin/products"
+                            }
+                        },
+                        {
+                            "name": "Get Product Detail",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/products/{{product_id}}"
+                            }
+                        },
+                        {
+                            "name": "Get Product (exclude block — Phase 3)",
+                            "request": {
+                                "method": "GET",
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/admin/products/{{product_id}}?exclude=VARIANT_MATRIX",
+                                    "host": ["{{base_url}}"],
+                                    "path": ["api", "v1", "admin", "products", "{{product_id}}"],
+                                    "query": [
+                                        { "key": "exclude", "value": "VARIANT_MATRIX" }
+                                    ]
+                                },
+                                "description": "Phase 3: opt-out shape. Returns all admin blocks except VARIANT_MATRIX. Drop the param entirely if you want everything."
+                            }
+                        },
+                        {
+                            "name": "Get Product (select blocks — legacy include)",
+                            "request": {
+                                "method": "GET",
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/admin/products/{{product_id}}?include=PRICING&include=IMAGES&include=INVENTORY",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "admin",
+                                        "products",
+                                        "{{product_id}}"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "include",
+                                            "value": "PRICING"
+                                        },
+                                        {
+                                            "key": "include",
+                                            "value": "IMAGES"
+                                        },
+                                        {
+                                            "key": "include",
+                                            "value": "INVENTORY"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "List Products",
+                            "request": {
+                                "method": "GET",
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/admin/products?page=0&size=20",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "admin",
+                                        "products"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "page",
+                                            "value": "0"
+                                        },
+                                        {
+                                            "key": "size",
+                                            "value": "20"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Update Product",
+                            "request": {
+                                "method": "PUT",
+                                "header": [],
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "product",
+                                            "type": "text",
+                                            "contentType": "application/json",
+                                            "value": "{\n  \"titleAr\": \"قميص محدث\",\n  \"titleEn\": \"Updated Shirt\",\n  \"slug\": \"classic-cotton-shirt-test\",\n  \"basePrice\": 90000,\n  \"currencyCode\": \"SYP\",\n  \"status\": \"ACTIVE\",\n  \"allowOversell\": false,\n  \"categoryIds\": [\"{{category_id}}\"],\n  \"tagIds\": [\"{{tag_id}}\"],\n  \"mediaAssetIds\": null\n}",
+                                            "description": "Product JSON. mediaAssetIds: null = leave images unchanged, [] = remove all, [ids] = explicit set."
+                                        },
+                                        {
+                                            "key": "files",
+                                            "type": "file",
+                                            "src": [],
+                                            "description": "Optional. New image files. Their UUIDs are PREPENDED to mediaAssetIds (treated as empty list if null)."
+                                        }
+                                    ]
+                                },
+                                "url": "{{base_url}}/api/v1/admin/products/{{product_id}}"
+                            }
+                        },
+                        {
+                            "name": "Delete Product",
+                            "request": {
+                                "method": "DELETE",
+                                "url": "{{base_url}}/api/v1/admin/products/{{product_id}}"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Admin - Variants",
+                    "item": [
+                        {
+                            "name": "Get Variant Matrix",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/products/{{product_id}}/variants"
+                            }
+                        },
+                        {
+                            "name": "Save Variant Matrix",
+                            "request": {
+                                "method": "PUT",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"options\": [\n    {\n      \"optionNameAr\": \"المقاس\", \"optionNameEn\": \"Size\", \"sortOrder\": 0,\n      \"values\": [\n        { \"valueAr\": \"S\", \"valueEn\": \"S\", \"sortOrder\": 0 },\n        { \"valueAr\": \"M\", \"valueEn\": \"M\", \"sortOrder\": 1 }\n      ]\n    }\n  ],\n  \"variantOverrides\": {\n    \"S\": { \"sku\": \"SHIRT-S\", \"price\": 85000, \"stockQty\": 25, \"isActive\": true }\n  }\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/admin/products/{{product_id}}/variants"
+                            }
+                        },
+                        {
+                            "name": "Update Single Variant",
+                            "request": {
+                                "method": "PUT",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"sku\": \"SHIRT-M-RED\",\n  \"price\": 90000,\n  \"stockQty\": 25,\n  \"isActive\": true\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/admin/products/{{product_id}}/variants/{{variant_id}}"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Admin - Categories",
+                    "item": [
+                        {
+                            "name": "Get Category Tree",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/categories"
+                            }
+                        },
+                        {
+                            "name": "Get Category",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/categories/{{category_id}}"
+                            }
+                        },
+                        {
+                            "name": "Get Category Children",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/categories/{{category_id}}/children"
+                            }
+                        },
+                        {
+                            "name": "Create Category",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "const r = pm.response.json(); if (r?.data?.categoryId) pm.collectionVariables.set('category_id', r.data.categoryId);"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"nameAr\": \"ملابس\",\n  \"nameEn\": \"Clothing\",\n  \"slug\": \"clothing-test\",\n  \"descriptionAr\": \"جميع أنواع الملابس\",\n  \"descriptionEn\": \"All types of clothing\",\n  \"parentCategoryId\": null,\n  \"sortOrder\": 0,\n  \"isActive\": true\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/admin/categories"
+                            }
+                        },
+                        {
+                            "name": "Update Category",
+                            "request": {
+                                "method": "PUT",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"nameAr\": \"ملابس محدثة\",\n  \"nameEn\": \"Updated Clothing\",\n  \"slug\": \"clothing-test\",\n  \"sortOrder\": 0,\n  \"isActive\": true\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/admin/categories/{{category_id}}"
+                            }
+                        },
+                        {
+                            "name": "Delete Category",
+                            "request": {
+                                "method": "DELETE",
+                                "url": "{{base_url}}/api/v1/admin/categories/{{category_id}}"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Admin - Tags",
+                    "item": [
+                        {
+                            "name": "List Tags",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/tags"
+                            }
+                        },
+                        {
+                            "name": "Create Tag",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "const r = pm.response.json(); if (r?.data?.productTagId) pm.collectionVariables.set('tag_id', r.data.productTagId);"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"tagName\": \"تخفيضات\",\n  \"slug\": \"sale\"\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/admin/tags"
+                            }
+                        },
+                        {
+                            "name": "Update Tag",
+                            "request": {
+                                "method": "PUT",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"tagName\": \"عروض خاصة\",\n  \"slug\": \"special-offers\"\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/admin/tags/{{tag_id}}"
+                            }
+                        },
+                        {
+                            "name": "Delete Tag",
+                            "request": {
+                                "method": "DELETE",
+                                "url": "{{base_url}}/api/v1/admin/tags/{{tag_id}}"
+                            }
+                        },
+                        {
+                            "name": "Tags by Product",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/tags/products/{{product_id}}"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Admin - Product Attributes (EAV)",
+                    "description": "Manages tenant-defined custom attribute SCHEMA (definitions + options). Values are attached to products via ProductUpsertRequestDto.attributes during product create/update — no standalone value endpoints.\n\nData types: TEXT, NUMBER, BOOLEAN, SELECT, MULTI_SELECT.",
+                    "item": [
+                        {
+                            "name": "List Attribute Definitions",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/product-attributes"
+                            }
+                        },
+                        {
+                            "name": "List Attribute Definitions (by Category)",
+                            "request": {
+                                "method": "GET",
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/admin/product-attributes?categoryId={{category_id}}",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "admin",
+                                        "product-attributes"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "categoryId",
+                                            "value": "{{category_id}}"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Get Attribute Definition",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/product-attributes/{{attribute_def_id}}"
+                            }
+                        },
+                        {
+                            "name": "Create Attribute (SELECT with options)",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "const r = pm.response.json(); if (r?.data?.attributeDefId) pm.collectionVariables.set('attribute_def_id', r.data.attributeDefId);"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"attributeNameAr\": \"اللون\",\n  \"attributeNameEn\": \"Color\",\n  \"attributeKey\": \"color\",\n  \"dataType\": \"SELECT\",\n  \"categoryId\": null,\n  \"isRequired\": false,\n  \"isFilterable\": true,\n  \"isVisibleOnStorefront\": true,\n  \"sortOrder\": 0,\n  \"options\": [\n    { \"optionValueAr\": \"أحمر\", \"optionValueEn\": \"Red\", \"sortOrder\": 0 },\n    { \"optionValueAr\": \"أزرق\", \"optionValueEn\": \"Blue\", \"sortOrder\": 1 }\n  ]\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/admin/product-attributes"
+                            }
+                        },
+                        {
+                            "name": "Create Attribute (TEXT)",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "const r = pm.response.json(); if (r?.data?.attributeDefId) pm.collectionVariables.set('attribute_def_id', r.data.attributeDefId);"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"attributeNameAr\": \"المادة\",\n  \"attributeNameEn\": \"Material\",\n  \"attributeKey\": \"material\",\n  \"dataType\": \"TEXT\",\n  \"categoryId\": null,\n  \"isRequired\": false,\n  \"isFilterable\": false,\n  \"isVisibleOnStorefront\": true,\n  \"sortOrder\": 1\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/admin/product-attributes"
+                            }
+                        },
+                        {
+                            "name": "Create Attribute (MULTI_SELECT)",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "const r = pm.response.json(); if (r?.data?.attributeDefId) pm.collectionVariables.set('attribute_def_id', r.data.attributeDefId);"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"attributeNameAr\": \"الميزات\",\n  \"attributeNameEn\": \"Features\",\n  \"attributeKey\": \"features\",\n  \"dataType\": \"MULTI_SELECT\",\n  \"categoryId\": null,\n  \"isRequired\": false,\n  \"isFilterable\": true,\n  \"isVisibleOnStorefront\": true,\n  \"sortOrder\": 2,\n  \"options\": [\n    { \"optionValueAr\": \"مقاوم للماء\", \"optionValueEn\": \"Waterproof\", \"sortOrder\": 0 },\n    { \"optionValueAr\": \"خفيف الوزن\", \"optionValueEn\": \"Lightweight\", \"sortOrder\": 1 },\n    { \"optionValueAr\": \"قابل للطي\", \"optionValueEn\": \"Foldable\", \"sortOrder\": 2 }\n  ]\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/admin/product-attributes"
+                            }
+                        },
+                        {
+                            "name": "Update Attribute (full options replacement)",
+                            "request": {
+                                "method": "PUT",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"attributeNameAr\": \"اللون المحدث\",\n  \"attributeNameEn\": \"Updated Color\",\n  \"attributeKey\": \"color\",\n  \"dataType\": \"SELECT\",\n  \"categoryId\": null,\n  \"isRequired\": false,\n  \"isFilterable\": true,\n  \"isVisibleOnStorefront\": true,\n  \"sortOrder\": 0,\n  \"options\": [\n    { \"optionValueAr\": \"أحمر\", \"optionValueEn\": \"Red\", \"sortOrder\": 0 },\n    { \"optionValueAr\": \"أخضر\", \"optionValueEn\": \"Green\", \"sortOrder\": 1 }\n  ]\n}",
+                                    "options": {
+                                        "raw": {
+                                            "language": "json"
+                                        }
+                                    }
+                                },
+                                "url": "{{base_url}}/api/v1/admin/product-attributes/{{attribute_def_id}}"
+                            }
+                        },
+                        {
+                            "name": "Delete Attribute Definition",
+                            "request": {
+                                "method": "DELETE",
+                                "url": "{{base_url}}/api/v1/admin/product-attributes/{{attribute_def_id}}"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Admin - Inventory",
+                    "item": [
+                        {
+                            "name": "Adjust Stock",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"variantId\": \"{{variant_id}}\",\n  \"quantityDelta\": -3,\n  \"reasonCode\": \"MANUAL_ADJUSTMENT\"\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/admin/inventory/adjust"
+                            }
+                        },
+                        {
+                            "name": "Bulk Adjust Stock",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"adjustments\": [\n    { \"variantId\": \"{{variant_id}}\", \"quantityDelta\": 10, \"reasonCode\": \"IMPORT\" }\n  ]\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/admin/inventory/adjust/bulk"
+                            }
+                        },
+                        {
+                            "name": "Movement History",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/inventory/variants/{{variant_id}}/movements?page=0&size=20"
+                            }
+                        },
+                        {
+                            "name": "Inventory Status",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/inventory/products/{{product_id}}/status"
+                            }
+                        },
+                        {
+                            "name": "Set Low-Stock Threshold",
+                            "request": {
+                                "method": "PUT",
+                                "url": "{{base_url}}/api/v1/admin/inventory/variants/{{variant_id}}/threshold?threshold=5"
+                            }
+                        },
+                        {
+                            "name": "Low-Stock Variants",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/inventory/products/{{product_id}}/low-stock"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Admin - Collections",
+                    "item": [
+                        {
+                            "name": "Create Manual Collection",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "const r = pm.response.json(); if (r?.data?.collectionId) pm.collectionVariables.set('collection_id', r.data.collectionId);"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"collectionName\": \"Summer Sale\",\n  \"collectionSlug\": \"summer-sale\",\n  \"collectionType\": \"MANUAL\",\n  \"descriptionAr\": \"تخفيضات الصيف\",\n  \"descriptionEn\": \"Summer discounts\",\n  \"isActive\": true\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/admin/collections"
+                            }
+                        },
+                        {
+                            "name": "Create Automated Collection",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "const r = pm.response.json(); if (r?.data?.collectionId) pm.collectionVariables.set('collection_id', r.data.collectionId);"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"collectionName\": \"New Arrivals\",\n  \"collectionSlug\": \"new-arrivals\",\n  \"collectionType\": \"AUTOMATED\",\n  \"descriptionAr\": \"وصل حديثاً\",\n  \"descriptionEn\": \"New arrivals\",\n  \"isActive\": true\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/admin/collections"
+                            }
+                        },
+                        {
+                            "name": "List Collections",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/collections?page=0&size=20"
+                            }
+                        },
+                        {
+                            "name": "Get Collection Detail",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/collections/{{collection_id}}"
+                            }
+                        },
+                        {
+                            "name": "Update Collection",
+                            "request": {
+                                "method": "PUT",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"collectionName\": \"Summer Sale Updated\",\n  \"collectionSlug\": \"summer-sale\",\n  \"collectionType\": \"MANUAL\",\n  \"descriptionAr\": \"تخفيضات الصيف المحدثة\",\n  \"descriptionEn\": \"Updated summer discounts\",\n  \"isActive\": true\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/admin/collections/{{collection_id}}"
+                            }
+                        },
+                        {
+                            "name": "Add Product to Collection",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{ \"productId\": \"{{product_id}}\", \"sortOrder\": 0 }"
+                                },
+                                "url": "{{base_url}}/api/v1/admin/collections/{{collection_id}}/products"
+                            }
+                        },
+                        {
+                            "name": "Remove Product from Collection",
+                            "request": {
+                                "method": "DELETE",
+                                "url": "{{base_url}}/api/v1/admin/collections/{{collection_id}}/products/{{product_id}}"
+                            }
+                        },
+                        {
+                            "name": "Reorder Products in Collection",
+                            "request": {
+                                "method": "PUT",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"productIds\": [\"{{product_id}}\"]\n}",
+                                    "options": {
+                                        "raw": {
+                                            "language": "json"
+                                        }
+                                    }
+                                },
+                                "url": "{{base_url}}/api/v1/admin/collections/{{collection_id}}/products/reorder"
+                            }
+                        },
+                        {
+                            "name": "List Collection Products",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/collections/{{collection_id}}/products"
+                            }
+                        },
+                        {
+                            "name": "Add Rule",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "const r = pm.response.json(); if (r?.data?.collectionRuleId) pm.collectionVariables.set('rule_id', r.data.collectionRuleId);"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"fieldKey\": \"tag\",\n  \"operator\": \"equals\",\n  \"value\": \"sale\",\n  \"logicGroup\": \"AND\"\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/admin/collections/{{collection_id}}/rules"
+                            }
+                        },
+                        {
+                            "name": "Update Rule",
+                            "request": {
+                                "method": "PUT",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"fieldKey\": \"tag\",\n  \"operator\": \"equals\",\n  \"value\": \"clearance\",\n  \"logicGroup\": \"AND\"\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/admin/collections/{{collection_id}}/rules/{{rule_id}}"
+                            }
+                        },
+                        {
+                            "name": "Delete Rule",
+                            "request": {
+                                "method": "DELETE",
+                                "url": "{{base_url}}/api/v1/admin/collections/{{collection_id}}/rules/{{rule_id}}"
+                            }
+                        },
+                        {
+                            "name": "Evaluate Rules",
+                            "request": {
+                                "method": "POST",
+                                "url": "{{base_url}}/api/v1/admin/collections/{{collection_id}}/evaluate"
+                            }
+                        },
+                        {
+                            "name": "Preview Rules",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/collections/{{collection_id}}/preview"
+                            }
+                        },
+                        {
+                            "name": "Delete Collection",
+                            "request": {
+                                "method": "DELETE",
+                                "url": "{{base_url}}/api/v1/admin/collections/{{collection_id}}"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Admin - Import",
+                    "item": [
+                        {
+                            "name": "Import CSV",
+                            "request": {
+                                "method": "POST",
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "file",
+                                            "type": "file",
+                                            "src": ""
+                                        }
+                                    ]
+                                },
+                                "url": "{{base_url}}/api/v1/admin/imports/products"
+                            }
+                        },
+                        {
+                            "name": "Import CSV (Dry Run)",
+                            "request": {
+                                "method": "POST",
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "file",
+                                            "type": "file",
+                                            "src": ""
+                                        }
+                                    ]
+                                },
+                                "url": "{{base_url}}/api/v1/admin/imports/products?dryRun=true"
+                            }
+                        },
+                        {
+                            "name": "Preview Import File",
+                            "request": {
+                                "method": "POST",
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "file",
+                                            "type": "file",
+                                            "src": ""
+                                        }
+                                    ]
+                                },
+                                "url": "{{base_url}}/api/v1/admin/imports/products/preview"
+                            }
+                        },
+                        {
+                            "name": "Get Import Batch",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/imports/products/{{import_batch_id}}"
+                            }
+                        },
+                        {
+                            "name": "List Import Batches",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/imports/products?page=0&size=20"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Public - Storefront",
+                    "item": [
+                        {
+                            "name": "Browse Products",
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "X-Tenant-ID",
+                                        "value": "{{tenant_id}}"
+                                    }
+                                ],
+                                "url": "{{base_url}}/api/v1/public/products?page=0&size=20"
+                            }
+                        },
+                        {
+                            "name": "Search Products",
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "X-Tenant-ID",
+                                        "value": "{{tenant_id}}"
+                                    }
+                                ],
+                                "url": "{{base_url}}/api/v1/public/products/search?q=%D8%AD%D8%B0%D8%A7%D8%A1&page=0&size=20"
+                            }
+                        },
+                        {
+                            "name": "Search with Filters",
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "X-Tenant-ID",
+                                        "value": "{{tenant_id}}"
+                                    }
+                                ],
+                                "url": "{{base_url}}/api/v1/public/products/search?q=&minPrice=10000&maxPrice=50000&inStockOnly=true&page=0&size=20"
+                            }
+                        },
+                        {
+                            "name": "Autocomplete",
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "X-Tenant-ID",
+                                        "value": "{{tenant_id}}"
+                                    }
+                                ],
+                                "url": "{{base_url}}/api/v1/public/products/autocomplete?q=%D8%AD%D8%B0%D8%A7"
+                            }
+                        },
+                        {
+                            "name": "Product Detail by Slug",
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "X-Tenant-ID",
+                                        "value": "{{tenant_id}}"
+                                    }
+                                ],
+                                "url": "{{base_url}}/api/v1/public/products/cotton-shirt"
+                            }
+                        },
+                        {
+                            "name": "Category Tree",
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "X-Tenant-ID",
+                                        "value": "{{tenant_id}}"
+                                    }
+                                ],
+                                "url": "{{base_url}}/api/v1/public/categories"
+                            }
+                        },
+                        {
+                            "name": "Category by Slug",
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "X-Tenant-ID",
+                                        "value": "{{tenant_id}}"
+                                    }
+                                ],
+                                "url": "{{base_url}}/api/v1/public/categories/clothing"
+                            }
+                        },
+                        {
+                            "name": "Category Products",
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "X-Tenant-ID",
+                                        "value": "{{tenant_id}}"
+                                    }
+                                ],
+                                "url": "{{base_url}}/api/v1/public/categories/clothing/products?page=0&size=20"
+                            }
+                        },
+                        {
+                            "name": "List Collections",
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "X-Tenant-ID",
+                                        "value": "{{tenant_id}}"
+                                    }
+                                ],
+                                "url": "{{base_url}}/api/v1/public/collections"
+                            }
+                        },
+                        {
+                            "name": "Get Collection by Slug",
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "X-Tenant-ID",
+                                        "value": "{{tenant_id}}"
+                                    }
+                                ],
+                                "url": "{{base_url}}/api/v1/public/collections/summer-sale"
+                            }
+                        },
+                        {
+                            "name": "Collection Products",
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "X-Tenant-ID",
+                                        "value": "{{tenant_id}}"
+                                    }
+                                ],
+                                "url": "{{base_url}}/api/v1/public/collections/summer-sale/products?page=0&size=20"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "ORD (Order)",
+            "description": "Checkout, order management, discount codes, invoices",
+            "item": [
+                {
+                    "name": "Public - Checkout",
+                    "item": [
+                        {
+                            "name": "Checkout (COD)",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "const r = pm.response.json(); if (r?.data?.orderId) pm.collectionVariables.set('order_id', r.data.orderId);"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "X-Tenant-Id",
+                                        "value": "{{tenant_id}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"items\": [{ \"variantId\": \"{{variant_id}}\", \"quantity\": 2 }],\n  \"shippingAddress\": {\n    \"latitude\": 33.5138,\n    \"longitude\": 36.2765,\n    \"recipientName\": \"Ahmad Ali\",\n    \"phone\": \"+963944000001\",\n    \"addressLabel\": \"Al-Hamra Street, Building 5, Damascus\"\n  },\n  \"paymentMethod\": \"COD\",\n  \"checkoutToken\": \"{{$guid}}\",\n  \"guestEmail\": \"guest@example.com\"\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/public/checkout"
+                            }
+                        },
+                        {
+                            "name": "Checkout (Paymera Online)",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "const r = pm.response.json(); if (r?.data?.orderId) pm.collectionVariables.set('order_id', r.data.orderId);"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "X-Tenant-Id",
+                                        "value": "{{tenant_id}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"items\": [{ \"variantId\": \"{{variant_id}}\", \"quantity\": 1 }],\n  \"shippingAddress\": {\n    \"latitude\": 36.2021,\n    \"longitude\": 37.1343,\n    \"recipientName\": \"Guest User\",\n    \"phone\": \"+963955000001\",\n    \"addressLabel\": \"Baron Street, Aleppo\"\n  },\n  \"paymentMethod\": \"PAYMERA\",\n  \"checkoutToken\": \"{{$guid}}\",\n  \"guestEmail\": \"online@example.com\"\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/public/checkout"
+                            }
+                        },
+                        {
+                            "name": "Validate Discount Code",
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "X-Tenant-Id",
+                                        "value": "{{tenant_id}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/public/checkout/validate-discount?code=10OFF&subtotal=100000&shippingCost=5000",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "public",
+                                        "checkout",
+                                        "validate-discount"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "code",
+                                            "value": "10OFF"
+                                        },
+                                        {
+                                            "key": "subtotal",
+                                            "value": "100000"
+                                        },
+                                        {
+                                            "key": "shippingCost",
+                                            "value": "5000"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Guest Order Lookup",
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "X-Tenant-Id",
+                                        "value": "{{tenant_id}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/public/checkout/orders/lookup?orderNumber=ORD-001&email=guest@example.com",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "public",
+                                        "checkout",
+                                        "orders",
+                                        "lookup"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "orderNumber",
+                                            "value": "ORD-001"
+                                        },
+                                        {
+                                            "key": "email",
+                                            "value": "guest@example.com"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Admin - Orders",
+                    "item": [
+                        {
+                            "name": "Dashboard Summary",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/orders/summary"
+                            }
+                        },
+                        {
+                            "name": "List Orders (Paginated)",
+                            "request": {
+                                "method": "GET",
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/admin/orders?page=0&size=20&sort=placedAt,desc",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "admin",
+                                        "orders"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "page",
+                                            "value": "0"
+                                        },
+                                        {
+                                            "key": "size",
+                                            "value": "20"
+                                        },
+                                        {
+                                            "key": "sort",
+                                            "value": "placedAt,desc"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "List Orders (by Status)",
+                            "request": {
+                                "method": "GET",
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/admin/orders?status=PENDING&page=0&size=20",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "admin",
+                                        "orders"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "status",
+                                            "value": "PENDING"
+                                        },
+                                        {
+                                            "key": "page",
+                                            "value": "0"
+                                        },
+                                        {
+                                            "key": "size",
+                                            "value": "20"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Get Order Detail",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/orders/{{order_id}}"
+                            }
+                        },
+                        {
+                            "name": "Transition Status",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{ \"targetStatus\": \"CONFIRMED\" }"
+                                },
+                                "url": "{{base_url}}/api/v1/admin/orders/{{order_id}}/transition"
+                            }
+                        },
+                        {
+                            "name": "Cancel Order",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{ \"reason\": \"Customer requested cancellation\" }"
+                                },
+                                "url": "{{base_url}}/api/v1/admin/orders/{{order_id}}/cancel"
+                            }
+                        },
+                        {
+                            "name": "Update Notes",
+                            "request": {
+                                "method": "PUT",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"notesInternal\": \"VIP customer\",\n  \"notesCustomer\": \"Your order is being prepared!\"\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/admin/orders/{{order_id}}/notes"
+                            }
+                        },
+                        {
+                            "name": "Edit Order (pre-fulfillment)",
+                            "request": {
+                                "method": "PUT",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"items\": [{ \"variantId\": \"{{variant_id}}\", \"quantity\": 3 }],\n  \"shippingAddress\": {\n    \"latitude\": 36.2021,\n    \"longitude\": 37.1343,\n    \"recipientName\": \"Updated Name\",\n    \"phone\": \"+963888888888\",\n    \"addressLabel\": \"New Street, Aleppo\"\n  }\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/admin/orders/{{order_id}}/edit"
+                            }
+                        },
+                        {
+                            "name": "Get Timeline",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/orders/{{order_id}}/timeline"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Customer - My Orders",
+                    "item": [
+                        {
+                            "name": "List My Orders",
+                            "request": {
+                                "method": "GET",
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/customer/orders?page=0&size=20",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "customer",
+                                        "orders"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "page",
+                                            "value": "0"
+                                        },
+                                        {
+                                            "key": "size",
+                                            "value": "20"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "List My Orders (by Status)",
+                            "request": {
+                                "method": "GET",
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/customer/orders?status=PENDING&page=0&size=20",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "customer",
+                                        "orders"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "status",
+                                            "value": "PENDING"
+                                        },
+                                        {
+                                            "key": "page",
+                                            "value": "0"
+                                        },
+                                        {
+                                            "key": "size",
+                                            "value": "20"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Get My Order Detail",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/customer/orders/{{order_id}}"
+                            }
+                        },
+                        {
+                            "name": "Cancel My Order",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{ \"reason\": \"Changed my mind\" }"
+                                },
+                                "url": "{{base_url}}/api/v1/customer/orders/{{order_id}}/cancel"
+                            }
+                        },
+                        {
+                            "name": "Get My Invoice",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/customer/orders/{{order_id}}/invoice"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Customer - Profile & Addresses (CUS)",
+                    "item": [
+                        {
+                            "name": "Get My Profile",
+                            "request": {
+                                "method": "GET",
+                                "header": [{ "key": "Authorization", "value": "Bearer {{customer_access_token}}" }],
+                                "url": "{{base_url}}/api/v1/customer/profile"
+                            }
+                        },
+                        {
+                            "name": "Update My Profile",
+                            "request": {
+                                "method": "PUT",
+                                "header": [
+                                    { "key": "Authorization", "value": "Bearer {{customer_access_token}}" },
+                                    { "key": "Content-Type", "value": "application/json" }
+                                ],
+                                "body": { "mode": "raw", "raw": "{\n  \"fullName\": \"Ahmed Ali\"\n}" },
+                                "url": "{{base_url}}/api/v1/customer/profile"
+                            }
+                        },
+                        {
+                            "name": "Get Marketing Preferences",
+                            "request": {
+                                "method": "GET",
+                                "header": [{ "key": "Authorization", "value": "Bearer {{customer_access_token}}" }],
+                                "url": "{{base_url}}/api/v1/customer/preferences"
+                            }
+                        },
+                        {
+                            "name": "Toggle Marketing Preferences",
+                            "request": {
+                                "method": "PUT",
+                                "header": [
+                                    { "key": "Authorization", "value": "Bearer {{customer_access_token}}" },
+                                    { "key": "Content-Type", "value": "application/json" }
+                                ],
+                                "body": { "mode": "raw", "raw": "{\n  \"emailOptIn\": true,\n  \"smsOptIn\": false\n}" },
+                                "url": "{{base_url}}/api/v1/customer/preferences/marketing"
+                            }
+                        },
+                        {
+                            "name": "List My Addresses",
+                            "request": {
+                                "method": "GET",
+                                "header": [{ "key": "Authorization", "value": "Bearer {{customer_access_token}}" }],
+                                "url": "{{base_url}}/api/v1/customer/addresses"
+                            }
+                        },
+                        {
+                            "name": "Create Address",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "const r = pm.response.json(); if (r?.data?.addressId) pm.collectionVariables.set('customer_address_id', r.data.addressId);"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    { "key": "Authorization", "value": "Bearer {{customer_access_token}}" },
+                                    { "key": "Content-Type", "value": "application/json" }
+                                ],
+                                "body": { "mode": "raw", "raw": "{\n  \"label\": \"HOME\",\n  \"recipientName\": \"Ahmed Ali\",\n  \"recipientPhone\": \"+963911000111\",\n  \"governorate\": \"Damascus\",\n  \"city\": \"Mezzeh\",\n  \"streetAddress\": \"Building 12, Floor 3\",\n  \"notes\": \"Gate code 1234\",\n  \"latitude\": 33.5138,\n  \"longitude\": 36.2765,\n  \"isDefault\": true\n}" },
+                                "url": "{{base_url}}/api/v1/customer/addresses"
+                            }
+                        },
+                        {
+                            "name": "Set Default Address",
+                            "request": {
+                                "method": "POST",
+                                "header": [{ "key": "Authorization", "value": "Bearer {{customer_access_token}}" }],
+                                "url": "{{base_url}}/api/v1/customer/addresses/{{customer_address_id}}/default"
+                            }
+                        },
+                        {
+                            "name": "Delete Address",
+                            "request": {
+                                "method": "DELETE",
+                                "header": [{ "key": "Authorization", "value": "Bearer {{customer_access_token}}" }],
+                                "url": "{{base_url}}/api/v1/customer/addresses/{{customer_address_id}}"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Admin - Customers (CUS)",
+                    "item": [
+                        {
+                            "name": "Search Customers",
+                            "request": {
+                                "method": "GET",
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/admin/customers?page=0&size=20&sort=totalSpendSyp,desc",
+                                    "host": ["{{base_url}}"],
+                                    "path": ["api", "v1", "admin", "customers"],
+                                    "query": [
+                                        { "key": "page", "value": "0" },
+                                        { "key": "size", "value": "20" },
+                                        { "key": "sort", "value": "totalSpendSyp,desc" },
+                                        { "key": "q", "value": "", "disabled": true },
+                                        { "key": "minSpend", "value": "", "disabled": true },
+                                        { "key": "hasOrders", "value": "true", "disabled": true },
+                                        { "key": "optedInEmail", "value": "true", "disabled": true }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Get Customer Detail",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/customers/{{customer_id}}"
+                            }
+                        },
+                        {
+                            "name": "Add Internal Note",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "const r = pm.response.json(); if (r?.data?.noteId) pm.collectionVariables.set('customer_note_id', r.data.noteId);"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                                "body": { "mode": "raw", "raw": "{\n  \"noteText\": \"Customer prefers WhatsApp follow-up over phone calls.\",\n  \"isPrivate\": false\n}" },
+                                "url": "{{base_url}}/api/v1/admin/customers/{{customer_id}}/notes"
+                            }
+                        },
+                        {
+                            "name": "Update Internal Note",
+                            "request": {
+                                "method": "PUT",
+                                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                                "body": { "mode": "raw", "raw": "{\n  \"noteText\": \"Updated note text\",\n  \"isPrivate\": true\n}" },
+                                "url": "{{base_url}}/api/v1/admin/customers/{{customer_id}}/notes/{{customer_note_id}}"
+                            }
+                        },
+                        {
+                            "name": "Delete Internal Note",
+                            "request": {
+                                "method": "DELETE",
+                                "url": "{{base_url}}/api/v1/admin/customers/{{customer_id}}/notes/{{customer_note_id}}"
+                            }
+                        },
+                        {
+                            "name": "Export Customers (CSV)",
+                            "request": {
+                                "method": "GET",
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/admin/customers/export.csv?hasOrders=true",
+                                    "host": ["{{base_url}}"],
+                                    "path": ["api", "v1", "admin", "customers", "export.csv"],
+                                    "query": [
+                                        { "key": "hasOrders", "value": "true" },
+                                        { "key": "minSpend", "value": "", "disabled": true }
+                                    ]
+                                },
+                                "description": "Downloads a UTF-8 BOM-prefixed CSV (Excel-Arabic compatible)."
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Admin - Discount Codes",
+                    "item": [
+                        {
+                            "name": "Create Discount Code",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "const r = pm.response.json(); if (r?.data?.discountCodeId) pm.collectionVariables.set('discount_code_id', r.data.discountCodeId);"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"code\": \"10OFF\",\n  \"discountType\": \"PERCENTAGE\",\n  \"discountValue\": 10,\n  \"minOrderAmount\": 50000,\n  \"maxDiscountCap\": 50000,\n  \"usageLimit\": 100,\n  \"perCustomerMax\": 1,\n  \"applicableScope\": \"ALL\",\n  \"startsAt\": \"2026-04-01T00:00:00\",\n  \"expiresAt\": \"2026-12-31T23:59:59\"\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/admin/discount-codes"
+                            }
+                        },
+                        {
+                            "name": "List Discount Codes",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/discount-codes"
+                            }
+                        },
+                        {
+                            "name": "Get Discount Code",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/discount-codes/{{discount_code_id}}"
+                            }
+                        },
+                        {
+                            "name": "Update Discount Code",
+                            "request": {
+                                "method": "PUT",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{ \"discountValue\": 15, \"isActive\": true }"
+                                },
+                                "url": "{{base_url}}/api/v1/admin/discount-codes/{{discount_code_id}}"
+                            }
+                        },
+                        {
+                            "name": "Delete Discount Code",
+                            "request": {
+                                "method": "DELETE",
+                                "url": "{{base_url}}/api/v1/admin/discount-codes/{{discount_code_id}}"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Admin - Invoices",
+                    "item": [
+                        {
+                            "name": "Generate Invoice",
+                            "request": {
+                                "method": "POST",
+                                "url": "{{base_url}}/api/v1/admin/invoices/generate/{{order_id}}"
+                            }
+                        },
+                        {
+                            "name": "Regenerate Invoice",
+                            "request": {
+                                "method": "POST",
+                                "url": "{{base_url}}/api/v1/admin/invoices/regenerate/{{order_id}}"
+                            }
+                        },
+                        {
+                            "name": "List All Invoices",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/invoices"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Admin - Invoice Layout Profiles",
+                    "item": [
+                        {
+                            "name": "Create Layout Profile",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "const r = pm.response.json(); if (r?.data?.profileId) pm.collectionVariables.set('invoice_layout_profile_id', r.data.profileId);"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [],
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "profile",
+                                            "type": "text",
+                                            "contentType": "application/json",
+                                            "value": "{\n  \"profileName\": \"Default Invoice\",\n  \"visibleFieldsJson\": \"{\\\"showLogo\\\":true,\\\"showStoreName\\\":true,\\\"showOrderNumber\\\":true,\\\"showOrderDate\\\":true,\\\"showCustomerName\\\":true,\\\"showCustomerPhone\\\":true,\\\"showShippingAddress\\\":true,\\\"showSku\\\":true,\\\"showUnitPrice\\\":true,\\\"showQuantity\\\":true,\\\"showItemDiscount\\\":true,\\\"showSubtotal\\\":true,\\\"showTaxBreakdown\\\":true,\\\"showShippingCost\\\":true,\\\"showDiscountTotal\\\":true,\\\"showPaymentMethod\\\":true,\\\"showPaymentStatus\\\":true,\\\"showNotes\\\":true,\\\"headerText\\\":\\\"شكراً لطلبكم\\\",\\\"footerText\\\":\\\"Thank you!\\\",\\\"colorScheme\\\":\\\"#1a73e8\\\",\\\"storeName\\\":\\\"سوق دمشق\\\"}\",\n  \"isDefault\": true\n}"
+                                        },
+                                        {
+                                            "key": "logo",
+                                            "type": "file",
+                                            "src": "",
+                                            "description": "Optional. When present, server uploads it and overrides visibleFieldsJson.logoUrl."
+                                        }
+                                    ]
+                                },
+                                "url": "{{base_url}}/api/v1/admin/invoice-layout-profiles"
+                            }
+                        },
+                        {
+                            "name": "List Layout Profiles",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/invoice-layout-profiles"
+                            }
+                        },
+                        {
+                            "name": "Get Layout Profile",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/invoice-layout-profiles/{{invoice_layout_profile_id}}"
+                            }
+                        },
+                        {
+                            "name": "Update Layout Profile",
+                            "request": {
+                                "method": "PUT",
+                                "header": [],
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "profile",
+                                            "type": "text",
+                                            "contentType": "application/json",
+                                            "value": "{ \"profileName\": \"Updated\", \"isDefault\": true }"
+                                        },
+                                        {
+                                            "key": "logo",
+                                            "type": "file",
+                                            "src": "",
+                                            "description": "Optional. Replaces the logo on the profile."
+                                        }
+                                    ]
+                                },
+                                "url": "{{base_url}}/api/v1/admin/invoice-layout-profiles/{{invoice_layout_profile_id}}"
+                            }
+                        },
+                        {
+                            "name": "Delete Layout Profile",
+                            "request": {
+                                "method": "DELETE",
+                                "url": "{{base_url}}/api/v1/admin/invoice-layout-profiles/{{invoice_layout_profile_id}}"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "PAY (Payment)",
+            "description": "Dynamic payment provider architecture: COD, Paymera, extensible",
+            "item": [
+                {
+                    "name": "Admin - Provider Config",
+                    "item": [
+                        {
+                            "name": "Add Provider (Paymera)",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "const r = pm.response.json(); if (r?.data?.configId) pm.collectionVariables.set('payment_provider_config_id', r.data.configId);"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"providerCode\": \"PAYMERA\",\n  \"displayName\": \"Credit Card (Paymera)\",\n  \"credentialsJson\": \"{\\\"terminalId\\\":\\\"TEST-001\\\",\\\"username\\\":\\\"test\\\",\\\"password\\\":\\\"test\\\"}\",\n  \"settingsJson\": \"{\\\"environment\\\":\\\"test\\\",\\\"lang\\\":\\\"ar\\\"}\",\n  \"isActive\": true,\n  \"sortOrder\": 1\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/admin/payment-providers"
+                            }
+                        },
+                        {
+                            "name": "Add Provider (COD)",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "const r = pm.response.json(); if (r?.data?.configId) pm.collectionVariables.set('payment_provider_config_id', r.data.configId);"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"providerCode\": \"COD\",\n  \"displayName\": \"Cash on Delivery\",\n  \"isActive\": true,\n  \"sortOrder\": 0\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/admin/payment-providers"
+                            }
+                        },
+                        {
+                            "name": "List Providers",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/payment-providers"
+                            }
+                        },
+                        {
+                            "name": "Update Provider",
+                            "request": {
+                                "method": "PUT",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{ \"displayName\": \"Updated\", \"isActive\": false }"
+                                },
+                                "url": "{{base_url}}/api/v1/admin/payment-providers/{{payment_provider_config_id}}"
+                            }
+                        },
+                        {
+                            "name": "Delete Provider",
+                            "request": {
+                                "method": "DELETE",
+                                "url": "{{base_url}}/api/v1/admin/payment-providers/{{payment_provider_config_id}}"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Public - Payment Methods",
+                    "item": [
+                        {
+                            "name": "List Available Methods",
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "X-Tenant-Id",
+                                        "value": "{{tenant_id}}"
+                                    }
+                                ],
+                                "url": "{{base_url}}/api/v1/public/payments/methods"
+                            }
+                        },
+                        {
+                            "name": "Poll Payment Status",
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "X-Tenant-Id",
+                                        "value": "{{tenant_id}}"
+                                    }
+                                ],
+                                "url": "{{base_url}}/api/v1/public/payments/{{payment_txn_id}}/status"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Admin - Refunds",
+                    "item": [
+                        {
+                            "name": "Initiate Refund",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "const r = pm.response.json(); if (r?.data?.refundId) pm.collectionVariables.set('refund_id', r.data.refundId);"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"orderId\": \"{{order_id}}\",\n  \"refundAmount\": 50000,\n  \"reason\": \"Customer requested refund\"\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/admin/refunds"
+                            }
+                        },
+                        {
+                            "name": "List Refunds",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/refunds"
+                            }
+                        },
+                        {
+                            "name": "Get Refund by Order",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/refunds/order/{{order_id}}"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Webhooks",
+                    "item": [
+                        {
+                            "name": "Paymera Webhook",
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "X-Tenant-ID",
+                                        "value": "{{tenant_id}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"paymentId\": \"PAY-123\",\n  \"status\": \"A\",\n  \"rrn\": \"123456789\",\n  \"amount\": 100000\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/webhooks/payments/PAYMERA"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "APP (Mobile Builder)",
+            "description": "APK build initiation, status tracking, GitHub Actions webhook",
+            "item": [
+                {
+                    "name": "Initiate Build",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const r = pm.response.json(); if (r?.data?.appBuildJobId) pm.collectionVariables.set('app_build_job_id', r.data.appBuildJobId);"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-Tenant-ID",
+                                "value": "{{tenant_id}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"appTarget\": \"CLIENT_APP\",\n  \"buildChannel\": \"BETA\",\n  \"configVersionId\": \"{{config_version_id}}\"\n}"
+                        },
+                        "url": "{{base_url}}/api/v1/app-builds"
+                    }
+                },
+                {
+                    "name": "Get Build Status",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-Tenant-ID",
+                                "value": "{{tenant_id}}"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/app-builds/{{app_build_job_id}}"
+                    }
+                },
+                {
+                    "name": "GitHub Actions Webhook",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "X-Hub-Signature-256",
+                                "value": "{{webhook_signature}}"
+                            },
+                            {
+                                "key": "X-Tenant-ID",
+                                "value": "{{tenant_id}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"ciRunId\": \"123456789\",\n  \"buildStatus\": \"SUCCESS\",\n  \"artifactUrl\": \"https://github.com/example/actions/runs/123456789\",\n  \"fileHash\": \"abc123\",\n  \"completedAt\": \"2026-04-12T12:00:00Z\"\n}"
+                        },
+                        "url": "{{base_url}}/api/v1/webhooks/github-actions/build-status"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "SHP (Shipping)",
+            "description": "Shipping providers, shipments, webhooks, COD reconciliation, customer tracking. Uses GPS coordinates (lat/lng).",
+            "item": [
+                {
+                    "name": "Shipping Providers",
+                    "item": [
+                        {
+                            "name": "Register Provider",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "const r = pm.response.json(); if (r?.data?.shippingProviderId) pm.collectionVariables.set('shipping_provider_id', r.data.shippingProviderId);"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"providerCode\": \"DAMASCUS_EXPRESS\",\n  \"providerName\": \"دمشق إكسبريس\",\n  \"apiBaseUrl\": \"https://api.damascus-express.sy/v1\",\n  \"apiKey\": \"sk_test_key\",\n  \"webhookSecret\": \"whsec_test_secret\",\n  \"priority\": 10\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/admin/shipping/providers"
+                            }
+                        },
+                        {
+                            "name": "List Providers",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/shipping/providers"
+                            }
+                        },
+                        {
+                            "name": "Get Provider",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/shipping/providers/{{shipping_provider_id}}"
+                            }
+                        },
+                        {
+                            "name": "Update Provider",
+                            "request": {
+                                "method": "PUT",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"providerName\": \"Damascus Express Updated\",\n  \"priority\": 15\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/admin/shipping/providers/{{shipping_provider_id}}"
+                            }
+                        },
+                        {
+                            "name": "Delete Provider",
+                            "request": {
+                                "method": "DELETE",
+                                "url": "{{base_url}}/api/v1/admin/shipping/providers/{{shipping_provider_id}}"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Shipping Cost (Public)",
+                    "item": [
+                        {
+                            "name": "Calculate Shipping Cost",
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "X-Tenant-ID",
+                                        "value": "{{tenant_id}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"originLat\": 33.5138,\n  \"originLng\": 36.2765,\n  \"destinationLat\": 36.2021,\n  \"destinationLng\": 37.1343\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/public/shipping/calculate"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Shipments",
+                    "item": [
+                        {
+                            "name": "Create Shipment",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "const r = pm.response.json(); if (r?.data?.shipmentId) pm.collectionVariables.set('shipment_id', r.data.shipmentId);"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"orderId\": \"{{order_id}}\",\n  \"shippingProviderId\": \"{{shipping_provider_id}}\",\n  \"originLat\": 33.5138,\n  \"originLng\": 36.2765,\n  \"destinationLat\": 36.2021,\n  \"destinationLng\": 37.1343,\n  \"expectedCodAmountSyp\": 50000\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/admin/shipping/shipments"
+                            }
+                        },
+                        {
+                            "name": "List Shipments",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/shipping/shipments"
+                            }
+                        },
+                        {
+                            "name": "Get Shipment",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/shipping/shipments/{{shipment_id}}"
+                            }
+                        },
+                        {
+                            "name": "Transition Status",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"targetStatus\": \"PICKED_UP\"\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/admin/shipping/shipments/{{shipment_id}}/transition"
+                            }
+                        },
+                        {
+                            "name": "Get Status Events",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/shipping/shipments/{{shipment_id}}/events"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Webhooks (3PL)",
+                    "item": [
+                        {
+                            "name": "Status Update",
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "X-Tenant-ID",
+                                        "value": "{{tenant_id}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"shipmentId\": \"{{shipment_id}}\",\n  \"status\": \"picked_up\",\n  \"providerCode\": \"DAMASCUS_EXPRESS\",\n  \"carrierTrackingId\": \"https://track.example.com/ABC123\",\n  \"carrierName\": \"Damascus Express\"\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/webhooks/shipping/status"
+                            }
+                        },
+                        {
+                            "name": "COD Collection",
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "X-Tenant-ID",
+                                        "value": "{{tenant_id}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"shipmentId\": \"{{shipment_id}}\",\n  \"collectedAmountSyp\": 50000,\n  \"providerCode\": \"DAMASCUS_EXPRESS\"\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/webhooks/shipping/cod"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "COD Reconciliation",
+                    "item": [
+                        {
+                            "name": "Create Batch",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "const r = pm.response.json(); if (r?.data?.codBatchId) pm.collectionVariables.set('cod_batch_id', r.data.codBatchId);"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"shippingProviderId\": \"{{shipping_provider_id}}\",\n  \"providerFeePercentage\": 5.00,\n  \"settlementDate\": \"2026-04-26\",\n  \"notes\": \"Daily settlement\"\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/admin/shipping/cod/reconciliation"
+                            }
+                        },
+                        {
+                            "name": "List Batches",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/shipping/cod/reconciliation"
+                            }
+                        },
+                        {
+                            "name": "Update Settlement Status",
+                            "request": {
+                                "method": "PUT",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"status\": \"SETTLED\"\n}"
+                                },
+                                "url": "{{base_url}}/api/v1/admin/shipping/cod/reconciliation/{{cod_batch_id}}/status"
+                            }
+                        },
+                        {
+                            "name": "List COD Entries",
+                            "request": {
+                                "method": "GET",
+                                "url": "{{base_url}}/api/v1/admin/shipping/cod/entries/{{shipment_id}}"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Customer Tracking (Public)",
+                    "item": [
+                        {
+                            "name": "Track Shipment",
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "X-Tenant-ID",
+                                        "value": "{{tenant_id}}"
+                                    }
+                                ],
+                                "url": "{{base_url}}/api/v1/public/shipping/track/{{order_id}}"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+    {
+      "name": "ANL - Analytics",
+      "description": "Merchant analytics dashboard and exports (JWT must include analytics:read).",
+      "item": [
+        {
+          "name": "Dashboard",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/v1/admin/analytics/dashboard?period=WEEK"
+          }
+        },
+        {
+          "name": "Revenue series",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/v1/admin/analytics/revenue?period=WEEK&granularity=DAILY&comparePrevious=true"
+          }
+        },
+        {
+          "name": "Export CSV",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/v1/admin/analytics/export/csv?period=WEEK"
+          }
+        },
+        {
+          "name": "Export PDF",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/v1/admin/analytics/export/pdf?period=WEEK"
+          }
+        },
+        {
+          "name": "Profit",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/v1/admin/analytics/profit?period=WEEK"
+          }
+        },
+        {
+          "name": "FX impact",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/v1/admin/analytics/fx-impact?period=MONTH"
+          }
+        }
+      ]
+    },
+    {
+      "name": "RET (Returns)",
+      "description": "Sprint 9 — Customer-initiated returns + merchant approval/rejection workflow (RET-001/RET-002/RET-003). Phase 1 ships create + list + get for both surfaces; Phase 2 adds approve/reject.",
+      "item": [
+        {
+          "name": "Customer Returns",
+          "item": [
+            {
+              "name": "Submit a return request",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    { "key": "token", "value": "{{customer_access_token}}", "type": "string" }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"orderId\": \"{{order_id}}\",\n  \"reason\": \"DEFECTIVE\",\n  \"items\": [\n    {\n      \"orderItemId\": \"{{order_item_id}}\",\n      \"quantity\": 1,\n      \"itemCondition\": \"OPENED\"\n    }\n  ]\n}"
+                },
+                "url": "{{base_url}}/api/v1/customer/returns",
+                "description": "Customer submits a return for a DELIVERED order. reason ∈ {DEFECTIVE, WRONG_ITEM, CHANGED_MIND, DOESNT_FIT, OTHER}. customReasonText is required if and only if reason=OTHER. Each item.quantity must be ≤ the corresponding order_item.quantity. 201 with the persisted return (status=PENDING). Publishes ReturnRequestCreatedEvent → customer email + merchant bell-icon."
+              }
+            },
+            {
+              "name": "List my returns",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    { "key": "token", "value": "{{customer_access_token}}", "type": "string" }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/api/v1/customer/returns?page=0&size=20",
+                "description": "Paged list scoped to the authenticated customer, sorted by requestedAt DESC."
+              }
+            },
+            {
+              "name": "Get my return detail",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    { "key": "token", "value": "{{customer_access_token}}", "type": "string" }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/api/v1/customer/returns/{{return_request_id}}",
+                "description": "Returns 404 if the request is not owned by the authenticated customer (no cross-customer visibility)."
+              }
+            }
+          ]
+        },
+        {
+          "name": "Admin Returns",
+          "item": [
+            {
+              "name": "List returns (paged, filterable)",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    { "key": "token", "value": "{{access_token}}", "type": "string" }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/api/v1/admin/returns?status=PENDING&reason=DEFECTIVE&page=0&size=20",
+                "description": "Merchant admin paged list, scoped to the current tenant. Optional status + reason filters power the RET-002 analytics view (drop either query param to skip the filter). Roles: OWNER, MANAGER, STAFF."
+              }
+            },
+            {
+              "name": "Get return detail",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    { "key": "token", "value": "{{access_token}}", "type": "string" }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/api/v1/admin/returns/{{return_request_id}}",
+                "description": "Returns 404 if the request belongs to a different tenant. Roles: OWNER, MANAGER, STAFF."
+              }
+            },
+            {
+              "name": "Approve return (RET-003)",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    { "key": "token", "value": "{{access_token}}", "type": "string" }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "url": "{{base_url}}/api/v1/admin/returns/{{return_request_id}}/approve",
+                "description": "Approves the return all-or-nothing. Refund = Σ(orderItem.unitPrice × returnItem.quantity). Async fan-out (AFTER_COMMIT): PAY initiates refund, PRD restores inventory per line, ORD transitions order DELIVERED → RETURNED, NTF emails the customer. Refund failures (e.g. COD orders) are logged and do NOT roll back the approval. Roles: OWNER, MANAGER (STAFF cannot approve)."
+              }
+            },
+            {
+              "name": "Reject return (RET-003)",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    { "key": "token", "value": "{{access_token}}", "type": "string" }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"rejectionReason\": \"Outside the policy window\"\n}"
+                },
+                "url": "{{base_url}}/api/v1/admin/returns/{{return_request_id}}/reject",
+                "description": "Stores rejectionReason and notifies the customer. Terminal — customer must resubmit a new return if they want a different outcome. Roles: OWNER, MANAGER."
+              }
+            }
+          ]
+        }
+      ]
+    }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "https://ShopEngine-production.up.railway.app"
+        },
+        {
+            "key": "phone",
+            "value": "+963992040386"
+        },
+        {
+            "key": "new_phone",
+            "value": "+963992040387"
+        },
+        {
+            "key": "role",
+            "value": "OWNER"
+        },
+        {
+            "key": "tenant_slug",
+            "value": "registration-hub"
+        },
+        {
+            "key": "otp_code",
+            "value": "123456"
+        },
+        {
+            "key": "access_token",
+            "value": ""
+        },
+        {
+            "key": "tenant_id",
+            "value": ""
+        },
+        {
+            "key": "user_id",
+            "value": ""
+        },
+        {
+            "key": "session_jti",
+            "value": ""
+        },
+        {
+            "key": "totp_code",
+            "value": ""
+        },
+        {
+            "key": "google_id_token",
+            "value": ""
+        },
+        {
+            "key": "target_tenant_id",
+            "value": ""
+        },
+        {
+            "key": "product_id",
+            "value": ""
+        },
+        {
+            "key": "variant_id",
+            "value": ""
+        },
+        {
+            "key": "category_id",
+            "value": ""
+        },
+        {
+            "key": "tag_id",
+            "value": ""
+        },
+        {
+            "key": "attribute_def_id",
+            "value": ""
+        },
+        {
+            "key": "collection_id",
+            "value": ""
+        },
+        {
+            "key": "rule_id",
+            "value": ""
+        },
+        {
+            "key": "media_asset_id",
+            "value": ""
+        },
+        {
+            "key": "import_batch_id",
+            "value": ""
+        },
+        {
+            "key": "order_id",
+            "value": ""
+        },
+        {
+            "key": "discount_code_id",
+            "value": ""
+        },
+        {
+            "key": "invoice_layout_profile_id",
+            "value": ""
+        },
+        {
+            "key": "payment_provider_config_id",
+            "value": ""
+        },
+        {
+            "key": "payment_txn_id",
+            "value": ""
+        },
+        {
+            "key": "config_version_id",
+            "value": ""
+        },
+        {
+            "key": "app_build_job_id",
+            "value": ""
+        },
+        {
+            "key": "webhook_signature",
+            "value": "sha256="
+        },
+        {
+            "key": "shipping_provider_id",
+            "value": ""
+        },
+        {
+            "key": "shipment_id",
+            "value": ""
+        },
+        {
+            "key": "cod_batch_id",
+            "value": ""
+        },
+        {
+            "key": "refund_id",
+            "value": ""
+        },
+        {
+            "key": "customer_id",
+            "value": ""
+        },
+        {
+            "key": "customer_address_id",
+            "value": ""
+        },
+        {
+            "key": "customer_note_id",
+            "value": ""
+        },
+        {
+            "key": "customer_access_token",
+            "value": ""
+        },
+        {
+            "key": "order_item_id",
+            "value": ""
+        },
+        {
+            "key": "return_request_id",
+            "value": ""
+        }
+    ]
+}

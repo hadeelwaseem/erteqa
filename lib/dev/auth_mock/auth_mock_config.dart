@@ -5,7 +5,7 @@ class AuthMockConfig {
   AuthMockConfig._();
 
   /// Set to `false` to use real [AuthRepoImpl] without deleting mock files.
-  static const bool enabled = true;
+  static const bool enabled = false;
 
   /// Simulated network latency (matches “real” feel while offline).
   static const Duration requestDelay = Duration(milliseconds: 400);

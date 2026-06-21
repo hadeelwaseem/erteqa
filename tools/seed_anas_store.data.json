@@ -1,0 +1,163 @@
+{
+  "categories": [
+    { "slug": "clothing", "nameEn": "Clothing", "nameAr": "Clothing", "parentSlug": null },
+    { "slug": "electronics", "nameEn": "Electronics", "nameAr": "Electronics", "parentSlug": null },
+    { "slug": "accessories", "nameEn": "Accessories", "nameAr": "Accessories", "parentSlug": null },
+    { "slug": "mens-shirts", "nameEn": "Men Shirts", "nameAr": "Men Shirts", "parentSlug": "clothing" }
+  ],
+  "tags": ["Summer", "New", "Sale"],
+  "products": [
+    {
+      "slug": "cotton-shirt",
+      "imageUrl": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&auto=format&fit=crop&q=60",
+      "json": {
+        "titleAr": "Cotton Shirt AR",
+        "titleEn": "Cotton Shirt",
+        "descriptionAr": "Comfortable cotton shirt",
+        "descriptionEn": "Comfortable cotton shirt",
+        "slug": "cotton-shirt",
+        "basePrice": 85000,
+        "currencyCode": "SYP",
+        "status": "ACTIVE",
+        "allowOversell": false,
+        "categories": [{ "nameEn": "Men Shirts" }],
+        "tags": [{ "name": "Summer" }, { "name": "New" }],
+        "variants": [
+          { "attributes": { "Size": "S", "Color": "Red" }, "sku": "SHIRT-S-RED", "price": 85000, "stockQty": 25, "isActive": true },
+          { "attributes": { "Size": "M", "Color": "Red" }, "sku": "SHIRT-M-RED", "price": 85000, "stockQty": 20, "isActive": true },
+          { "attributes": { "Size": "L", "Color": "Blue" }, "sku": "SHIRT-L-BLU", "price": 90000, "stockQty": 15, "isActive": true }
+        ]
+      }
+    },
+    {
+      "slug": "leather-belt",
+      "imageUrl": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&auto=format&fit=crop&q=60",
+      "json": {
+        "titleAr": "Leather Belt AR",
+        "titleEn": "Leather Belt",
+        "slug": "leather-belt",
+        "basePrice": 45000,
+        "currencyCode": "SYP",
+        "status": "ACTIVE",
+        "allowOversell": false,
+        "categories": [{ "nameEn": "Accessories" }],
+        "tags": [{ "name": "New" }],
+        "variants": [
+          { "attributes": { "Default": "Standard" }, "sku": "LEATHER-BELT", "price": 45000, "stockQty": 50, "isActive": true }
+        ]
+      }
+    },
+    {
+      "slug": "wireless-earbuds",
+      "imageUrl": "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=400&auto=format&fit=crop&q=60",
+      "json": {
+        "titleAr": "Wireless Earbuds AR",
+        "titleEn": "Wireless Earbuds",
+        "slug": "wireless-earbuds",
+        "basePrice": 250000,
+        "currencyCode": "SYP",
+        "status": "ACTIVE",
+        "allowOversell": false,
+        "categories": [{ "nameEn": "Electronics" }],
+        "tags": [{ "name": "Sale" }],
+        "variants": [
+          { "attributes": { "Default": "Standard" }, "sku": "EARBUDS-1", "price": 250000, "stockQty": 30, "isActive": true }
+        ]
+      }
+    },
+    {
+      "slug": "phone-case",
+      "imageUrl": "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=400&auto=format&fit=crop&q=60",
+      "json": {
+        "titleAr": "Phone Case AR",
+        "titleEn": "Phone Case",
+        "slug": "phone-case",
+        "basePrice": 35000,
+        "currencyCode": "SYP",
+        "status": "ACTIVE",
+        "allowOversell": false,
+        "categories": [{ "nameEn": "Electronics" }],
+        "tags": [{ "name": "New" }],
+        "variants": [
+          { "attributes": { "Default": "Standard" }, "sku": "PHONE-CASE-1", "price": 35000, "stockQty": 100, "isActive": true }
+        ]
+      }
+    },
+    {
+      "slug": "summer-dress",
+      "imageUrl": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&auto=format&fit=crop&q=60",
+      "json": {
+        "titleAr": "Summer Dress AR",
+        "titleEn": "Summer Dress",
+        "slug": "summer-dress",
+        "basePrice": 120000,
+        "currencyCode": "SYP",
+        "status": "ACTIVE",
+        "allowOversell": false,
+        "categories": [{ "nameEn": "Clothing" }],
+        "tags": [{ "name": "Summer" }],
+        "variants": [
+          { "attributes": { "Size": "S" }, "price": 120000, "stockQty": 10, "isActive": true },
+          { "attributes": { "Size": "M" }, "price": 120000, "stockQty": 12, "isActive": true },
+          { "attributes": { "Size": "L" }, "price": 125000, "stockQty": 8, "isActive": true }
+        ]
+      }
+    },
+    {
+      "slug": "running-shoes",
+      "imageUrl": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&auto=format&fit=crop&q=60",
+      "json": {
+        "titleAr": "Running Shoes AR",
+        "titleEn": "Running Shoes",
+        "slug": "running-shoes",
+        "basePrice": 180000,
+        "currencyCode": "SYP",
+        "status": "ACTIVE",
+        "allowOversell": false,
+        "categories": [{ "nameEn": "Clothing" }],
+        "tags": [{ "name": "Sale" }],
+        "variants": [
+          { "attributes": { "Size": "40" }, "price": 180000, "stockQty": 5, "isActive": true },
+          { "attributes": { "Size": "42" }, "price": 180000, "stockQty": 7, "isActive": true },
+          { "attributes": { "Size": "44" }, "price": 185000, "stockQty": 4, "isActive": true }
+        ]
+      }
+    },
+    {
+      "slug": "sunglasses",
+      "imageUrl": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&auto=format&fit=crop&q=60",
+      "json": {
+        "titleAr": "Sunglasses AR",
+        "titleEn": "Sunglasses",
+        "slug": "sunglasses",
+        "basePrice": 55000,
+        "currencyCode": "SYP",
+        "status": "ACTIVE",
+        "allowOversell": false,
+        "categories": [{ "nameEn": "Accessories" }],
+        "tags": [{ "name": "Summer" }],
+        "variants": [
+          { "attributes": { "Default": "Standard" }, "sku": "SUNGLASSES-1", "price": 55000, "stockQty": 40, "isActive": true }
+        ]
+      }
+    },
+    {
+      "slug": "power-bank",
+      "imageUrl": "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=400&auto=format&fit=crop&q=60",
+      "json": {
+        "titleAr": "Power Bank AR",
+        "titleEn": "Power Bank",
+        "slug": "power-bank",
+        "basePrice": 95000,
+        "currencyCode": "SYP",
+        "status": "ACTIVE",
+        "allowOversell": false,
+        "categories": [{ "nameEn": "Electronics" }],
+        "tags": [{ "name": "New" }],
+        "variants": [
+          { "attributes": { "Default": "Standard" }, "sku": "POWERBANK-1", "price": 95000, "stockQty": 25, "isActive": true }
+        ]
+      }
+    }
+  ]
+}

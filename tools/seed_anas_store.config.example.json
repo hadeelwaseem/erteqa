@@ -1,0 +1,11 @@
+{
+  "baseUrl": "https://shopengine-production-c68b.up.railway.app",
+  "tenantId": "e24b0752-2b2d-49b1-9976-60633bde215b",
+  "tenantSlug": "tmp-9f05d7cd67ae42a58add8cc14887cb52",
+  "storeSlug": "anas-slug",
+  "accessToken": "PASTE_MERCHANT_ACCESS_TOKEN",
+  "refreshToken": "PASTE_MERCHANT_REFRESH_TOKEN",
+  "merchantPhone": "+963935237452",
+  "customerPhone": "+963944000001",
+  "guestEmail": "guest@anas-store.test"
+}

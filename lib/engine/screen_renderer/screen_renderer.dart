@@ -189,9 +189,9 @@ class ScreenRenderer {
     required String variantId,
     required String path,
   }) {
-    AppLogger.debug(
-      '[ScreenRenderer] render node type=${config.type.name} path=$path',
-    );
+    // AppLogger.debug(
+    //   '[ScreenRenderer] render node type=${config.type.name} path=$path',
+    // );
     final renderer = _renderers[config.type];
     if (renderer == null) {
       final id = config.properties['id'] as String? ?? '?';
@@ -322,8 +322,7 @@ class ScreenRenderer {
     dataContext[EngineActionDispatcher.contextKey] = EngineActionDispatcher(
       context: context,
       formState: dataContext[FormStateStore.contextKey] as FormStateStore?,
-      pageStateStore:
-          dataContext[PageStateStore.contextKey] as PageStateStore?,
+      pageStateStore: dataContext[PageStateStore.contextKey] as PageStateStore?,
     );
   }
 
