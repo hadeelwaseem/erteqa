@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 // const kBaseUrl = 'http://192.168.137.8:8000/api';
 // const kBaseUrl = 'http://10.0.2.2:8000/api';
 /// Deprecated: use [NetworkConfig.baseUrl] from service locator.
-const kBaseUrl = 'https://sooq.up.railway.app';
+const kBaseUrl = 'https://shopengine-production-c68b.up.railway.app';
 
 /// Deprecated: use [NetworkConfig.assetBaseUrl].
 final kBaseUrlAsset = kBaseUrl.split('/api')[0];

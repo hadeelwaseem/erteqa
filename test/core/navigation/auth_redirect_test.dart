@@ -82,6 +82,17 @@ void main() {
     });
 
     group('logout and protected routes', () {
+      test('profile is not a public guest route', () {
+        expect(AuthRedirect.isPublicGuestRoute('/profile'), isFalse);
+      });
+
+      test('logged-out user on profile redirects to login', () {
+        expect(
+          AuthRedirect.resolve(token: null, matchedLocation: '/profile'),
+          AuthRedirect.loginRoute,
+        );
+      });
+
       test('settings is not a public guest route', () {
         expect(AuthRedirect.isPublicGuestRoute('/settings'), isFalse);
       });

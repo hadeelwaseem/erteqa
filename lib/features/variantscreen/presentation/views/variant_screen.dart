@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sooq_merchant/core/cubits/token_cubit/token_cubit.dart';
+import 'package:sooq_merchant/core/navigation/auth_redirect.dart';
 import 'package:sooq_merchant/core/network/network_config.dart';
 import 'package:sooq_merchant/core/network/tenant_resolver.dart';
 import 'package:sooq_merchant/core/feedback/app_messenger.dart';
@@ -43,6 +44,23 @@ import 'package:sooq_merchant/features/product/presentation/manager/product_deta
 import 'package:sooq_merchant/features/product/presentation/manager/product_search_cubit/product_search_cubit.dart';
 import 'package:sooq_merchant/features/variantscreen/data/repos/variant_repository.dart';
 import 'package:sooq_merchant/features/variantscreen/presentation/manager/variant_cubit/variant_cubit.dart';
+
+bool _isSessionLoggedIn() {
+  if (!getIt.isRegistered<TokenCubit>()) {
+    return false;
+  }
+  return AuthRedirect.isLoggedIn(getIt<TokenCubit>().state);
+}
+
+bool _isCustomerAuthenticatedRequestUrl(String? requestUrl) {
+  final url = requestUrl?.toLowerCase() ?? '';
+  return url.startsWith('/api/v1/customer/');
+}
+
+bool _shouldSkipCustomerRequestWhenLoggedOut(EngineMappedRequest request) {
+  return !_isSessionLoggedIn() &&
+      _isCustomerAuthenticatedRequestUrl(request.requestUrl);
+}
 
 /// Dynamic screen host widget.
 class VariantScreen extends StatefulWidget {
@@ -834,7 +852,9 @@ class _VariantScreenState extends State<VariantScreen> {
     };
     merged['initialRequestKeys'] = {
       for (final request in mappedRequests)
-        if (request.qField == null && !request.deferInitialDispatch)
+        if (request.qField == null &&
+            !request.deferInitialDispatch &&
+            !_shouldSkipCustomerRequestWhenLoggedOut(request))
           request.key: true,
     };
     if (_requestResults.isNotEmpty) {
@@ -1921,7 +1941,8 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
           (request) =>
               request.requestUrl != null &&
               request.requestUrl!.isNotEmpty &&
-              !request.requestUrl!.contains(':'),
+              !request.requestUrl!.contains(':') &&
+              !_shouldSkipCustomerRequestWhenLoggedOut(request),
         )
         .toList(growable: false);
 

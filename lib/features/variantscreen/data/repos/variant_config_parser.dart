@@ -146,7 +146,10 @@ class VariantConfigParser {
       ];
     }
 
-    final children = <ComponentConfig>[if (appBar != null) appBar, ...bodyNodes];
+    final children = <ComponentConfig>[
+      if (appBar != null) appBar,
+      ...bodyNodes,
+    ];
 
     final resolvedPagePadding = resolvePagePadding(
       selectedPage,
@@ -188,9 +191,7 @@ class VariantConfigParser {
     );
 
     final pageId = selectedPage['id'] as String? ?? variantId;
-    final pageName =
-        selectedPage['title'] as String? ??
-        pageId;
+    final pageName = selectedPage['title'] as String? ?? pageId;
 
     return ScreenConfig(pageId: variantId, pageName: pageName, root: root);
   }
@@ -204,7 +205,7 @@ class VariantConfigParser {
       throw ArgumentError('Missing type at $path');
     }
     final type = _componentTypeFromString(rawType);
-    AppLogger.debug('[VariantConfigParser] parse node type=$rawType path=$path');
+    // AppLogger.debug('[VariantConfigParser] parse node type=$rawType path=$path');
     final properties = _normalizeBuilderProperties(json, rawType);
 
     ComponentConfig? child;
@@ -383,7 +384,10 @@ class VariantConfigParser {
     );
   }
 
-  static ItemBuilderConfig? _parseItemBuilder(dynamic raw, {required String path}) {
+  static ItemBuilderConfig? _parseItemBuilder(
+    dynamic raw, {
+    required String path,
+  }) {
     if (raw == null) return null;
     if (raw is! Map<String, dynamic>) {
       throw ArgumentError('itemBuilder must be an Object at $path');

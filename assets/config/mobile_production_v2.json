@@ -515,6 +515,22 @@
                         "navigation_type": "clear_stack"
                       }
                     }
+                  },
+                  {
+                    "id": "auth-login-skip",
+                    "type": "button",
+                    "props": {
+                      "label": "تصفح المتجر بدون تسجيل",
+                      "variant": "text",
+                      "fullWidth": true,
+                      "alignment": "center",
+                      "textColor": "#475569"
+                    },
+                    "tap": {
+                      "type": "navigate",
+                      "route": "/home",
+                      "navigation_type": "clear_stack"
+                    }
                   }
                 ]
               }
@@ -4986,6 +5002,7 @@
                   "type": "cubitCall",
                   "cubit": "order",
                   "method": "openInvoice",
+                  "requireAuth": true,
                   "params": {
                     "orderId": {
                       "source": "routeParams",
@@ -5007,6 +5024,7 @@
                   "type": "cubitCall",
                   "cubit": "order",
                   "method": "cancelOrder",
+                  "requireAuth": true,
                   "params": {
                     "orderId": {
                       "source": "routeParams",

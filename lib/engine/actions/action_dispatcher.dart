@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/cubits/token_cubit/token_cubit.dart';
 import '../../core/feedback/app_messenger.dart';
 import '../../core/navigation/app_navigation.dart';
+import '../../core/navigation/auth_prompt_sheet.dart';
 import '../../core/navigation/auth_redirect.dart';
 import '../../core/network/network_config.dart';
 import '../../core/utils/api_service.dart';
@@ -174,11 +175,7 @@ class EngineActionDispatcher {
       return false;
     }
 
-    AppNavigation.navigate(
-      _context,
-      route: AuthRedirect.loginRoute,
-      type: NavigationType.push,
-    );
+    AuthPromptSheet.show(_context);
     return false;
   }
 
