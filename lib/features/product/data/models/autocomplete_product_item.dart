@@ -7,6 +7,7 @@ class AutocompleteProductItem extends Equatable {
   final String? titleEn;
   final String? slug;
   final dynamic basePrice;
+  final String? primaryImageUrl;
   final String? thumbnailUrl;
 
   const AutocompleteProductItem({
@@ -15,6 +16,7 @@ class AutocompleteProductItem extends Equatable {
     this.titleEn,
     this.slug,
     this.basePrice,
+    this.primaryImageUrl,
     this.thumbnailUrl,
   });
 
@@ -25,6 +27,11 @@ class AutocompleteProductItem extends Equatable {
       titleEn: _readString(json['titleEn']),
       slug: _readString(json['slug']),
       basePrice: json['basePrice'],
+      primaryImageUrl: _resolveBackendUrl(
+        _readString(
+          json['primaryImageUrl'] ?? json['imageUrl'] ?? json['image'],
+        ),
+      ),
       thumbnailUrl: _resolveBackendUrl(
         _readString(json['thumbnailUrl'] ?? json['primaryThumbnailUrl']),
       ),
@@ -38,6 +45,7 @@ class AutocompleteProductItem extends Equatable {
       'titleEn': titleEn,
       'slug': slug,
       'basePrice': basePrice,
+      'primaryImageUrl': primaryImageUrl,
       'thumbnailUrl': thumbnailUrl,
       'name': name,
       'image': image,
@@ -52,7 +60,7 @@ class AutocompleteProductItem extends Equatable {
     return '';
   }
 
-  String get image => thumbnailUrl ?? '';
+  String get image => primaryImageUrl ?? thumbnailUrl ?? '';
 
   static String? _readString(dynamic value) {
     final text = value?.toString().trim();
@@ -74,6 +82,7 @@ class AutocompleteProductItem extends Equatable {
     titleEn,
     slug,
     basePrice,
+    primaryImageUrl,
     thumbnailUrl,
   ];
 }

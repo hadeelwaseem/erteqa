@@ -1033,7 +1033,7 @@
                         "props": {
                           "source": "network",
                           "urlPath": "item.image",
-                          "url": "https://picsum.photos/seed/sooq-product-fallback/400/400",
+                          "url": "",
                           "width": 40,
                           "height": 40,
                           "fit": "cover"
@@ -1138,7 +1138,7 @@
                     "props": {
                       "source": "network",
                       "urlPath": "item.image",
-                      "url": "https://picsum.photos/seed/sooq-product-fallback/400/400",
+                      "url": "",
                       "aspectRatio": 1,
                       "fit": "cover"
                     }
@@ -1375,7 +1375,7 @@
                         "props": {
                           "source": "network",
                           "urlPath": "item.imageUrl",
-                          "url": "https://picsum.photos/seed/sooq-category-fallback/400/400",
+                          "url": "",
                           "width": 110,
                           "height": 80,
                           "fit": "cover"
@@ -1456,7 +1456,7 @@
                         "props": {
                           "source": "network",
                           "urlPath": "item.imageUrl",
-                          "url": "https://picsum.photos/seed/sooq-category-fallback/400/400",
+                          "url": "",
                           "aspectRatio": 1,
                           "fit": "cover"
                         }
@@ -1591,7 +1591,7 @@
                         "props": {
                           "source": "network",
                           "urlPath": "item.image",
-                          "url": "https://picsum.photos/seed/sooq-product-fallback/400/400",
+                          "url": "",
                           "aspectRatio": 1,
                           "fit": "cover"
                         }
@@ -1735,7 +1735,7 @@
                           "props": {
                             "source": "network",
                             "urlPath": "item.imageUrl",
-                            "url": "https://picsum.photos/seed/sooq-category-fallback/400/400",
+                            "url": "",
                             "width": 56,
                             "height": 56,
                             "fit": "cover"
@@ -1863,7 +1863,7 @@
                     "props": {
                       "source": "network",
                       "urlPath": "item.image",
-                      "url": "https://picsum.photos/seed/sooq-product-fallback/400/400",
+                      "url": "",
                       "aspectRatio": 1,
                       "fit": "cover"
                     }
@@ -2052,7 +2052,7 @@
                     "props": {
                       "source": "network",
                       "urlPath": "item.image",
-                      "url": "https://picsum.photos/seed/sooq-product-fallback/400/400",
+                      "url": "",
                       "aspectRatio": 1,
                       "fit": "cover"
                     }
@@ -2511,7 +2511,7 @@
                     "props": {
                       "source": "network",
                       "urlPath": "item.image",
-                      "url": "https://picsum.photos/seed/sooq-product-fallback/400/400",
+                      "url": "",
                       "aspectRatio": 1,
                       "fit": "cover"
                     }
@@ -2686,7 +2686,7 @@
                         "props": {
                           "source": "network",
                           "urlPath": "item.image",
-                          "url": "https://picsum.photos/seed/sooq-product-fallback/400/400",
+                          "url": "",
                           "width": 40,
                           "height": 40,
                           "fit": "cover"
@@ -2823,7 +2823,7 @@
                     "props": {
                       "source": "network",
                       "urlPath": "item.image",
-                      "url": "https://picsum.photos/seed/sooq-product-fallback/400/400",
+                      "url": "",
                       "aspectRatio": 1,
                       "fit": "cover"
                     }
@@ -3083,7 +3083,7 @@
                               "props": {
                                 "source": "network",
                                 "urlPath": "item.thumbnailUrl",
-                                "url": "https://picsum.photos/seed/sooq-cart-item/200/200",
+                                "url": "",
                                 "width": 88,
                                 "height": 88,
                                 "fit": "cover"
@@ -5214,7 +5214,7 @@
                     "props": {
                       "source": "network",
                       "urlPath": "item.image",
-                      "url": "https://picsum.photos/seed/sooq-product-fallback/400/400",
+                      "url": "",
                       "aspectRatio": 1,
                       "fit": "cover"
                     }
@@ -5992,7 +5992,7 @@
                   "props": {
                     "source": "network",
                     "urlPath": "item.image",
-                    "url": "https://picsum.photos/seed/sooq-product-fallback/400/400",
+                    "url": "",
                     "aspectRatio": 1,
                     "fit": "cover"
                   }
@@ -6079,7 +6079,7 @@
                   "props": {
                     "source": "network",
                     "urlPath": "item.imageUrl",
-                    "url": "https://picsum.photos/seed/sooq-category-fallback/400/400",
+                    "url": "",
                     "aspectRatio": 1,
                     "fit": "cover"
                   }

@@ -6,7 +6,7 @@ import '../network/engine_image_cache_manager.dart';
 import '../network/remote_image_url.dart';
 
 /// Network catalog image with shared URL resolution and merchant-aware headers.
-class EngineNetworkImage extends StatelessWidget {
+class EngineNetworkImage extends StatefulWidget {
   EngineNetworkImage({
     super.key,
     required String url,
@@ -17,7 +17,7 @@ class EngineNetworkImage extends StatelessWidget {
     this.errorBuilder,
   }) : url = resolveRemoteImageUrl(url);
 
-  /// Final resolved URL passed to the image provider.
+  /// Initial resolved URL passed to the image provider.
   final String url;
   final double? width;
   final double? height;
@@ -25,7 +25,34 @@ class EngineNetworkImage extends StatelessWidget {
   final ImageLoadingBuilder? loadingBuilder;
   final ImageErrorWidgetBuilder? errorBuilder;
 
-  static void _logFailure(String imageUrl, Object error, [StackTrace? stackTrace]) {
+  @override
+  State<EngineNetworkImage> createState() => _EngineNetworkImageState();
+}
+
+class _EngineNetworkImageState extends State<EngineNetworkImage> {
+  late String _activeUrl;
+  bool _retriedFullSize = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _activeUrl = widget.url;
+  }
+
+  @override
+  void didUpdateWidget(EngineNetworkImage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.url != oldWidget.url) {
+      _activeUrl = widget.url;
+      _retriedFullSize = false;
+    }
+  }
+
+  static void _logFailure(
+    String imageUrl,
+    Object error, [
+    StackTrace? stackTrace,
+  ]) {
     if (!kDebugMode) return;
     debugPrint('[EngineNetworkImage] FAILED $imageUrl');
     debugPrint('[EngineNetworkImage]   error: $error');
@@ -34,13 +61,25 @@ class EngineNetworkImage extends StatelessWidget {
     }
   }
 
+  void _maybeRetryWithFullSize(String failedUrl) {
+    if (_retriedFullSize) {
+      return;
+    }
+    final fallback = fullSizeFallbackForGeneratedThumbnail(failedUrl);
+    if (fallback == null || fallback == failedUrl) {
+      return;
+    }
+    _retriedFullSize = true;
+    setState(() => _activeUrl = fallback);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final trimmed = url.trim();
+    final trimmed = _activeUrl.trim();
     if (trimmed.isEmpty) {
       const error = 'empty image url';
       _logFailure(trimmed, error);
-      return errorBuilder?.call(context, Exception(error), null) ??
+      return widget.errorBuilder?.call(context, Exception(error), null) ??
           const SizedBox.shrink();
     }
 
@@ -54,21 +93,25 @@ class EngineNetworkImage extends StatelessWidget {
     }
 
     return CachedNetworkImage(
+      key: ValueKey(trimmed),
       imageUrl: trimmed,
       cacheManager: EngineImageCacheManager.instance,
       httpHeaders: headers,
-      width: width,
-      height: height,
-      fit: fit,
-      errorListener: (error) => _logFailure(trimmed, error),
-      progressIndicatorBuilder: loadingBuilder == null
+      width: widget.width,
+      height: widget.height,
+      fit: widget.fit,
+      errorListener: (error) {
+        _logFailure(trimmed, error);
+        _maybeRetryWithFullSize(trimmed);
+      },
+      progressIndicatorBuilder: widget.loadingBuilder == null
           ? null
           : (context, imageUrl, downloadProgress) {
               final total = downloadProgress.totalSize;
               final loaded = downloadProgress.downloaded;
               final fraction = downloadProgress.progress;
               if (fraction == null || fraction < 1) {
-                return loadingBuilder!(
+                return widget.loadingBuilder!(
                   context,
                   const SizedBox.shrink(),
                   ImageChunkEvent(
@@ -79,11 +122,36 @@ class EngineNetworkImage extends StatelessWidget {
               }
               return const SizedBox.shrink();
             },
-      errorWidget: errorBuilder == null
+      errorWidget: widget.errorBuilder == null
           ? null
           : (context, imageUrl, error) {
+              if (!_retriedFullSize) {
+                final fallback = fullSizeFallbackForGeneratedThumbnail(imageUrl);
+                if (fallback != null && fallback != imageUrl) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (mounted) {
+                      _maybeRetryWithFullSize(imageUrl);
+                    }
+                  });
+                  if (widget.loadingBuilder != null) {
+                    return widget.loadingBuilder!(
+                      context,
+                      const SizedBox.shrink(),
+                      null,
+                    );
+                  }
+                  return SizedBox(
+                    width: widget.width,
+                    height: widget.height,
+                  );
+                }
+              }
               _logFailure(imageUrl, error, StackTrace.current);
-              return errorBuilder!(context, error, StackTrace.current);
+              return widget.errorBuilder!(
+                context,
+                error,
+                StackTrace.current,
+              );
             },
     );
   }

@@ -64,3 +64,27 @@ String resolveRemoteImageUrl(String url) {
   }
   return value;
 }
+
+/// Generated thumbnail suffixes the API may reference when the file was never created.
+final RegExp kGeneratedThumbnailSuffix = RegExp(
+  r'_(150|300|600)\.png$',
+  caseSensitive: false,
+);
+
+/// If [url] ends with `_150.png`, `_300.png`, or `_600.png`, returns the `.jpg` full-size URL.
+///
+/// Returns null when [url] is empty or does not match a generated thumbnail pattern.
+String? fullSizeFallbackForGeneratedThumbnail(String url) {
+  final trimmed = url.trim();
+  if (trimmed.isEmpty) {
+    return null;
+  }
+
+  final match = kGeneratedThumbnailSuffix.firstMatch(trimmed);
+  if (match == null) {
+    return null;
+  }
+
+  final fallback = '${trimmed.substring(0, match.start)}.jpg';
+  return fallback == trimmed ? null : fallback;
+}

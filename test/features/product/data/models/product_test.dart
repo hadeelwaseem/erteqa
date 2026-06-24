@@ -43,5 +43,27 @@ void main() {
 
       expect(product.image, 'https://cdn.example.com/uploads/product.jpg');
     });
+
+    test('image prefers primaryImageUrl over primaryThumbnailUrl', () {
+      GetIt.I.registerSingleton<NetworkConfig>(
+        const NetworkConfig(
+          baseUrl: 'https://shopengine-production-c68b.up.railway.app',
+        ),
+      );
+
+      final product = Product.fromJson({
+        ...sampleProductItem(),
+        'primaryImageUrl':
+            '/api/v1/public/media/tenant/media/2026/06/photo.jpg',
+        'primaryThumbnailUrl':
+            '/api/v1/public/media/tenant/media/2026/06/photo_150.png',
+      });
+
+      expect(
+        product.image,
+        'https://shopengine-production-c68b.up.railway.app/api/v1/public/media/tenant/media/2026/06/photo.jpg',
+      );
+      expect(product.image, isNot(contains('_150.png')));
+    });
   });
 }

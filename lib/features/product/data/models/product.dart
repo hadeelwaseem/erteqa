@@ -93,8 +93,8 @@ class Product extends Equatable {
   String get currency => currencyCode ?? '';
 
   String get resolvedImageUrl {
-    return _resolveBackendUrl(primaryThumbnailUrl) ??
-        _resolveBackendUrl(primaryImageUrl) ??
+    return _resolveBackendUrl(primaryImageUrl) ??
+        _resolveBackendUrl(primaryThumbnailUrl) ??
         '';
   }
 
