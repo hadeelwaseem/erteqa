@@ -1,0 +1,16 @@
+{
+  "event_type": "build-merchant-app",
+  "client_payload": {
+    "app_name": "Anas Golden Store",
+    "bundle_id": "com.anasgoldenmer.shop",
+    "api_base_url": "https://sooq.up.railway.app",
+    "tenant_id": "3fc183e8-ac80-4b2a-8bf1-4cd6ac6ffcb1",
+    "tenant_slug": "anasgoldenmer",
+    "config_mode": "local",
+    "variant_id": "mobile_production_v2",
+    "config_url": null,
+    "icon_url": null,
+    "version": "1.0.0",
+    "build_number": 1
+  }
+}

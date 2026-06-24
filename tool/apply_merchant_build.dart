@@ -3,6 +3,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'merchant_native_patch.dart';
+
 /// Applies per-merchant build identity from a manifest JSON file.
 ///
 /// Usage:
@@ -111,17 +113,8 @@ String? _optionalString(Object? value) {
 void _patchAndroidGradle(String bundleId) {
   const path = 'android/app/build.gradle.kts';
   final file = File(path);
-  var content = file.readAsStringSync();
-  content = content.replaceAll(
-    RegExp(r'namespace\s*=\s*"[^"]*"'),
-    'namespace = "$bundleId"',
-  );
-  content = content.replaceAll(
-    RegExp(r'applicationId\s*=\s*"[^"]*"'),
-    'applicationId = "$bundleId"',
-  );
-  file.writeAsStringSync(content);
-  print('Patched $path');
+  patchAndroidGradleApplicationId(file, bundleId);
+  print('Patched $path (applicationId only)');
 }
 
 void _patchAndroidManifest(String appName) {
