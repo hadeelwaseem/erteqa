@@ -1402,7 +1402,7 @@
                   },
                   "tap": {
                     "type": "navigate",
-                    "route": "/categories/:categorySlug/products",
+                    "route": "/categories/:categorySlug/products?categoryId=:categoryId",
                     "navigation_type": "push"
                   }
                 }
@@ -1501,7 +1501,7 @@
                   },
                   "tap": {
                     "type": "navigate",
-                    "route": "/categories/:categorySlug/products",
+                    "route": "/categories/:categorySlug/products?categoryId=:categoryId",
                     "navigation_type": "push"
                   }
                 }
@@ -1771,156 +1771,8 @@
                 }
               },
               "tap": {
-                "type": "setPageState",
-                "values": {
-                  "selectedCategorySlug": {
-                    "source": "item",
-                    "field": "slug"
-                  }
-                },
-                "onSuccess": {
-                  "type": "reloadRequest",
-                  "requestKey": "category-products"
-                }
-              }
-            }
-          }
-        },
-        {
-          "id": "categories-products-title",
-          "type": "container",
-          "style": {
-            "padding": {
-              "top": 12,
-              "bottom": 8
-            }
-          },
-          "child": {
-            "id": "categories-products-title-text",
-            "type": "text",
-            "props": {
-              "value": "منتجات القسم",
-              "fontSize": 18,
-              "fontWeight": "bold",
-              "textAlign": "right",
-              "color": "#0F172A"
-            }
-          }
-        },
-        {
-          "id": "categories-products-grid",
-          "type": "gridView",
-          "props": {
-            "crossAxisCount": 2,
-            "mainAxisSpacing": 10,
-            "crossAxisSpacing": 10,
-            "childAspectRatio": 0.68,
-            "enableInnerScroll": false,
-            "data": {
-              "source": "collection",
-              "id": "categories-products-grid",
-              "requestKey": "category-products",
-              "requestUrl": "/api/v1/public/categories/:categorySlug/products?page=0&size=20",
-              "page": 0,
-              "size": 20,
-              "pathBindings": {
-                ":categorySlug": {
-                  "source": "pageState",
-                  "field": "selectedCategorySlug"
-                }
-              },
-              "primeFromRequest": {
-                "sourceRequestKey": "category-tree",
-                "itemField": "slug",
-                "pageStateKey": "selectedCategorySlug"
-              }
-            },
-            "emptyMessage": "لا توجد منتجات",
-            "errorMessage": "تعذر تحميل المنتجات"
-          },
-          "itemBuilder": {
-            "type": "repeat",
-            "source": "dataContext.requests.category-products.data",
-            "item": {
-              "id": "categories-products-grid-item",
-              "type": "card",
-              "props": {
-                "color": "#FFFFFF",
-                "borderRadius": 10,
-                "elevation": 0
-              },
-              "child": {
-                "id": "categories-products-grid-item-content",
-                "type": "column",
-                "props": {
-                  "crossAxis": "stretch",
-                  "gap": 0
-                },
-                "children": [
-                  {
-                    "id": "categories-products-grid-item-image",
-                    "type": "image",
-                    "props": {
-                      "source": "network",
-                      "urlPath": "item.image",
-                      "url": "",
-                      "aspectRatio": 1,
-                      "fit": "cover"
-                    }
-                  },
-                  {
-                    "id": "categories-products-grid-item-body",
-                    "type": "container",
-                    "style": {
-                      "padding": {
-                        "left": 8,
-                        "right": 8,
-                        "top": 6,
-                        "bottom": 8
-                      }
-                    },
-                    "child": {
-                      "id": "categories-products-grid-item-col",
-                      "type": "column",
-                      "props": {
-                        "crossAxis": "start",
-                        "gap": 2
-                      },
-                      "children": [
-                        {
-                          "id": "categories-products-grid-item-name",
-                          "type": "text",
-                          "props": {
-                            "valuePath": "item.name",
-                            "value": "",
-                            "fontSize": 14,
-                            "fontWeight": "semibold",
-                            "textAlign": "right",
-                            "color": "#0F172A",
-                            "maxLines": 2,
-                            "overflow": "ellipsis"
-                          }
-                        },
-                        {
-                          "id": "categories-products-grid-item-price",
-                          "type": "text",
-                          "props": {
-                            "valuePath": "item.price",
-                            "value": "--",
-                            "fontSize": 15,
-                            "fontWeight": "bold",
-                            "textAlign": "right",
-                            "color": "#1D4ED8"
-                          }
-                        }
-                      ]
-                    }
-                  }
-                ]
-              },
-              "tap": {
                 "type": "navigate",
-                "route": "/product/details/:productId",
+                "route": "/categories/:categorySlug/products?categoryId=:categoryId",
                 "navigation_type": "push"
               }
             }
@@ -2439,34 +2291,6 @@
       },
       "body": [
         {
-          "id": "category-detail-header",
-          "type": "container",
-          "props": {
-            "data": {
-              "requestKey": "category-detail",
-              "requestUrl": "/api/v1/public/categories/:categorySlug"
-            }
-          },
-          "style": {
-            "padding": {
-              "top": 12,
-              "bottom": 8
-            }
-          },
-          "child": {
-            "id": "category-detail-title",
-            "type": "text",
-            "props": {
-              "valuePath": "dataContext.requests.category-detail.data.name",
-              "value": "",
-              "fontSize": 20,
-              "fontWeight": "bold",
-              "textAlign": "right",
-              "color": "#0F172A"
-            }
-          }
-        },
-        {
           "id": "category-products-grid",
           "type": "gridView",
           "props": {
@@ -2479,7 +2303,7 @@
               "source": "collection",
               "id": "category-products-grid",
               "requestKey": "category-products",
-              "requestUrl": "/api/v1/public/categories/:categorySlug/products?page=0&size=20",
+              "requestUrl": "/api/v1/public/products/search?q=&categoryId=:categoryId&page=0&size=20",
               "page": 0,
               "size": 20
             },
@@ -6124,7 +5948,7 @@
             },
             "tap": {
               "type": "navigate",
-              "route": "/categories/:categorySlug/products",
+              "route": "/categories/:categorySlug/products?categoryId=:categoryId",
               "navigation_type": "push"
             }
           }

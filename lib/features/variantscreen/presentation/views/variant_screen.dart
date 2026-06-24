@@ -1567,7 +1567,13 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
   }
 
   bool _isPageRequestKey(String? requestKey) {
-    return requestKey != null && widget.pageRequestKeys.contains(requestKey);
+    if (requestKey == null || requestKey.isEmpty) {
+      return false;
+    }
+    // Include deferred/path-bound keys (e.g. category-products on /categories).
+    return widget.mappedRequests.any(
+      (request) => request.qField == null && request.key == requestKey,
+    );
   }
 
   bool _shouldHandleTerminalProductState(String requestKey) {
@@ -1922,8 +1928,8 @@ class _ProductRequestHostState extends State<_ProductRequestHost> {
       return;
     }
 
+    _dispatchedRequestKeys.addAll(toDispatch.map((request) => request.key));
     if (isInitialLoad) {
-      _dispatchedRequestKeys.addAll(toDispatch.map((request) => request.key));
       _isDispatching = true;
     }
 

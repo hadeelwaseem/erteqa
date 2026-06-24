@@ -363,6 +363,8 @@ class EngineActionDispatcher {
         itemValue = item['slug'];
       } else if (itemValue == null && key == 'categorySlug') {
         itemValue = item['slug'] ?? item['categoryId'];
+      } else if (itemValue == null && key == 'categoryId') {
+        itemValue = item['categoryId'] ?? item['id'];
       } else if (itemValue == null && key == 'orderId') {
         itemValue = item['orderId'];
       } else if (itemValue == null && key == 'id') {
