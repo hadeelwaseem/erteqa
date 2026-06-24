@@ -1,0 +1,79 @@
+name: Build merchant Android APK
+
+on:
+  repository_dispatch:
+    types: [build-merchant-app]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Create merchant manifest
+        run: |
+          cat > merchant-build.json <<EOF
+          {
+            "appName": "${{ github.event.client_payload.app_name }}",
+            "bundleId": "${{ github.event.client_payload.bundle_id }}",
+            "apiBaseUrl": "${{ github.event.client_payload.api_base_url }}",
+            "tenantId": "${{ github.event.client_payload.tenant_id }}",
+            "tenantSlug": "${{ github.event.client_payload.tenant_slug }}",
+            "configMode": "${{ github.event.client_payload.config_mode }}",
+            "variantId": "${{ github.event.client_payload.variant_id }}",
+            "configUrl": null,
+            "iconUrl": null,
+            "version": "${{ github.event.client_payload.version }}",
+            "buildNumber": ${{ github.event.client_payload.build_number }}
+          }
+          EOF
+
+      - name: Apply merchant build
+        run: dart run tool/apply_merchant_build.dart merchant-build.json
+
+      - name: Test
+        continue-on-error: true
+        run: flutter test
+
+      - name: Build APK
+        run: |
+          flutter build apk --release \
+            --build-name="${{ github.event.client_payload.version }}" \
+            --build-number="${{ github.event.client_payload.build_number }}"
+
+      - name: Upload APK to GitHub Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.event.client_payload.tenant_slug }}-android-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Upload APK to GoFile S3 🌐
+        id: upload_gofile
+        run: |
+          # رفع الملف وجلب رابط التحميل المباشر باستخدام curl وجقح البيانات بصيغة JSON
+          RESPONSE=$(curl -F "file=@build/app/outputs/flutter-apk/app-release.apk" https://store1.gofile.io/contents/uploadfile)
+          DOWNLOAD_URL=$(echo $RESPONSE | jq -r '.data.downloadPage')
+          echo "DOWNLOAD_URL=$DOWNLOAD_URL" >> $GITHUB_ENV
+
+      - name: Send Download Link to Telegram 🚀
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          message: |
+            ✨ تم بناء تطبيق أندرويد جديد بنجاح!
+            
+            📦 اسم التطبيق: ${{ github.event.client_payload.app_name }}
+            🆔 المعرّف (Slug): ${{ github.event.client_payload.tenant_slug }}
+            🔢 رقم البناء: #${{ github.event.client_payload.build_number }}
+            📆 الإصدار: ${{ github.event.client_payload.version }}
+            
+            🔗 رابط تحميل الـ APK المباشر:
+            ${{ env.DOWNLOAD_URL }}
+            
+            اضغطي على الرابط لتحميل التطبيق مباشرة ومشاركته مع العميل.
